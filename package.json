@@ -16,7 +16,7 @@
 	},
 	"bugs": {
 		"url": "https://github.com/gbrueckl/PowerBI-VSCode/issues",
-		"email": "databricks-vscode@paiqo.com"
+		"email": "powerbi-vscode@gbrueckl.at"
 	},
 	"qna": "https://github.com/gbrueckl/PowerBI-VSCode",
 	"enableApiProposals": false,
@@ -28,7 +28,9 @@
 		"theme": "dark"
 	},
 	"categories": [
-		"PowerBI"
+		"Azure",
+		"Extension Packs",
+		"Other"
 	],
 	"keywords": [
 		"powerbi",
@@ -36,373 +38,31 @@
 		"api"
 	],
 	"activationEvents": [
-		"onView:DatabricksConnections",
-		"onView:databricksWorkspace",
-		"onView:databricksClusters",
-		"onView:databricksJobs",
-		"onView:databricksFS",
-		"onView:databricksSecrets",
-		"onView:databricksSql",
-		"onView:databricksRepos"
+		"onView:PowerBIWorkspaces"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-		"configuration": [
-			{
-				"name": "Databricks",
-				"type": "object",
-				"title": "Databricks",
-				"properties": {
-					"databricks.connectionManager": {
-						"type": "string",
-						"enum": [
-							"VSCode Settings",
-							"Databricks CLI Profiles"
-						],
-						"default": "VSCode Settings",
-						"enumDescriptions": [
-							"All connection information is stored securely in the VSCode Settings (user or workspace).",
-							"Connection information is read from the Databricks CLI config file. Databricks CLI has to be configured upfront! Also supports the environment varialbe 'DATABRICKS_CONFIG_FILE'."
-						],
-						"description": "Defines how connection information is managed and stored",
-						"scope": "window"
-					},
-					"databricks.sensitiveValueStore": {
-						"type": "string",
-						"enum": [
-							"VSCodeSettings",
-							"SystemKeyChain",
-							"ExternalConfigFile"
-						],
-						"default": "SystemKeyChain",
-						"enumDescriptions": [
-							"Databricks Personal Access Token is stored in the VSCode Settings as plain text! There is a potential risk that the PAT gets checked in to source control systems like git!",
-							"(Experimental!) Databricks Personal Access Token is securely stored in the System Key Chain. Easy Copying/Sharing connections with other users is not possible this way. VSCode only stores a reference to the the KeyChain entry.",
-							"(Experimental!) Databricks Personal Access Token is stored in an external Config file. This is useful to manage all your PATs in one place and also easily share it"
-						],
-						"description": "Defines the default how the VSCode extension for Databricks stores sensitive values like the Databricks Personal Access Token (PAT). Only releveant if the VSCode Connection Manager is used!",
-						"scope": "window"
-					},
-					"databricks.connection.default.exportFormats": {
-						"type": "object",
-						"default": {
-							"Scala": ".scala",
-							"Python": ".ipynb",
-							"SQL": ".sql",
-							"R": ".r"
-						},
-						"description": "(Optional) The different file extension used when downloading notebooks from Databricks.",
-						"scope": "window",
-						"properties": {
-							"Scala": {
-								"type": "string",
-								"enum": [
-									".scala"
-								],
-								"description": "The file extension used when downloading Scala notebooks from Databricks."
-							},
-							"Python": {
-								"type": "string",
-								"enum": [
-									".py",
-									".ipynb"
-								],
-								"description": "The file extension used when downloading Python notebooks from Databricks."
-							},
-							"SQL": {
-								"type": "string",
-								"enum": [
-									".sql"
-								],
-								"description": "The file extension used when downloading SQL notebooks from Databricks."
-							},
-							"R": {
-								"type": "string",
-								"enum": [
-									".r",
-									".Rmd"
-								],
-								"description": "The file extension used when downloading R notebooks from Databricks."
-							}
-						}
-					},
-					"databricks.connection.default.displayName": {
-						"type": "string",
-						"description": "(Mandatory) Name shown in the Connection list of the Databricks VSCode extension. Must be unique across all VSCode workspaces to avoid conflicts!",
-						"scope": "window",
-						"examples": [
-							"my Connection",
-							"DEV",
-							"TEST"
-						]
-					},
-					"databricks.connection.default.apiRootUrl": {
-						"type": "string",
-						"description": "(Mandatory) Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
-						"scope": "window",
-						"examples": [
-							"https://westeurope.azuredatabricks.net",
-							"https://abc-12345-xaz.cloud.databricks.com"
-						],
-						"format": "hostname"
-					},
-					"databricks.connection.default.personalAccessToken": {
-						"type": "string",
-						"description": "(Mandatory) The Personal Access Token (PAT) used to access the Databricks API.",
-						"scope": "window",
-						"examples": [
-							"dapi0123456789abcdef0123456789abcdef"
-						]
-					},
-					"databricks.connection.default.personalAccessTokenSecure": {
-						"type": "object",
-						"description": "(Optional) Reference to a secure store for the Personal Access Token.",
-						"scope": "window",
-						"maxProperties": 1,
-						"properties": {
-							"keyChainSettingName": {
-								"type": "string",
-								"description": "A unique identifier which is used by KeyTar to store this connection's access token securely.",
-								"scope": "window"
-							},
-							"databricksCLIProfileName": {
-								"type": "string",
-								"description": "The name of a profile in the Databricks CLI config under ~/.databrickscfg",
-								"scope": "window"
-							}
-						}
-					},
-					"databricks.connection.default.localSyncFolder": {
-						"type": "string",
-						"description": "(Mandatory) A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository. \nExamples: \nWindows - C:\\mySyncFolder \nLinux/Unix - /home/myUser/mySyncFolder \nmacOS - myUser/mySyncFolder  (Please do not use leading / on macOS!)",
-						"scope": "window",
-						"examples": [
-							"Windows: C:\\mySyncFolder",
-							"Linux/Unix: /home/myUser/mySyncFolder",
-							"macOS: myUser/mySyncFolder  (Please do not use leading / on macOS!)"
-						]
-					},
-					"databricks.connection.default.localSyncSubfolders": {
-						"type": "object",
-						"default": {
-							"Workspace": "Workspace",
-							"Clusters": "Clusters",
-							"DBFS": "DBFS",
-							"Jobs": "Jobs"
-						},
-						"description": "(Optional) Can be used to specify different sub-paths for the items that can be downloaded from Databricks.",
-						"scope": "window",
-						"properties": {
-							"Workspace": {
-								"type": "string",
-								"description": "The subfolder where to store downloaded notebooks."
-							},
-							"Clusters": {
-								"type": "string",
-								"description": "The subfolder where to store downloaded cluster definitions."
-							},
-							"DBFS": {
-								"type": "string",
-								"description": "The subfolder where to store downloaded DBFS items."
-							},
-							"Jobs": {
-								"type": "string",
-								"description": "The subfolder where to store downloaded job and job-run defintions."
-							}
-						}
-					},
-					"databricks.connection.default.useCodeCells": {
-						"type": "boolean",
-						"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files.",
-						"scope": "window",
-						"default": true
-					},
-					"databricks.connections": {
-						"type": "array",
-						"description": "An array of objects where each object represents a Databricks Connection containing the same settings as defined for databricks.connection.default.* ",
-						"items": {
-							"type": "object",
-							"properties": {
-								"exportFormats": {
-									"type": "object",
-									"default": {
-										"Scala": ".scala",
-										"Python": ".ipynb",
-										"SQL": ".sql",
-										"R": ".r"
-									},
-									"description": "(Optional) The different file extension used when downloading notebooks from Databricks.",
-									"scope": "window",
-									"properties": {
-										"Scala": {
-											"type": "string",
-											"enum": [
-												".scala"
-											],
-											"description": "The file extension used when downloading Scala notebooks from Databricks."
-										},
-										"Python": {
-											"type": "string",
-											"enum": [
-												".py",
-												".ipynb"
-											],
-											"description": "The file extension used when downloading Python notebooks from Databricks."
-										},
-										"SQL": {
-											"type": "string",
-											"enum": [
-												".sql"
-											],
-											"description": "The file extension used when downloading SQL notebooks from Databricks."
-										},
-										"R": {
-											"type": "string",
-											"enum": [
-												".r",
-												".Rmd"
-											],
-											"description": "The file extension used when downloading R notebooks from Databricks."
-										}
-									}
-								},
-								"displayName": {
-									"type": "string",
-									"default": "my Databricks workspace",
-									"description": "Name shown in the Connection list of the Databricks VSCode extension. . Must be unique across all VSCode workspaces to avoid conflicts!",
-									"scope": "window"
-								},
-								"apiRootUrl": {
-									"type": "string",
-									"default": "https://westeurope.azuredatabricks.net",
-									"description": "Root URL of the Databricks API. Azure: https://westeurope.azuredatabricks.net - AWS:   https://abc-12345-xaz.cloud.databricks.com",
-									"scope": "window"
-								},
-								"personalAccessToken": {
-									"type": "string",
-									"default": "dapi123456789abcdef123456789abcdef",
-									"description": "The Personal Access Token (PAT) used to access the Databricks API.",
-									"scope": "window"
-								},
-								"personalAccessTokenSecure": {
-									"type": "object",
-									"description": "(Optional) Reference to a secure store for the Personal Access Token.",
-									"scope": "window",
-									"properties": {
-										"keyChainSettingName": {
-											"type": "string",
-											"description": "A unique identifier which is used by KeyTar to store this connection's access token securely.",
-											"scope": "window"
-										},
-										"databricksCLIProfileName": {
-											"type": "string",
-											"description": "The name of a profile in the Databricks CLI config under ~/.databrickscfg",
-											"scope": "window"
-										}
-									}
-								},
-								"localSyncFolder": {
-									"type": "string",
-									"default": "C:\\Databricks_sync",
-									"description": "A local path where files (notebooks) that are downloaded from Databricks should be stored. This folder can then be integrated in your GIT repository",
-									"scope": "window"
-								},
-								"localSyncSubfolders": {
-									"type": "object",
-									"default": {
-										"Workspace": "Workspace",
-										"Clusters": "Clusters",
-										"DBFS": "DBFS",
-										"Jobs": "Jobs"
-									},
-									"description": "(Optional) Can be used to specify different sub-paths for the items that can be downloaded from Databricks.",
-									"scope": "window",
-									"properties": {
-										"Workspace": {
-											"type": "string",
-											"description": "The subfolder where to store downloaded notebooks."
-										},
-										"Clusters": {
-											"type": "string",
-											"description": "The subfolder where to store downloaded cluster definitions."
-										},
-										"DBFS": {
-											"type": "string",
-											"description": "The subfolder where to store downloaded DBFS items."
-										},
-										"Jobs": {
-											"type": "string",
-											"description": "The subfolder where to store downloaded job and job-run defintions."
-										}
-									}
-								},
-								"useCodeCells": {
-									"type": "boolean",
-									"default": false,
-									"description": "If true, Code Cell tags (# %%) will be added when downloading raw source files.",
-									"scope": "window"
-								}
-							}
-						},
-						"scope": "window",
-						"default": []
-					},
-					"databricks.lastActiveConnection": {
-						"type": "string",
-						"description": "(Optional) The displayName of the Connection that was used in the last session.",
-						"scope": "window"
-					}
-				}
-			}
-		],
+		"configuration": [],
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "databricks",
-					"title": "Databricks",
-					"icon": "resources/databricks_sidebar.png"
+					"id": "powerbi",
+					"title": "PowerBI",
+					"icon": "resources/powerbi_sidebar.png"
 				}
 			]
 		},
 		"views": {
-			"databricks": [
+			"powerbi": [
 				{
-					"id": "DatabricksConnections",
-					"name": "Connections"
-				},
-				{
-					"id": "databricksWorkspace",
-					"name": "Workspace"
-				},
-				{
-					"id": "databricksClusters",
-					"name": "Clusters"
-				},
-				{
-					"id": "databricksJobs",
-					"name": "Jobs"
-				},
-				{
-					"id": "databricksFS",
-					"name": "DBFS"
-				},
-				{
-					"id": "databricksSecrets",
-					"name": "Secrets"
-				},
-				{
-					"id": "databricksSQL",
-					"name": "SQL"
-				},
-				{
-					"id": "databricksRepos",
-					"name": "Repos"
+					"id": "PowerBIWorkspaces",
+					"name": "Workspaces"
 				}
 			]
 		},
 		"commands": [
 			{
-				"command": "databricksConnections.refresh",
+				"command": "PowerBIWorkspaces.refresh",
 				"title": "Refresh",
 				"icon": {
 					"light": "resources/light/refresh.png",
@@ -410,344 +70,16 @@
 				}
 			},
 			{
-				"command": "DatabricksConnections.add",
-				"title": "Add",
+				"command": "PowerBIWorkspaces.add",
+				"title": "Refresh",
 				"icon": {
 					"light": "resources/light/add.png",
 					"dark": "resources/dark/add.png"
 				}
 			},
 			{
-				"command": "DatabricksConnectionItem.activate",
-				"title": "Activate",
-				"icon": {
-					"light": "resources/light/connected.png",
-					"dark": "resources/dark/connected.png"
-				}
-			},
-			{
-				"command": "databricksWorkspace.refresh",
+				"command": "PowerBIWorkspace.delete",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
-			},
-			{
-				"command": "databricksWorkspace.download",
-				"title": "Download",
-				"icon": {
-					"light": "resources/light/download.png",
-					"dark": "resources/dark/download.png"
-				}
-			},
-			{
-				"command": "databricksWorkspace.sync",
-				"title": "Sync",
-				"icon": {
-					"light": "resources/light/sync.png",
-					"dark": "resources/dark/sync.png"
-				}
-			},
-			{
-				"command": "databricksWorkspace.upload",
-				"title": "Upload",
-				"icon": {
-					"light": "resources/light/upload.png",
-					"dark": "resources/dark/upload.png"
-				}
-			},
-			{
-				"command": "databricksWorkspaceItem.click",
-				"title": "Open File"
-			},
-			{
-				"command": "databricksWorkspaceItem.download",
-				"title": "Download",
-				"icon": {
-					"light": "resources/light/download.png",
-					"dark": "resources/dark/download.png"
-				}
-			},
-			{
-				"command": "databricksWorkspaceItem.upload",
-				"title": "Upload",
-				"icon": {
-					"light": "resources/light/upload.png",
-					"dark": "resources/dark/upload.png"
-				}
-			},
-			{
-				"command": "databricksWorkspaceItem.compare",
-				"title": "Compare",
-				"icon": {
-					"light": "resources/light/compare.png",
-					"dark": "resources/dark/compare.png"
-				}
-			},
-			{
-				"command": "databricksWorkspaceItem.sync",
-				"title": "Sync",
-				"icon": {
-					"light": "resources/light/sync.png",
-					"dark": "resources/dark/sync.png"
-				}
-			},
-			{
-				"command": "databricksWorkspaceItem.delete",
-				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
-			},
-			{
-				"command": "databricksWorkspaceItem.copyPath",
-				"title": "Copy Path"
-			},
-			{
-				"command": "databricksClusters.refresh",
-				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
-			},
-			{
-				"command": "databricksClusters.add",
-				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
-			},
-			{
-				"command": "databricksClusterItem.click",
-				"title": "Open File"
-			},
-			{
-				"command": "databricksClusterItem.start",
-				"title": "Start",
-				"icon": {
-					"light": "resources/light/start.png",
-					"dark": "resources/dark/start.png"
-				}
-			},
-			{
-				"command": "databricksClusterItem.stop",
-				"title": "Stop",
-				"icon": {
-					"light": "resources/light/stop.png",
-					"dark": "resources/dark/stop.png"
-				}
-			},
-			{
-				"command": "databricksClusterItem.showDefinition",
-				"title": "JSON Definition",
-				"icon": {
-					"light": "resources/light/json.png",
-					"dark": "resources/dark/json.png"
-				}
-			},
-			{
-				"command": "databricksClusterItem.delete",
-				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
-			},
-			{
-				"command": "databricksClusterItem.useForSQL",
-				"title": "Use for VSCode and SQL",
-				"icon": {
-					"light": "resources/light/stop.png",
-					"dark": "resources/dark/stop.png"
-				}
-			},
-			{
-				"command": "databricksJobs.refresh",
-				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
-			},
-			{
-				"command": "databricksJobItem.showDefinition",
-				"title": "JSON Definition",
-				"icon": {
-					"light": "resources/light/json.png",
-					"dark": "resources/dark/json.png"
-				}
-			},
-			{
-				"command": "databricksJobItem.click",
-				"title": "Open File"
-			},
-			{
-				"command": "databricksJobItem.start",
-				"title": "Start",
-				"icon": {
-					"light": "resources/light/start.png",
-					"dark": "resources/dark/start.png"
-				}
-			},
-			{
-				"command": "databricksJobItem.stop",
-				"title": "Stop",
-				"icon": {
-					"light": "resources/light/stop.png",
-					"dark": "resources/dark/stop.png"
-				}
-			},
-			{
-				"command": "databricksJobItem.openBrowser",
-				"title": "Open Browser",
-				"icon": {
-					"light": "resources/light/openBrowser.png",
-					"dark": "resources/dark/openBrowser.png"
-				}
-			},
-			{
-				"command": "databricksFS.refresh",
-				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
-			},
-			{
-				"command": "databricksFS.add",
-				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
-			},
-			{
-				"command": "databricksFSItem.download",
-				"title": "Download",
-				"icon": {
-					"light": "resources/light/download.png",
-					"dark": "resources/dark/download.png"
-				}
-			},
-			{
-				"command": "databricksFSItem.upload",
-				"title": "Upload",
-				"icon": {
-					"light": "resources/light/upload.png",
-					"dark": "resources/dark/upload.png"
-				}
-			},
-			{
-				"command": "databricksFSItem.click",
-				"title": "Preview File"
-			},
-			{
-				"command": "databricksFSItem.add",
-				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
-			},
-			{
-				"command": "databricksFSItem.delete",
-				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
-			},
-			{
-				"command": "databricksFSItem.copyPath",
-				"title": "Copy Path"
-			},
-			{
-				"command": "databricksSecrets.refresh",
-				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
-			},
-			{
-				"command": "databricksSecrets.addSecretScope",
-				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
-			},
-			{
-				"command": "databricksSecretItem.deleteSecretScope",
-				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
-			},
-			{
-				"command": "databricksSecretItem.addSecret",
-				"title": "Add",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
-			},
-			{
-				"command": "databricksSecretItem.updateSecret",
-				"title": "Update",
-				"icon": {
-					"light": "resources/light/edit.png",
-					"dark": "resources/dark/edit.png"
-				}
-			},
-			{
-				"command": "databricksSecretItem.deleteSecret",
-				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
-			},
-			{
-				"command": "databricksSQL.refresh",
-				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
-			},
-			{
-				"command": "databricksSQLTable.showDefinition",
-				"title": "Show Definition",
-				"icon": {
-					"light": "resources/light/json.png",
-					"dark": "resources/dark/json.png"
-				}
-			},
-			{
-				"command": "databricksRepos.refresh",
-				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
-			},
-			{
-				"command": "databricksRepo.checkOut",
-				"title": "Check-Out",
-				"icon": {
-					"light": "resources/light/download.png",
-					"dark": "resources/dark/download.png"
-				}
-			},
-			{
-				"command": "databricksRepo.delete",
-				"title": "Delete",
 				"icon": {
 					"light": "resources/light/delete.png",
 					"dark": "resources/dark/delete.png"
@@ -757,207 +89,20 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "databricksConnections.refresh",
-					"when": "view == DatabricksConnections",
+					"command": "PowerBIWorkspaces.refresh",
+					"when": "view == PowerBIWorkspaces",
 					"group": "navigation"
 				},
 				{
-					"command": "DatabricksConnections.add",
-					"when": "view == DatabricksConnections",
-					"group": "navigation"
-				},
-				{
-					"command": "databricksWorkspace.refresh",
-					"when": "view == databricksWorkspace",
-					"group": "navigation@2"
-				},
-				{
-					"command": "databricksWorkspace.download",
-					"when": "view == databricksWorkspace",
-					"group": "navigation@1"
-				},
-				{
-					"command": "databricksWorkspace.upload",
-					"when": "view == databricksWorkspace",
-					"group": "navigation@1"
-				},
-				{
-					"command": "databricksClusters.refresh",
-					"when": "view == databricksClusters",
-					"group": "navigation"
-				},
-				{
-					"command": "databricksClusters.add",
-					"when": "view == databricksClusters",
-					"group": "navigation"
-				},
-				{
-					"command": "databricksJobs.refresh",
-					"when": "view == databricksJobs",
-					"group": "navigation"
-				},
-				{
-					"command": "databricksFS.refresh",
-					"when": "view == databricksFS",
-					"group": "navigation"
-				},
-				{
-					"command": "databricksFS.add",
-					"when": "view == databricksFS",
-					"group": "navigation"
-				},
-				{
-					"command": "databricksSecrets.refresh",
-					"when": "view == databricksSecrets",
-					"group": "navigation"
-				},
-				{
-					"command": "databricksSecrets.addSecretScope",
-					"when": "view == databricksSecrets",
-					"group": "navigation"
-				},
-				{
-					"command": "databricksSQL.refresh",
-					"when": "view == databricksSQL",
-					"group": "navigation"
-				},
-				{
-					"command": "databricksRepos.refresh",
-					"when": "view == databricksRepos",
+					"command": "PowerBIWorkspaces.add",
+					"when": "view == PowerBIWorkspaces",
 					"group": "navigation"
 				}
 			],
 			"view/item/context": [
 				{
-					"command": "DatabricksConnectionItem.activate",
-					"when": "view == DatabricksConnections && viewItem == INACTIVE",
-					"group": "inline"
-				},
-				{
-					"command": "databricksWorkspaceItem.download",
-					"when": "view == databricksWorkspace && viewItem == CAN_SYNC || viewItem == CAN_DOWNLOAD",
-					"group": "inline@1"
-				},
-				{
-					"command": "databricksWorkspaceItem.upload",
-					"when": "view == databricksWorkspace && viewItem == CAN_SYNC || viewItem == CAN_UPLOAD",
-					"group": "inline@1"
-				},
-				{
-					"command": "databricksWorkspaceItem.compare",
-					"when": "view == databricksWorkspace && viewItem == CAN_SYNC",
-					"group": "inline@1"
-				},
-				{
-					"command": "databricksWorkspaceItem.delete",
-					"when": "view == databricksWorkspace",
-					"group": "inline@2"
-				},
-				{
-					"command": "databricksWorkspaceItem.copyPath",
-					"when": "view == databricksWorkspace"
-				},
-				{
-					"command": "databricksClusterItem.start",
-					"when": "view == databricksClusters && viewItem == CAN_START",
-					"group": "inline"
-				},
-				{
-					"command": "databricksClusterItem.stop",
-					"when": "view == databricksClusters && viewItem == CAN_STOP",
-					"group": "inline"
-				},
-				{
-					"command": "databricksClusterItem.showDefinition",
-					"when": "view == databricksClusters",
-					"group": "inline"
-				},
-				{
-					"command": "databricksClusterItem.delete",
-					"when": "view == databricksClusters",
-					"group": "inline"
-				},
-				{
-					"command": "databricksClusterItem.useForSQL",
-					"when": "view == databricksClusters"
-				},
-				{
-					"command": "databricksJobItem.showDefinition",
-					"when": "view == databricksJobs && viewItem == JOB || viewItem == JOB_RUN || viewItem == RUNNING_JOB",
-					"group": "inline"
-				},
-				{
-					"command": "databricksJobItem.start",
-					"when": "view == databricksJobs  && viewItem == JOB",
-					"group": "inline"
-				},
-				{
-					"command": "databricksJobItem.stop",
-					"when": "view == databricksJobs  && viewItem == RUNNING_JOB",
-					"group": "inline"
-				},
-				{
-					"command": "databricksJobItem.openBrowser",
-					"when": "view == databricksJobs && viewItem == JOB || viewItem == JOB_RUN || viewItem == RUNNING_JOB",
-					"group": "inline"
-				},
-				{
-					"command": "databricksFSItem.add",
-					"when": "view == databricksFS && viewItem == FOLDER",
-					"group": "inline"
-				},
-				{
-					"command": "databricksFSItem.download",
-					"when": "view == databricksFS && viewItem == FILE || viewItem == FILE_WITH_LOCAL_COPY",
-					"group": "inline"
-				},
-				{
-					"command": "databricksFSItem.upload",
-					"when": "view == databricksFS && viewItem == FILE_WITH_LOCAL_COPY",
-					"group": "inline"
-				},
-				{
-					"command": "databricksFSItem.delete",
-					"when": "view == databricksFS && viewItem == FILE || viewItem == FILE_WITH_LOCAL_COPY",
-					"group": "inline"
-				},
-				{
-					"command": "databricksFSItem.copyPath",
-					"when": "view == databricksFS"
-				},
-				{
-					"command": "databricksSecretItem.deleteSecretScope",
-					"when": "view == databricksSecrets && viewItem == SCOPE_DATABRICKS",
-					"group": "inline"
-				},
-				{
-					"command": "databricksSecretItem.addSecret",
-					"when": "view == databricksSecrets && viewItem == SCOPE_DATABRICKS",
-					"group": "inline"
-				},
-				{
-					"command": "databricksSecretItem.updateSecret",
-					"when": "view == databricksSecrets && viewItem == SECRET_DATABRICKS",
-					"group": "inline"
-				},
-				{
-					"command": "databricksSecretItem.deleteSecret",
-					"when": "view == databricksSecrets && viewItem == SECRET_DATABRICKS",
-					"group": "inline"
-				},
-				{
-					"command": "databricksSQLTable.showDefinition",
-					"when": "view == databricksSQL && viewItem == TABLE",
-					"group": "inline"
-				},
-				{
-					"command": "databricksRepo.checkOut",
-					"when": "view == databricksRepos && viewItem == REPOSITORY",
-					"group": "inline"
-				},
-				{
-					"command": "databricksRepo.delete",
-					"when": "view == databricksRepos && viewItem == REPOSITORY",
+					"command": "PowerBIWorkspace.delete",
+					"when": "view == PowerBIWorkspaces",
 					"group": "inline"
 				}
 			]
@@ -982,23 +127,12 @@
 	"dependencies": {
 		"@angular/common": "^8.2.14",
 		"@angular/core": "^8.2.14",
+		"@azure/identity": "^2.0.4",
+		"@azure/identity-vscode": "^1.0.0",
 		"angular": "^1.8.2",
 		"axios": "^0.21.4",
-		"file-saver": "^2.0.5",
-		"follow-redirects": "^1.14.8",
-		"ftp": "^0.3.10",
 		"https-agent": "^1.0.0",
 		"jsonc-parser": "^0.4.2",
-		"keytar": "^5.6.0",
-		"minimist": "^1.2.6",
-		"mkdirp": "^0.5.1",
-		"promise.prototype.finally": "^3.1.3",
-		"replace-in-file": "^6.3.2",
-		"request": "^2.88.2",
-		"rimraf": "^2.6.2",
-		"rxjs": "^6.6.7",
-		"sync-request": "^6.1.0",
-		"uniquefilename": "^1.1.2",
-		"zone.js": "^0.9.1"
+		"keytar": "^7.9.0"
 	}
 }

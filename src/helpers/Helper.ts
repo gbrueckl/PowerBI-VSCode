@@ -7,14 +7,20 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import * as fspath from 'path';
 import * as fs from 'fs';
-import * as UniqueFileName from 'uniquefilename';
 import { ThisExtension } from '../ThisExtension';
 
-export abstract class Helper {
-	private static CodeCellTag: string = "# %% Code Cell";
-	private static DatabricksCommandTag: string = "# COMMAND ----------";
-	private static openAsNotebookSettingName: string = 'python.dataScience.useNotebookEditor';
+export class unique_id extends String {
+	// placeholder class for unique-ids in Power BI
+	private _value: string;
+	constructor(
+		value: string
+	) {
+		super(value);
+		this._value = value;
+	}
+}
 
+export abstract class Helper {
 	private static _tempFiles: string[];
 	private static _doubleClickTimer: any;
 
@@ -53,6 +59,23 @@ export abstract class Helper {
 		});
 
 		return result;
+	}
+
+
+	private static writeBase64toFile(base64String: string, filePath: string): void {
+		Helper.ensureLocalFolder(filePath, true);
+		fs.writeFile(filePath, base64String, { encoding: 'base64' }, function (err) {
+			if (err) {
+				vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
+			}
+		});
+	}
+
+	private static readBase64FromFile(filePath: string): string {
+		// read binary data
+		var bitmap = fs.readFileSync(filePath);
+		// convert binary data to base64 encoded string
+		return Buffer.from(bitmap).toString('base64');
 	}
 
 
@@ -104,33 +127,9 @@ export abstract class Helper {
 		this._tempFiles.push(filePath);
 	}
 
-	static async openTempFile(content: string = '', fileName: string = 'db-vscode-temp.json', open: boolean = true): Promise<string> {
-		let tempDir = this.resolvePath(os.tmpdir());
-		let filePath = `${tempDir}${fspath.sep}${fileName}`;
-		let uniqueFilePath = await UniqueFileName.get(filePath, {});
-
-
-		fs.writeFile(uniqueFilePath, content, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
-		this.addTempFile(uniqueFilePath);
-
-		if (open) {
-			setTimeout(() => vscode.workspace
-				.openTextDocument(uniqueFilePath)
-				.then(vscode.window.showTextDocument), 500);			
-		}
-
-		return uniqueFilePath;
-	}
-
 	static removeTempFiles(): void {
 		for (const tempFile of Helper.tempFiles) {
 			fs.unlink(tempFile, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
-		}
-	}
-
-	private static initOpenAsNotebookOriginalSetting(): void {
-		if (this._openAsNotebookOriginalSetting == undefined) {
-			this._openAsNotebookOriginalSetting = ThisExtension.getConfigurationSetting<boolean>(this.openAsNotebookSettingName).value;
 		}
 	}
 
@@ -146,22 +145,6 @@ export abstract class Helper {
 		}
 
 		return text;
-	}
-
-	static disableOpenAsNotebook(): void {
-		this.initOpenAsNotebookOriginalSetting();
-
-		if (this._openAsNotebookOriginalSetting) {
-			ThisExtension.log("Temporary setting " + this.openAsNotebookSettingName + " to false for proper DIFF ...");
-			ThisExtension.updateConfigurationSetting(this.openAsNotebookSettingName, false, ThisExtension.SettingScope);
-		}
-	}
-
-	static resetOpenAsNotebook(): void {
-		this.initOpenAsNotebookOriginalSetting();
-
-		ThisExtension.log("Setting " + this.openAsNotebookSettingName + " back to " + this._openAsNotebookOriginalSetting);
-		ThisExtension.updateConfigurationSetting("python.dataScience.useNotebookEditor", this._openAsNotebookOriginalSetting, ThisExtension.SettingScope);
 	}
 
 	static async showDiff(filePath1: string, filePath2: string): Promise<void> {
@@ -253,58 +236,11 @@ export abstract class Helper {
 	}
 
 	static newGuid() {
-		return 'xxxxxxxx-xxxx-1908-xxxx-xxxxxxxxxxxx'.replace(/[x]/g, function (c) {
+		return 'xxxxxxxx-xxxx-1908-2120-xxxxxxxxxxxx'.replace(/[x]/g, function (c) {
 			var r = Math.random() * 16 | 0,
 				v = c == 'x' ? r : (r & 0x3 | 0x8);
 			return v.toString(16);
 		});
-	}
-
-	static async addCodeCells(filePath: string): Promise<void> {
-		try {
-			const replace = require('replace-in-file');
-			let regex = new RegExp(this.DatabricksCommandTag, 'g');
-			let options = {
-				files: filePath,
-				from: regex,
-				to: this.DatabricksCommandTag + '\n' + this.CodeCellTag
-			};
-
-
-			let results = await replace(options);
-			ThisExtension.log('Replacement results:', results[0].hasChanged);
-
-			// remove duplicat code cells that might have been added
-			regex = new RegExp(this.CodeCellTag + '[\\r\\n]' + this.CodeCellTag, 'g');
-			options = {
-				files: filePath,
-				from: regex,
-				to: this.CodeCellTag
-			};
-
-			results = await replace(options);
-			ThisExtension.log('Replacement results:', results[0].hasChanged);
-		}
-		catch (error) {
-			ThisExtension.log('Error occurred:', error);
-		}
-	}
-	static async removeCodeCells(filePath: string): Promise<void> {
-		try {
-			const replace = require('replace-in-file');
-			const regex = new RegExp(this.DatabricksCommandTag + '[\\r\\n]*' + this.CodeCellTag, 'g');
-			const options = {
-				files: filePath,
-				from: regex,
-				to: this.DatabricksCommandTag,
-			};
-
-			const results = await replace(options);
-			ThisExtension.log('Replacement results:', results[0].hasChanged);
-		}
-		catch (error) {
-			ThisExtension.log('Error occurred:', error);
-		}
 	}
 
 	static secondsToHms(seconds: number) {
