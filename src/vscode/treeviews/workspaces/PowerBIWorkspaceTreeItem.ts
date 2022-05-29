@@ -1,15 +1,18 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
-import { WorkspaceItemType } from './_types';
-import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
+
 import { ThisExtension } from '../../../ThisExtension';
 import { unique_id } from '../../../helpers/Helper';
+
+import { WorkspaceItemType } from './_types';
+import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
 
 export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerBIWorkspaceItem {
 	protected _name: string;
 	protected _group: string;
 	protected _item_type: WorkspaceItemType;
 	protected _id: unique_id;
+	protected _definition: object;
 
 	constructor(
 		name: string,
@@ -24,6 +27,12 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 		this._group = group;
 		this._item_type = item_type;
 		this._id = id;
+		this.definition = {
+			name: name,
+			group: group,
+			item_type: item_type,
+			id: id
+		};
 
 		super.label = this.name;
 		super.tooltip = this._tooltip;
@@ -49,7 +58,15 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 
 	// tooltip shown when hovering over the item
 	get _tooltip(): string {
-		return this.name;
+		let tooltip: string = "";
+		for (const [key, value] of Object.entries(this.definition)) {
+			if(value.length < 50)
+			{
+				tooltip += `${key}: ${value}\n`;
+			}
+		}
+
+		return tooltip.trim();
 	}
 
 	// description is show next to the label
@@ -84,7 +101,25 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 		return this._id;
 	}
 
+	get definition(): object {
+		return this._definition;
+	}
+
+	set definition(value: object) {
+		this._definition = value;
+	}
+
 	public CopyPathToClipboard(): void {
 		vscode.env.clipboard.writeText(this._name);
+	}
+
+	get apiPath(): string {
+		let group: string = "";
+		if (this.group != null && this.group != undefined)
+		{
+			group = `/groups/${this.group}`;
+		}
+
+		return `v1.0/myorg${this.group}/${this.item_type.toString()}`;
 	}
 }

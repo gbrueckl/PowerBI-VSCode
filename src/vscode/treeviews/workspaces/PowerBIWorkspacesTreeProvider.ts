@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
-import * as fs from 'fs';
-import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
+
+
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+
+import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 

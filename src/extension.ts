@@ -2,6 +2,7 @@
 
 import * as vscode from 'vscode';
 import { ThisExtension } from './ThisExtension';
+import { PowerBIDataset } from './vscode/treeviews/workspaces/PowerBIDataset';
 
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
 
@@ -18,6 +19,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider);
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(showInfoMessage));
 	//vscode.commands.registerCommand('PowerBIWorkspaces.delete', () => pbiWorkspacesTreeProvider.add());
+
+	vscode.commands.registerCommand('PowerBIDataset.refresh', (dataset: PowerBIDataset) => dataset.refresh());
 }
 
 

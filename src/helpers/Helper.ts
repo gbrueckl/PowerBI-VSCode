@@ -101,7 +101,7 @@ export abstract class Helper {
 		}
 	}
 
-	static sortArrayByProperty(unsortedArray: object[], property: string = "label", direction: "ASC" | "DESC" = "ASC") {
+	static sortArrayByProperty<T>(unsortedArray: Array<T>, property: string = "label", direction: "ASC" | "DESC" = "ASC") {
 		let direction_num: number = (direction == "ASC" ? 1 : -1);
 
 		unsortedArray.sort((t1, t2) => {

@@ -79,10 +79,19 @@
 			},
 			{
 				"command": "PowerBIWorkspace.delete",
-				"title": "Refresh",
+				"title": "Delete",
 				"icon": {
 					"light": "resources/light/delete.png",
 					"dark": "resources/dark/delete.png"
+				}
+			},
+
+			{
+				"command": "PowerBIDataset.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
 				}
 			}
 		],
@@ -102,7 +111,12 @@
 			"view/item/context": [
 				{
 					"command": "PowerBIWorkspace.delete",
-					"when": "view == PowerBIWorkspaces",
+					"when": "view == PowerBIWorkspaces && viewItem == GROUP",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIDataset.refresh",
+					"when": "view == PowerBIWorkspaces && viewItem == DATASET",
 					"group": "inline"
 				}
 			]
@@ -132,7 +146,6 @@
 		"angular": "^1.8.2",
 		"axios": "^0.21.4",
 		"https-agent": "^1.0.0",
-		"jsonc-parser": "^0.4.2",
-		"keytar": "^7.9.0"
+		"jsonc-parser": "^0.4.2"
 	}
 }

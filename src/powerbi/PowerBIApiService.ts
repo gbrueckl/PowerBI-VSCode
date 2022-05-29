@@ -1,11 +1,15 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-import { Helper } from '../helpers/Helper';
+import { Helper, unique_id } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { iPowerBIWorkspaceItem } from '../vscode/treeviews/workspaces/iPowerBIWorkspaceItem';
 import { iPowerBIGroup } from './GroupsAPI/_types';
 import { iPowerBIDataset } from './DatasetsAPI/_types';
+import { WorkspaceItemType } from '../vscode/treeviews/workspaces/_types';
+import { iPowerBIReport } from './ReportsAPI/_types';
+import { iPowerBIDashboard } from './DashboardsAPI/_types';
+import { iPowerBIDataflow } from './DataflowsAPI/_types';
 
 
 export abstract class PowerBIApiService {
@@ -79,7 +83,7 @@ export abstract class PowerBIApiService {
 		ThisExtension.log(JSON.stringify(response.data));
 	}
 
-	private static async get(endpoint: string, params: object = null): Promise<any> {
+	static async get(endpoint: string, params: object = null): Promise<any> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
@@ -112,7 +116,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static async post(endpoint: string, body: object): Promise<any> {
+	static async post(endpoint: string, body: object): Promise<any> {
 		ThisExtension.log("POST " + endpoint);
 		ThisExtension.log("Body:" + JSON.stringify(body));
 
@@ -140,7 +144,7 @@ export abstract class PowerBIApiService {
 		return response;
 	}
 
-	private static async patch(endpoint: string, body: object): Promise<any> {
+	static async patch(endpoint: string, body: object): Promise<any> {
 		ThisExtension.log("PATCH " + endpoint);
 		ThisExtension.log("Body:" + JSON.stringify(body));
 
@@ -168,7 +172,7 @@ export abstract class PowerBIApiService {
 		return response;
 	}
 
-	private static async delete(endpoint: string, body: object): Promise<any> {
+	static async delete(endpoint: string, body: object): Promise<any> {
 		ThisExtension.log("DELETE " + endpoint);
 		ThisExtension.log("Body:" + JSON.stringify(body));
 
@@ -195,17 +199,32 @@ export abstract class PowerBIApiService {
 
 		return response;
 	}
-	//#endregion
 
-	//#region Groups/Workspaces API
-	static async getGroups(): Promise<iPowerBIGroup[]> {
-		let endpoint = 'v1.0/myorg/groups';
+	private static getUrl(groupId: string | unique_id = undefined, itemType: WorkspaceItemType = undefined): string {
+		let group: string = "";
+		if (groupId != null && groupId != undefined)
+		{
+			group = `/groups/${groupId.toString()}`;
+		}
+
+		let type = "";
+		if (itemType != null && itemType != undefined)
+		{
+			type = `/${itemType.toString().toLowerCase()}`;
+		}
+
+		return `v1.0/myorg${group}${type}`;
+	}
+
+	static async getItemList<T>(groupId: string | unique_id = undefined, itemType: WorkspaceItemType = undefined): Promise<T[]> {
+		let endpoint =  this.getUrl(groupId, itemType);
+		
 		let body = { };
 
 		let response = await this.get(endpoint, { params: body });
 
 		let result = response.data;
-		let items = result.value as iPowerBIGroup[];
+		let items = result.value as T[];
 
 		if (items == undefined) {
 			return [];
@@ -215,25 +234,44 @@ export abstract class PowerBIApiService {
 	}
 	//#endregion
 
+	//#region Groups/Workspaces API
+	static async getGroups(): Promise<iPowerBIGroup[]> {
+		let items: iPowerBIGroup[] = await this.getItemList<iPowerBIGroup>(null, "GROUPS");
+
+		return items;
+	}
+
+	
+	//#endregion
+
 	//#region Datasets API
-	static async getDatasets(groupId: string = undefined): Promise<iPowerBIDataset[]> {
-		let endpoint = 'v1.0/myorg/datasets';
-		if(!(groupId == undefined || groupId == null))
-		{
-			endpoint = `v1.0/myorg/groups/${groupId}/datasets`;
-		}
-		
-		let body = { };
+	static async getDatasets(groupId: string | unique_id = undefined): Promise<iPowerBIDataset[]> {
+		let items: iPowerBIDataset[] = await this.getItemList<iPowerBIDataset>(groupId, "DATASETS");
 
-		let response = await this.get(endpoint, { params: body });
+		return items;
+	}
+	//#endregion
 
-		let result = response.data;
-		let items = result.value as iPowerBIDataset[];
+	//#region Reports API
+	static async getReports(groupId: string | unique_id = undefined): Promise<iPowerBIReport[]> {
+		let items: iPowerBIReport[] = await this.getItemList<iPowerBIReport>(groupId, "REPORTS");
 
-		if (items == undefined) {
-			return [];
-		}
-		Helper.sortArrayByProperty(items, "name");
+		return items;
+	}
+	//#endregion
+
+	//#region Dashboards API
+	static async getDashboards(groupId: string | unique_id = undefined): Promise<iPowerBIDashboard[]> {
+		let items: iPowerBIDashboard[] = await this.getItemList<iPowerBIDashboard>(groupId, "DASHBOARDS");
+
+		return items;
+	}
+	//#endregion
+
+	//#region Dataflows API
+	static async getDataflows(groupId: string | unique_id = undefined): Promise<iPowerBIDataflow[]> {
+		let items: iPowerBIDataflow[] = await this.getItemList<iPowerBIDataflow>(groupId, "DATAFLOWS");
+
 		return items;
 	}
 	//#endregion

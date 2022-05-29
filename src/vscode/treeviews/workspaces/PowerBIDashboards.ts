@@ -1,17 +1,18 @@
 import * as vscode from 'vscode';
 
-import {  unique_id } from '../../../helpers/Helper';
-import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { unique_id } from '../../../helpers/Helper';
 
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { PowerBIDataset } from './PowerBIDataset';
-import { iPowerBIDataset } from '../../../powerbi/DatasetsAPI/_types';
+import { PowerBIDashboard } from './PowerBIDashboard';
+import { iPowerBIDashboard } from '../../../powerbi/DashboardsAPI/_types';
+
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIDatasets extends PowerBIWorkspaceTreeItem {
+export class PowerBIDashboards extends PowerBIWorkspaceTreeItem {
 
 	constructor(groupId?: string) {
-		super("Datasets", groupId, "DATASETS", new unique_id(groupId));
+		super("Dashboards", groupId, "DASHBOARDS", new unique_id(groupId));
 
 		super.tooltip = this._tooltip;
 		super.description = this._description;
@@ -31,11 +32,11 @@ export class PowerBIDatasets extends PowerBIWorkspaceTreeItem {
 			return element.getChildren();
 		}
 		else {
-			let children: PowerBIDataset[] = [];
-			let items: iPowerBIDataset[] = await PowerBIApiService.getDatasets(this._group);
+			let children: PowerBIDashboard[] = [];
+			let items: iPowerBIDashboard[] = await PowerBIApiService.getDashboards(this._group);
 
 			for (let item of items) {
-				children.push(new PowerBIDataset(item));
+				children.push(new PowerBIDashboard(item));
 			}
 			
 			return children;
