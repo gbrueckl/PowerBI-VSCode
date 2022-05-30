@@ -9,14 +9,14 @@ import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
 
 export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerBIWorkspaceItem {
 	protected _name: string;
-	protected _group: string;
+	protected _group: unique_id;
 	protected _item_type: WorkspaceItemType;
 	protected _id: unique_id;
 	protected _definition: object;
 
 	constructor(
 		name: string,
-		group: string,
+		group: unique_id,
 		item_type: WorkspaceItemType,
 		id: unique_id,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
@@ -27,13 +27,14 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 		this._group = group;
 		this._item_type = item_type;
 		this._id = id;
-		this.definition = {
+		this._definition = {
 			name: name,
 			group: group,
 			item_type: item_type,
 			id: id
 		};
 
+		super.id = id.toString();
 		super.label = this.name;
 		super.tooltip = this._tooltip;
 		super.description = this._description;
@@ -49,12 +50,10 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, this.item_type.toLowerCase() + '.png');
 	}	
 
-	readonly command = null;
-	/*
+	// command to execute when clicking the TreeItem
 	readonly command = {
-		command: 'PowerBIWorkspaceItem.click', title: "Open File", arguments: [this]
+		command: 'PowerBI.updateQuickPickList', title: "Update QuickPick List", arguments: [this]
 	};
-	*/
 
 	// tooltip shown when hovering over the item
 	get _tooltip(): string {
@@ -69,6 +68,8 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 		return tooltip.trim();
 	}
 
+	
+
 	// description is show next to the label
 	get _description(): string {
 		return this._id.toString();
@@ -79,7 +80,7 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 		return this.item_type;
 	}
 	
-	public async getChildren(): Promise<PowerBIWorkspaceTreeItem[]> {
+	public async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
 		await vscode.window.showErrorMessage("getChildren is not implemented! Please overwrite in derived class!");
 		return undefined;
 	}
@@ -89,7 +90,7 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 		return this._name;
 	}
 
-	get group(): string {
+	get group(): unique_id {
 		return this._group;
 	}
 
@@ -114,12 +115,19 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 	}
 
 	get apiPath(): string {
-		let group: string = "";
+		let groupPath: string = "";
 		if (this.group != null && this.group != undefined)
 		{
-			group = `/groups/${this.group}`;
+			groupPath = `/groups/${this.group}`;
 		}
 
-		return `v1.0/myorg${this.group}/${this.item_type.toString()}`;
+		if (this.uid != null && this.uid != undefined)
+		{
+			return `v1.0/myorg${groupPath}/${this.item_type.toString().toLowerCase()}s/${this.uid}`;
+		}
+		else
+		{
+			return `v1.0/myorg${groupPath}/${this.item_type.toString().toLowerCase()}`;
+		}
 	}
 }

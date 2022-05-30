@@ -62,6 +62,10 @@
 		},
 		"commands": [
 			{
+				"command": "PowerBI.updateQuickPickList",
+				"title": "Update Quick Pick List"
+			},
+			{
 				"command": "PowerBIWorkspaces.refresh",
 				"title": "Refresh",
 				"icon": {
@@ -93,6 +97,39 @@
 					"light": "resources/light/refresh.png",
 					"dark": "resources/dark/refresh.png"
 				}
+			},
+			{
+				"command": "PowerBIDataset.takeOver",
+				"title": "Take Over",
+				"icon": {
+					"light": "resources/light/disconnected.png",
+					"dark": "resources/dark/disconnected.png"
+				}
+			},
+
+			{
+				"command": "PowerBIReport.clone",
+				"title": "Clone",
+				"icon": {
+					"light": "resources/light/copy.png",
+					"dark": "resources/dark/copy.png"
+				}
+			},
+			{
+				"command": "PowerBIReport.rebind",
+				"title": "Rebind",
+				"icon": {
+					"light": "resources/light/rebind.png",
+					"dark": "resources/dark/rebind.png"
+				}
+			},
+			{
+				"command": "PowerBIReport.updateContent",
+				"title": "Update Content",
+				"icon": {
+					"light": "resources/light/updateContent.png",
+					"dark": "resources/dark/updateContent.png"
+				}
 			}
 		],
 		"menus": {
@@ -114,10 +151,28 @@
 					"when": "view == PowerBIWorkspaces && viewItem == GROUP",
 					"group": "inline"
 				},
+
 				{
 					"command": "PowerBIDataset.refresh",
 					"when": "view == PowerBIWorkspaces && viewItem == DATASET",
 					"group": "inline"
+				},
+				{
+					"command": "PowerBIDataset.takeOver",
+					"when": "view == PowerBIWorkspaces && viewItem == DATASET"
+				},
+
+				{
+					"command": "PowerBIReport.clone",
+					"when": "view == PowerBIWorkspaces && viewItem == REPORT"
+				},
+				{
+					"command": "PowerBIReport.rebind",
+					"when": "view == PowerBIWorkspaces && viewItem == REPORT"
+				},
+				{
+					"command": "PowerBIReport.updateContent",
+					"when": "view == PowerBIWorkspaces && viewItem == REPORT"
 				}
 			]
 		}

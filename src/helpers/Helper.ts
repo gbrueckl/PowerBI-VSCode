@@ -11,56 +11,16 @@ import { ThisExtension } from '../ThisExtension';
 
 export class unique_id extends String {
 	// placeholder class for unique-ids in Power BI
-	private _value: string;
 	constructor(
-		value: string
+		value?: string
 	) {
 		super(value);
-		this._value = value;
 	}
 }
 
 export abstract class Helper {
 	private static _tempFiles: string[];
 	private static _doubleClickTimer: any;
-
-	private static _openAsNotebookOriginalSetting: boolean;
-
-	static async showQuickPick(
-		items: string[],
-		toolTip: string,
-	): Promise<string> {
-		let i = 0;
-		const result = await vscode.window.showQuickPick(items, {
-			placeHolder: toolTip
-			/*,
-			onDidSelectItem: item => window.showInformationMessage(`Focus ${++i}: ${item}`)
-			*/
-		});
-
-		return result;
-	}
-
-	static async showInputBox(
-		defaultValue: string,
-		toolTip: string,
-		valueSelection: [number, number] = undefined,
-	): Promise<string> {
-		const result = await vscode.window.showInputBox({
-			value: defaultValue,
-			valueSelection: valueSelection,
-			placeHolder: toolTip,
-			prompt: toolTip
-			/*,
-			validateInput: text => {
-				window.showInformationMessage(`Validating: ${text}`);
-				return text === '123' ? 'Not 123!' : null;
-			}*/
-		});
-
-		return result;
-	}
-
 
 	private static writeBase64toFile(base64String: string, filePath: string): void {
 		Helper.ensureLocalFolder(filePath, true);

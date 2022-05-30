@@ -8,6 +8,7 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
+import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
@@ -42,7 +43,9 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 			let items: iPowerBIGroup[] = await PowerBIApiService.getGroups();
 
 			for (let item of items) {
-				children.push(new PowerBIWorkspace(item));
+				let treeItem = new PowerBIWorkspace(item);
+				children.push(treeItem);
+				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
 			
 			return children;

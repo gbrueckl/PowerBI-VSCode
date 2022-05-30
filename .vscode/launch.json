@@ -10,38 +10,34 @@
             "args": [
                 "--extensionDevelopmentPath=${workspaceRoot}"
             ],
-            "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceRoot}/out/src/**/*.js"
             ],
             "preLaunchTask": "npm: watch",
             "skipFiles": [
-                "<node_internals>/**/*.js",
-                "${workspaceFolder}/node_modules/**/*.js",
+                "<node_internals>/**",
                 "main.js",
                 "extension.bundle.js",
                 "extensionHostProcess.js",
-                "${workspaceFolder}/node_modules/**/*.js"
+                "${workspaceFolder}/node_modules/**"
             ]
         },
         {
             "type": "node",
             "request": "attach",
             "name": "Attach to Extension Host",
-            "protocol": "inspector",
             "port": 5870,
             "restart": true,
             "outFiles": [
                 "${workspaceRoot}/out/src"
             ],
             "skipFiles": [
-                "<node_internals>/**/*.js",
-                "${workspaceFolder}/node_modules/**/*.js",
+                "<node_internals>/**",
+                "${workspaceFolder}/node_modules/**",
                 "main.js",
                 "extension.bundle.js",
-                "extensionHostProcess.js",
-                "${workspaceFolder}/node_modules/**/*.js"
+                "extensionHostProcess.js"
             ]
         }
     ]

@@ -6,20 +6,16 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIDataset } from './PowerBIDataset';
 import { iPowerBIDataset } from '../../../powerbi/DatasetsAPI/_types';
+import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasets extends PowerBIWorkspaceTreeItem {
 
-	constructor(groupId?: string) {
-		super("Datasets", groupId, "DATASETS", new unique_id(groupId));
+	constructor(groupId?: unique_id) {
+		super("Datasets", groupId, "DATASETS", groupId);
 
-		super.tooltip = this._tooltip;
-		super.description = this._description;
-		super.contextValue = this._contextValue;
-		super.iconPath = {
-			light: this.getIconPath("light"),
-			dark: this.getIconPath("dark")
-		};
+		// the groupId is not unique for logical folders hence we make it unique
+		super.id = groupId + this.item_type.toString();
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
@@ -35,7 +31,9 @@ export class PowerBIDatasets extends PowerBIWorkspaceTreeItem {
 			let items: iPowerBIDataset[] = await PowerBIApiService.getDatasets(this._group);
 
 			for (let item of items) {
-				children.push(new PowerBIDataset(item));
+				let treeItem = new PowerBIDataset(item, this.group);
+				children.push(treeItem);
+				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
 			
 			return children;

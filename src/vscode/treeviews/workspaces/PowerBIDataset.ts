@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Helper } from '../../../helpers/Helper';
+import { Helper, unique_id } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
@@ -10,32 +10,18 @@ import { iPowerBIDataset } from '../../../powerbi/DatasetsAPI/_types';
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	constructor(
-		definition: iPowerBIDataset
+		definition: iPowerBIDataset,
+		group: unique_id
 	) {
-		super(definition.name, null, "DATASET", definition.id, vscode.TreeItemCollapsibleState.None);
-
-		super.definition = definition;
-		super.tooltip = this._tooltip;
-		super.description = this._description;
-		super.contextValue = this._contextValue;
-		super.iconPath = {
-			light: this.getIconPath("light"),
-			dark: this.getIconPath("dark")
-		};
+		super(definition.name, group, "DATASET", definition.id, vscode.TreeItemCollapsibleState.None);
 	}
 
-	public static fromInterface(item: iPowerBIDataset): PowerBIDataset {
-		let ret = new PowerBIDataset(item);
-		return ret;
-	}
-
-	public static fromJSON(jsonString: string): PowerBIDataset {
-		let item: iPowerBIDataset = JSON.parse(jsonString);
-		return PowerBIDataset.fromInterface(item);
-	}
-
-	// ItemType-specific funtions
+	// Dataset-specific funtions
 	public async refresh(): Promise<void> {
 		PowerBIApiService.post(this.apiPath + "/refreshes", null);
+	}
+
+	public async takeOver(): Promise<void> {
+		PowerBIApiService.post(this.apiPath + "/Default.TakeOver", null);
 	}
 }
