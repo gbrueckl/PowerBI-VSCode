@@ -10,14 +10,14 @@ import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
 export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerBIWorkspaceItem {
 	protected _name: string;
 	protected _group: unique_id;
-	protected _item_type: WorkspaceItemType;
+	protected _itemType: WorkspaceItemType;
 	protected _id: unique_id;
 	protected _definition: object;
 
 	constructor(
 		name: string,
 		group: unique_id,
-		item_type: WorkspaceItemType,
+		itemType: WorkspaceItemType,
 		id: unique_id,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
@@ -25,12 +25,12 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 
 		this._name = name;
 		this._group = group;
-		this._item_type = item_type;
+		this._itemType = itemType;
 		this._id = id;
 		this._definition = {
 			name: name,
 			group: group,
-			item_type: item_type,
+			itemType: itemType,
 			id: id
 		};
 
@@ -47,7 +47,7 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 	}
 
 	protected getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, this.item_type.toLowerCase() + '.png');
+		return fspath.join(ThisExtension.rootPath, 'resources', theme, this.itemType.toLowerCase() + '.png');
 	}	
 
 	// command to execute when clicking the TreeItem
@@ -59,10 +59,14 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 	get _tooltip(): string {
 		let tooltip: string = "";
 		for (const [key, value] of Object.entries(this.definition)) {
-			if(value.length < 50)
+			if(typeof value === "string")
 			{
-				tooltip += `${key}: ${value}\n`;
+				if(value.length > 100)
+				{
+					continue;
+				}
 			}
+			tooltip += `${key}: ${value.toString()}\n`;
 		}
 
 		return tooltip.trim();
@@ -77,7 +81,7 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 
 	// used in package.json to filter commands via viewItem == CANSTART
 	get _contextValue(): string {
-		return this.item_type;
+		return this.itemType;
 	}
 	
 	public async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
@@ -94,8 +98,8 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 		return this._group;
 	}
 
-	get item_type(): WorkspaceItemType {
-		return this._item_type;
+	get itemType(): WorkspaceItemType {
+		return this._itemType;
 	}
 
 	get uid(): unique_id {
@@ -123,11 +127,11 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 
 		if (this.uid != null && this.uid != undefined)
 		{
-			return `v1.0/myorg${groupPath}/${this.item_type.toString().toLowerCase()}s/${this.uid}`;
+			return `v1.0/myorg${groupPath}/${this.itemType.toString().toLowerCase()}s/${this.uid}`;
 		}
 		else
 		{
-			return `v1.0/myorg${groupPath}/${this.item_type.toString().toLowerCase()}`;
+			return `v1.0/myorg${groupPath}/${this.itemType.toString().toLowerCase()}`;
 		}
 	}
 }

@@ -32,4 +32,9 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 
 		return children;
 	}
+
+	// Workspace-specific funtions
+	public async delete(): Promise<void> {
+		PowerBICommandBuilder.execute<iPowerBIGroup>(this.apiPath, "DELETE", []);
+	}
 }

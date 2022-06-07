@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 import { Helper } from './helpers/Helper';
 import { PowerBIApiService } from './powerbi/PowerBIApiService';
+import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -11,6 +12,7 @@ export abstract class ThisExtension {
 	private static _isValidated: boolean = false;
 	private static _logger: vscode.OutputChannel;
 	private static _settingScope: ConfigSettingSource;
+	private static _treeViewWorkspaces: vscode.TreeView<PowerBIWorkspaceTreeItem>;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -30,6 +32,16 @@ export abstract class ThisExtension {
 
 	static get IsValidated(): boolean {
 		return this._isValidated;
+	}
+
+	static set TreeViewWorkspaces(treeView: vscode.TreeView<PowerBIWorkspaceTreeItem>)
+	{
+		this._treeViewWorkspaces = treeView;
+	}
+
+	static get TreeViewWorkspaces(): vscode.TreeView<PowerBIWorkspaceTreeItem>
+	{
+		return this._treeViewWorkspaces;
 	}
 
 	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {

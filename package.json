@@ -19,7 +19,6 @@
 		"email": "powerbi-vscode@gbrueckl.at"
 	},
 	"qna": "https://github.com/gbrueckl/PowerBI-VSCode",
-	"enableApiProposals": false,
 	"engines": {
 		"vscode": "^1.66.0"
 	},
@@ -60,6 +59,12 @@
 				}
 			]
 		},
+		"viewsWelcome": [
+			{
+				"view": "PowerBIWorkspaces",
+				"contents": "Please log in using Azure Account Extension -> Sign In"
+			}
+		],
 		"commands": [
 			{
 				"command": "PowerBI.updateQuickPickList",
@@ -89,7 +94,14 @@
 					"dark": "resources/dark/delete.png"
 				}
 			},
-
+			{
+				"command": "PowerBIDataset.delete",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
+				}
+			},
 			{
 				"command": "PowerBIDataset.refresh",
 				"title": "Refresh",
@@ -106,7 +118,14 @@
 					"dark": "resources/dark/disconnected.png"
 				}
 			},
-
+			{
+				"command": "PowerBIReport.delete",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
+				}
+			},
 			{
 				"command": "PowerBIReport.clone",
 				"title": "Clone",
@@ -130,6 +149,22 @@
 					"light": "resources/light/updateContent.png",
 					"dark": "resources/dark/updateContent.png"
 				}
+			},
+			{
+				"command": "PowerBIDataflow.delete",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
+				}
+			},
+			{
+				"command": "PowerBIDashboard.delete",
+				"title": "Delete",
+				"icon": {
+					"light": "resources/light/delete.png",
+					"dark": "resources/dark/delete.png"
+				}
 			}
 		],
 		"menus": {
@@ -151,7 +186,11 @@
 					"when": "view == PowerBIWorkspaces && viewItem == GROUP",
 					"group": "inline"
 				},
-
+				{
+					"command": "PowerBIDataset.delete",
+					"when": "view == PowerBIWorkspaces && viewItem == DATASET",
+					"group": "inline"
+				},
 				{
 					"command": "PowerBIDataset.refresh",
 					"when": "view == PowerBIWorkspaces && viewItem == DATASET",
@@ -161,7 +200,11 @@
 					"command": "PowerBIDataset.takeOver",
 					"when": "view == PowerBIWorkspaces && viewItem == DATASET"
 				},
-
+				{
+					"command": "PowerBIReport.delete",
+					"when": "view == PowerBIWorkspaces && viewItem == REPORT",
+					"group": "inline"
+				},
 				{
 					"command": "PowerBIReport.clone",
 					"when": "view == PowerBIWorkspaces && viewItem == REPORT"
@@ -173,6 +216,16 @@
 				{
 					"command": "PowerBIReport.updateContent",
 					"when": "view == PowerBIWorkspaces && viewItem == REPORT"
+				},
+				{
+					"command": "PowerBIDataflow.delete",
+					"when": "view == PowerBIWorkspaces && viewItem == DATAFLOW",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIDashboard.delete",
+					"when": "view == PowerBIWorkspaces && viewItem == DASHBOARD",
+					"group": "inline"
 				}
 			]
 		}
@@ -184,12 +237,12 @@
 	},
 	"devDependencies": {
 		"@types/mkdirp": "^0.5.2",
-		"@types/node": "^10.17.60",
+		"@types/node": "^12.12.0",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.66.0",
 		"ts-loader": "^8.3.0",
 		"tslint": "^5.20.1",
-		"typescript": "^3.9.10",
+		"typescript": "^4.4.3",
 		"webpack": "^5.62.1",
 		"webpack-cli": "^4.9.1"
 	},
@@ -198,7 +251,7 @@
 		"@angular/core": "^8.2.14",
 		"@azure/identity": "^2.0.4",
 		"@azure/identity-vscode": "^1.0.0",
-		"angular": "^1.8.2",
+		"angular": "^1.6.10",
 		"axios": "^0.21.4",
 		"https-agent": "^1.0.0",
 		"jsonc-parser": "^0.4.2"

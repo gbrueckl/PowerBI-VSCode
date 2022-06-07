@@ -5,6 +5,7 @@ import { ThisExtension } from '../ThisExtension';
 import { PowerBIWorkspaceTreeItem } from '../vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
 import { WorkspaceItemType } from '../vscode/treeviews/workspaces/_types';
 import { PowerBIApiService } from './PowerBIApiService';
+import { ApiMethod } from './_types';
 
 
 
@@ -95,11 +96,15 @@ export class PowerBIQuickPickItem {
 	}
 
 	get value(): string {
+		if (this._value == null || this._value == undefined) {
+			return this.name;
+		}
+
 		return this._value;
 	}
 
 	get label(): string {
-		if (this.value == null || this.value == undefined) {
+		if (this._value == null || this._value == undefined) {
 			return this.name;
 		}
 
@@ -127,7 +132,8 @@ export abstract class PowerBICommandBuilder {
 
 	static async execute<T>(
 		apiUrl: string,
-		inputs: PowerBICommandInput[]
+		method: ApiMethod = "POST",
+		inputs: PowerBICommandInput[] = []
 	): Promise<T> {
 		let body: object = {};
 
@@ -138,7 +144,23 @@ export abstract class PowerBICommandBuilder {
 			body = this.addProperty(body, input.Key, inputValue);
 		}
 
-		return PowerBIApiService.post(apiUrl, body) as Promise<T>;
+		switch (method) {
+			case "GET":
+				return PowerBIApiService.get(apiUrl, body) as Promise<T>;
+
+			case "POST":
+				return PowerBIApiService.post(apiUrl, body) as Promise<T>;
+
+			case "PATCH":
+				return PowerBIApiService.patch(apiUrl, body) as Promise<T>;
+
+			case "DELETE":
+				return PowerBIApiService.delete(apiUrl, body) as Promise<T>;
+		
+			default:
+				break;
+		}
+		
 	}
 
 	static addProperty(body: object, key: string, inputValue: string): object {
@@ -207,25 +229,25 @@ export abstract class PowerBICommandBuilder {
 			this._quickPickLists = new Map<WorkspaceItemType, PowerBIQuickPickItem[]>();
 		}
 
-		if (!this._quickPickLists.has(item.item_type)) {
-			ThisExtension.log(`Adding item '${item.item_type}' to QuickPickLists ...`);
-			this._quickPickLists.set(item.item_type, []);
+		if (!this._quickPickLists.has(item.itemType)) {
+			ThisExtension.log(`Adding item '${item.itemType}' to QuickPickLists ...`);
+			this._quickPickLists.set(item.itemType, []);
 		}
 
 		let newItem: PowerBIQuickPickItem = new PowerBIQuickPickItem(item.name, item.uid.toString());
 
 		// if the item already exists, pop it and add it to the top again
-		let existingItemIndex = this._quickPickLists.get(item.item_type).findIndex(x => x.label == newItem.label);
+		let existingItemIndex = this._quickPickLists.get(item.itemType).findIndex(x => x.label == newItem.label);
 		if (existingItemIndex >= 0) {
-			this._quickPickLists.get(item.item_type).splice(existingItemIndex, 1);
+			this._quickPickLists.get(item.itemType).splice(existingItemIndex, 1);
 		}
 
-		ThisExtension.log(`Adding item '${item.uid}' to QuickPickList '${item.item_type}'.`);
-		this._quickPickLists.get(item.item_type).push(newItem);
+		ThisExtension.log(`Adding item '${item.uid}' to QuickPickList '${item.itemType}'.`);
+		this._quickPickLists.get(item.itemType).push(newItem);
 
-		while (this._quickPickLists.get(item.item_type).length > this._maxQuickPickListItems) {
-			let removed = this._quickPickLists.get(item.item_type).shift();
-			ThisExtension.log(`Removed item '${removed.value}' from QuickPickList '${item.item_type}'.`);
+		while (this._quickPickLists.get(item.itemType).length > this._maxQuickPickListItems) {
+			let removed = this._quickPickLists.get(item.itemType).shift();
+			ThisExtension.log(`Removed item '${removed.value}' from QuickPickList '${item.itemType}'.`);
 		}
 	}
 

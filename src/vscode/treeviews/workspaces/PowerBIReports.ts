@@ -17,7 +17,17 @@ export class PowerBIReports extends PowerBIWorkspaceTreeItem {
 		super("Reports", groupId, "REPORTS", groupId);
 
 		// the groupId is not unique for logical folders hence we make it unique
-		super.id = groupId + this.item_type.toString();
+		super.id = groupId + "/" + this.itemType.toString();
+	}
+
+	// tooltip shown when hovering over the item
+	get _tooltip(): string {
+		return undefined;
+	}
+
+	// description is show next to the label
+	get _description(): string {
+		return undefined;
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {

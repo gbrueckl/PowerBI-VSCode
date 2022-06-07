@@ -2,14 +2,13 @@ import * as vscode from 'vscode';
 
 
 import { ThisExtension } from '../../../ThisExtension';
-import { Helper } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-
+import { PowerBIWorkspacesDragAndDropController } from './PowerBIWorkspacesDragAndDropController';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<PowerBIWorkspaceTreeItem> {
@@ -17,8 +16,13 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 	private _onDidChangeTreeData: vscode.EventEmitter<PowerBIWorkspaceTreeItem | undefined> = new vscode.EventEmitter<PowerBIWorkspaceTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<PowerBIWorkspaceTreeItem | undefined> = this._onDidChangeTreeData.event;
 
-	constructor() { }
+	constructor(context: vscode.ExtensionContext) {
+		const view = vscode.window.createTreeView('PowerBIWorkspaces', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIWorkspacesDragAndDropController() });
+		context.subscriptions.push(view);
 
+		ThisExtension.TreeViewWorkspaces = view;
+	}
+	
 	refresh(showInfoMessage: boolean = false): void {
 		if (showInfoMessage) {
 			vscode.window.showInformationMessage('Refreshing Workspaces ...');
@@ -27,6 +31,10 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 	}
 
 	getTreeItem(element: PowerBIWorkspaceTreeItem): PowerBIWorkspaceTreeItem {
+		return element;
+	}
+
+	getParent(element: PowerBIWorkspaceTreeItem): vscode.ProviderResult<PowerBIWorkspaceTreeItem> {
 		return element;
 	}
 
@@ -52,6 +60,7 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 		}
 	}
 
+	// TopLevel workspace functions
 	add(): void {
 		
 	}
