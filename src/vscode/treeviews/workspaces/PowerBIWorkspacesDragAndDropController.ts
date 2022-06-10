@@ -28,7 +28,7 @@ class PowerBIObjectTransferItem extends vscode.DataTransferItem {
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIWorkspacesDragAndDropController implements vscode.TreeDragAndDropController<PowerBIWorkspaceTreeItem> {
 
-	dropMimeTypes: readonly string[] = ["text/treeitems", "application/vnd.code.tree.powerbiworkspaces"];
+	dropMimeTypes: readonly string[] = ["text/treeitems", "application/vnd.code.tree.powerbiworkspaces", "text/uri-list"];
 	dragMimeTypes: readonly string[] = ["text/treeitems", "application/vnd.code.tree.powerbiworkspaces"];
 
 	public async handleDrag?(source: readonly PowerBIWorkspaceTreeItem[], dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
@@ -37,6 +37,8 @@ export class PowerBIWorkspacesDragAndDropController implements vscode.TreeDragAn
 
 	public async handleDrop?(target: PowerBIWorkspaceTreeItem, dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
 		ThisExtension.log("Dropped item on " + target.itemType + " ...");
+
+		ThisExtension.log(await dataTransfer.get("text/uri-list").asString());
 
 		// check if target implemnts iHandleDrop interface / has handleDrop function
 		if ('handleDrop' in target) {

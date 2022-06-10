@@ -247,11 +247,10 @@
 		"webpack-cli": "^4.9.1"
 	},
 	"dependencies": {
-		"@angular/common": "^8.2.14",
-		"@angular/core": "^8.2.14",
+		"@angular/common": "^14.0.1",
+		"@angular/core": "^14.0.1",
 		"@azure/identity": "^2.0.4",
 		"@azure/identity-vscode": "^1.0.0",
-		"angular": "^1.6.10",
 		"axios": "^0.21.4",
 		"https-agent": "^1.0.0",
 		"jsonc-parser": "^0.4.2"

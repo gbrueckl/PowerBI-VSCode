@@ -116,13 +116,21 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	static async post(endpoint: string, body: object): Promise<any> {
+	static async post(endpoint: string, body: object, headers?: object): Promise<any> {
 		ThisExtension.log("POST " + endpoint);
 		ThisExtension.log("Body:" + JSON.stringify(body));
 
+		let axiosConfig = {};
+		if(headers != undefined)
+		{
+			axiosConfig = {
+			headers: headers
+			};
+		}
+
 		let response: any = "Request not yet executed!";
 		try {
-			response = await this._apiService.post(endpoint, body);
+			response = await this._apiService.post(endpoint, body, axiosConfig);
 			this.logResponse(response);
 		} catch (error) {
 			let errResponse = error.response;

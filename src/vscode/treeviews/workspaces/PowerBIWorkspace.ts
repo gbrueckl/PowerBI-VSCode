@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as fspath from 'path';
+import * as fs from 'fs';
 
 import { Helper } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
@@ -11,9 +12,11 @@ import { PowerBIReports } from './PowerBIReports';
 import { PowerBIDashboards } from './PowerBIDashboards';
 import { PowerBIDataflows } from './PowerBIDataflows';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
+export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandleDrop {
 	constructor(
 		definition: iPowerBIGroup
 	) {
@@ -32,6 +35,35 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 
 		return children;
 	}
+	
+	// #region iHandleDrop implementation
+	public async handleDrop(dataTransfer: vscode.DataTransfer): Promise<void> {
+		const transferItem = dataTransfer.get('application/vnd.code.tree.powerbiworkspaces');
+		const fileItem = dataTransfer.get('text/uri-list');
+		if (!transferItem && !fileItem) {
+			ThisExtension.log("Item dropped on PowerBI Workspace Tree-View - but MimeType 'application/vnd.code.tree.powerbiworkspaces' was not found!");
+			return;
+		}
+
+		if(fileItem)
+		{
+			const fileUri = await fileItem.asString();
+			const fileName = fileUri.split("/").pop().split(".")[0];
+
+			let url = this.apiPath + "/imports?datasetDisplayName=" + fileName;
+			
+			let importRequest = PowerBIApiService.post(url, fs.createReadStream(fileUri), {'Content-Type': 'multipart/form-data'});
+
+			importRequest.then(function (body) {
+				ThisExtension.log('success! ', body);
+			})
+				.catch(function (err) {
+				ThisExtension.log('error', err);
+			});
+		}
+		
+	}
+	// #endregion
 
 	// Workspace-specific funtions
 	public async delete(): Promise<void> {
