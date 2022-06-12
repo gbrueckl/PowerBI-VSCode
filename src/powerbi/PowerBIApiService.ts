@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as FormData from 'form-data';
 import * as fs from 'fs';
 
 import { Helper, unique_id } from '../helpers/Helper';
@@ -6,17 +7,19 @@ import { ThisExtension } from '../ThisExtension';
 import { iPowerBIWorkspaceItem } from '../vscode/treeviews/workspaces/iPowerBIWorkspaceItem';
 import { iPowerBIGroup } from './GroupsAPI/_types';
 import { iPowerBIDataset } from './DatasetsAPI/_types';
-import { WorkspaceItemType } from '../vscode/treeviews/workspaces/_types';
+import { ApiItemType } from '../vscode/treeviews/workspaces/_types';
 import { iPowerBIReport } from './ReportsAPI/_types';
 import { iPowerBIDashboard } from './DashboardsAPI/_types';
 import { iPowerBIDataflow } from './DataflowsAPI/_types';
+import { Stream } from 'stream';
+import { iPowerBICapacityItem } from '../vscode/treeviews/Capacities/iPowerBICapacityItem';
 
 
 export abstract class PowerBIApiService {
 	private static _apiService: any;
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
-	
+
 	//#region Initialization
 	static async initialize(apiRootUrl: string = "https://api.powerbi.com/"): Promise<boolean> {
 		try {
@@ -26,7 +29,7 @@ export abstract class PowerBIApiService {
 
 			// Set config defaults when creating the instance
 			this._apiService = axios.create({
-				httpsAgent: new httpsAgent({  
+				httpsAgent: new httpsAgent({
 					rejectUnauthorized: ThisExtension.rejectUnauthorizedSSL
 				}),
 				baseURL: Helper.trimChar(apiRootUrl, '/') + '/',
@@ -46,7 +49,7 @@ export abstract class PowerBIApiService {
 			let credential = new VisualStudioCodeCredential();
 
 			let accessToken = await credential.getToken("https://analysis.windows.net/powerbi/api/.default");
-			
+
 			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + accessToken.token;
 			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
 			this._apiService.defaults.headers.common['Accept'] = 'application/json';
@@ -121,16 +124,58 @@ export abstract class PowerBIApiService {
 		ThisExtension.log("Body:" + JSON.stringify(body));
 
 		let axiosConfig = {};
-		if(headers != undefined)
-		{
+		if (headers != undefined) {
 			axiosConfig = {
-			headers: headers
+				headers: headers
 			};
 		}
 
 		let response: any = "Request not yet executed!";
 		try {
 			response = await this._apiService.post(endpoint, body, axiosConfig);
+			this.logResponse(response);
+		} catch (error) {
+			let errResponse = error.response;
+
+			let errorMessage = errResponse.data.message;
+			if (!errorMessage) {
+				errorMessage = errResponse.headers["x-powerbi-reason-phrase"];
+			}
+
+			ThisExtension.log("ERROR: " + error.message);
+			ThisExtension.log("ERROR: " + errorMessage);
+			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
+
+			vscode.window.showErrorMessage(errorMessage);
+
+			return undefined;
+		}
+
+		return response;
+	}
+
+	static async postFile(endpoint: string, file: string | URL): Promise<any> {
+		ThisExtension.log("POST " + endpoint);
+		ThisExtension.log("Content:" + "<stream>");
+
+		const contentLength: number = fs.statSync(file).size;
+
+		let fileStream = await fs.createReadStream(file);
+
+		const form = new FormData();
+		form.append("Content", fileStream);
+
+		const contentHeaders = {
+			"Content-Length": contentLength
+			//"Content-Type": "multipart/form-data"
+		};
+
+		let axiosConfig = {
+			headers: { ...(form.getHeaders()), ...contentHeaders }
+		};
+		let response: any = "Request not yet executed!";
+		try {
+			response = await this._apiService.post(endpoint, form, axiosConfig);
 			this.logResponse(response);
 		} catch (error) {
 			let errResponse = error.response;
@@ -208,26 +253,24 @@ export abstract class PowerBIApiService {
 		return response;
 	}
 
-	private static getUrl(groupId: string | unique_id = undefined, itemType: WorkspaceItemType = undefined): string {
+	private static getUrl(groupId: string | unique_id = undefined, itemType: ApiItemType = undefined): string {
 		let group: string = "";
-		if (groupId != null && groupId != undefined)
-		{
+		if (groupId != null && groupId != undefined) {
 			group = `/groups/${groupId.toString()}`;
 		}
 
 		let type = "";
-		if (itemType != null && itemType != undefined)
-		{
+		if (itemType != null && itemType != undefined) {
 			type = `/${itemType.toString().toLowerCase()}`;
 		}
 
 		return `v1.0/myorg${group}${type}`;
 	}
 
-	static async getItemList<T>(groupId: string | unique_id = undefined, itemType: WorkspaceItemType = undefined): Promise<T[]> {
-		let endpoint =  this.getUrl(groupId, itemType);
-		
-		let body = { };
+	static async getItemList<T>(groupId: string | unique_id = undefined, itemType: ApiItemType = undefined): Promise<T[]> {
+		let endpoint = this.getUrl(groupId, itemType);
+
+		let body = {};
 
 		let response = await this.get(endpoint, { params: body });
 
@@ -249,7 +292,7 @@ export abstract class PowerBIApiService {
 		return items;
 	}
 
-	
+
 	//#endregion
 
 	//#region Datasets API
@@ -282,5 +325,16 @@ export abstract class PowerBIApiService {
 
 		return items;
 	}
+	//#endregion
+
+
+	//#region Capacities API
+	static async getCapacities(): Promise<iPowerBICapacityItem[]> {
+		let items: iPowerBICapacityItem[] = await this.getItemList<iPowerBICapacityItem>(null, "CAPACITIES");
+
+		return items;
+	}
+
+
 	//#endregion
 }

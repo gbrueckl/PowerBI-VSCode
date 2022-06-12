@@ -1,4 +1,4 @@
-export type WorkspaceItemType = 
+export type ApiItemType = 
 	"GROUP"
 |	"GROUPS" 
 |	"DATASETS" // container for datasets within workspace
@@ -8,4 +8,6 @@ export type WorkspaceItemType =
 |	"DATAFLOWS" // container for datasets within workspace
 |	"DATAFLOW"
 |	"DASHBOARDS" // container for datasets within workspace
-|	"DASHBOARD";
+|	"DASHBOARD"
+|	"CAPACITIES"
+|	"CAPACITY";

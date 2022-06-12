@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { Helper } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { PowerBIWorkspaceTreeItem } from '../vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
-import { WorkspaceItemType } from '../vscode/treeviews/workspaces/_types';
+import { ApiItemType } from '../vscode/treeviews/workspaces/_types';
 import { PowerBIApiService } from './PowerBIApiService';
 import { ApiMethod } from './_types';
 
@@ -127,7 +127,7 @@ export class PowerBIQuickPickItem {
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export abstract class PowerBICommandBuilder {
-	private static _quickPickLists: Map<WorkspaceItemType, PowerBIQuickPickItem[]>;
+	private static _quickPickLists: Map<ApiItemType, PowerBIQuickPickItem[]>;
 	private static _maxQuickPickListItems: number = 10;
 
 	static async execute<T>(
@@ -226,7 +226,7 @@ export abstract class PowerBICommandBuilder {
 	static pushQuickPickItem(item: PowerBIWorkspaceTreeItem): void {
 		if (this._quickPickLists == undefined) {
 			ThisExtension.log(`Initializing QuickPickList ...`);
-			this._quickPickLists = new Map<WorkspaceItemType, PowerBIQuickPickItem[]>();
+			this._quickPickLists = new Map<ApiItemType, PowerBIQuickPickItem[]>();
 		}
 
 		if (!this._quickPickLists.has(item.itemType)) {
@@ -251,10 +251,10 @@ export abstract class PowerBICommandBuilder {
 		}
 	}
 
-	static getQuickPickItems(itemType: WorkspaceItemType): PowerBIQuickPickItem[] {
+	static getQuickPickItems(itemType: ApiItemType): PowerBIQuickPickItem[] {
 		if (this._quickPickLists == undefined) {
 			ThisExtension.log(`Initializing QuickPickList ...`);
-			this._quickPickLists = new Map<WorkspaceItemType, PowerBIQuickPickItem[]>();
+			this._quickPickLists = new Map<ApiItemType, PowerBIQuickPickItem[]>();
 		}
 
 		if (!this._quickPickLists.has(itemType)) {

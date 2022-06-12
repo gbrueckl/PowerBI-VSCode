@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { PowerBICommandBuilder, PowerBICommandInput } from './powerbi/CommandBuilder';
 import { ThisExtension } from './ThisExtension';
+import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacityTreeProvider';
 import { PowerBIDashboard } from './vscode/treeviews/workspaces/PowerBIDashboard';
 import { PowerBIDataflow } from './vscode/treeviews/workspaces/PowerBIDataflow';
 import { PowerBIDataset } from './vscode/treeviews/workspaces/PowerBIDataset';
@@ -23,7 +24,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// register PowerBIWorkspacesTreeProvider
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
-	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider);
+	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(showInfoMessage));
 	//vscode.commands.registerCommand('PowerBIWorkspaces.delete', () => pbiWorkspacesTreeProvider.add());
 
@@ -43,6 +44,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Dashboard commands
 	vscode.commands.registerCommand('PowerBIDasjbpard.delete', (dashboard: PowerBIDashboard) => dashboard.delete());
+
+
+	// register PowerBICapacitiesTreeProvider
+	let pbiCapacitiesTreeProvider = new PowerBICapacitiesTreeProvider(context);
+	//vscode.window.registerTreeDataProvider('PowerBICapacities', pbiCapacitiesTreeProvider); // done in constructor which also adds Drag&Drop Controller
+	vscode.commands.registerCommand('PowerBICapacities.refresh', (showInfoMessage: boolean = true) => pbiCapacitiesTreeProvider.refresh(showInfoMessage));
 }
 
 

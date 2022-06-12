@@ -56,12 +56,20 @@
 				{
 					"id": "PowerBIWorkspaces",
 					"name": "Workspaces"
+				},
+				{
+					"id": "PowerBICapacities",
+					"name": "Capacities"
 				}
 			]
 		},
 		"viewsWelcome": [
 			{
 				"view": "PowerBIWorkspaces",
+				"contents": "Please log in using Azure Account Extension -> Sign In"
+			},
+			{
+				"view": "PowerBICapacities",
 				"contents": "Please log in using Azure Account Extension -> Sign In"
 			}
 		],
@@ -165,6 +173,15 @@
 					"light": "resources/light/delete.png",
 					"dark": "resources/dark/delete.png"
 				}
+			},
+
+			{
+				"command": "PowerBICapacities.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
+				}
 			}
 		],
 		"menus": {
@@ -177,6 +194,12 @@
 				{
 					"command": "PowerBIWorkspaces.add",
 					"when": "view == PowerBIWorkspaces",
+					"group": "navigation"
+				},
+
+				{
+					"command": "PowerBICapacities.refresh",
+					"when": "view == PowerBICapacities",
 					"group": "navigation"
 				}
 			],
@@ -252,6 +275,7 @@
 		"@azure/identity": "^2.0.4",
 		"@azure/identity-vscode": "^1.0.0",
 		"axios": "^0.21.4",
+		"form-data": "^4.0.0",
 		"https-agent": "^1.0.0",
 		"jsonc-parser": "^0.4.2"
 	}

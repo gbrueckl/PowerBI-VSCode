@@ -4,38 +4,24 @@ import * as fspath from 'path';
 import { ThisExtension } from '../../../ThisExtension';
 import { unique_id } from '../../../helpers/Helper';
 
-import { ApiItemType } from './_types';
-import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
+import { iPowerBICapacityItem } from './iPowerBICapacityItem';
+import { ApiItemType } from '../workspaces/_types';
 
-export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerBIWorkspaceItem {
-	protected _name: string;
-	protected _group: unique_id;
+export class PowerBICapacityTreeItem extends vscode.TreeItem implements iPowerBICapacityItem {
+	protected _definition: iPowerBICapacityItem;
 	protected _itemType: ApiItemType;
-	protected _id: unique_id;
-	protected _definition: object;
 
 	constructor(
-		name: string,
-		group: unique_id,
-		itemType: ApiItemType,
-		id: unique_id,
+		definition: iPowerBICapacityItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(name, collapsibleState);
+		super(definition.displayName, collapsibleState);
 
-		this._name = name;
-		this._group = group;
-		this._itemType = itemType;
-		this._id = id;
-		this._definition = {
-			name: name,
-			group: group,
-			itemType: itemType,
-			id: id
-		};
+		this._definition = definition;
+		this._itemType = "CAPACITY";
 
-		super.id = id.toString();
-		super.label = this.name;
+		super.id = definition.uid.toString();
+		super.label = definition.displayName;
 		super.tooltip = this._tooltip;
 		super.description = this._description;
 		super.contextValue = this._contextValue;
@@ -47,7 +33,7 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 	}
 
 	protected getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, this.itemType.toLowerCase() + '.png');
+		return fspath.join(ThisExtension.rootPath, 'resources', theme, "capacity" + '.png');
 	}	
 
 	// command to execute when clicking the TreeItem
@@ -76,62 +62,72 @@ export class PowerBIWorkspaceTreeItem extends vscode.TreeItem implements iPowerB
 
 	// description is show next to the label
 	get _description(): string {
-		return this._id.toString();
+		return this.definition.uid.toString();
 	}
 
 	// used in package.json to filter commands via viewItem == CANSTART
 	get _contextValue(): string {
-		return this.itemType;
+		return "CAPACITY";
 	}
 	
-	public async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
+	public async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
 		await vscode.window.showErrorMessage("getChildren is not implemented! Please overwrite in derived class!");
 		return undefined;
 	}
 
-	/* iDatabrickWorkspaceItem implementatin */
+
+	/* iPowerBICapacityItem implementatin */
 	get name(): string {
-		return this._name;
+		return this.definition.displayName;
 	}
 
-	get group(): unique_id {
-		return this._group;
+	get displayName(): string {
+		return this.definition.displayName;
 	}
 
 	get itemType(): ApiItemType {
 		return this._itemType;
 	}
 
-	get uid(): unique_id {
-		return this._id;
+	get sku(): string {
+		return this.definition.sku;
 	}
 
-	get definition(): object {
+	get region(): string {
+		return this.definition.region;
+	}
+
+	get state(): string {
+		return this.definition.state;
+	}
+
+	get admins(): string[] {
+		return this.definition.admins;
+	}
+
+	get capacityUserAccessRight(): string {
+		return this.definition.capacityUserAccessRight;
+	}
+
+	get uid(): unique_id {
+		return this.definition.uid;
+	}
+
+	get definition(): iPowerBICapacityItem {
 		return this._definition;
 	}
 
-	set definition(value: object) {
+	set definition(value: iPowerBICapacityItem) {
 		this._definition = value;
 	}
 
+
+
 	public CopyPathToClipboard(): void {
-		vscode.env.clipboard.writeText(this._name);
+		vscode.env.clipboard.writeText(this.definition.displayName);
 	}
 
 	get apiPath(): string {
-		let groupPath: string = "";
-		if (this.group != null && this.group != undefined && this.itemType != "GROUP")
-		{
-			groupPath = `/groups/${this.group}`;
-		}
-
-		if (this.uid != null && this.uid != undefined)
-		{
-			return `v1.0/myorg${groupPath}/${this.itemType.toString().toLowerCase()}s/${this.uid}`;
-		}
-		else
-		{
-			return `v1.0/myorg${groupPath}/${this.itemType.toString().toLowerCase()}`;
-		}
+		return `v1.0/myorg/capacities`;
 	}
 }

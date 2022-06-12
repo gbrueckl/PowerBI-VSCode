@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 import { Helper } from './helpers/Helper';
 import { PowerBIApiService } from './powerbi/PowerBIApiService';
+import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICapacityTreeItem';
 import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
@@ -13,6 +14,7 @@ export abstract class ThisExtension {
 	private static _logger: vscode.OutputChannel;
 	private static _settingScope: ConfigSettingSource;
 	private static _treeViewWorkspaces: vscode.TreeView<PowerBIWorkspaceTreeItem>;
+	private static _treeViewCapacities: vscode.TreeView<PowerBICapacityTreeItem>;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -42,6 +44,16 @@ export abstract class ThisExtension {
 	static get TreeViewWorkspaces(): vscode.TreeView<PowerBIWorkspaceTreeItem>
 	{
 		return this._treeViewWorkspaces;
+	}
+
+	static set TreeViewCapacities(treeView: vscode.TreeView<PowerBICapacityTreeItem>)
+	{
+		this._treeViewCapacities = treeView;
+	}
+
+	static get TreeViewCapacities(): vscode.TreeView<PowerBICapacityTreeItem>
+	{
+		return this._treeViewCapacities;
 	}
 
 	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {

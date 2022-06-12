@@ -1,10 +1,10 @@
 import { unique_id } from "../../helpers/Helper";
-import { WorkspaceItemType } from "../../vscode/treeviews/workspaces/_types";
+import { ApiItemType } from "../../vscode/treeviews/workspaces/_types";
 
 export class iPowerBIDataflow {
 	name: string;
 	id: unique_id;
-	item_type: WorkspaceItemType;
+	item_type: ApiItemType;
 	
 	configuredBy: string; //The dataflow owner
 	description: string; //The dataflow description

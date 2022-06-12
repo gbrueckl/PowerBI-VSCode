@@ -14,6 +14,7 @@ import { PowerBIDataflows } from './PowerBIDataflows';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
+import { URL } from 'url';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandleDrop {
@@ -47,12 +48,12 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 
 		if(fileItem)
 		{
-			const fileUri = await fileItem.asString();
-			const fileName = fileUri.split("/").pop().split(".")[0];
+			const fileUri = new URL(await fileItem.asString());// "file:///d:/Desktop/DeltaLake_New.pbix"; //await fileItem.asString();
+			const fileName = fileUri.pathname.split("/").pop().split(".")[0];
 
 			let url = this.apiPath + "/imports?datasetDisplayName=" + fileName;
 			
-			let importRequest = PowerBIApiService.post(url, fs.createReadStream(fileUri), {'Content-Type': 'multipart/form-data'});
+			let importRequest = await PowerBIApiService.postFile(url, fileUri);
 
 			importRequest.then(function (body) {
 				ThisExtension.log('success! ', body);

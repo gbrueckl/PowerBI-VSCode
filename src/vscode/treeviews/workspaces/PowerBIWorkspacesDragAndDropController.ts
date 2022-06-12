@@ -28,8 +28,8 @@ class PowerBIObjectTransferItem extends vscode.DataTransferItem {
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIWorkspacesDragAndDropController implements vscode.TreeDragAndDropController<PowerBIWorkspaceTreeItem> {
 
-	dropMimeTypes: readonly string[] = ["text/treeitems", "application/vnd.code.tree.powerbiworkspaces", "text/uri-list"];
-	dragMimeTypes: readonly string[] = ["text/treeitems", "application/vnd.code.tree.powerbiworkspaces"];
+	dropMimeTypes: readonly string[] = ["application/vnd.code.tree.powerbiworkspaces", "text/uri-list"];
+	dragMimeTypes: readonly string[] = ["application/vnd.code.tree.powerbiworkspaces"];
 
 	public async handleDrag?(source: readonly PowerBIWorkspaceTreeItem[], dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
 		dataTransfer.set("application/vnd.code.tree.powerbiworkspaces", new PowerBIObjectTransferItem(source));
