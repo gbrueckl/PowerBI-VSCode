@@ -1,9 +1,9 @@
-import { unique_id } from "../../helpers/Helper";
-import { ApiItemType } from "../../vscode/treeviews/workspaces/_types";
+import { UniqueId } from "../../helpers/Helper";
+import { ApiItemType } from "../../vscode/treeviews/_types";
 
 export class iPowerBIDashboard {
 	name: string;
-	id: unique_id; // The dashboard ID
+	id: UniqueId; // The dashboard ID
 	item_type: ApiItemType;
 	
 	appId: string; //The app ID, returned only if the dashboard belongs to an app

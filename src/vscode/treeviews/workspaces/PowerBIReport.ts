@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { iPowerBIReport } from '../../../powerbi/ReportsAPI/_types';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
-import { unique_id } from '../../../helpers/Helper';
+import { UniqueId } from '../../../helpers/Helper';
 import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
 import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
@@ -13,7 +13,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 
 	constructor(
 		definition: iPowerBIReport,
-		group: unique_id
+		group: UniqueId
 	) {
 		super(definition.name, group, "REPORT", definition.id, vscode.TreeItemCollapsibleState.None);
 

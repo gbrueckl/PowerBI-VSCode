@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import {  unique_id } from '../../../helpers/Helper';
+import {  UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
@@ -11,7 +11,7 @@ import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasets extends PowerBIWorkspaceTreeItem {
 
-	constructor(groupId?: unique_id) {
+	constructor(groupId?: UniqueId) {
 		super("Datasets", groupId, "DATASETS", groupId);
 
 		// the groupId is not unique for logical folders hence we make it unique

@@ -20,7 +20,7 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 		const view = vscode.window.createTreeView('PowerBICapacities', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBICapacitiesDragAndDropController() });
 		context.subscriptions.push(view);
 
-		ThisExtension.TreeViewCapacities = view;
+		ThisExtension.TreeViewCapacities = this;
 	}
 	
 	refresh(showInfoMessage: boolean = false): void {

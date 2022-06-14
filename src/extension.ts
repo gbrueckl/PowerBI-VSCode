@@ -3,7 +3,8 @@
 import * as vscode from 'vscode';
 import { PowerBICommandBuilder, PowerBICommandInput } from './powerbi/CommandBuilder';
 import { ThisExtension } from './ThisExtension';
-import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacityTreeProvider';
+import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
+import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
 import { PowerBIDashboard } from './vscode/treeviews/workspaces/PowerBIDashboard';
 import { PowerBIDataflow } from './vscode/treeviews/workspaces/PowerBIDataflow';
 import { PowerBIDataset } from './vscode/treeviews/workspaces/PowerBIDataset';
@@ -26,7 +27,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(showInfoMessage));
-	//vscode.commands.registerCommand('PowerBIWorkspaces.delete', () => pbiWorkspacesTreeProvider.add());
+	//vscode.commands.registerCommand('PowerBIWorkspaces.add', () => pbiWorkspacesTreeProvider.add());
 
 	// Dataset commands
 	vscode.commands.registerCommand('PowerBIDataset.delete', (dataset: PowerBIDataset) => dataset.delete());
@@ -50,6 +51,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiCapacitiesTreeProvider = new PowerBICapacitiesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBICapacities', pbiCapacitiesTreeProvider); // done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBICapacities.refresh', (showInfoMessage: boolean = true) => pbiCapacitiesTreeProvider.refresh(showInfoMessage));
+
+
+	// register PowerBIGatewaysTreeProvider
+	let pbiGatewaysTreeProvider = new PowerBIGatewaysTreeProvider(context);
+	//vscode.window.registerTreeDataProvider('PowerBIGateways', pbiGatewaysTreeProvider); // done in constructor which also adds Drag&Drop Controller
+	vscode.commands.registerCommand('PowerBIGateways.refresh', (showInfoMessage: boolean = true) => pbiGatewaysTreeProvider.refresh(showInfoMessage));
 }
 
 

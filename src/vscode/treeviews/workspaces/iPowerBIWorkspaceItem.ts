@@ -1,9 +1,13 @@
-import { unique_id } from '../../../helpers/Helper';
-import * as types from './_types';
+import { UniqueId } from '../../../helpers/Helper';
+import { iPowerBIApiItem } from '../iPowerBIApiItem';
+import * as types from '../_types';
 
 export interface iPowerBIWorkspaceItem {
-	name: string;
-	group: unique_id;
+	/* from iPowerBIApiItem */
 	itemType: types.ApiItemType;
-	uid: unique_id;
+	uid: UniqueId;
+	name: string;
+
+	/* new properties */
+	group: UniqueId;
 }

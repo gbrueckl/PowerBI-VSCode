@@ -1,16 +1,16 @@
 import * as vscode from 'vscode';
 
-import { PowerBICapacityTreeItem } from './PowerBICapacityTreeItem';
+import { PowerBIGatewayTreeItem } from './PowerBIGatewayTreeItem';
 import { iPowerBIDashboard } from '../../../powerbi/DashboardsAPI/_types';
 import { UniqueId } from '../../../helpers/Helper';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { iPowerBICapacityItem } from './iPowerBICapacityItem';
+import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBICapacity extends PowerBICapacityTreeItem {
+export class PowerBIGateway extends PowerBIGatewayTreeItem {
 
 	constructor(
-		definition: iPowerBICapacityItem
+		definition: iPowerBIGatewayItem
 	) {
 		super(definition, vscode.TreeItemCollapsibleState.None);
 	}

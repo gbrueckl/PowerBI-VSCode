@@ -2,17 +2,18 @@ import * as vscode from 'vscode';
 import * as FormData from 'form-data';
 import * as fs from 'fs';
 
-import { Helper, unique_id } from '../helpers/Helper';
+import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { iPowerBIWorkspaceItem } from '../vscode/treeviews/workspaces/iPowerBIWorkspaceItem';
 import { iPowerBIGroup } from './GroupsAPI/_types';
 import { iPowerBIDataset } from './DatasetsAPI/_types';
-import { ApiItemType } from '../vscode/treeviews/workspaces/_types';
+import { ApiItemType } from '../vscode/treeviews/_types';
 import { iPowerBIReport } from './ReportsAPI/_types';
 import { iPowerBIDashboard } from './DashboardsAPI/_types';
 import { iPowerBIDataflow } from './DataflowsAPI/_types';
 import { Stream } from 'stream';
 import { iPowerBICapacityItem } from '../vscode/treeviews/Capacities/iPowerBICapacityItem';
+import { iPowerBIGatewayItem } from '../vscode/treeviews/Gateways/iPowerBIGatewayItem';
 
 
 export abstract class PowerBIApiService {
@@ -253,7 +254,7 @@ export abstract class PowerBIApiService {
 		return response;
 	}
 
-	private static getUrl(groupId: string | unique_id = undefined, itemType: ApiItemType = undefined): string {
+	private static getUrl(groupId: string | UniqueId = undefined, itemType: ApiItemType = undefined): string {
 		let group: string = "";
 		if (groupId != null && groupId != undefined) {
 			group = `/groups/${groupId.toString()}`;
@@ -267,7 +268,7 @@ export abstract class PowerBIApiService {
 		return `v1.0/myorg${group}${type}`;
 	}
 
-	static async getItemList<T>(groupId: string | unique_id = undefined, itemType: ApiItemType = undefined): Promise<T[]> {
+	static async getItemList<T>(groupId: string | UniqueId = undefined, itemType: ApiItemType = undefined, sortBy: string = "name"): Promise<T[]> {
 		let endpoint = this.getUrl(groupId, itemType);
 
 		let body = {};
@@ -280,7 +281,7 @@ export abstract class PowerBIApiService {
 		if (items == undefined) {
 			return [];
 		}
-		Helper.sortArrayByProperty(items, "name");
+		Helper.sortArrayByProperty(items, sortBy);
 		return items;
 	}
 	//#endregion
@@ -296,7 +297,7 @@ export abstract class PowerBIApiService {
 	//#endregion
 
 	//#region Datasets API
-	static async getDatasets(groupId: string | unique_id = undefined): Promise<iPowerBIDataset[]> {
+	static async getDatasets(groupId: string | UniqueId = undefined): Promise<iPowerBIDataset[]> {
 		let items: iPowerBIDataset[] = await this.getItemList<iPowerBIDataset>(groupId, "DATASETS");
 
 		return items;
@@ -304,7 +305,7 @@ export abstract class PowerBIApiService {
 	//#endregion
 
 	//#region Reports API
-	static async getReports(groupId: string | unique_id = undefined): Promise<iPowerBIReport[]> {
+	static async getReports(groupId: string | UniqueId = undefined): Promise<iPowerBIReport[]> {
 		let items: iPowerBIReport[] = await this.getItemList<iPowerBIReport>(groupId, "REPORTS");
 
 		return items;
@@ -312,7 +313,7 @@ export abstract class PowerBIApiService {
 	//#endregion
 
 	//#region Dashboards API
-	static async getDashboards(groupId: string | unique_id = undefined): Promise<iPowerBIDashboard[]> {
+	static async getDashboards(groupId: string | UniqueId = undefined): Promise<iPowerBIDashboard[]> {
 		let items: iPowerBIDashboard[] = await this.getItemList<iPowerBIDashboard>(groupId, "DASHBOARDS");
 
 		return items;
@@ -320,7 +321,7 @@ export abstract class PowerBIApiService {
 	//#endregion
 
 	//#region Dataflows API
-	static async getDataflows(groupId: string | unique_id = undefined): Promise<iPowerBIDataflow[]> {
+	static async getDataflows(groupId: string | UniqueId = undefined): Promise<iPowerBIDataflow[]> {
 		let items: iPowerBIDataflow[] = await this.getItemList<iPowerBIDataflow>(groupId, "DATAFLOWS");
 
 		return items;
@@ -330,7 +331,18 @@ export abstract class PowerBIApiService {
 
 	//#region Capacities API
 	static async getCapacities(): Promise<iPowerBICapacityItem[]> {
-		let items: iPowerBICapacityItem[] = await this.getItemList<iPowerBICapacityItem>(null, "CAPACITIES");
+		let items: iPowerBICapacityItem[] = await this.getItemList<iPowerBICapacityItem>(null, "CAPACITIES", "displayName");
+
+		return items;
+	}
+
+
+	//#endregion
+
+
+	//#region Gateways API
+	static async getGateways(): Promise<iPowerBIGatewayItem[]> {
+		let items: iPowerBIGatewayItem[] = await this.getItemList<iPowerBIGatewayItem>(null, "GATEWAYS");
 
 		return items;
 	}

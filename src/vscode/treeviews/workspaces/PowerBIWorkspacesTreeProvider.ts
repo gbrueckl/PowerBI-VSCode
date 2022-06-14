@@ -20,7 +20,7 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 		const view = vscode.window.createTreeView('PowerBIWorkspaces', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIWorkspacesDragAndDropController() });
 		context.subscriptions.push(view);
 
-		ThisExtension.TreeViewWorkspaces = view;
+		ThisExtension.TreeViewWorkspaces = this;
 	}
 	
 	refresh(showInfoMessage: boolean = false): void {

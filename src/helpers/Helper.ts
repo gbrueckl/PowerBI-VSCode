@@ -9,7 +9,7 @@ import * as fspath from 'path';
 import * as fs from 'fs';
 import { ThisExtension } from '../ThisExtension';
 
-export class unique_id extends String {
+export class UniqueId extends String {
 	// placeholder class for unique-ids in Power BI
 	constructor(
 		value?: string

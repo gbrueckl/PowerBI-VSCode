@@ -1,7 +1,7 @@
 import { UniqueId } from '../../../helpers/Helper';
 import { ApiItemType } from '../_types';
 
-export interface iPowerBICapacityItem {
+export interface iPowerBIGatewayItem {
 	/* from iPowerBIApiItem */
 	itemType: ApiItemType;
 	uid: UniqueId;
@@ -9,10 +9,6 @@ export interface iPowerBICapacityItem {
 	name: string;
 
 	/* new properties */
-	displayName: string;
-	admins: string[];
-	sku: string;
-	state: string;
-	region: string;
-	capacityUserAccessRight: string;
+	type: string;
+	publicKey: object;
 }

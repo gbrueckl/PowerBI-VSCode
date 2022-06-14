@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Helper, unique_id } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
@@ -14,7 +14,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		definition: iPowerBIDataset,
-		group: unique_id
+		group: UniqueId
 	) {
 		super(definition.name, group, "DATASET", definition.id, vscode.TreeItemCollapsibleState.None);
 

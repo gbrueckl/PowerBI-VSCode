@@ -4,24 +4,23 @@ import * as fspath from 'path';
 import { ThisExtension } from '../../../ThisExtension';
 import { UniqueId } from '../../../helpers/Helper';
 
-import { iPowerBICapacityItem } from './iPowerBICapacityItem';
+import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
 import { ApiItemType } from '../_types';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
-export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowerBICapacityItem {
-	protected _definition: iPowerBICapacityItem;
+export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPowerBIGatewayItem {
+	protected _definition: iPowerBIGatewayItem;
 	protected _itemType: ApiItemType;
 
 	constructor(
-		definition: iPowerBICapacityItem,
+		definition: iPowerBIGatewayItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(definition.id, definition.displayName, "CAPACITY", collapsibleState);
+		super(definition.id, definition.name, "GATEWAY", collapsibleState);
 
 		this._definition = definition;
 
 		super.id = this.uid as string;
-		super.label = definition.displayName;
 		super.tooltip = this._tooltip;
 		super.description = this._description;
 		super.contextValue = this._contextValue;
@@ -49,46 +48,30 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 		return tooltip.trim();
 	}
 
-	public async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
+	public async getChildren(element?: PowerBIGatewayTreeItem): Promise<PowerBIGatewayTreeItem[]> {
 		await vscode.window.showErrorMessage("getChildren is not implemented! Please overwrite in derived class!");
 		return undefined;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-	get definition(): iPowerBICapacityItem {
-		return super.definition as iPowerBICapacityItem;
+	get definition(): iPowerBIGatewayItem {
+		return super.definition as iPowerBIGatewayItem;
 	}
 
-	set definition(value: iPowerBICapacityItem) {
+	set definition(value: iPowerBIGatewayItem) {
 		this._definition = value;
 	}
 
 	get apiPath(): string {
-		return `v1.0/myorg/capacities`;
+		return `v1.0/myorg/gateways`;
 	}
 
-	/* iPowerBICapacityItem implementation */
-	get displayName(): string {
-		return this.definition.displayName;
+	/* iPowerBIGatewayItem implementation */
+	get type(): string {
+		return this.definition.type;
 	}
 
-	get sku(): string {
-		return this.definition.sku;
-	}
-
-	get region(): string {
-		return this.definition.region;
-	}
-
-	get state(): string {
-		return this.definition.state;
-	}
-
-	get admins(): string[] {
-		return this.definition.admins;
-	}
-
-	get capacityUserAccessRight(): string {
-		return this.definition.capacityUserAccessRight;
+	get publicKey(): object {
+		return this.definition.publicKey;
 	}
 }

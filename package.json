@@ -37,7 +37,9 @@
 		"api"
 	],
 	"activationEvents": [
-		"onView:PowerBIWorkspaces"
+		"onView:PowerBIWorkspaces",
+		"onView:PowerBICapacities",
+		"onView:PowerBIGateways"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -60,6 +62,10 @@
 				{
 					"id": "PowerBICapacities",
 					"name": "Capacities"
+				},
+				{
+					"id": "PowerBIGateways",
+					"name": "Gateways"
 				}
 			]
 		},
@@ -70,6 +76,10 @@
 			},
 			{
 				"view": "PowerBICapacities",
+				"contents": "Please log in using Azure Account Extension -> Sign In"
+			},
+			{
+				"view": "PowerBIGateways",
 				"contents": "Please log in using Azure Account Extension -> Sign In"
 			}
 		],
@@ -182,6 +192,15 @@
 					"light": "resources/light/refresh.png",
 					"dark": "resources/dark/refresh.png"
 				}
+			},
+
+			{
+				"command": "PowerBIGateways.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
+				}
 			}
 		],
 		"menus": {
@@ -200,6 +219,12 @@
 				{
 					"command": "PowerBICapacities.refresh",
 					"when": "view == PowerBICapacities",
+					"group": "navigation"
+				},
+
+				{
+					"command": "PowerBIGateways.refresh",
+					"when": "view == PowerBIGateways",
 					"group": "navigation"
 				}
 			],

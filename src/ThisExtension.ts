@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 
 import { Helper } from './helpers/Helper';
 import { PowerBIApiService } from './powerbi/PowerBIApiService';
-import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICapacityTreeItem';
-import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
+import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
+import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
+import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -13,8 +14,9 @@ export abstract class ThisExtension {
 	private static _isValidated: boolean = false;
 	private static _logger: vscode.OutputChannel;
 	private static _settingScope: ConfigSettingSource;
-	private static _treeViewWorkspaces: vscode.TreeView<PowerBIWorkspaceTreeItem>;
-	private static _treeViewCapacities: vscode.TreeView<PowerBICapacityTreeItem>;
+	private static _treeViewWorkspaces: PowerBIWorkspacesTreeProvider;
+	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
+	private static _treeViewGateways: PowerBIGatewaysTreeProvider;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -35,26 +37,37 @@ export abstract class ThisExtension {
 	static get IsValidated(): boolean {
 		return this._isValidated;
 	}
-
-	static set TreeViewWorkspaces(treeView: vscode.TreeView<PowerBIWorkspaceTreeItem>)
+	// #region TreeViews
+	static set TreeViewWorkspaces(treeView: PowerBIWorkspacesTreeProvider)
 	{
 		this._treeViewWorkspaces = treeView;
 	}
 
-	static get TreeViewWorkspaces(): vscode.TreeView<PowerBIWorkspaceTreeItem>
+	static get TreeViewWorkspaces(): PowerBIWorkspacesTreeProvider
 	{
 		return this._treeViewWorkspaces;
 	}
 
-	static set TreeViewCapacities(treeView: vscode.TreeView<PowerBICapacityTreeItem>)
+	static set TreeViewCapacities(treeView: PowerBICapacitiesTreeProvider)
 	{
 		this._treeViewCapacities = treeView;
 	}
 
-	static get TreeViewCapacities(): vscode.TreeView<PowerBICapacityTreeItem>
+	static get TreeViewCapacities(): PowerBICapacitiesTreeProvider
 	{
 		return this._treeViewCapacities;
 	}
+
+	static set TreeViewGateways(treeView: PowerBIGatewaysTreeProvider)
+	{
+		this._treeViewGateways = treeView;
+	}
+
+	static get TreeViewGateways(): PowerBIGatewaysTreeProvider
+	{
+		return this._treeViewGateways;
+	}
+	//#endregion
 
 	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {
 		try {

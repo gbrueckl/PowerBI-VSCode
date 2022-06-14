@@ -10,4 +10,7 @@ export type ApiItemType =
 |	"DASHBOARDS" // container for datasets within workspace
 |	"DASHBOARD"
 |	"CAPACITIES"
-|	"CAPACITY";
+|	"CAPACITY"
+|	"GATEWAYS"
+|	"GATEWAY"
+;
