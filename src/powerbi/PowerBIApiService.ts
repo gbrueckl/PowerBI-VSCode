@@ -60,7 +60,7 @@ export abstract class PowerBIApiService {
 			let workspaceList = await this.getGroups();
 			this._connectionTestRunning = false;
 			if (workspaceList.length > 0) {
-				ThisExtension.log("PowerBI API Service initialized!");
+				ThisExtension.log("Power BI API Service initialized!");
 				this._isInitialized = true;
 				return true;
 			}

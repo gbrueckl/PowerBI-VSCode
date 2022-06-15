@@ -1,9 +1,9 @@
 {
 	"name": "powerbi-vscode",
-	"displayName": "PowerBI VSCode",
-	"description": "PowerBI Extension for VSCode",
-	"version": "0.0.1",
-	"publisher": "gbrueckl",
+	"displayName": "Power BI VSCode",
+	"description": "Power BI Extension for VSCode",
+	"version": "0.0.2",
+	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
 		"name": "Gerhard Brueckl"
@@ -32,7 +32,7 @@
 		"Other"
 	],
 	"keywords": [
-		"powerbi",
+		"power bi",
 		"rest",
 		"api"
 	],
@@ -48,7 +48,7 @@
 			"activitybar": [
 				{
 					"id": "powerbi",
-					"title": "PowerBI",
+					"title": "Power BI",
 					"icon": "resources/powerbi_sidebar.png"
 				}
 			]
@@ -184,7 +184,6 @@
 					"dark": "resources/dark/delete.png"
 				}
 			},
-
 			{
 				"command": "PowerBICapacities.refresh",
 				"title": "Refresh",
@@ -193,7 +192,6 @@
 					"dark": "resources/dark/refresh.png"
 				}
 			},
-
 			{
 				"command": "PowerBIGateways.refresh",
 				"title": "Refresh",
@@ -215,13 +213,11 @@
 					"when": "view == PowerBIWorkspaces",
 					"group": "navigation"
 				},
-
 				{
 					"command": "PowerBICapacities.refresh",
 					"when": "view == PowerBICapacities",
 					"group": "navigation"
 				},
-
 				{
 					"command": "PowerBIGateways.refresh",
 					"when": "view == PowerBIGateways",
@@ -279,7 +275,11 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
+		"vscode:prepublish": "npm run esbuild-base -- --minify --external:keytar",
+		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+		"esbuild": "npm run esbuild-base -- --sourcemap --external:keytar",
+		"esbuild-watch": "npm run esbuild-base -- --sourcemap --watch --external:keytar",
+		"test-compile": "tsc -p ./",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./"
 	},
@@ -288,6 +288,7 @@
 		"@types/node": "^12.12.0",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.66.0",
+		"esbuild": "^0.14.43",
 		"ts-loader": "^8.3.0",
 		"tslint": "^5.20.1",
 		"typescript": "^4.4.3",

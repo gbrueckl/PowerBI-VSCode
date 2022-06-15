@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 
-
 import { ThisExtension } from '../../../ThisExtension';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
@@ -38,7 +37,11 @@ export class PowerBIWorkspacesDragAndDropController implements vscode.TreeDragAn
 	public async handleDrop?(target: PowerBIWorkspaceTreeItem, dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
 		ThisExtension.log("Dropped item on " + target.itemType + " ...");
 
-		ThisExtension.log(await dataTransfer.get("text/uri-list").asString());
+		let uriList = await dataTransfer.get("text/uri-list");
+		if(uriList != null)
+		{
+			ThisExtension.log(await uriList.asString());
+		}
 
 		// check if target implemnts iHandleDrop interface / has handleDrop function
 		if ('handleDrop' in target) {
