@@ -5,14 +5,16 @@ import { iPowerBIDashboard } from '../../../powerbi/DashboardsAPI/_types';
 import { UniqueId } from '../../../helpers/Helper';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { iPowerBICapacityItem } from './iPowerBICapacityItem';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBICapacity extends PowerBICapacityTreeItem {
 
 	constructor(
-		definition: iPowerBICapacityItem
+		definition: iPowerBICapacityItem,
+		parent: PowerBIApiTreeItem,
 	) {
-		super(definition, vscode.TreeItemCollapsibleState.None);
+		super(definition, parent, vscode.TreeItemCollapsibleState.None);
 	}
 
 	// Dashboard-specific funtions

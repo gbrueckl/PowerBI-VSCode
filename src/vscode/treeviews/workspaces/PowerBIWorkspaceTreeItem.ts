@@ -17,9 +17,10 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 		group: UniqueId,
 		itemType: ApiItemType,
 		id: UniqueId,
+		parent: PowerBIApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(id, name, itemType, collapsibleState);
+		super(id, name, itemType, parent, collapsibleState);
 
 		this._group = group;
 
@@ -29,6 +30,10 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 			itemType: itemType,
 			id: id
 		};
+	}
+
+	get parent(): PowerBIWorkspaceTreeItem {
+		return this._parent as PowerBIWorkspaceTreeItem;
 	}
 
 	public async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {

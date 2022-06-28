@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 
-
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
@@ -51,7 +50,7 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 			let items: iPowerBICapacityItem[] = await PowerBIApiService.getCapacities();
 
 			for (let item of items) {
-				let treeItem = new PowerBICapacity(item);
+				let treeItem = new PowerBICapacity(item, undefined);
 				children.push(treeItem);
 				//PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}

@@ -11,28 +11,59 @@ import { PowerBIDatasets } from './PowerBIDatasets';
 import { PowerBIReports } from './PowerBIReports';
 import { PowerBIDashboards } from './PowerBIDashboards';
 import { PowerBIDataflows } from './PowerBIDataflows';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
 import { URL } from 'url';
+import { PowerBIReport } from './PowerBIReport';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandleDrop {
 	constructor(
 		definition: iPowerBIGroup
 	) {
-		super(definition.name, definition.id, "GROUP", definition.id);
+		super(definition.name, definition.id, "GROUP", definition.id, undefined);
+
+		this.definition = definition;
+		
+		super.tooltip = this._tooltip;
+
+		super.iconPath = {
+			light: this.getIconPath("light"),
+			dark: this.getIconPath("dark")
+		};
 	}
+
+	/* Overwritten properties from PowerBIApiTreeItem */
+	get definition(): iPowerBIGroup {
+		return super.definition as iPowerBIGroup;
+	}
+
+	set definition(value: iPowerBIGroup) {
+		super.definition = value;
+	}
+
+	get isPremiumCapacity(): boolean {
+		return this.definition.isOnDedicatedCapacity
+	}
+
+	protected getIconPath(theme: string): string {
+		let premium = "";
+		if(this.isPremiumCapacity) {
+			premium = "_premium";
+		}
+		return fspath.join(ThisExtension.rootPath, 'resources', theme, this.itemType.toLowerCase() + premium + '.png');
+	}	
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
 		PowerBICommandBuilder.pushQuickPickItem(this);
 
 		let children: PowerBIWorkspaceTreeItem[] = [];
 		
-		children.push(new PowerBIDatasets(this.uid));
-		children.push(new PowerBIReports(this.uid));
-		children.push(new PowerBIDashboards(this.uid));
-		children.push(new PowerBIDataflows(this.uid));
+		children.push(new PowerBIDatasets(this.uid, this));
+		children.push(new PowerBIReports(this.uid, this));
+		children.push(new PowerBIDashboards(this.uid, this));
+		children.push(new PowerBIDataflows(this.uid, this));
 
 		return children;
 	}
@@ -62,12 +93,45 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 				ThisExtension.log('error', err);
 			});
 		}
+
+		if(transferItem)
+		{
+			const sourceItems: PowerBIWorkspaceTreeItem[] = transferItem.value;
+
+			const source = sourceItems[0];
+
+			switch (source.itemType) {
+				case "REPORT":
+					const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("clone")], "Action");
+
+					switch (action) {
+						case "clone":
+							await (source as PowerBIReport).clone({
+								name: source.name,
+								targetWorkspaceId: this.id
+							});
+							
+							ThisExtension.TreeViewWorkspaces.refresh(false, this);
+							break;
+
+						default:
+							ThisExtension.log("Invalid or no action selected!");
+					}
+
+					break;
+
+				default:
+					ThisExtension.log("No action defined when dropping a " + source.itemType + " on " + this.itemType + "!");
+			}
+		}
 		
 	}
 	// #endregion
 
 	// Workspace-specific funtions
 	public async delete(): Promise<void> {
-		PowerBICommandBuilder.execute<iPowerBIGroup>(this.apiPath, "DELETE", []);
+		await PowerBICommandBuilder.execute<iPowerBIGroup>(this.apiPath, "DELETE", []);
+		
+		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
 }

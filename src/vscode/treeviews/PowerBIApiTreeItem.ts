@@ -13,11 +13,13 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	protected _id: UniqueId;
 	protected _name: string;
 	protected _definition: object;
+	protected _parent?: PowerBIApiTreeItem;
 
 	constructor(
 		id: UniqueId,
 		name: string,
 		itemType: ApiItemType,
+		parent: PowerBIApiTreeItem = undefined,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
 		super(name, collapsibleState);
@@ -25,12 +27,15 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		this._name = name;
 		this._itemType = itemType;
 		this._id = id;
+		this._parent = parent;
 
 		this._definition = {
 			name: name,
 			itemType: itemType,
 			uid: id
 		};
+
+
 
 		super.id = id.toString();
 		super.label = this.name;
@@ -100,12 +105,20 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		return this._name;
 	}
 
+	set name(value: string) {
+		this._name = value;
+	}
+
 	get itemType(): ApiItemType {
 		return this._itemType;
 	}
 
 	get uid() {
 		return this._id;
+	}
+
+	get parent(): PowerBIApiTreeItem {
+		return this._parent;
 	}
 
 	public CopyPathToClipboard(): void {

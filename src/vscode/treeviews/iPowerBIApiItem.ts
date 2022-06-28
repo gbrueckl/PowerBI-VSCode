@@ -5,4 +5,5 @@ export interface iPowerBIApiItem {
 	itemType: types.ApiItemType;
 	uid: UniqueId;
 	name: string;
+	parent?: iPowerBIApiItem;
 }

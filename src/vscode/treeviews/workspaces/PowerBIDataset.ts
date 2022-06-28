@@ -8,19 +8,30 @@ import { iPowerBIDataset } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIReport } from './PowerBIReport';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		definition: iPowerBIDataset,
-		group: UniqueId
+		group: UniqueId,
+		parent: PowerBIApiTreeItem
 	) {
-		super(definition.name, group, "DATASET", definition.id, vscode.TreeItemCollapsibleState.None);
+		super(definition.name, group, "DATASET", definition.id, parent, vscode.TreeItemCollapsibleState.None);
 
 		this.definition = definition;
-
+		
 		super.tooltip = this._tooltip;
+	}
+
+	/* Overwritten properties from PowerBIApiTreeItem */
+	get definition(): iPowerBIDataset {
+		return super.definition as iPowerBIDataset;
+	}
+
+	set definition(value: iPowerBIDataset) {
+		super.definition = value;
 	}
 
 	// #region iHandleDrop implementation
@@ -36,7 +47,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 		switch (source.itemType) {
 			case "REPORT":
-				const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("rebind")], "Action");
+				const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("rebind"), new PowerBIQuickPickItem("clone")], "Action");
 
 				switch (action) {
 					case "rebind":
@@ -44,6 +55,16 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 							datasetId: this.id
 						});
 						break;
+
+					case "clone":
+							await (source as PowerBIReport).clone({
+								name: source.name,
+								targetModelId: this.id,
+								targetWorkspaceId: this.group
+							});
+							
+							ThisExtension.TreeViewWorkspaces.refresh(false, this.parent.parent);
+							break;
 
 					default:
 						ThisExtension.log("Invalid or no action selected!");
@@ -59,7 +80,9 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	// Dataset-specific funtions
 	public async delete(): Promise<void> {
-		PowerBICommandBuilder.execute<iPowerBIDataset>(this.apiPath, "DELETE", []);
+		await PowerBICommandBuilder.execute<iPowerBIDataset>(this.apiPath, "DELETE", []);
+
+		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
 	
 	public async refresh(): Promise<void> {
@@ -68,5 +91,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	public async takeOver(): Promise<void> {
 		PowerBIApiService.post(this.apiPath + "/Default.TakeOver", null);
+
+		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
 }

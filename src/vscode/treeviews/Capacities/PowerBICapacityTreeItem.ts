@@ -14,9 +14,10 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 
 	constructor(
 		definition: iPowerBICapacityItem,
+		parent: PowerBIApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(definition.id, definition.displayName, "CAPACITY", collapsibleState);
+		super(definition.id, definition.displayName, "CAPACITY", parent, collapsibleState);
 
 		this._definition = definition;
 

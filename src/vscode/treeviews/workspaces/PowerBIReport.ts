@@ -7,21 +7,31 @@ import { UniqueId } from '../../../helpers/Helper';
 import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
 import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDrop {
 
 	constructor(
 		definition: iPowerBIReport,
-		group: UniqueId
+		group: UniqueId,
+		parent: PowerBIApiTreeItem
 	) {
-		super(definition.name, group, "REPORT", definition.id, vscode.TreeItemCollapsibleState.None);
+		super(definition.name, group, "REPORT", definition.id, parent, vscode.TreeItemCollapsibleState.None);
 
 		this.definition = definition;
 		
 		super.tooltip = this._tooltip;
 	}
 
+	/* Overwritten properties from PowerBIApiTreeItem */
+	get definition(): iPowerBIReport {
+		return super.definition as iPowerBIReport;
+	}
+
+	set definition(value: iPowerBIReport) {
+		super.definition = value;
+	}
 	// #region iHandleDrop implementation
 	public async handleDrop(dataTransfer: vscode.DataTransfer): Promise<void> {
 		const transferItem = dataTransfer.get('application/vnd.code.tree.powerbiworkspaces');
@@ -62,14 +72,16 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 
 	// Report-specific funtions
 	public async delete(): Promise<void> {
-		PowerBICommandBuilder.execute<iPowerBIReport>(this.apiPath, "DELETE", []);
+		await PowerBICommandBuilder.execute<iPowerBIReport>(this.apiPath, "DELETE", []);
+
+		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
 
 	public async clone(settings: object = undefined): Promise<void> {
-		const apiUrl = this.apiPath + "/Rebind";
+		const apiUrl = this.apiPath + "/Clone";
 		if (settings == undefined) // prompt user for inputs
 		{
-			PowerBICommandBuilder.execute<iPowerBIReport>(this.apiPath + "/Clone", "POST",
+			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
 				[
 					new PowerBICommandInput("Name of new report", "FREE_TEXT", "name", false, "The new report name"),
 					new PowerBICommandInput("Target Dataset", "DATASET_SELECTOR", "targetModelId", true, "Optional. Parameter for specifying the target associated dataset ID. If not provided, the new report will be associated with the same dataset as the source report."),

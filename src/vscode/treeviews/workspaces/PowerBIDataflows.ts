@@ -7,13 +7,17 @@ import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { iPowerBIDataflow } from '../../../powerbi/DataflowsAPI/_types';
 import { PowerBIDataflow } from './PowerBIDataflow';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataflows extends PowerBIWorkspaceTreeItem {
 
-	constructor(groupId?: UniqueId) {
-		super("Dataflows", groupId, "DATAFLOWS", groupId);
+	constructor(
+		groupId: UniqueId,
+		parent: PowerBIApiTreeItem
+	) {
+		super("Dataflows", groupId, "DATAFLOWS", groupId, parent);
 
 		// the groupId is not unique for logical folders hence we make it unique
 		super.id = groupId + "/" + this.itemType.toString();
@@ -42,7 +46,7 @@ export class PowerBIDataflows extends PowerBIWorkspaceTreeItem {
 			let items: iPowerBIDataflow[] = await PowerBIApiService.getDataflows(this._group);
 
 			for (let item of items) {
-				let treeItem = new PowerBIDataflow(item, this.group);
+				let treeItem = new PowerBIDataflow(item, this.group, this);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}

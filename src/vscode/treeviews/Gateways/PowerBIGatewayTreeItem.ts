@@ -14,9 +14,10 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 
 	constructor(
 		definition: iPowerBIGatewayItem,
+		parent: PowerBIApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(definition.id, definition.name, "GATEWAY", collapsibleState);
+		super(definition.id, definition.name, "GATEWAY", parent, collapsibleState);
 
 		this._definition = definition;
 

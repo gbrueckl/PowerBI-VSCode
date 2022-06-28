@@ -7,13 +7,17 @@ import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIDashboard } from './PowerBIDashboard';
 import { iPowerBIDashboard } from '../../../powerbi/DashboardsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDashboards extends PowerBIWorkspaceTreeItem {
 
-	constructor(groupId?: UniqueId) {
-		super("Dashboards", groupId, "DASHBOARDS", groupId);
+	constructor(
+		groupId: UniqueId,
+		parent: PowerBIApiTreeItem
+	) {
+		super("Dashboards", groupId, "DASHBOARDS", groupId, parent);
 
 		// the groupId is not unique for logical folders hence we make it unique
 		super.id = groupId + "/" + this.itemType.toString();
@@ -30,7 +34,7 @@ export class PowerBIDashboards extends PowerBIWorkspaceTreeItem {
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		if(!PowerBIApiService.isInitialized) { 			
+		if (!PowerBIApiService.isInitialized) {
 			return Promise.resolve([]);
 		}
 
@@ -42,11 +46,11 @@ export class PowerBIDashboards extends PowerBIWorkspaceTreeItem {
 			let items: iPowerBIDashboard[] = await PowerBIApiService.getDashboards(this._group);
 
 			for (let item of items) {
-				let treeItem = new PowerBIDashboard(item, this.group);
+				let treeItem = new PowerBIDashboard(item, this.group, this);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
-			
+
 			return children;
 		}
 	}

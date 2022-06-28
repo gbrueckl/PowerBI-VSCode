@@ -12,7 +12,7 @@ export class PowerBIGateway extends PowerBIGatewayTreeItem {
 	constructor(
 		definition: iPowerBIGatewayItem
 	) {
-		super(definition, vscode.TreeItemCollapsibleState.None);
+		super(definition, undefined, vscode.TreeItemCollapsibleState.None);
 	}
 
 	// Dashboard-specific funtions
