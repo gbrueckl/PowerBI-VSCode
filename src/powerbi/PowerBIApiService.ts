@@ -4,22 +4,22 @@ import * as fs from 'fs';
 
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
-import { iPowerBIWorkspaceItem } from '../vscode/treeviews/workspaces/iPowerBIWorkspaceItem';
 import { iPowerBIGroup } from './GroupsAPI/_types';
 import { iPowerBIDataset } from './DatasetsAPI/_types';
 import { ApiItemType } from '../vscode/treeviews/_types';
 import { iPowerBIReport } from './ReportsAPI/_types';
 import { iPowerBIDashboard } from './DashboardsAPI/_types';
 import { iPowerBIDataflow } from './DataflowsAPI/_types';
-import { Stream } from 'stream';
 import { iPowerBICapacityItem } from '../vscode/treeviews/Capacities/iPowerBICapacityItem';
 import { iPowerBIGatewayItem } from '../vscode/treeviews/Gateways/iPowerBIGatewayItem';
+import { iPowerBIPipeline, iPowerBIPipelineStage } from './PipelinesAPI/_types';
 
 
 export abstract class PowerBIApiService {
 	private static _apiService: any;
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
+	private static _org: string = "/myorg"
 
 	//#region Initialization
 	static async initialize(apiRootUrl: string = "https://api.powerbi.com/"): Promise<boolean> {
@@ -102,16 +102,10 @@ export abstract class PowerBIApiService {
 			} catch (error) {
 				let errResponse = error.response;
 
-				let errorMessage = errResponse.data.message;
-				if (!errorMessage) {
-					errorMessage = errResponse.headers["x-powerbi-reason-phrase"];
-				}
-
 				ThisExtension.log("ERROR: " + error.message);
-				ThisExtension.log("ERROR: " + errorMessage);
 				ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
 
-				vscode.window.showErrorMessage(errorMessage);
+				vscode.window.showErrorMessage(error.message);
 
 				return undefined;
 			}
@@ -136,18 +130,7 @@ export abstract class PowerBIApiService {
 			response = await this._apiService.post(endpoint, body, axiosConfig);
 			this.logResponse(response);
 		} catch (error) {
-			let errResponse = error.response;
-
-			let errorMessage = errResponse.data.message;
-			if (!errorMessage) {
-				errorMessage = errResponse.headers["x-powerbi-reason-phrase"];
-			}
-
-			ThisExtension.log("ERROR: " + error.message);
-			ThisExtension.log("ERROR: " + errorMessage);
-			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-			vscode.window.showErrorMessage(errorMessage);
+			this.handleException(error);
 
 			return undefined;
 		}
@@ -179,18 +162,7 @@ export abstract class PowerBIApiService {
 			response = await this._apiService.post(endpoint, form, axiosConfig);
 			this.logResponse(response);
 		} catch (error) {
-			let errResponse = error.response;
-
-			let errorMessage = errResponse.data.message;
-			if (!errorMessage) {
-				errorMessage = errResponse.headers["x-powerbi-reason-phrase"];
-			}
-
-			ThisExtension.log("ERROR: " + error.message);
-			ThisExtension.log("ERROR: " + errorMessage);
-			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-			vscode.window.showErrorMessage(errorMessage);
+			this.handleException(error);
 
 			return undefined;
 		}
@@ -207,18 +179,7 @@ export abstract class PowerBIApiService {
 			response = await this._apiService.patch(endpoint, body);
 			this.logResponse(response);
 		} catch (error) {
-			let errResponse = error.response;
-
-			let errorMessage = errResponse.data.message;
-			if (!errorMessage) {
-				errorMessage = errResponse.headers["x-powerbi-reason-phrase"];
-			}
-
-			ThisExtension.log("ERROR: " + error.message);
-			ThisExtension.log("ERROR: " + errorMessage);
-			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-			vscode.window.showErrorMessage(errorMessage);
+			this.handleException(error);
 
 			return undefined;
 		}
@@ -235,23 +196,21 @@ export abstract class PowerBIApiService {
 			response = await this._apiService.delete(endpoint, body);
 			this.logResponse(response);
 		} catch (error) {
-			let errResponse = error.response;
-
-			let errorMessage = errResponse.data.message;
-			if (!errorMessage) {
-				errorMessage = errResponse.headers["x-powerbi-reason-phrase"];
-			}
-
-			ThisExtension.log("ERROR: " + error.message);
-			ThisExtension.log("ERROR: " + errorMessage);
-			ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-			vscode.window.showErrorMessage(errorMessage);
+			this.handleException(error);
 
 			return undefined;
 		}
 
 		return response;
+	}
+
+	private static handleException(error) {
+		let errResponse = error.response;
+
+		ThisExtension.log("ERROR: " + error.message);
+		ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
+
+		vscode.window.showErrorMessage(error.message);
 	}
 
 	private static getUrl(groupId: string | UniqueId = undefined, itemType: ApiItemType = undefined): string {
@@ -265,7 +224,7 @@ export abstract class PowerBIApiService {
 			type = `/${itemType.toString().toLowerCase()}`;
 		}
 
-		return `v1.0/myorg${group}${type}`;
+		return `v1.0${this._org}${group}${type}`;
 	}
 
 	static async getItemList<T>(groupId: string | UniqueId = undefined, itemType: ApiItemType = undefined, sortBy: string = "name"): Promise<T[]> {
@@ -343,6 +302,23 @@ export abstract class PowerBIApiService {
 	//#region Gateways API
 	static async getGateways(): Promise<iPowerBIGatewayItem[]> {
 		let items: iPowerBIGatewayItem[] = await this.getItemList<iPowerBIGatewayItem>(null, "GATEWAYS");
+
+		return items;
+	}
+
+
+	//#endregion
+
+
+	//#region Pipelines API
+	static async getPipelines(): Promise<iPowerBIPipeline[]> {
+		let items: iPowerBIPipeline[] = await this.getItemList<iPowerBIPipeline>(null, "PIPELINES");
+
+		return items;
+	}
+
+	static async getPipelineStages(pipelineId: string | UniqueId): Promise<iPowerBIPipelineStage[]> {
+		let items: iPowerBIPipelineStage[] = (await this.get(`v1.0${this._org}/pipelines/${pipelineId}/stages`)).data.value;
 
 		return items;
 	}

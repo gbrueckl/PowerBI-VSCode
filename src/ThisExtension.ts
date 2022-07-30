@@ -4,6 +4,7 @@ import { Helper } from './helpers/Helper';
 import { PowerBIApiService } from './powerbi/PowerBIApiService';
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
+import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/PowerBIPipelinesTreeProvider';
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
@@ -17,6 +18,7 @@ export abstract class ThisExtension {
 	private static _treeViewWorkspaces: PowerBIWorkspacesTreeProvider;
 	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
 	private static _treeViewGateways: PowerBIGatewaysTreeProvider;
+	private static _treeViewPipeliness: PowerBIPipelinesTreeProvider;
 
 	static get rootPath(): string {
 		return this._context.extensionPath;
@@ -66,6 +68,16 @@ export abstract class ThisExtension {
 	static get TreeViewGateways(): PowerBIGatewaysTreeProvider
 	{
 		return this._treeViewGateways;
+	}
+
+	static set TreeViewPipelines(treeView: PowerBIPipelinesTreeProvider)
+	{
+		this._treeViewPipeliness = treeView;
+	}
+
+	static get TreeViewPipelines(): PowerBIPipelinesTreeProvider
+	{
+		return this._treeViewPipeliness;
 	}
 	//#endregion
 

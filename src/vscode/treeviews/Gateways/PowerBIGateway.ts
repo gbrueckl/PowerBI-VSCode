@@ -13,10 +13,22 @@ export class PowerBIGateway extends PowerBIGatewayTreeItem {
 		definition: iPowerBIGatewayItem
 	) {
 		super(definition, undefined, vscode.TreeItemCollapsibleState.None);
+		this.definition = definition;
+		
+		super.tooltip = this._tooltip;
+	}
+
+	/* Overwritten properties from PowerBIApiTreeItem */
+	get definition(): iPowerBIGatewayItem {
+		return super.definition as iPowerBIGatewayItem;
+	}
+
+	set definition(value: iPowerBIGatewayItem) {
+		super.definition = value;
 	}
 
 	// Dashboard-specific funtions
 	public async delete(): Promise<void> {
-		//PowerBICommandBuilder.execute<iPowerBIDashboard>(this.apiPath, "DELETE", []);
+		//PowerBICommandBuilder.execute<iPowerBIGatewayItem>(this.apiPath, "DELETE", []);
 	}
 }

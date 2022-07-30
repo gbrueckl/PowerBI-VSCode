@@ -35,8 +35,6 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 			uid: id
 		};
 
-
-
 		super.id = id.toString();
 		super.label = this.name;
 		super.tooltip = this._tooltip;

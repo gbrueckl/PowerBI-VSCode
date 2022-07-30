@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -66,6 +66,10 @@
 				{
 					"id": "PowerBIGateways",
 					"name": "Gateways"
+				},
+				{
+					"id": "PowerBIPipelines",
+					"name": "Pipelines"
 				}
 			]
 		},
@@ -80,6 +84,10 @@
 			},
 			{
 				"view": "PowerBIGateways",
+				"contents": "Please log in using Azure Account Extension -> Sign In"
+			},
+			{
+				"view": "PowerBIPipelines",
 				"contents": "Please log in using Azure Account Extension -> Sign In"
 			}
 		],
@@ -177,6 +185,14 @@
 				}
 			},
 			{
+				"command": "PowerBIDataflow.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
+				}
+			},
+			{
 				"command": "PowerBIDashboard.delete",
 				"title": "Delete",
 				"icon": {
@@ -194,6 +210,14 @@
 			},
 			{
 				"command": "PowerBIGateways.refresh",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.png",
+					"dark": "resources/dark/refresh.png"
+				}
+			},
+			{
+				"command": "PowerBIPipelines.refresh",
 				"title": "Refresh",
 				"icon": {
 					"light": "resources/light/refresh.png",
@@ -221,6 +245,11 @@
 				{
 					"command": "PowerBIGateways.refresh",
 					"when": "view == PowerBIGateways",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIPipelines.refresh",
+					"when": "view == PowerBIPipelines",
 					"group": "navigation"
 				}
 			],
@@ -263,6 +292,11 @@
 				},
 				{
 					"command": "PowerBIDataflow.delete",
+					"when": "view == PowerBIWorkspaces && viewItem == DATAFLOW",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIDataflow.refresh",
 					"when": "view == PowerBIWorkspaces && viewItem == DATAFLOW",
 					"group": "inline"
 				},

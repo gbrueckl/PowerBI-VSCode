@@ -9,7 +9,7 @@ import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
 import { iPowerBIApiItem } from '../iPowerBIApiItem';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
-export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPowerBIApiItem, iPowerBIWorkspaceItem {
+export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPowerBIWorkspaceItem {
 	protected _group: UniqueId;
 
 	constructor(

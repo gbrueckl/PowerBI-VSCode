@@ -9,7 +9,6 @@ A [VSCode](https://code.visualstudio.com/) extension for managing your Power BI 
 2. In [VSCode](https://code.visualstudio.com/), open the Command Palette (`Ctrl+Shift+P`) and type `Install from VSIX`, then select the menu option that appears below.
 ![image](https://user-images.githubusercontent.com/37491308/181848291-e956cca0-40f0-4ce6-86a5-06b76f548cef.png)
 3. Browse to your Downloads folder and select the `.vsix` file you just downloaded
-
 # Building Locally
 1. Make sure you have installed [NodeJS](https://nodejs.org/en/) on your development workstation
 2. Clone this repo to your development workstation, then open the cloned folder in [VSCode](https://code.visualstudio.com/)
@@ -19,3 +18,17 @@ A [VSCode](https://code.visualstudio.com/) extension for managing your Power BI 
 
 # VSCode Extension Development Details
 Please refer to the [official docs and samples](https://github.com/microsoft/vscode-extension-samples#prerequisites)
+
+# Change Log
+
+**v0.0.3**:
+- fix issues with Dataflows and Dashboards
+- improve Drag & Drop capabilities
+- add new Treeviews for Capacity, Pipelines and Gateways
+- add Refresh after most actions to reflect updated objects after changes
+
+**v0.0.2**:
+- minor fixes, naming, etc.
+
+**v0.0.1**:
+- initial release

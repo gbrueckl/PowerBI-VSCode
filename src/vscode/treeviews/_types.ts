@@ -13,4 +13,8 @@ export type ApiItemType =
 |	"CAPACITY"
 |	"GATEWAYS"
 |	"GATEWAY"
+|	"PIPELINES"
+|	"PIPELINE"
+|	"PIPELINESTAGES"
+|	"PIPELINESTAGE"
 ;
