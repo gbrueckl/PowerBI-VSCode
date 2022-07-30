@@ -6,6 +6,8 @@ import { UniqueId } from '../../helpers/Helper';
 import { ApiItemType } from './_types';
 import { iPowerBIApiItem } from './iPowerBIApiItem';
 import { ThisExtension } from '../../ThisExtension';
+import { ApiUrlPair } from '../../powerbi/_types';
+import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 
 
 export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiItem {
@@ -35,7 +37,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 			uid: id
 		};
 
-		super.id = id.toString();
+		super.id = (id as string);
 		super.label = this.name;
 		super.tooltip = this._tooltip;
 		super.description = this._description;
@@ -123,14 +125,48 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		vscode.env.clipboard.writeText(this._name);
 	}
 
-	get apiPath(): string {
+	get apiUrlPart(): string {
+		if(this.itemType.endsWith("S"))
+		{
+			return this.itemType.toLowerCase();
+		}
+		if(this.uid)
+		{
+			return this.uid.toString();
+		}
+		return this.id;
+	}
+
+	get apiUrlPair(): ApiUrlPair {
+		return {itemType: this.itemType, itemId: this.id};
+	}
+
+	get apiPath1(): string {
 		if (this.uid != null && this.uid != undefined)
 		{
-			return `v1.0/myorg/${this.itemType.toString().toLowerCase()}s/${this.uid}`;
+			return `v1.0/${PowerBIApiService.Org}/${this.itemType.toString().toLowerCase()}s/${this.uid}`;
 		}
 		else
 		{
-			return `v1.0/myorg/${this.itemType.toString().toLowerCase()}`;
+			return `v1.0/${PowerBIApiService.Org}/${this.itemType.toString().toLowerCase()}`;
 		}
+	}
+
+	get apiPath(): string {
+
+		let urlParts: string[] = [];
+
+		let apiItem: PowerBIApiTreeItem = this;
+
+		while(apiItem)
+		{
+			if(apiItem.apiUrlPart)
+			{
+				urlParts.push(apiItem.apiUrlPart)
+			}
+			apiItem = apiItem.parent;
+		}
+
+		return `v1.0/${PowerBIApiService.Org}/${urlParts.reverse().join("/")}/`;
 	}
 }

@@ -13,7 +13,7 @@ export class PowerBIDashboard extends PowerBIWorkspaceTreeItem {
 	constructor(
 		definition: iPowerBIDashboard,
 		group: UniqueId,
-		parent: PowerBIApiTreeItem
+		parent: PowerBIWorkspaceTreeItem
 	) {
 		super(definition.displayName, group, "DASHBOARD", definition.id, parent, vscode.TreeItemCollapsibleState.None);
 
@@ -28,7 +28,7 @@ export class PowerBIDashboard extends PowerBIWorkspaceTreeItem {
 		return super.definition as iPowerBIDashboard;
 	}
 
-	set definition(value: iPowerBIDashboard) {
+	private set definition(value: iPowerBIDashboard) {
 		super.definition = value;
 	}
 

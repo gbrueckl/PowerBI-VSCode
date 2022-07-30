@@ -4,12 +4,11 @@ import * as fspath from 'path';
 import { ThisExtension } from '../../../ThisExtension';
 import { UniqueId } from '../../../helpers/Helper';
 
-import { iPowerBIPipelineItem, iPowerBIPipelineStageItem } from './iPowerBIPipelineItem';
 import { ApiItemType } from '../_types';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBIPipeline, iPowerBIPipelineStage } from '../../../powerbi/PipelinesAPI/_types';
 
-export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowerBIPipelineItem {
+export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowerBIPipeline {
 
 	constructor(
 		name: string,

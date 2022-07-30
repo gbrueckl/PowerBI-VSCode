@@ -10,6 +10,7 @@ import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIWorkspacesDragAndDropController } from './PowerBIWorkspacesDragAndDropController';
 import { Time } from '@angular/common';
+import { PowerBIWorkspacePersonal } from './PowerBIWorkspacePersonal';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<PowerBIWorkspaceTreeItem> {
@@ -74,8 +75,10 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 			return element.getChildren();
 		}
 		else {
-			let children: PowerBIWorkspace[] = [];
+			let children: PowerBIWorkspaceTreeItem[] = [];
 			let items: iPowerBIGroup[] = await PowerBIApiService.getGroups();
+
+			children.push(new PowerBIWorkspacePersonal())
 
 			for (let item of items) {
 				let treeItem = new PowerBIWorkspace(item);

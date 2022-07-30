@@ -7,8 +7,8 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIGatewayTreeItem } from './PowerBIGatewayTreeItem';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIGateway } from './PowerBIGateway';
-import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
 import { PowerBIGatewaysDragAndDropController } from './PowerBIGatewaysDragAndDropController';
+import { iPowerBIGateway } from '../../../powerbi/GatewayAPI/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<PowerBIGatewayTreeItem> {
@@ -48,7 +48,7 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 		}
 		else {
 			let children: PowerBIGateway[] = [];
-			let items: iPowerBIGatewayItem[] = await PowerBIApiService.getGateways();
+			let items: iPowerBIGateway[] = await PowerBIApiService.getGateways();
 
 			for (let item of items) {
 				let treeItem = new PowerBIGateway(item);

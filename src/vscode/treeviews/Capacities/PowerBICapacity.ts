@@ -1,17 +1,15 @@
 import * as vscode from 'vscode';
 
 import { PowerBICapacityTreeItem } from './PowerBICapacityTreeItem';
-import { iPowerBIDashboard } from '../../../powerbi/DashboardsAPI/_types';
-import { UniqueId } from '../../../helpers/Helper';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { iPowerBICapacityItem } from './iPowerBICapacityItem';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBICapacity extends PowerBICapacityTreeItem {
 
 	constructor(
-		definition: iPowerBICapacityItem,
+		definition: iPowerBICapacity,
 		parent: PowerBIApiTreeItem,
 	) {
 		super(definition, parent, vscode.TreeItemCollapsibleState.None);
@@ -21,11 +19,11 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-	get definition(): iPowerBICapacityItem {
-		return super.definition as iPowerBICapacityItem;
+	get definition(): iPowerBICapacity {
+		return super.definition as iPowerBICapacity;
 	}
 
-	set definition(value: iPowerBICapacityItem) {
+	set definition(value: iPowerBICapacity) {
 		super.definition = value;
 	}
 

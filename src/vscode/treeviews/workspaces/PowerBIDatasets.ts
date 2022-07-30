@@ -7,14 +7,13 @@ import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIDataset } from './PowerBIDataset';
 import { iPowerBIDataset } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasets extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		groupId: UniqueId,
-		parent: PowerBIApiTreeItem
+		parent: PowerBIWorkspaceTreeItem
 	) {
 		super("Datasets", groupId, "DATASETS", groupId, parent);
 
@@ -42,7 +41,7 @@ export class PowerBIDatasets extends PowerBIWorkspaceTreeItem {
 		}
 		else {
 			let children: PowerBIDataset[] = [];
-			let items: iPowerBIDataset[] = await PowerBIApiService.getDatasets(this._group);
+			let items: iPowerBIDataset[] = await PowerBIApiService.getItemList<iPowerBIDataset>(this.apiPath);
 
 			for (let item of items) {
 				let treeItem = new PowerBIDataset(item, this.group, this);

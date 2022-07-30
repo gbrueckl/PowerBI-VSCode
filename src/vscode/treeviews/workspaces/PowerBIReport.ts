@@ -15,7 +15,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 	constructor(
 		definition: iPowerBIReport,
 		group: UniqueId,
-		parent: PowerBIApiTreeItem
+		parent: PowerBIWorkspaceTreeItem
 	) {
 		super(definition.name, group, "REPORT", definition.id, parent, vscode.TreeItemCollapsibleState.None);
 
@@ -29,7 +29,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		return super.definition as iPowerBIReport;
 	}
 
-	set definition(value: iPowerBIReport) {
+	private set definition(value: iPowerBIReport) {
 		super.definition = value;
 	}
 	// #region iHandleDrop implementation
@@ -59,6 +59,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 						break;
 
 					default:
+						ThisExtension.setStatusBar("Drag&Drop aborted!");
 						ThisExtension.log("Invalid or no action selected!");
 				}
 
@@ -72,7 +73,9 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 
 	// Report-specific funtions
 	public async delete(): Promise<void> {
+		ThisExtension.setStatusBar("Deleting report ...", true);
 		await PowerBICommandBuilder.execute<iPowerBIReport>(this.apiPath, "DELETE", []);
+		ThisExtension.setStatusBar("Report deleted!");
 
 		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
@@ -91,6 +94,8 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		else {
 			PowerBIApiService.post(apiUrl, settings);
 		}
+
+		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
 
 	public async rebind(settings: object = undefined): Promise<void> {
@@ -105,6 +110,8 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		else {
 			PowerBIApiService.post(apiUrl, settings);
 		}
+
+		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
 
 	public async updateContent(settings: object = undefined): Promise<void> {
@@ -121,5 +128,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		else {
 			PowerBIApiService.post(apiUrl, settings);
 		}
+
+		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
 }

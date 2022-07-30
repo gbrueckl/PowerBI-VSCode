@@ -6,10 +6,13 @@ import { ThisExtension } from './ThisExtension';
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
 import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/PowerBIPipelinesTreeProvider';
+import { PowerBIApiTreeItem } from './vscode/treeviews/PowerBIApiTreeItem';
 import { PowerBIDashboard } from './vscode/treeviews/workspaces/PowerBIDashboard';
 import { PowerBIDataflow } from './vscode/treeviews/workspaces/PowerBIDataflow';
 import { PowerBIDataset } from './vscode/treeviews/workspaces/PowerBIDataset';
+import { PowerBIParameter } from './vscode/treeviews/workspaces/PowerBIParameter';
 import { PowerBIReport } from './vscode/treeviews/workspaces/PowerBIReport';
+import { PowerBIWorkspace } from './vscode/treeviews/workspaces/PowerBIWorkspace';
 
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
 import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
@@ -22,18 +25,28 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.window.showErrorMessage("Issue initializing extension - Please update PowerBI settings and restart VSCode!");
 	}
 
-	vscode.commands.registerCommand('PowerBI.updateQuickPickList', (treeItem: PowerBIWorkspaceTreeItem) => PowerBICommandBuilder.pushQuickPickItem(treeItem));
+	ThisExtension.StatusBar = vscode.window.createStatusBarItem("powerbi-vscode", vscode.StatusBarAlignment.Right);
+	ThisExtension.StatusBar.show();
+	ThisExtension.setStatusBar("Initialized!");
+
+	vscode.commands.registerCommand('PowerBI.updateQuickPickList', (treeItem: PowerBIApiTreeItem) => PowerBICommandBuilder.pushQuickPickItem(treeItem));
 
 	// register PowerBIWorkspacesTreeProvider
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(showInfoMessage));
 	//vscode.commands.registerCommand('PowerBIWorkspaces.add', () => pbiWorkspacesTreeProvider.add());
+	vscode.commands.registerCommand('PowerBIWorkspace.delete', (workspace: PowerBIWorkspace) => workspace.delete());
+	
 
 	// Dataset commands
 	vscode.commands.registerCommand('PowerBIDataset.delete', (dataset: PowerBIDataset) => dataset.delete());
 	vscode.commands.registerCommand('PowerBIDataset.refresh', (dataset: PowerBIDataset) => dataset.refresh());
 	vscode.commands.registerCommand('PowerBIDataset.takeOver', (dataset: PowerBIDataset) => dataset.takeOver());
+	vscode.commands.registerCommand('PowerBIDataset.updateAllParameters', (dataset: PowerBIDataset) => dataset.updateAllParameters());
+
+	// DatasetParameter commands
+	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
 
 	// Report commands
 	vscode.commands.registerCommand('PowerBIReport.delete', (report: PowerBIDataset) => report.delete());

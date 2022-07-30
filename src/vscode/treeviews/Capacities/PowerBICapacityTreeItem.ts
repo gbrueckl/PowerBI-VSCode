@@ -7,13 +7,14 @@ import { UniqueId } from '../../../helpers/Helper';
 import { iPowerBICapacityItem } from './iPowerBICapacityItem';
 import { ApiItemType } from '../_types';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 
 export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowerBICapacityItem {
-	protected _definition: iPowerBICapacityItem;
+	protected _definition: iPowerBICapacity;
 	protected _itemType: ApiItemType;
 
 	constructor(
-		definition: iPowerBICapacityItem,
+		definition: iPowerBICapacity,
 		parent: PowerBIApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
@@ -56,11 +57,11 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-	get definition(): iPowerBICapacityItem {
-		return super.definition as iPowerBICapacityItem;
+	get definition(): iPowerBICapacity {
+		return super.definition as iPowerBICapacity;
 	}
 
-	set definition(value: iPowerBICapacityItem) {
+	set definition(value: iPowerBICapacity) {
 		this._definition = value;
 	}
 

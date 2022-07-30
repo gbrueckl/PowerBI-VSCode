@@ -14,7 +14,7 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 	constructor(
 		definition: iPowerBIDataflow,
 		group: UniqueId,
-		parent: PowerBIApiTreeItem
+		parent: PowerBIWorkspaceTreeItem
 	) {
 		super(definition.name, group, "DATAFLOW", definition.objectId, parent, vscode.TreeItemCollapsibleState.None);
 
@@ -29,18 +29,22 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 		return super.definition as iPowerBIDataflow;
 	}
 
-	set definition(value: iPowerBIDataflow) {
+	private set definition(value: iPowerBIDataflow) {
 		super.definition = value;
 	}
 	// Dataflow-specific funtions
 	public async delete(): Promise<void> {
+		ThisExtension.setStatusBar("Deleting dataflow ...", true);
 		await PowerBICommandBuilder.execute<iPowerBIDataflow>(this.apiPath, "DELETE", []);
+		ThisExtension.setStatusBar("Dataflow deleted!");
 		
 		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
 
 	public async refresh(): Promise<void> {
+		ThisExtension.setStatusBar("Triggering dataflow-refresh ...", true);
 		PowerBIApiService.post(this.apiPath + "/refreshes", null);
+		ThisExtension.setStatusBar("Dataflow-refresh triggered");
 	}
 
 }

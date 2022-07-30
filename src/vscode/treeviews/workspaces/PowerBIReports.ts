@@ -16,7 +16,7 @@ export class PowerBIReports extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		groupId: UniqueId,
-		parent: PowerBIApiTreeItem
+		parent: PowerBIWorkspaceTreeItem
 	) {
 		super("Reports", groupId, "REPORTS", groupId, parent);
 
@@ -44,7 +44,7 @@ export class PowerBIReports extends PowerBIWorkspaceTreeItem {
 		}
 		else {
 			let children: PowerBIReport[] = [];
-			let items: iPowerBIReport[] = await PowerBIApiService.getReports(this.group);
+			let items: iPowerBIReport[] = await PowerBIApiService.getItemList<iPowerBIReport>(this.apiPath);
 
 			for (let item of items) {
 				let treeItem = new PowerBIReport(item, this.group, this);

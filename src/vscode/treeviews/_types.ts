@@ -17,4 +17,6 @@ export type ApiItemType =
 |	"PIPELINE"
 |	"PIPELINESTAGES"
 |	"PIPELINESTAGE"
+|	"PARAMETERS"
+|	"PARAMETER"
 ;

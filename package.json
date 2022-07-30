@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.0.3",
+	"version": "0.0.5",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -39,9 +39,10 @@
 	"activationEvents": [
 		"onView:PowerBIWorkspaces",
 		"onView:PowerBICapacities",
-		"onView:PowerBIGateways"
+		"onView:PowerBIGateways",
+		"onView:PowerBIPipelines"
 	],
-	"main": "./out/extension.js",
+	"main": "./dist/extension.js",
 	"contributes": {
 		"configuration": [],
 		"viewsContainers": {
@@ -99,42 +100,27 @@
 			{
 				"command": "PowerBIWorkspaces.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "PowerBIWorkspaces.add",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/add.png",
-					"dark": "resources/dark/add.png"
-				}
+				"icon": "$(add)"
 			},
 			{
 				"command": "PowerBIWorkspace.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "PowerBIDataset.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "PowerBIDataset.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "PowerBIDataset.takeOver",
@@ -145,20 +131,24 @@
 				}
 			},
 			{
+				"command": "PowerBIDataset.updateAllParameters",
+				"title": "Edit Parameters",
+				"icon": "$(pencil)"
+			},
+			{
+				"command": "PowerBIDatasetParameter.update",
+				"title": "Edit",
+				"icon": "$(pencil)"
+			},
+			{
 				"command": "PowerBIReport.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "PowerBIReport.clone",
 				"title": "Clone",
-				"icon": {
-					"light": "resources/light/copy.png",
-					"dark": "resources/dark/copy.png"
-				}
+				"icon": "$(copy)"
 			},
 			{
 				"command": "PowerBIReport.rebind",
@@ -179,50 +169,32 @@
 			{
 				"command": "PowerBIDataflow.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "PowerBIDataflow.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "PowerBIDashboard.delete",
 				"title": "Delete",
-				"icon": {
-					"light": "resources/light/delete.png",
-					"dark": "resources/dark/delete.png"
-				}
+				"icon": "$(remove-close)"
 			},
 			{
 				"command": "PowerBICapacities.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "PowerBIGateways.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			},
 			{
 				"command": "PowerBIPipelines.refresh",
 				"title": "Refresh",
-				"icon": {
-					"light": "resources/light/refresh.png",
-					"dark": "resources/dark/refresh.png"
-				}
+				"icon": "$(refresh)"
 			}
 		],
 		"menus": {
@@ -274,6 +246,15 @@
 					"when": "view == PowerBIWorkspaces && viewItem == DATASET"
 				},
 				{
+					"command": "PowerBIDataset.updateAllParameters",
+					"when": "view == PowerBIWorkspaces && viewItem == DATASET"
+				},
+				{
+					"command": "PowerBIDatasetParameter.update",
+					"when": "view == PowerBIWorkspaces && viewItem == PARAMETER",
+					"group": "inline"
+				},
+				{
 					"command": "PowerBIReport.delete",
 					"when": "view == PowerBIWorkspaces && viewItem == REPORT",
 					"group": "inline"
@@ -310,7 +291,7 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run esbuild-base -- --minify --external:keytar",
-		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
 		"esbuild": "npm run esbuild-base -- --sourcemap --external:keytar",
 		"esbuild-watch": "npm run esbuild-base -- --sourcemap --watch --external:keytar",
 		"test-compile": "tsc -p ./",

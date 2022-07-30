@@ -39,7 +39,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 		return super.definition as iPowerBIGroup;
 	}
 
-	set definition(value: iPowerBIGroup) {
+	private set definition(value: iPowerBIGroup) {
 		super.definition = value;
 	}
 
@@ -53,7 +53,22 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 			premium = "_premium";
 		}
 		return fspath.join(ThisExtension.rootPath, 'resources', theme, this.itemType.toLowerCase() + premium + '.png');
+	}
+
+	get apiUrlPart(): string {
+		return "groups/" + this.uid;
 	}	
+
+	static get MyWorkspace(): iPowerBIGroup
+	{
+		return {
+			"id": "myorg",
+			"name": "My Workspace",
+			"item_type": "GROUP",
+			"isOnDedicatedCapacity": false,
+			"isReadOnly": false
+		}
+	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
 		PowerBICommandBuilder.pushQuickPickItem(this);
@@ -107,7 +122,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 					switch (action) {
 						case "clone":
 							await (source as PowerBIReport).clone({
-								name: source.name,
+								name: source.name + " - Clone",
 								targetWorkspaceId: this.id
 							});
 							
@@ -115,6 +130,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 							break;
 
 						default:
+							ThisExtension.setStatusBar("Drag&Drop aborted!");
 							ThisExtension.log("Invalid or no action selected!");
 					}
 
@@ -128,10 +144,15 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 	}
 	// #endregion
 
-	// Workspace-specific funtions
+	// Workspace-specific functions
 	public async delete(): Promise<void> {
+		/*
+		ThisExtension.setStatusBar("Deleting workspace ...");
 		await PowerBICommandBuilder.execute<iPowerBIGroup>(this.apiPath, "DELETE", []);
+		ThisExtension.setStatusBar("Workspace deleted!");
 		
 		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		*/
+		vscode.window.showWarningMessage("For safety-reasons workspaces cannot be deleted using this extension!");
 	}
 }

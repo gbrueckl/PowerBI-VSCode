@@ -1,26 +1,26 @@
 import * as vscode from 'vscode';
 
-import {  UniqueId } from '../../../helpers/Helper';
-import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { UniqueId } from '../../../helpers/Helper';
 
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { iPowerBIDataflow } from '../../../powerbi/DataflowsAPI/_types';
-import { PowerBIDataflow } from './PowerBIDataflow';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { PowerBIDataset } from './PowerBIDataset';
+import { PowerBIParameter } from './PowerBIParameter';
+import { iPowerBIDatasetParameter } from '../../../powerbi/DatasetsAPI/_types';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIDataflows extends PowerBIWorkspaceTreeItem {
+export class PowerBIParameters extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		groupId: UniqueId,
-		parent: PowerBIWorkspaceTreeItem
+		parent: PowerBIDataset
 	) {
-		super("Dataflows", groupId, "DATAFLOWS", groupId, parent);
+		super("Parameters", groupId, "PARAMETERS", parent.uid, parent);
 
 		// the groupId is not unique for logical folders hence we make it unique
-		super.id = groupId + "/" + this.itemType.toString();
+		super.id = groupId + "/" + this.parent.uid + "/" + this.itemType.toString();
 	}
 
 	// tooltip shown when hovering over the item
@@ -33,8 +33,12 @@ export class PowerBIDataflows extends PowerBIWorkspaceTreeItem {
 		return undefined;
 	}
 
+	get dataset(): PowerBIDataset {
+		return this.parent as PowerBIDataset;
+	}
+
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		if(!PowerBIApiService.isInitialized) { 			
+		if (!PowerBIApiService.isInitialized) {
 			return Promise.resolve([]);
 		}
 
@@ -42,15 +46,15 @@ export class PowerBIDataflows extends PowerBIWorkspaceTreeItem {
 			return element.getChildren();
 		}
 		else {
-			let children: PowerBIDataflow[] = [];
-			let items: iPowerBIDataflow[] = await PowerBIApiService.getItemList<iPowerBIDataflow>(this.apiPath, {}, "displayName");
+			let children: PowerBIParameter[] = [];
+			let items: iPowerBIDatasetParameter[] = await PowerBIApiService.getItemList<iPowerBIDatasetParameter>(this.apiPath);
 
 			for (let item of items) {
-				let treeItem = new PowerBIDataflow(item, this.group, this);
+				let treeItem = new PowerBIParameter(item, this.group, this);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
-			
+
 			return children;
 		}
 	}

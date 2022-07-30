@@ -15,7 +15,7 @@ export class PowerBIDashboards extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		groupId: UniqueId,
-		parent: PowerBIApiTreeItem
+		parent: PowerBIWorkspaceTreeItem
 	) {
 		super("Dashboards", groupId, "DASHBOARDS", groupId, parent);
 
@@ -43,7 +43,7 @@ export class PowerBIDashboards extends PowerBIWorkspaceTreeItem {
 		}
 		else {
 			let children: PowerBIDashboard[] = [];
-			let items: iPowerBIDashboard[] = await PowerBIApiService.getDashboards(this._group);
+			let items: iPowerBIDashboard[] = await PowerBIApiService.getItemList<iPowerBIDashboard>(this.apiPath, {}, "displayName");
 
 			for (let item of items) {
 				let treeItem = new PowerBIDashboard(item, this.group, this);

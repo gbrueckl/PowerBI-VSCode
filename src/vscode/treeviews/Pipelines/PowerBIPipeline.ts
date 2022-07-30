@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
-import { iPowerBIPipelineItem } from './iPowerBIPipelineItem';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIPipelineStages } from './PowerBIPipelineStages';
 import { iPowerBIPipeline } from '../../../powerbi/PipelinesAPI/_types';

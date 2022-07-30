@@ -7,7 +7,6 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIPipeline } from './PowerBIPipeline';
-import { iPowerBIPipelineItem } from './iPowerBIPipelineItem';
 import { PowerBIPipelinesDragAndDropController } from './PowerBIPipelineDragAndDropController';
 import { iPowerBIPipeline } from '../../../powerbi/PipelinesAPI/_types';
 

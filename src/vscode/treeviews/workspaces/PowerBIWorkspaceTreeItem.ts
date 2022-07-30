@@ -8,25 +8,26 @@ import { ApiItemType } from '../_types';
 import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
 import { iPowerBIApiItem } from '../iPowerBIApiItem';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPowerBIWorkspaceItem {
-	protected _group: UniqueId;
+	protected _groupId: UniqueId;
 
 	constructor(
 		name: string,
-		group: UniqueId,
+		groupId: UniqueId,
 		itemType: ApiItemType,
 		id: UniqueId,
-		parent: PowerBIApiTreeItem,
+		parent: PowerBIWorkspaceTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
 		super(id, name, itemType, parent, collapsibleState);
 
-		this._group = group;
+		this._groupId = groupId;
 
 		super.definition = {
 			name: name,
-			group: group,
+			group: groupId,
 			itemType: itemType,
 			id: id
 		};
@@ -41,26 +42,8 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 		return undefined;
 	}
 
-	/* Overwritten properties from PowerBIApiTreeItem */
-	get apiPath(): string {
-		let groupPath: string = "";
-		if (this.group != null && this.group != undefined && this.itemType != "GROUP")
-		{
-			groupPath = `/groups/${this.group}`;
-		}
-
-		if (this.uid != null && this.uid != undefined)
-		{
-			return `v1.0/myorg${groupPath}/${this.itemType.toString().toLowerCase()}s/${this.uid}`;
-		}
-		else
-		{
-			return `v1.0/myorg${groupPath}/${this.itemType.toString().toLowerCase()}`;
-		}
-	}
-
-	/* iDatabrickWorkspaceItem implementatin */
+	/* iDatabrickWorkspaceItem implementation */
 	get group(): UniqueId {
-		return this._group;
+		return this._groupId;
 	}
 }

@@ -1,16 +1,13 @@
 import * as vscode from 'vscode';
 
 import { PowerBIGatewayTreeItem } from './PowerBIGatewayTreeItem';
-import { iPowerBIDashboard } from '../../../powerbi/DashboardsAPI/_types';
-import { UniqueId } from '../../../helpers/Helper';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
+import { iPowerBIGateway } from '../../../powerbi/GatewayAPI/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIGateway extends PowerBIGatewayTreeItem {
 
 	constructor(
-		definition: iPowerBIGatewayItem
+		definition: iPowerBIGateway
 	) {
 		super(definition, undefined, vscode.TreeItemCollapsibleState.None);
 		this.definition = definition;
@@ -19,11 +16,11 @@ export class PowerBIGateway extends PowerBIGatewayTreeItem {
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-	get definition(): iPowerBIGatewayItem {
-		return super.definition as iPowerBIGatewayItem;
+	get definition(): iPowerBIGateway {
+		return super.definition as iPowerBIGateway;
 	}
 
-	set definition(value: iPowerBIGatewayItem) {
+	set definition(value: iPowerBIGateway) {
 		super.definition = value;
 	}
 

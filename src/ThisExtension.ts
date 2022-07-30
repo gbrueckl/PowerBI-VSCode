@@ -15,6 +15,7 @@ export abstract class ThisExtension {
 	private static _isValidated: boolean = false;
 	private static _logger: vscode.OutputChannel;
 	private static _settingScope: ConfigSettingSource;
+	private static _statusBar: vscode.StatusBarItem;
 	private static _treeViewWorkspaces: PowerBIWorkspacesTreeProvider;
 	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
 	private static _treeViewGateways: PowerBIGatewaysTreeProvider;
@@ -39,6 +40,28 @@ export abstract class ThisExtension {
 	static get IsValidated(): boolean {
 		return this._isValidated;
 	}
+
+	// #region StatusBar
+	static set StatusBar(value: vscode.StatusBarItem) {
+		this._statusBar = value;
+	}
+
+	static get StatusBar(): vscode.StatusBarItem {
+		return this._statusBar;
+	}
+
+	static setStatusBar(text: string, inProgress: boolean = false): void {
+		if(inProgress)
+		{
+			this.StatusBar.text = "$(loading~spin) " + text;
+		}
+		else
+		{
+			this.StatusBar.text = text;
+		}
+		
+	}
+	//#endregion
 	// #region TreeViews
 	static set TreeViewWorkspaces(treeView: PowerBIWorkspacesTreeProvider)
 	{

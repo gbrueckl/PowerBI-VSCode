@@ -9,16 +9,17 @@ import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/Co
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIReport } from './PowerBIReport';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { PowerBIParameters } from './PowerBIParameters';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		definition: iPowerBIDataset,
-		group: UniqueId,
-		parent: PowerBIApiTreeItem
+		groupId: UniqueId,
+		parent: PowerBIWorkspaceTreeItem
 	) {
-		super(definition.name, group, "DATASET", definition.id, parent, vscode.TreeItemCollapsibleState.None);
+		super(definition.name, groupId, "DATASET", definition.id, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this.definition = definition;
 		
@@ -30,8 +31,22 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		return super.definition as iPowerBIDataset;
 	}
 
-	set definition(value: iPowerBIDataset) {
+	private set definition(value: iPowerBIDataset) {
 		super.definition = value;
+	}
+
+	get canDoChangse(): boolean {
+		return "" == this.definition.configuredBy;
+	}
+
+	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
+		PowerBICommandBuilder.pushQuickPickItem(this);
+
+		let children: PowerBIWorkspaceTreeItem[] = [];
+		
+		children.push(new PowerBIParameters(this.group, this));
+
+		return children;
 	}
 
 	// #region iHandleDrop implementation
@@ -67,6 +82,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 							break;
 
 					default:
+						ThisExtension.setStatusBar("Drag&Drop aborted!");
 						ThisExtension.log("Invalid or no action selected!");
 				}
 
@@ -80,18 +96,28 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	// Dataset-specific funtions
 	public async delete(): Promise<void> {
+		ThisExtension.setStatusBar("Deleting dataset ...", true);
 		await PowerBICommandBuilder.execute<iPowerBIDataset>(this.apiPath, "DELETE", []);
+		ThisExtension.setStatusBar("Dataset deleted!");
 
 		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
 	
 	public async refresh(): Promise<void> {
+		ThisExtension.setStatusBar("Triggering dataset-refresh ...", true);
 		PowerBIApiService.post(this.apiPath + "/refreshes", null);
+		ThisExtension.setStatusBar("Dataset-refresh triggered!");
 	}
 
 	public async takeOver(): Promise<void> {
+		ThisExtension.setStatusBar("Taking over dataset ...", true);
 		PowerBIApiService.post(this.apiPath + "/Default.TakeOver", null);
+		ThisExtension.setStatusBar("Dataset taken over!");
 
 		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+	}
+
+	public async updateAllParameters(): Promise<void> {
+		// TODO
 	}
 }

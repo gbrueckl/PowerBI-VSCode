@@ -1,19 +1,16 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
-import { ThisExtension } from '../../../ThisExtension';
-import { UniqueId } from '../../../helpers/Helper';
-
-import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
 import { ApiItemType } from '../_types';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { iPowerBIGateway } from '../../../powerbi/GatewayAPI/_types';
+import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
 
 export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPowerBIGatewayItem {
-	protected _definition: iPowerBIGatewayItem;
+	protected _definition: iPowerBIGateway;
 	protected _itemType: ApiItemType;
 
 	constructor(
-		definition: iPowerBIGatewayItem,
+		definition: iPowerBIGateway,
 		parent: PowerBIApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
@@ -55,11 +52,11 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-	get definition(): iPowerBIGatewayItem {
-		return super.definition as iPowerBIGatewayItem;
+	get definition(): iPowerBIGateway {
+		return super.definition as iPowerBIGateway;
 	}
 
-	set definition(value: iPowerBIGatewayItem) {
+	set definition(value: iPowerBIGateway) {
 		this._definition = value;
 	}
 

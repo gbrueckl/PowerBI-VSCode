@@ -21,6 +21,7 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 		this.definition = definition;
 
 		super.tooltip = this._tooltip;
+		super.description = null;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

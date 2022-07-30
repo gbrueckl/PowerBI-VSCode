@@ -4,10 +4,9 @@ import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBICapacityTreeItem } from './PowerBICapacityTreeItem';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBICapacity } from './PowerBICapacity';
-import { iPowerBICapacityItem } from './iPowerBICapacityItem';
 import { PowerBICapacitiesDragAndDropController } from './PowerBICapacitiesDragAndDropController';
+import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<PowerBICapacityTreeItem> {
@@ -47,7 +46,7 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 		}
 		else {
 			let children: PowerBICapacity[] = [];
-			let items: iPowerBICapacityItem[] = await PowerBIApiService.getCapacities();
+			let items: iPowerBICapacity[] = await PowerBIApiService.getCapacities();
 
 			for (let item of items) {
 				let treeItem = new PowerBICapacity(item, undefined);
