@@ -8,3 +8,5 @@ src/**
 .gitignore
 tsconfig.json
 webpack.config.js
+*.code-workspace
+tslint.json

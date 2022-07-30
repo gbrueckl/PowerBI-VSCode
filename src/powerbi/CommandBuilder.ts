@@ -2,6 +2,7 @@ import { stringify } from 'querystring';
 import * as vscode from 'vscode';
 import { Helper } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
+import { PowerBIApiTreeItem } from '../vscode/treeviews/PowerBIApiTreeItem';
 import { PowerBIWorkspaceTreeItem } from '../vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
 import { ApiItemType } from '../vscode/treeviews/_types';
 import { PowerBIApiService } from './PowerBIApiService';
@@ -223,7 +224,7 @@ export abstract class PowerBICommandBuilder {
 		return result;
 	}
 
-	static pushQuickPickItem(item: PowerBIWorkspaceTreeItem): void {
+	static pushQuickPickItem(item: PowerBIApiTreeItem): void {
 		if (this._quickPickLists == undefined) {
 			ThisExtension.log(`Initializing QuickPickList ...`);
 			this._quickPickLists = new Map<ApiItemType, PowerBIQuickPickItem[]>();

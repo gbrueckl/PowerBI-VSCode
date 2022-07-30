@@ -6,6 +6,7 @@ import { UniqueId } from '../../../helpers/Helper';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { ThisExtension } from '../../../ThisExtension';
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
@@ -37,4 +38,9 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 		
 		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 	}
+
+	public async refresh(): Promise<void> {
+		PowerBIApiService.post(this.apiPath + "/refreshes", null);
+	}
+
 }

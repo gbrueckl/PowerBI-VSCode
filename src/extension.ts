@@ -5,6 +5,7 @@ import { PowerBICommandBuilder, PowerBICommandInput } from './powerbi/CommandBui
 import { ThisExtension } from './ThisExtension';
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
+import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/PowerBIPipelinesTreeProvider';
 import { PowerBIDashboard } from './vscode/treeviews/workspaces/PowerBIDashboard';
 import { PowerBIDataflow } from './vscode/treeviews/workspaces/PowerBIDataflow';
 import { PowerBIDataset } from './vscode/treeviews/workspaces/PowerBIDataset';
@@ -42,6 +43,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Dataflow commands
 	vscode.commands.registerCommand('PowerBIDataflow.delete', (dataflow: PowerBIDataflow) => dataflow.delete());
+	vscode.commands.registerCommand('PowerBIDataflow.refresh', (dataflow: PowerBIDataflow) => dataflow.refresh());
 
 	// Dashboard commands
 	vscode.commands.registerCommand('PowerBIDasjbpard.delete', (dashboard: PowerBIDashboard) => dashboard.delete());
@@ -57,6 +59,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiGatewaysTreeProvider = new PowerBIGatewaysTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIGateways', pbiGatewaysTreeProvider); // done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIGateways.refresh', (showInfoMessage: boolean = true) => pbiGatewaysTreeProvider.refresh(showInfoMessage));
+
+
+	// register PowerBIPipelinesTreeProvider
+	let pbiPipelinesTreeProvider = new PowerBIPipelinesTreeProvider(context);
+	//vscode.window.registerTreeDataProvider('PowerBIPipelines', pbiPipelinesTreeProvider); // done in constructor which also adds Drag&Drop Controller
+	vscode.commands.registerCommand('PowerBIPipelines.refresh', (showInfoMessage: boolean = true) => pbiPipelinesTreeProvider.refresh(showInfoMessage));
 }
 
 
