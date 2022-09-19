@@ -15,7 +15,8 @@ import { PowerBIReport } from './vscode/treeviews/workspaces/PowerBIReport';
 import { PowerBIWorkspace } from './vscode/treeviews/workspaces/PowerBIWorkspace';
 
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
-import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
+
+const keytar = require('keytar');
 
 export async function activate(context: vscode.ExtensionContext) {
 

@@ -12,15 +12,15 @@
             ],
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/out/src/**/*.js"
+                "${workspaceRoot}/dist/**/*.js"
             ],
             "preLaunchTask": "npm: watch",
             "skipFiles": [
-                "<node_internals>/**",
+                "<node_internals>/**/*.js",
                 "main.js",
                 "extension.bundle.js",
                 "extensionHostProcess.js",
-                "${workspaceFolder}/node_modules/**"
+                "${workspaceFolder}/node_modules/**/*.js"
             ]
         },
         {
@@ -30,14 +30,15 @@
             "port": 5870,
             "restart": true,
             "outFiles": [
-                "${workspaceRoot}/out/src"
+                "${workspaceFolder}/dist/**/*.js"
             ],
             "skipFiles": [
-                "<node_internals>/**",
-                "${workspaceFolder}/node_modules/**",
+                "<node_internals>/**/*.js",
+                "${workspaceFolder}/node_modules/**/*.js",
                 "main.js",
                 "extension.bundle.js",
-                "extensionHostProcess.js"
+                "extensionHostProcess.js",
+                "${workspaceFolder}/node_modules/**/*.js"
             ]
         }
     ]

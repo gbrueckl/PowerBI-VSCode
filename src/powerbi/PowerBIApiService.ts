@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 //import * as FormData from 'form-data';
-import * as fs from 'fs';
 
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
@@ -11,13 +10,16 @@ import { ApiUrlPair } from './_types';
 import { iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
-
+import fetch from 'node-fetch';
 
 export abstract class PowerBIApiService {
 	private static _apiService: any;
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
 	private static _org: string = "myorg"
+	private static _fetchHeaders: any;
+	private static _fetchRootUrl: string;
+	private static _fetch: any;
 
 	//#region Initialization
 	static async initialize(apiRootUrl: string = "https://api.powerbi.com/"): Promise<boolean> {
@@ -52,6 +54,14 @@ export abstract class PowerBIApiService {
 			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + accessToken.token;
 			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
 			this._apiService.defaults.headers.common['Accept'] = 'application/json';
+
+			this._fetch = fetch;
+			this._fetchRootUrl = apiRootUrl;
+			this._fetchHeaders = {
+				"Authorization": 'Bearer ' + accessToken.token,
+				"Content-Type": 'application/json',
+				"Accept": 'application/json'
+			}
 
 			ThisExtension.log(`Testing new PowerBI API (${apiRootUrl}) settings ()...`);
 			this._connectionTestRunning = true;
@@ -89,6 +99,11 @@ export abstract class PowerBIApiService {
 		ThisExtension.log(JSON.stringify(response.data));
 	}
 
+	static async fetch(endpoint: string, options: any): Promise<any>
+	{
+		return await this._fetch(endpoint, options)
+	}
+
 	static async get(endpoint: string, params: object = null): Promise<any> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
@@ -99,7 +114,11 @@ export abstract class PowerBIApiService {
 
 			let response: any = "Request not yet executed!";
 			try {
-				response = await this._apiService.get(endpoint, params);
+				//response = await this._apiService.get(endpoint, params);
+				response = await this.fetch(this._fetchRootUrl, {
+					method: 'get',
+					headers: this._fetchHeaders
+				});
 				this.logResponse(response);
 			} catch (error) {
 				let errResponse = error.response;
@@ -335,7 +354,7 @@ export abstract class PowerBIApiService {
 
 	//#region Capacities API
 	static async getCapacities(): Promise<iPowerBICapacity[]> {
-		
+
 		let items: iPowerBICapacity[] = await this.getItemList<iPowerBICapacity>(`v1.0/${PowerBIApiService.Org}/capacities`, {}, "displayName");
 
 		return items;

@@ -99,6 +99,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 
 			let url = this.apiPath + "/imports?datasetDisplayName=" + fileName;
 			
+			/*
 			let importRequest = await PowerBIApiService.postFile(url, fileUri);
 
 			importRequest.then(function (body) {
@@ -107,6 +108,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 				.catch(function (err) {
 				ThisExtension.log('error', err);
 			});
+			*/
 		}
 
 		if(transferItem)
@@ -123,7 +125,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 						case "clone":
 							await (source as PowerBIReport).clone({
 								name: source.name + " - Clone",
-								targetWorkspaceId: this.id
+								targetWorkspaceId: this.id == "myorg" ? "00000000-0000-0000-0000-000000000000" : this.id
 							});
 							
 							ThisExtension.TreeViewWorkspaces.refresh(false, this);
