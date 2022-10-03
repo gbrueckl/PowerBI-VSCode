@@ -166,7 +166,9 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 			}
 			apiItem = apiItem.parent;
 		}
+		urlParts.push(PowerBIApiService.Org)
+		urlParts = urlParts.filter(x => x.length > 0)
 
-		return `v1.0/${PowerBIApiService.Org}/${urlParts.reverse().join("/")}/`;
+		return `v1.0/${urlParts.reverse().join("/")}/`;
 	}
 }

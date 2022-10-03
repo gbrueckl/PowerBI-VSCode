@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 //import * as FormData from 'form-data';
 import * as fs from 'fs';
 
+const fsPromises = require('fs/promises');
+
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { iPowerBIGroup } from './GroupsAPI/_types';
@@ -11,10 +13,12 @@ import { ApiUrlPair } from './_types';
 import { iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
+import { AxiosInstance } from 'axios';
 
+const FormData = require('form-data');
 
 export abstract class PowerBIApiService {
-	private static _apiService: any;
+	private static _apiService: AxiosInstance;
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
 	private static _org: string = "myorg"
@@ -140,25 +144,19 @@ export abstract class PowerBIApiService {
 		return response;
 	}
 
-	/*
-	static async postFile(endpoint: string, file: string | URL): Promise<any> {
+	static async postFile(endpoint: string, file: vscode.Uri, displayName: string): Promise<any> {
+		endpoint = endpoint + "?datasetDisplayName=" + displayName + "&nameConflict=Abort";
 		ThisExtension.log("POST " + endpoint);
 		ThisExtension.log("Content:" + "<stream>");
 
-		const contentLength: number = fs.statSync(file).size;
-
-		let fileStream = await fs.createReadStream(file);
+		const fileStream = fsPromises.createReadStream(file.fsPath);
 
 		const form = new FormData();
-		form.append("Content", fileStream);
-
-		const contentHeaders = {
-			"Content-Length": contentLength
-			//"Content-Type": "multipart/form-data"
-		};
+		// Pass file stream directly to form
+		form.append(displayName, fileStream, displayName + '.pbix');
 
 		let axiosConfig = {
-			headers: { ...(form.getHeaders()), ...contentHeaders }
+			headers: { ...(this._apiService.defaults.headers.common), ...form.getHeaders() }
 		};
 		let response: any = "Request not yet executed!";
 		try {
@@ -172,7 +170,6 @@ export abstract class PowerBIApiService {
 
 		return response;
 	}
-	*/
 
 	static async patch(endpoint: string, body: object): Promise<any> {
 		ThisExtension.log("PATCH " + endpoint);

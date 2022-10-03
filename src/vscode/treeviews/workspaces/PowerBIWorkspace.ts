@@ -94,12 +94,12 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 
 		if(fileItem)
 		{
-			const fileUri = new URL(await fileItem.asString());// "file:///d:/Desktop/DeltaLake_New.pbix"; //await fileItem.asString();
-			const fileName = fileUri.pathname.split("/").pop().split(".")[0];
+			const fileUri: vscode.Uri = vscode.Uri.parse(await fileItem.asString());// "file:///d:/Desktop/DeltaLake_New.pbix"; //await fileItem.asString();
+			const fileName = fileUri.path.split("/").pop().split(".")[0];
 
-			let url = this.apiPath + "/imports?datasetDisplayName=" + fileName;
+			let url = this.apiPath + "imports";
 			
-			let importRequest = await PowerBIApiService.postFile(url, fileUri);
+			let importRequest = await PowerBIApiService.postFile(url, fileUri, fileName);
 
 			importRequest.then(function (body) {
 				ThisExtension.log('success! ', body);
@@ -123,7 +123,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 						case "clone":
 							await (source as PowerBIReport).clone({
 								name: source.name + " - Clone",
-								targetWorkspaceId: this.id
+								targetWorkspaceId: this.id == "myorg" ? "00000000-0000-0000-0000-000000000000" : this.id
 							});
 							
 							ThisExtension.TreeViewWorkspaces.refresh(false, this);

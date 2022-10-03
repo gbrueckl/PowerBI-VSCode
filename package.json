@@ -290,20 +290,23 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run esbuild-base -- --minify --external:keytar",
-		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
-		"esbuild": "npm run esbuild-base -- --sourcemap --external:keytar",
-		"esbuild-watch": "npm run esbuild-base -- --sourcemap --watch --external:keytar",
-		"test-compile": "tsc -p ./",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./"
+		"vscode:prepublish": "npm run package",
+		"compile": "webpack",
+		"watch": "webpack --watch",
+		"package": "webpack --mode production --devtool hidden-source-map",
+		"lint": "eslint src --ext ts"
 	},
 	"devDependencies": {
+		"@types/glob": "^7.2.0",
 		"@types/mkdirp": "^0.5.2",
+		"@types/mocha": "^9.1.1",
 		"@types/node": "^12.12.0",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.66.0",
 		"esbuild": "^0.14.43",
+		"glob": "^8.0.3",
+		"mocha": "^10.0.0",
+		"node-loader": "^2.0.0",
 		"ts-loader": "^8.3.0",
 		"tslint": "^5.20.1",
 		"typescript": "^4.4.3",
@@ -317,6 +320,7 @@
 		"@azure/identity-vscode": "^1.0.0",
 		"axios": "^0.21.4",
 		"form-data": "^4.0.0",
+		"fs.promises": "^0.1.2",
 		"https-agent": "^1.0.0",
 		"jsonc-parser": "^0.4.2"
 	}
