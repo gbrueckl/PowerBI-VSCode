@@ -94,12 +94,13 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 
 		if(fileItem)
 		{
-			const fileUri: vscode.Uri = vscode.Uri.parse(await fileItem.asString());// "file:///d:/Desktop/DeltaLake_New.pbix"; //await fileItem.asString();
-			const fileName = fileUri.path.split("/").pop().split(".")[0];
+			const fileUri = new URL(await fileItem.asString());// "file:///d:/Desktop/DeltaLake_New.pbix"; //await fileItem.asString();
+			const fileName = fileUri.pathname.split("/").pop().split(".")[0];
 
-			let url = this.apiPath + "imports";
+			let url = this.apiPath + "/imports?datasetDisplayName=" + fileName;
 			
-			let importRequest = await PowerBIApiService.postFile(url, fileUri, fileName);
+			/*
+			let importRequest = await PowerBIApiService.postFile(url, fileUri);
 
 			importRequest.then(function (body) {
 				ThisExtension.log('success! ', body);
@@ -107,6 +108,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 				.catch(function (err) {
 				ThisExtension.log('error', err);
 			});
+			*/
 		}
 
 		if(transferItem)

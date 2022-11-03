@@ -15,6 +15,7 @@ export abstract class ThisExtension {
 	private static _isValidated: boolean = false;
 	private static _logger: vscode.OutputChannel;
 	private static _settingScope: ConfigSettingSource;
+	private static _isVirtualWorkspace: boolean = undefined;
 	private static _statusBar: vscode.StatusBarItem;
 	private static _treeViewWorkspaces: PowerBIWorkspacesTreeProvider;
 	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
@@ -39,6 +40,10 @@ export abstract class ThisExtension {
 
 	static get IsValidated(): boolean {
 		return this._isValidated;
+	}
+
+	static get SettingScope(): ConfigSettingSource {
+		return this._settingScope;
 	}
 
 	// #region StatusBar
@@ -113,6 +118,15 @@ export abstract class ThisExtension {
 			this.log(`Loading VS Code extension '${context.extension.packageJSON.displayName}' (${context.extension.packageJSON.id}) version ${context.extension.packageJSON.version} ...`);
 			this.log(`If you experience issues please open a ticket at ${context.extension.packageJSON.qna}`);
 			this._context = context;	
+
+			if(vscode.workspace.workspaceFolders)
+			{
+				this._settingScope = "Workspace";
+			}
+			else
+			{
+				this._settingScope = "Global";
+			}
 
 			await PowerBIApiService.initialize();		
 
@@ -212,24 +226,31 @@ export abstract class ThisExtension {
 		vscode.workspace.getConfiguration().update(configSetting.setting, configSetting.value, target);
 	}
 
+	static get isVirtualWorkspace(): boolean {
+		if (this._isVirtualWorkspace == undefined) {
+			// from https://github.com/microsoft/vscode/wiki/Virtual-Workspaces#detect-virtual-workspaces-in-code
+			this._isVirtualWorkspace = vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.every(f => f.uri.scheme !== 'file')
+		}
+
+		return this._isVirtualWorkspace;
+	}
+
 	static get useProxy(): boolean {
 		let httpProxySupport: ConfigSetting<string> = ThisExtension.getConfigurationSetting<string>("http.proxySupport");
 
 		// only check if proxySupport is explicitly set to "off"
 		if (httpProxySupport.value == "off") {
-			this.log('Proxy support is disabled due to setting "http.proxySupport": "off"!');
 			return false;
 		}
 
 		if (httpProxySupport.value == "on") {
-			this.log('Proxy support is enabled due to setting "http.proxySupport": "on"!');
 			return true;
 		}
 
 		return undefined;
 	}
 
-	static get rejectUnauthorizedSSL(): boolean {
+	static get useStrictSSL(): boolean {
 		let httpProxyStrictSSL: ConfigSetting<boolean> = ThisExtension.getConfigurationSetting<boolean>("http.proxyStrictSSL");
 
 		// check if Strict Proxy SSL is NOT enabled
@@ -238,8 +259,7 @@ export abstract class ThisExtension {
 				this.log('Strict Proxy SSL verification enabled due to setting "http.proxyStrictSSL": true !');
 			}
 		}
-		else
-		{
+		else {
 			this.log('Strict Proxy SSL verification disabled due to setting "http.proxyStrictSSL": false !');
 		}
 

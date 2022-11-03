@@ -15,10 +15,11 @@ import { PowerBIReport } from './vscode/treeviews/workspaces/PowerBIReport';
 import { PowerBIWorkspace } from './vscode/treeviews/workspaces/PowerBIWorkspace';
 
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
-import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
 
 export async function activate(context: vscode.ExtensionContext) {
 
+	// TODO https://github.com/microsoft/vscode-azureresourcegroups/blob/main/src/utils/azureClients.ts#L12
+	
 	let isValidated: boolean = await ThisExtension.initialize(context);
 	if (!isValidated) {
 		ThisExtension.log("Issue initializing extension - Please update PowerBI settings and restart VSCode!");

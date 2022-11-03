@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.0.5",
+	"version": "0.1.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -42,7 +42,7 @@
 		"onView:PowerBIGateways",
 		"onView:PowerBIPipelines"
 	],
-	"main": "./dist/extension.js",
+	"main": "./dist/node/extension.js",
 	"contributes": {
 		"configuration": [],
 		"viewsContainers": {
@@ -104,7 +104,7 @@
 			},
 			{
 				"command": "PowerBIWorkspaces.add",
-				"title": "Refresh",
+				"title": "Add workspace",
 				"icon": "$(add)"
 			},
 			{
@@ -298,20 +298,18 @@
 	},
 	"devDependencies": {
 		"@types/glob": "^7.2.0",
-		"@types/mkdirp": "^0.5.2",
 		"@types/mocha": "^9.1.1",
 		"@types/node": "^12.12.0",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.66.0",
-		"esbuild": "^0.14.43",
+		"eslint": "^8.19.0",
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
-		"node-loader": "^2.0.0",
-		"ts-loader": "^8.3.0",
-		"tslint": "^5.20.1",
-		"typescript": "^4.4.3",
-		"webpack": "^5.62.1",
-		"webpack-cli": "^4.9.1"
+		"native-ext-loader": "^2.3.0",
+		"ts-loader": "^9.3.1",
+		"typescript": "^4.7.4",
+		"webpack": "^5.74.0",
+		"webpack-cli": "^4.10.0"
 	},
 	"dependencies": {
 		"@angular/common": "^14.0.1",
@@ -320,8 +318,8 @@
 		"@azure/identity-vscode": "^1.0.0",
 		"axios": "^0.21.4",
 		"form-data": "^4.0.0",
-		"fs.promises": "^0.1.2",
 		"https-agent": "^1.0.0",
-		"jsonc-parser": "^0.4.2"
+		"jsonc-parser": "^0.4.2",
+		"node-fetch": "^3.2.10"
 	}
 }

@@ -12,7 +12,28 @@
             ],
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceRoot}/dist/**/*.js"
+                "${workspaceRoot}/dist/node/**/*.js"
+            ],
+            "preLaunchTask": "npm: watch",
+            "skipFiles": [
+                "<node_internals>/**/*.js",
+                "main.js",
+                "extension.bundle.js",
+                "extensionHostProcess.js",
+                "${workspaceFolder}/node_modules/**/*.js"
+            ]
+        },
+        {
+            "name": "Launch Web Extension",
+            "type": "extensionHost",
+            "debugWebWorkerHost": true,
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "--extensionDevelopmentKind=web"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/dist/web/**/*.js"
             ],
             "preLaunchTask": "npm: watch",
             "skipFiles": [
