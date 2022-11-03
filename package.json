@@ -42,7 +42,7 @@
 		"onView:PowerBIGateways",
 		"onView:PowerBIPipelines"
 	],
-	"main": "./dist/extension.js",
+	"main": "./dist/node/extension.js",
 	"contributes": {
 		"configuration": [],
 		"viewsContainers": {

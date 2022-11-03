@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import { ThisExtension } from '../../../ThisExtension';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { PowerBIReport } from './PowerBIReport';
 
 
 export interface iHandleDrop {

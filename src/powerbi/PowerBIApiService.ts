@@ -10,32 +10,24 @@ import { ApiUrlPair } from './_types';
 import { iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
-import fetch from 'node-fetch';
+
+
+import { fetch, getProxyAgent } from '@env/fetch';
+import { RequestInit, Response } from '@env/fetch';
 
 export abstract class PowerBIApiService {
-	private static _apiService: any;
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
+	private static _apiBaseUrl: string;
 	private static _org: string = "myorg"
-	private static _fetchHeaders: any;
-	private static _fetchRootUrl: string;
-	private static _fetch: any;
+	private static _headers;
 
 	//#region Initialization
 	static async initialize(apiRootUrl: string = "https://api.powerbi.com/"): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing PowerBI API Service ...");
-			const axios = require('axios');
-			const httpsAgent = require('https-agent');
 
-			// Set config defaults when creating the instance
-			this._apiService = axios.create({
-				httpsAgent: new httpsAgent({
-					rejectUnauthorized: ThisExtension.rejectUnauthorizedSSL
-				}),
-				baseURL: Helper.trimChar(apiRootUrl, '/') + '/',
-				proxy: ThisExtension.useProxy
-			});
+			this._apiBaseUrl = Helper.trimChar(apiRootUrl, '/');
 
 			// https://github.com/microsoft/vscode-azure-account/blob/main/sample/src/extension.ts
 
@@ -51,19 +43,13 @@ export abstract class PowerBIApiService {
 
 			let accessToken = await credential.getToken("https://analysis.windows.net/powerbi/api/.default");
 
-			this._apiService.defaults.headers.common['Authorization'] = "Bearer " + accessToken.token;
-			this._apiService.defaults.headers.common['Content-Type'] = 'application/json';
-			this._apiService.defaults.headers.common['Accept'] = 'application/json';
-
-			this._fetch = fetch;
-			this._fetchRootUrl = apiRootUrl;
-			this._fetchHeaders = {
+			this._headers = {
 				"Authorization": 'Bearer ' + accessToken.token,
 				"Content-Type": 'application/json',
 				"Accept": 'application/json'
 			}
 
-			ThisExtension.log(`Testing new PowerBI API (${apiRootUrl}) settings ()...`);
+			ThisExtension.log(`Testing new PowerBI API (${apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
 			let workspaceList = await this.getGroups();
 			this._connectionTestRunning = false;
@@ -94,69 +80,91 @@ export abstract class PowerBIApiService {
 	//#endregion
 
 	//#region Helpers
-	private static logResponse(response: any): void {
-		ThisExtension.log("Response: ");
-		ThisExtension.log(JSON.stringify(response.data));
+	private static async logResponse(response: any): Promise<void> {
+		ThisExtension.log("Response: " + JSON.stringify(response));
 	}
 
-	static async fetch(endpoint: string, options: any): Promise<any>
-	{
-		return await this._fetch(endpoint, options)
+	private static async handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): Promise<void> {
+		ThisExtension.log("ERROR: " + error.name);
+		ThisExtension.log("ERROR: " + error.message);
+		if (error.stack) {
+			ThisExtension.log("ERROR: " + error.stack);
+		}
+
+		if (showErrorMessage) {
+			vscode.window.showErrorMessage(error.message);
+		}
+
+		if (raise) {
+			throw error;
+		}
 	}
 
-	static async get(endpoint: string, params: object = null): Promise<any> {
+	private static getFullUrl(endpoint: string, params?: object): string {
+		let uri = vscode.Uri.parse(`${this._apiBaseUrl}/${endpoint}`);
+
+		if (params) {
+			let urlParams = []
+			for (let kvp of Object.entries(params)) {
+				urlParams.push(`${kvp[0]}=${kvp[1] as number | string | boolean}`)
+			}
+			uri = uri.with({ query: urlParams.join('&') })
+		}
+
+		return uri.toString(true);
+	}
+
+	static async get<T = any>(endpoint: string, params: object = null): Promise<T> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
 		else {
-			ThisExtension.log("GET " + endpoint);
-			ThisExtension.log("Params:" + JSON.stringify(params));
+			ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
 
-			let response: any = "Request not yet executed!";
 			try {
-				//response = await this._apiService.get(endpoint, params);
-				response = await this.fetch(this._fetchRootUrl, {
-					method: 'get',
-					headers: this._fetchHeaders
-				});
-				this.logResponse(response);
+				const config: RequestInit = {
+					method: "GET",
+					headers: this._headers,
+					agent: getProxyAgent()
+				};
+				let response: Response = await fetch(this.getFullUrl(endpoint, params), config);
+
+				let result = await response.json() as T;
+
+				await this.logResponse(result);
+
+				return result;
 			} catch (error) {
-				let errResponse = error.response;
-
-				ThisExtension.log("ERROR: " + error.message);
-				ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-				vscode.window.showErrorMessage(error.message);
+				this.handleApiException(error);
 
 				return undefined;
 			}
-
-			return response;
 		}
 	}
 
-	static async post(endpoint: string, body: object, headers?: object): Promise<any> {
-		ThisExtension.log("POST " + endpoint);
-		ThisExtension.log("Body:" + JSON.stringify(body));
+	//static async post(endpoint: string, body: object, headers?: object): Promise<any> {
+	static async post<T = any>(endpoint: string, body: object): Promise<T> {
+		ThisExtension.log("POST " + endpoint + " --> " + JSON.stringify(body));
 
-		let axiosConfig = {};
-		if (headers != undefined) {
-			axiosConfig = {
-				headers: headers
-			};
-		}
-
-		let response: any = "Request not yet executed!";
 		try {
-			response = await this._apiService.post(endpoint, body, axiosConfig);
-			this.logResponse(response);
+			const config: RequestInit = {
+				method: "POST",
+				headers: this._headers,
+				body: JSON.stringify(body),
+				agent: getProxyAgent()
+			};
+			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+
+			let result: T = await response.json() as T
+
+			await this.logResponse(result);
+
+			return result;
 		} catch (error) {
-			this.handleException(error);
+			this.handleApiException(error);
 
 			return undefined;
 		}
-
-		return response;
 	}
 
 	/*
@@ -193,47 +201,50 @@ export abstract class PowerBIApiService {
 	}
 	*/
 
-	static async patch(endpoint: string, body: object): Promise<any> {
-		ThisExtension.log("PATCH " + endpoint);
-		ThisExtension.log("Body:" + JSON.stringify(body));
+	static async patch<T = any>(endpoint: string, body: object): Promise<T> {
+		ThisExtension.log("PATCH " + endpoint + " --> " + JSON.stringify(body));
 
-		let response: any = "Request not yet executed!";
 		try {
-			response = await this._apiService.patch(endpoint, body);
-			this.logResponse(response);
+			const config: RequestInit = {
+				method: "PATCH",
+				headers: this._headers,
+				body: JSON.stringify(body),
+				agent: getProxyAgent()
+			};
+			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+			let result: T = await response.json() as T
+
+			await this.logResponse(result);
+
+			return result;
 		} catch (error) {
-			this.handleException(error);
+			this.handleApiException(error);
 
 			return undefined;
 		}
-
-		return response;
 	}
 
-	static async delete(endpoint: string, body: object): Promise<any> {
-		ThisExtension.log("DELETE " + endpoint);
-		ThisExtension.log("Body:" + JSON.stringify(body));
+	static async delete<T = any>(endpoint: string, body: object): Promise<T> {
+		ThisExtension.log("DELETE " + endpoint + " --> " + JSON.stringify(body));
 
-		let response: any = "Request not yet executed!";
 		try {
-			response = await this._apiService.delete(endpoint, body);
-			this.logResponse(response);
+			const config: RequestInit = {
+				method: "DELETE",
+				headers: this._headers,
+				body: JSON.stringify(body),
+				agent: getProxyAgent()
+			};
+			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+			let result: T = await response.json() as T
+
+			await this.logResponse(result);
+
+			return result;
 		} catch (error) {
-			this.handleException(error);
+			this.handleApiException(error);
 
 			return undefined;
 		}
-
-		return response;
-	}
-
-	private static handleException(error) {
-		let errResponse = error.response;
-
-		ThisExtension.log("ERROR: " + error.message);
-		ThisExtension.log("ERROR: " + JSON.stringify(errResponse.data));
-
-		vscode.window.showErrorMessage(error.message);
 	}
 
 	private static getUrl(groupId: string | UniqueId = undefined, itemType: ApiItemType = undefined): string {
@@ -289,8 +300,7 @@ export abstract class PowerBIApiService {
 	static async getItemList<T>(endpoint: string, body: any = {}, sortBy: string = "name"): Promise<T[]> {
 		let response = await this.get(endpoint, { params: body });
 
-		let result = response.data;
-		let items = result.value as T[];
+		let items = response.value as T[];
 
 		if (items == undefined) {
 			return [];
@@ -309,8 +319,7 @@ export abstract class PowerBIApiService {
 
 		let response = await this.get(endpoint, { params: body });
 
-		let result = response.data;
-		let listItems = result.value as T[];
+		let listItems = response.value as T[];
 
 		if (items == undefined) {
 			return [];
