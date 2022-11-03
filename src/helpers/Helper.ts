@@ -4,10 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import * as os from 'os';
-import * as fspath from 'path';
-import * as fs from 'fs';
-import { ThisExtension } from '../ThisExtension';
 
 export class UniqueId extends String {
 	// placeholder class for unique-ids in Power BI
@@ -22,21 +18,7 @@ export abstract class Helper {
 	private static _tempFiles: string[];
 	private static _doubleClickTimer: any;
 
-	private static writeBase64toFile(base64String: string, filePath: string): void {
-		Helper.ensureLocalFolder(filePath, true);
-		fs.writeFile(filePath, base64String, { encoding: 'base64' }, function (err) {
-			if (err) {
-				vscode.window.showErrorMessage(`ERROR writing file: ${err}`);
-			}
-		});
-	}
-
-	private static readBase64FromFile(filePath: string): string {
-		// read binary data
-		var bitmap = fs.readFileSync(filePath);
-		// convert binary data to base64 encoded string
-		return Buffer.from(bitmap).toString('base64');
-	}
+	
 
 
 	static async delay(ms: number) {
@@ -49,16 +31,6 @@ export abstract class Helper {
 			obj[key] = value;
 		}
 		return obj as T;
-	}
-
-	static ensureLocalFolder(path: string, pathIsFile: boolean = false): void {
-		let folder = path;
-		if (pathIsFile) {
-			folder = fspath.dirname(path);
-		}
-		if (!fs.existsSync(folder)) {
-			fs.mkdirSync(folder, { recursive: true });
-		}
 	}
 
 	static sortArrayByProperty<T>(unsortedArray: Array<T>, property: string = "label", direction: "ASC" | "DESC" = "ASC") {
@@ -87,12 +59,6 @@ export abstract class Helper {
 		this._tempFiles.push(filePath);
 	}
 
-	static removeTempFiles(): void {
-		for (const tempFile of Helper.tempFiles) {
-			fs.unlink(tempFile, (err) => { if (err) { vscode.window.showErrorMessage(err.message); } });
-		}
-	}
-
 	static trimChar(text: string, charToRemove: string, fromLeft: boolean = true, fromRight: boolean = true) {
 		if (text == undefined) { return undefined; }
 		if (text.length == 0) { return text; }
@@ -119,40 +85,7 @@ export abstract class Helper {
 		vscode.commands.executeCommand("vscode.diff", localFileUri, onlnieFileUri, "Online <-> Local", options);
 	}
 
-	static resolvePath(filepath: string): string {
-		// replace environment variables in path
-		const envVarRegex = /\$([A-Z_]+[A-Z0-9_]*)|\${([A-Z0-9_]*)}|%([^%]+)%/ig;
-
-		do {
-			filepath = filepath.replace(envVarRegex, (_, a, b, c) => process.env[a || b || c]);
-		} while(filepath.match(envVarRegex));
-
-		if (filepath[0] === '~') {
-			// could also use os.homedir()
-			const homeVar = process.platform === 'win32' ? 'USERPROFILE' : 'HOME';
-			return fspath.join(process.env[homeVar], filepath.slice(1));
-		}
-		else {
-			return fspath.resolve(filepath);
-		}
-
-		/*
-		Migrate to Portable mode
-		You can also migrate an existing installation to Portable mode:
-
-		Download the VS Code ZIP distribution for your platform.
-		Create the data or code-portable-data folder as above.
-		Copy the user data directory Code to data and rename it to user-data:
-		Windows %APPDATA%\Code
-		macOS $HOME/Library/Application Support/Code
-		Linux $HOME/.config/Code
-		Copy the extensions directory to data:
-		Windows %USERPROFILE%\.vscode\extensions
-		macOS ~/.vscode/extensions
-		Linux ~/.vscode/extensions
-		*/
-	}
-
+	
 	static openLink(link: string): void {
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(link));
 	}
@@ -226,10 +159,6 @@ export abstract class Helper {
 			return array[0][1];
 		}
 		return null;
-	}
-
-	static getUserDir(): string {
-		return os.homedir();
 	}
 
 	static parseBoolean(value: string): boolean {

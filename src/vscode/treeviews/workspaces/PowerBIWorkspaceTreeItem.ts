@@ -1,14 +1,10 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
-import { ThisExtension } from '../../../ThisExtension';
 import { UniqueId } from '../../../helpers/Helper';
 
 import { ApiItemType } from '../_types';
 import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
-import { iPowerBIApiItem } from '../iPowerBIApiItem';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
-import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPowerBIWorkspaceItem {
 	protected _groupId: UniqueId;

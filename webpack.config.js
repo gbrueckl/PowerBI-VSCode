@@ -25,6 +25,9 @@ const webConfig = /** @type WebpackConfig */ {
         extensions: [".ts", ".js"], // support ts-files and js-files
         alias: {
             '@env': path.join(__dirname, './src/env/web')
+        },
+        fallback: {
+            "path": false
         }
     },
     module: {

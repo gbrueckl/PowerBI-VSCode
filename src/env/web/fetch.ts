@@ -14,7 +14,8 @@ declare global {
 declare type _BodyInit = BodyInit;
 declare type _RequestInit = RequestInit;
 declare type _Response = Response;
-export type { _BodyInit as BodyInit, _RequestInit as RequestInit, _Response as Response };
+declare type _FormData = FormData;
+export type { _BodyInit as BodyInit, _RequestInit as RequestInit, _Response as Response, _FormData as FormData };
 
 export function getProxyAgent(_strictSSL?: boolean): HttpsProxyAgent | undefined {
 	return undefined;

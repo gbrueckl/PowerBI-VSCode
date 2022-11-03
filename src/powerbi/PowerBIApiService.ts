@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-//import * as FormData from 'form-data';
 
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
@@ -13,7 +12,7 @@ import { iPowerBIGateway } from './GatewayAPI/_types';
 
 
 import { fetch, getProxyAgent } from '@env/fetch';
-import { RequestInit, Response } from '@env/fetch';
+import { RequestInit, Response, FormData } from '@env/fetch';
 
 export abstract class PowerBIApiService {
 	private static _isInitialized: boolean = false;
@@ -31,7 +30,7 @@ export abstract class PowerBIApiService {
 
 			// https://github.com/microsoft/vscode-azure-account/blob/main/sample/src/extension.ts
 
-			const { useIdentityPlugin, VisualStudioCodeCredential } = require("@azure/identity");
+			const { useIdentityPlugin, VisualStudioCodeCredential, DefaultAzureCredential  } = require("@azure/identity");
 
 			// The plugin is the package's default export, so you may import and use it
 			// as any name you like, and simply pass it to `useIdentityPlugin`.
@@ -39,7 +38,7 @@ export abstract class PowerBIApiService {
 
 			useIdentityPlugin(vsCodePlugin);
 
-			let credential = new VisualStudioCodeCredential();
+			let credential = new DefaultAzureCredential();
 
 			let accessToken = await credential.getToken("https://analysis.windows.net/powerbi/api/.default");
 
@@ -101,7 +100,7 @@ export abstract class PowerBIApiService {
 	}
 
 	private static getFullUrl(endpoint: string, params?: object): string {
-		let uri = vscode.Uri.parse(`${this._apiBaseUrl}/${endpoint}`);
+		let uri = vscode.Uri.parse(`${this._apiBaseUrl}/${Helper.trimChar(endpoint, '/')}`);
 
 		if (params) {
 			let urlParams = []
@@ -167,39 +166,37 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	/*
-	static async postFile(endpoint: string, file: string | URL): Promise<any> {
-		ThisExtension.log("POST " + endpoint);
-		ThisExtension.log("Content:" + "<stream>");
 
-		const contentLength: number = fs.statSync(file).size;
+	static async postFile(endpoint: string, uri: vscode.Uri): Promise<any> {
+		ThisExtension.log("POST " + endpoint + " --> (File)" + uri);
 
-		let fileStream = await fs.createReadStream(file);
-
-		const form = new FormData();
-		form.append("Content", fileStream);
-
-		const contentHeaders = {
-			"Content-Length": contentLength
-			//"Content-Type": "multipart/form-data"
-		};
-
-		let axiosConfig = {
-			headers: { ...(form.getHeaders()), ...contentHeaders }
-		};
-		let response: any = "Request not yet executed!";
 		try {
-			response = await this._apiService.post(endpoint, form, axiosConfig);
-			this.logResponse(response);
+			let data: FormData = new FormData();
+			data.append('file', uri.fsPath);
+
+			let headers = this._headers;
+
+			headers["Content-Type"] = "multipart/form-data";
+
+			const config: RequestInit = {
+				method: "POST",
+				headers: headers,
+				body: data,
+				agent: getProxyAgent()
+			};
+			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+
+			let result = await response.json()
+
+			await this.logResponse(result);
+
+			return result;
 		} catch (error) {
-			this.handleException(error);
+			this.handleApiException(error);
 
 			return undefined;
 		}
-
-		return response;
 	}
-	*/
 
 	static async patch<T = any>(endpoint: string, body: object): Promise<T> {
 		ThisExtension.log("PATCH " + endpoint + " --> " + JSON.stringify(body));

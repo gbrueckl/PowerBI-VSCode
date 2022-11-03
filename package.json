@@ -20,7 +20,7 @@
 	},
 	"qna": "https://github.com/gbrueckl/PowerBI-VSCode",
 	"engines": {
-		"vscode": "^1.66.0"
+		"vscode": "^1.68.0"
 	},
 	"galleryBanner": {
 		"color": "#0ea5ff",
@@ -294,17 +294,19 @@
 		"compile": "webpack",
 		"watch": "webpack --watch",
 		"package": "webpack --mode production --devtool hidden-source-map",
-		"lint": "eslint src --ext ts"
+		"lint": "eslint src --ext ts",
+		"test": "vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/web/extension.js"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^9.1.1",
 		"@types/node": "^12.12.0",
 		"@types/rimraf": "^2.0.5",
-		"@types/vscode": "^1.66.0",
+		"@types/vscode": "^1.68.0",
 		"eslint": "^8.19.0",
 		"glob": "^8.0.3",
 		"mocha": "^10.0.0",
+		"process": "^0.11.10",
 		"native-ext-loader": "^2.3.0",
 		"ts-loader": "^9.3.1",
 		"typescript": "^4.7.4",
@@ -312,14 +314,9 @@
 		"webpack-cli": "^4.10.0"
 	},
 	"dependencies": {
-		"@angular/common": "^14.0.1",
-		"@angular/core": "^14.0.1",
 		"@azure/identity": "^2.0.4",
 		"@azure/identity-vscode": "^1.0.0",
-		"axios": "^0.21.4",
-		"form-data": "^4.0.0",
 		"https-agent": "^1.0.0",
-		"jsonc-parser": "^0.4.2",
 		"node-fetch": "^3.2.10"
 	}
 }

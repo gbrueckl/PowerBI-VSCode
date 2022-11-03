@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
 import { UniqueId } from '../../helpers/Helper';
 
@@ -49,8 +48,8 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		};
 	}
 
-	protected getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, this.itemType.toLowerCase() + '.png');
+	protected getIconPath(theme: string): vscode.Uri {
+		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + '.png');
 	}	
 
 	// command to execute when clicking the TreeItem

@@ -22,8 +22,8 @@ export abstract class ThisExtension {
 	private static _treeViewGateways: PowerBIGatewaysTreeProvider;
 	private static _treeViewPipeliness: PowerBIPipelinesTreeProvider;
 
-	static get rootPath(): string {
-		return this._context.extensionPath;
+	static get rootUri(): vscode.Uri {
+		return this._context.extensionUri;
 	}
 
 	static get extensionContext(): vscode.ExtensionContext {
@@ -138,7 +138,7 @@ export abstract class ThisExtension {
 	}
 
 	static cleanUp(): void {
-		Helper.removeTempFiles();
+		
 	}
 
 	static log(text: string, newLine: boolean = true): void {

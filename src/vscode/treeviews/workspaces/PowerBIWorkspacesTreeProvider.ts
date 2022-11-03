@@ -9,7 +9,6 @@ import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIWorkspacesDragAndDropController } from './PowerBIWorkspacesDragAndDropController';
-import { Time } from '@angular/common';
 import { PowerBIWorkspacePersonal } from './PowerBIWorkspacePersonal';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html

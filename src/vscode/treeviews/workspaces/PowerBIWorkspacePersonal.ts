@@ -1,21 +1,13 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
-import * as fs from 'fs';
 
-import { Helper } from '../../../helpers/Helper';
+
 import { ThisExtension } from '../../../ThisExtension';
 
-import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIDatasets } from './PowerBIDatasets';
 import { PowerBIReports } from './PowerBIReports';
 import { PowerBIDashboards } from './PowerBIDashboards';
-import { PowerBIDataflows } from './PowerBIDataflows';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
-import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
-import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
-import { URL } from 'url';
-import { PowerBIReport } from './PowerBIReport';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -33,8 +25,8 @@ export class PowerBIWorkspacePersonal extends PowerBIWorkspace {
 
 	/* Overwritten properties from PowerBIApiTreeItem */
 
-	protected getIconPath(theme: string): string {
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, this.itemType.toLowerCase() + '.png');
+	protected getIconPath(theme: string): vscode.Uri {
+		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + '.png');
 	}
 
 	get apiUrlPart(): string {

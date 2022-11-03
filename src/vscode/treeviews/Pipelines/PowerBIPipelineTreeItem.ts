@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
 
-import { ThisExtension } from '../../../ThisExtension';
 import { UniqueId } from '../../../helpers/Helper';
 
 import { ApiItemType } from '../_types';

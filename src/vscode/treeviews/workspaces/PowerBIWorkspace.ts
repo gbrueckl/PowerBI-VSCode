@@ -1,8 +1,5 @@
 import * as vscode from 'vscode';
-import * as fspath from 'path';
-import * as fs from 'fs';
 
-import { Helper } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 
 import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
@@ -47,12 +44,12 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 		return this.definition.isOnDedicatedCapacity
 	}
 
-	protected getIconPath(theme: string): string {
+	protected getIconPath(theme: string): vscode.Uri {
 		let premium = "";
 		if(this.isPremiumCapacity) {
 			premium = "_premium";
 		}
-		return fspath.join(ThisExtension.rootPath, 'resources', theme, this.itemType.toLowerCase() + premium + '.png');
+		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + premium + '.png');
 	}
 
 	get apiUrlPart(): string {
@@ -94,21 +91,13 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 
 		if(fileItem)
 		{
-			const fileUri = new URL(await fileItem.asString());// "file:///d:/Desktop/DeltaLake_New.pbix"; //await fileItem.asString();
-			const fileName = fileUri.pathname.split("/").pop().split(".")[0];
+			const fileUri = vscode.Uri.parse(await fileItem.asString());// "file:///d:/Desktop/DeltaLake_New.pbix"; //await fileItem.asString();
+			const fileName = fileUri.path.split("/").pop().split(".")[0];
 
 			let url = this.apiPath + "/imports?datasetDisplayName=" + fileName;
 			
-			/*
+			
 			let importRequest = await PowerBIApiService.postFile(url, fileUri);
-
-			importRequest.then(function (body) {
-				ThisExtension.log('success! ', body);
-			})
-				.catch(function (err) {
-				ThisExtension.log('error', err);
-			});
-			*/
 		}
 
 		if(transferItem)
