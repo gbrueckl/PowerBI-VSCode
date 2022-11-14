@@ -81,9 +81,9 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		return this._id.toString();
 	}
 
-	// used in package.json to filter commands via viewItem == CANSTART
+	// used in package.json to filter commands via viewItem =~ /.*,GROUP,.*/
 	get _contextValue(): string {
-		return this.itemType;
+		return "," + this.itemType + ",";
 	}
 	
 	public async getChildren(element?: PowerBIApiTreeItem): Promise<PowerBIApiTreeItem[]> {
@@ -141,7 +141,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	}
 
 	get apiPath1(): string {
-		if (this.uid != null && this.uid != undefined)
+		if (this.uid != undefined && this.uid != null)
 		{
 			return `v1.0/${PowerBIApiService.Org}/${this.itemType.toString().toLowerCase()}s/${this.uid}`;
 		}

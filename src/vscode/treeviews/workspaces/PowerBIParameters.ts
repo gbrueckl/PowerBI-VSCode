@@ -50,7 +50,7 @@ export class PowerBIParameters extends PowerBIWorkspaceTreeItem {
 			let items: iPowerBIDatasetParameter[] = await PowerBIApiService.getItemList<iPowerBIDatasetParameter>(this.apiPath);
 
 			for (let item of items) {
-				let treeItem = new PowerBIParameter(item, this.group, this);
+				let treeItem = new PowerBIParameter(item, this.groupId, this);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}

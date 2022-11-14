@@ -46,7 +46,7 @@ export class PowerBIDataflows extends PowerBIWorkspaceTreeItem {
 			let items: iPowerBIDataflow[] = await PowerBIApiService.getItemList<iPowerBIDataflow>(this.apiPath, {}, "displayName");
 
 			for (let item of items) {
-				let treeItem = new PowerBIDataflow(item, this.group, this);
+				let treeItem = new PowerBIDataflow(item, this.groupId, this);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}

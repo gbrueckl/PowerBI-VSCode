@@ -47,7 +47,7 @@ export class PowerBIReports extends PowerBIWorkspaceTreeItem {
 			let items: iPowerBIReport[] = await PowerBIApiService.getItemList<iPowerBIReport>(this.apiPath);
 
 			for (let item of items) {
-				let treeItem = new PowerBIReport(item, this.group, this);
+				let treeItem = new PowerBIReport(item, this.groupId, this);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}

@@ -33,3 +33,21 @@ export class iPowerBIDatasetParameter {
 	currentValue: string;
 	suggestedValues?: string[];
 }
+
+export class iPowerBIDatasetExecuteQueries {
+	error?: {
+		code: string;
+		message: string
+	};
+	informationProtectionLabel?: {
+		id: string;
+		name: string;
+	};
+	results?: {
+		error?: string;
+		tables: {
+			error?: string;
+			rows: object[];
+		}[];
+	}[];
+}

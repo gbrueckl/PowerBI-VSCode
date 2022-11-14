@@ -8,8 +8,9 @@ import { iPowerBIDataset } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIReport } from './PowerBIReport';
-import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { PowerBIParameters } from './PowerBIParameters';
+import { PowerBIKernelManager } from '../../notebook/PowerBIKernelManager';
+import { PowerBIKernel } from '../../notebook/PowerBIKernel';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -24,9 +25,27 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		this.definition = definition;
 		
 		super.tooltip = this._tooltip;
+		super.contextValue = this._contextValue;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = []
+
+		if(this.NotebookKernelExists)
+		{
+			actions.push("REMOVE_KERNEL")
+		}
+		else
+		{
+			actions.push("CREATE_KERNEL")
+		}
+
+		return orig + actions.join(",") + ",";
+	}
+
 	get definition(): iPowerBIDataset {
 		return super.definition as iPowerBIDataset;
 	}
@@ -35,7 +54,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		super.definition = value;
 	}
 
-	get canDoChangse(): boolean {
+	get canDoChanges(): boolean {
 		return "" == this.definition.configuredBy;
 	}
 
@@ -44,7 +63,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 		let children: PowerBIWorkspaceTreeItem[] = [];
 		
-		children.push(new PowerBIParameters(this.group, this));
+		children.push(new PowerBIParameters(this.groupId, this));
 
 		return children;
 	}
@@ -75,7 +94,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 							await (source as PowerBIReport).clone({
 								name: source.name,
 								targetModelId: this.id,
-								targetWorkspaceId: this.group
+								targetWorkspaceId: this.groupId
 							});
 							
 							ThisExtension.TreeViewWorkspaces.refresh(false, this.parent.parent);
@@ -95,6 +114,28 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	// #endregion
 
 	// Dataset-specific funtions
+	private get NotebookKernel(): PowerBIKernel {
+		return PowerBIKernelManager.getNotebookKernel(this);
+	}
+
+	public get NotebookKernelExists(): boolean {
+		if (this.NotebookKernel) {
+			return true;
+		}
+		return false;
+	}
+
+	private get InteractiveKernel(): PowerBIKernel {
+		return PowerBIKernelManager.getNotebookKernel(this);
+	}
+
+	public get InteractiveKernelExists(): boolean {
+		if (this.InteractiveKernel) {
+			return true;
+		}
+		return false;
+	}
+
 	public async delete(): Promise<void> {
 		ThisExtension.setStatusBar("Deleting dataset ...", true);
 		await PowerBICommandBuilder.execute<iPowerBIDataset>(this.apiPath, "DELETE", []);
@@ -119,5 +160,13 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	public async updateAllParameters(): Promise<void> {
 		// TODO
+	}
+
+	async createKernel(logMessages: boolean = true): Promise<void> {
+		PowerBIKernelManager.createKernels(this, logMessages);
+	}
+
+	async removeKernel(): Promise<void> {
+		PowerBIKernelManager.removeKernels(this);
 	}
 }

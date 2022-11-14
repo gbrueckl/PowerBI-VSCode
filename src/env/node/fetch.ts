@@ -1,11 +1,11 @@
 import * as process from 'process';
 import * as url from 'url';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import fetch from 'node-fetch';
-import { FormData } from 'node-fetch';
+import fetch, { File, fileFrom } from 'node-fetch'
 import { ThisExtension } from '../../ThisExtension';
 
-export { fetch, FormData };
+const FormData = require('form-data');
+export { fetch, FormData, File, fileFrom };
 export type { BodyInit, RequestInit, Response } from 'node-fetch';
 
 export function getProxyAgent(strictSSL?: boolean): HttpsProxyAgent | undefined {

@@ -265,6 +265,10 @@ export abstract class ThisExtension {
 
 		return httpProxyStrictSSL.value;
 	}
+
+	static PushDisposable(item: any) {
+		this.extensionContext.subscriptions.push(item);
+	}
 }
 
 export type ConfigSettingSource =

@@ -39,7 +39,7 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 	}
 
 	/* iDatabrickWorkspaceItem implementation */
-	get group(): UniqueId {
+	get groupId(): UniqueId {
 		return this._groupId;
 	}
 }

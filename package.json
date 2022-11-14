@@ -123,6 +123,16 @@
 				"icon": "$(refresh)"
 			},
 			{
+				"command": "PowerBIDataset.createKernel",
+				"title": "Create Notebook Kernel",
+				"icon": "$(notebook)"
+			},
+			{
+				"command": "PowerBIDataset.removeKernel",
+				"title": "Remove Notebook Kernel",
+				"icon": "$(notebook-template)"
+			},
+			{
 				"command": "PowerBIDataset.takeOver",
 				"title": "Take Over",
 				"icon": {
@@ -228,62 +238,72 @@
 			"view/item/context": [
 				{
 					"command": "PowerBIWorkspace.delete",
-					"when": "view == PowerBIWorkspaces && viewItem == GROUP",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIDataset.delete",
-					"when": "view == PowerBIWorkspaces && viewItem == DATASET",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIDataset.refresh",
-					"when": "view == PowerBIWorkspaces && viewItem == DATASET",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIDataset.createKernel",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,CREATE_KERNEL,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIDataset.removeKernel",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,REMOVE_KERNEL,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIDataset.takeOver",
-					"when": "view == PowerBIWorkspaces && viewItem == DATASET"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/"
 				},
 				{
 					"command": "PowerBIDataset.updateAllParameters",
-					"when": "view == PowerBIWorkspaces && viewItem == DATASET"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/"
 				},
 				{
 					"command": "PowerBIDatasetParameter.update",
-					"when": "view == PowerBIWorkspaces && viewItem == PARAMETER",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,PARAMETER,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIReport.delete",
-					"when": "view == PowerBIWorkspaces && viewItem == REPORT",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIReport.clone",
-					"when": "view == PowerBIWorkspaces && viewItem == REPORT"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/"
 				},
 				{
 					"command": "PowerBIReport.rebind",
-					"when": "view == PowerBIWorkspaces && viewItem == REPORT"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/"
 				},
 				{
 					"command": "PowerBIReport.updateContent",
-					"when": "view == PowerBIWorkspaces && viewItem == REPORT"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/"
 				},
 				{
 					"command": "PowerBIDataflow.delete",
-					"when": "view == PowerBIWorkspaces && viewItem == DATAFLOW",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATAFLOW,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIDataflow.refresh",
-					"when": "view == PowerBIWorkspaces && viewItem == DATAFLOW",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATAFLOW,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIDashboard.delete",
-					"when": "view == PowerBIWorkspaces && viewItem == DASHBOARD",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATAFLOW,.*/",
 					"group": "inline"
 				}
 			]

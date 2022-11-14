@@ -46,7 +46,7 @@ export class PowerBIDashboards extends PowerBIWorkspaceTreeItem {
 			let items: iPowerBIDashboard[] = await PowerBIApiService.getItemList<iPowerBIDashboard>(this.apiPath, {}, "displayName");
 
 			for (let item of items) {
-				let treeItem = new PowerBIDashboard(item, this.group, this);
+				let treeItem = new PowerBIDashboard(item, this.groupId, this);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}

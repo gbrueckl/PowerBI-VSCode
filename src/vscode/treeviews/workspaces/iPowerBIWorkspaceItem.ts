@@ -9,5 +9,5 @@ export interface iPowerBIWorkspaceItem {
 	name: string;
 
 	/* new properties */
-	group: UniqueId;
+	groupId: UniqueId;
 }

@@ -44,7 +44,7 @@ export class PowerBIDatasets extends PowerBIWorkspaceTreeItem {
 			let items: iPowerBIDataset[] = await PowerBIApiService.getItemList<iPowerBIDataset>(this.apiPath);
 
 			for (let item of items) {
-				let treeItem = new PowerBIDataset(item, this.group, this);
+				let treeItem = new PowerBIDataset(item, this.groupId, this);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}

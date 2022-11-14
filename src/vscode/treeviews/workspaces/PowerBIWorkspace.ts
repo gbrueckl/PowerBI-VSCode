@@ -11,7 +11,6 @@ import { PowerBIDataflows } from './PowerBIDataflows';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
-import { URL } from 'url';
 import { PowerBIReport } from './PowerBIReport';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -94,7 +93,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 			const fileUri = vscode.Uri.parse(await fileItem.asString());// "file:///d:/Desktop/DeltaLake_New.pbix"; //await fileItem.asString();
 			const fileName = fileUri.path.split("/").pop().split(".")[0];
 
-			let url = this.apiPath + "/imports?datasetDisplayName=" + fileName;
+			let url = this.apiPath + "imports?datasetDisplayName=" + fileName;
 			
 			
 			let importRequest = await PowerBIApiService.postFile(url, fileUri);

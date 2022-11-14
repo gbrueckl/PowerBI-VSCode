@@ -6,13 +6,12 @@ import { iPowerBIGroup } from './GroupsAPI/_types';
 import { ApiItemType } from '../vscode/treeviews/_types';
 import { iPowerBIPipeline, iPowerBIPipelineStage } from './PipelinesAPI/_types';
 import { ApiUrlPair } from './_types';
-import { iPowerBIDatasetParameter } from './DatasetsAPI/_types';
+import { iPowerBIDataset, iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
 
 
-import { fetch, getProxyAgent } from '@env/fetch';
-import { RequestInit, Response, FormData } from '@env/fetch';
+import { fetch, getProxyAgent, RequestInit, Response, File, FormData } from '@env/fetch';
 
 export abstract class PowerBIApiService {
 	private static _isInitialized: boolean = false;
@@ -30,7 +29,7 @@ export abstract class PowerBIApiService {
 
 			// https://github.com/microsoft/vscode-azure-account/blob/main/sample/src/extension.ts
 
-			const { useIdentityPlugin, VisualStudioCodeCredential, DefaultAzureCredential  } = require("@azure/identity");
+			const { useIdentityPlugin, VisualStudioCodeCredential, DefaultAzureCredential } = require("@azure/identity");
 
 			// The plugin is the package's default export, so you may import and use it
 			// as any name you like, and simply pass it to `useIdentityPlugin`.
@@ -38,6 +37,7 @@ export abstract class PowerBIApiService {
 
 			useIdentityPlugin(vsCodePlugin);
 
+			//https://learn.microsoft.com/en-us/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
 			let credential = new DefaultAzureCredential();
 
 			let accessToken = await credential.getToken("https://analysis.windows.net/powerbi/api/.default");
@@ -141,7 +141,6 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	//static async post(endpoint: string, body: object, headers?: object): Promise<any> {
 	static async post<T = any>(endpoint: string, body: object): Promise<T> {
 		ThisExtension.log("POST " + endpoint + " --> " + JSON.stringify(body));
 
@@ -172,11 +171,16 @@ export abstract class PowerBIApiService {
 
 		try {
 			let data: FormData = new FormData();
-			data.append('file', uri.fsPath);
+			data.append('file', uri.fsPath, uri.path.split('/').pop());
+
+			const formData = new FormData()
+			const binary = await vscode.workspace.fs.readFile(uri);
+			const uploadFile = new File([binary], uri.path.split('/').pop(), { type: "multipart/form-data" })
+
+			//formData.append('file-upload', uploadFile, uploadFile.name);
 
 			let headers = this._headers;
-
-			headers["Content-Type"] = "multipart/form-data";
+			delete headers["Content-Type"];
 
 			const config: RequestInit = {
 				method: "POST",
@@ -186,7 +190,7 @@ export abstract class PowerBIApiService {
 			};
 			let response: Response = await fetch(this.getFullUrl(endpoint), config);
 
-			let result = await response.json()
+			let result = await response.text();
 
 			await this.logResponse(result);
 
@@ -345,6 +349,29 @@ export abstract class PowerBIApiService {
 		]);
 
 		return items;
+	}
+
+	static async executeQueries(groupId: string | UniqueId, datasetId: string | UniqueId, daxQuery: string): Promise<iPowerBIDatasetExecuteQueries> {
+		let endpoint: string = `v1.0/${PowerBIApiService.Org}/groups/${groupId}/datasets/${datasetId}/executeQueries`
+		ThisExtension.log("POST " + endpoint);
+
+		try {
+			let body: any = {
+				queries: [
+					{
+						query: daxQuery
+					}
+				]
+			}
+
+			let result: iPowerBIDatasetExecuteQueries = await this.post<iPowerBIDatasetExecuteQueries>(endpoint, body);
+
+			return result;
+		} catch (error) {
+			this.handleApiException(error);
+
+			return undefined;
+		}
 	}
 	//#endregion
 

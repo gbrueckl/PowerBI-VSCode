@@ -21,6 +21,11 @@ Please refer to the [official docs and samples](https://github.com/microsoft/vsc
 
 # Change Log
 
+**v0.1.0**:
+- added Notebook Kernel to execute DAX queries against a dataset
+- using Fetch API for calls to PowerBI REST API
+- minor fixes for Drag&Drop
+
 **v0.0.5**:
 - added dataset parameters
 - reworkd API URL builder

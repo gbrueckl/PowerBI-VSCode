@@ -52,7 +52,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 						this.updateContent({
 							sourceReport: {
 								sourceReportId: source.id,
-								sourceWorkspaceId: source.group
+								sourceWorkspaceId: source.groupId
 							},
 							sourceType: "ExistingReport"
 						});
