@@ -18,7 +18,7 @@ export class PowerBIRefresh extends PowerBIWorkspaceTreeItem {
 		group: UniqueId,
 		parent: PowerBIRefreshes
 	) {
-		super(definition.endTime.toString(), group, "REFRESH", definition.requestId, parent, vscode.TreeItemCollapsibleState.None);
+		super(definition.requestId, group, "REFRESH", definition.requestId, parent, vscode.TreeItemCollapsibleState.None);
 
 		this.definition = definition;
 
@@ -26,6 +26,7 @@ export class PowerBIRefresh extends PowerBIWorkspaceTreeItem {
 		super.label = this._label;
 		super.description = this._description;
 		super.tooltip = this._tooltip;
+		super.contextValue = this._contextValue;
 		super.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
@@ -50,6 +51,18 @@ export class PowerBIRefresh extends PowerBIWorkspaceTreeItem {
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = []
+
+		if(this.definition.status == "Unknown")
+		{
+			actions.push("CANCEL")
+		}
+
+		return orig + actions.join(",") + ",";
+	}
 	get definition(): iPowerBIDatasetRefresh {
 		return super.definition as iPowerBIDatasetRefresh;
 	}
@@ -63,4 +76,9 @@ export class PowerBIRefresh extends PowerBIWorkspaceTreeItem {
 	}
 
 	// Parameter-specific funtions
+	public async cancel(): Promise<void> {
+		ThisExtension.setStatusBar("Cancelling dataset-refresh ...", true);
+		PowerBIApiService.delete(this.apiPath, null);
+		ThisExtension.setStatusBar("Dataset-refresh cancelled!");
+	}
 }

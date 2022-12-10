@@ -11,6 +11,7 @@ import { PowerBIDashboard } from './vscode/treeviews/workspaces/PowerBIDashboard
 import { PowerBIDataflow } from './vscode/treeviews/workspaces/PowerBIDataflow';
 import { PowerBIDataset } from './vscode/treeviews/workspaces/PowerBIDataset';
 import { PowerBIParameter } from './vscode/treeviews/workspaces/PowerBIParameter';
+import { PowerBIRefresh } from './vscode/treeviews/workspaces/PowerBIRefresh';
 import { PowerBIReport } from './vscode/treeviews/workspaces/PowerBIReport';
 import { PowerBIWorkspace } from './vscode/treeviews/workspaces/PowerBIWorkspace';
 
@@ -41,6 +42,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Dataset commands
 	vscode.commands.registerCommand('PowerBIDataset.delete', (dataset: PowerBIDataset) => dataset.delete());
 	vscode.commands.registerCommand('PowerBIDataset.refresh', (dataset: PowerBIDataset) => dataset.refresh());
+	vscode.commands.registerCommand('PowerBIDataset.cancelRefresh', (refresh: PowerBIRefresh) => refresh.cancel());
 	vscode.commands.registerCommand('PowerBIDataset.createKernel', (dataset: PowerBIDataset) => dataset.createKernel());
 	vscode.commands.registerCommand('PowerBIDataset.removeKernel', (dataset: PowerBIDataset) => dataset.removeKernel());
 	vscode.commands.registerCommand('PowerBIDataset.takeOver', (dataset: PowerBIDataset) => dataset.takeOver());

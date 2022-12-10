@@ -142,6 +142,11 @@
 				"icon": "$(refresh)"
 			},
 			{
+				"command": "PowerBIDataset.cancelRefresh",
+				"title": "Cancel",
+				"icon": "$(stop)"
+			},
+			{
 				"command": "PowerBIDataset.createKernel",
 				"title": "Create Notebook Kernel",
 				"icon": "$(notebook)"
@@ -287,6 +292,11 @@
 				{
 					"command": "PowerBIDataset.updateAllParameters",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/"
+				},
+				{
+					"command": "PowerBIDataset.cancelRefresh",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REFRESH,.*/ && viewItem =~ /.*,CANCEL,.*/",
+					"group": "inline"
 				},
 				{
 					"command": "PowerBIDatasetParameter.update",
