@@ -19,4 +19,6 @@ export type ApiItemType =
 |	"PIPELINESTAGE"
 |	"PARAMETERS"
 |	"PARAMETER"
+|	"REFRESHES"
+|	"REFRESH"
 ;

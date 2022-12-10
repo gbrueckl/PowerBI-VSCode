@@ -309,7 +309,10 @@ export abstract class PowerBIApiService {
 		if (items == undefined) {
 			return [];
 		}
-		Helper.sortArrayByProperty(items, sortBy);
+		if(sortBy)
+		{
+			Helper.sortArrayByProperty(items, sortBy);
+		}
 		return items;
 	}
 

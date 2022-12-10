@@ -11,6 +11,7 @@ import { PowerBIReport } from './PowerBIReport';
 import { PowerBIParameters } from './PowerBIParameters';
 import { PowerBIKernelManager } from '../../notebook/PowerBIKernelManager';
 import { PowerBIKernel } from '../../notebook/PowerBIKernel';
+import { PowerBIRefreshes } from './PowerBIRefreshes';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -64,6 +65,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		let children: PowerBIWorkspaceTreeItem[] = [];
 		
 		children.push(new PowerBIParameters(this.groupId, this));
+		children.push(new PowerBIRefreshes(this.groupId, this));
 
 		return children;
 	}

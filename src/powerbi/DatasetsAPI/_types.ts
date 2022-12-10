@@ -51,3 +51,11 @@ export class iPowerBIDatasetExecuteQueries {
 		}[];
 	}[];
 }
+
+export class iPowerBIDatasetRefresh {
+    refreshType: string;
+    startTime: Date;
+    endTime: Date;
+    status: string;
+    requestId: string;
+}

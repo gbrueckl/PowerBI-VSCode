@@ -1,0 +1,60 @@
+import * as vscode from 'vscode';
+
+import {  UniqueId } from '../../../helpers/Helper';
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+
+import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
+import { PowerBIDataset } from './PowerBIDataset';
+import { iPowerBIDataset, iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
+import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBIRefresh } from './PowerBIRefresh';
+
+// https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
+export class PowerBIRefreshes extends PowerBIWorkspaceTreeItem {
+
+	constructor(
+		groupId: UniqueId,
+		parent: PowerBIWorkspaceTreeItem
+	) {
+		super("Refreshes", groupId, "REFRESHES", groupId, parent);
+
+		// the groupId is not unique for logical folders hence we make it unique
+		super.id = groupId + "/" + this.itemType.toString();
+	}
+
+	// tooltip shown when hovering over the item
+	get _tooltip(): string {
+		return undefined;
+	}
+
+	// description is show next to the label
+	get _description(): string {
+		return undefined;
+	}
+
+	get dataset(): PowerBIDataset {
+		return this.parent as PowerBIDataset;
+	}
+
+	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
+		if (!PowerBIApiService.isInitialized) {
+			return Promise.resolve([]);
+		}
+
+		if (element != null && element != undefined) {
+			return element.getChildren();
+		}
+		else {
+			let children: PowerBIRefresh[] = [];
+			let items: iPowerBIDatasetRefresh[] = await PowerBIApiService.getItemList<iPowerBIDatasetRefresh>(this.apiPath, undefined, null);
+
+			for (let item of items) {
+				let treeItem = new PowerBIRefresh(item, this.groupId, this);
+				children.push(treeItem);
+				PowerBICommandBuilder.pushQuickPickItem(treeItem);
+			}
+
+			return children;
+		}
+	}
+}
