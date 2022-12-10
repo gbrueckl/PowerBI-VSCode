@@ -6,7 +6,7 @@ import { iPowerBIGroup } from './GroupsAPI/_types';
 import { ApiItemType } from '../vscode/treeviews/_types';
 import { iPowerBIPipeline, iPowerBIPipelineStage } from './PipelinesAPI/_types';
 import { ApiUrlPair } from './_types';
-import { iPowerBIDataset, iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
+import { iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
 
@@ -21,29 +21,16 @@ export abstract class PowerBIApiService {
 	private static _headers;
 
 	//#region Initialization
-	static async initialize(apiRootUrl: string = "https://api.powerbi.com/"): Promise<boolean> {
+	static async initialize(apiRootUrl: string = "https://api.powerbi.com/", tenantId: string = undefined): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing PowerBI API Service ...");
 
 			this._apiBaseUrl = Helper.trimChar(apiRootUrl, '/');
 
-			// https://github.com/microsoft/vscode-azure-account/blob/main/sample/src/extension.ts
-
-			const { useIdentityPlugin, VisualStudioCodeCredential, DefaultAzureCredential } = require("@azure/identity");
-
-			// The plugin is the package's default export, so you may import and use it
-			// as any name you like, and simply pass it to `useIdentityPlugin`.
-			const { vsCodePlugin } = require("@azure/identity-vscode");
-
-			useIdentityPlugin(vsCodePlugin);
-
-			//https://learn.microsoft.com/en-us/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
-			let credential = new DefaultAzureCredential();
-
-			let accessToken = await credential.getToken("https://analysis.windows.net/powerbi/api/.default");
+			let vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], tenantId);
 
 			this._headers = {
-				"Authorization": 'Bearer ' + accessToken.token,
+				"Authorization": 'Bearer ' + vscodeSession.accessToken,
 				"Content-Type": 'application/json',
 				"Accept": 'application/json'
 			}
@@ -67,6 +54,22 @@ export abstract class PowerBIApiService {
 			vscode.window.showErrorMessage(error);
 			return false;
 		}
+	}
+
+	private static async getAADAccessToken(scopes: string[], tenantId?: string): Promise<vscode.AuthenticationSession> {
+		//https://www.eliostruyf.com/microsoft-authentication-provider-visual-studio-code/
+
+		if (!scopes.includes("offline_access")) {
+			scopes.push("offline_access") // Required for the refresh token.
+		}
+
+		if (tenantId) {
+			scopes.push("VSCODE_TENANT:" + tenantId);
+		}
+
+		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes, { createIfNone: true });
+
+		return session;
 	}
 
 	public static get Org(): string {

@@ -40,10 +40,6 @@ const webConfig = /** @type WebpackConfig */ {
                         loader: "ts-loader",
                     },
                 ],
-            },
-            {
-                test: /\.node$/,
-                loader: "native-ext-loader"
             }
         ],
     },
@@ -95,10 +91,6 @@ const nodeConfig = {
                         loader: 'ts-loader'
                     }
                 ]
-            },
-            {
-                test: /\.node$/,
-                loader: "native-ext-loader"
             }
         ]
     },

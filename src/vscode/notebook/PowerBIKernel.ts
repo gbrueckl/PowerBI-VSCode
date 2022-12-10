@@ -19,7 +19,7 @@ export type KernelType =
 // https://code.visualstudio.com/blogs/2021/11/08/custom-notebooks
 export class PowerBIKernel implements vscode.NotebookController {
 	private static baseId: string = 'powerbi-';
-	private static baseLabel: string = 'PowerBI ';
+	private static baseLabel: string = 'PowerBI: ';
 	public id: string;
 	public label: string;
 	readonly notebookType: KernelType;
@@ -47,7 +47,7 @@ export class PowerBIKernel implements vscode.NotebookController {
 			this.label);
 
 		this._controller.supportedLanguages = this.supportedLanguages;
-		this._controller.description = "PowerBI Dataset " + this._dataset.name;
+		this._controller.description = this._dataset.id;
 		this._controller.detail = this.DatasetDetails;
 		this._controller.supportsExecutionOrder = this.supportsExecutionOrder;
 		this._controller.executeHandler = this.executeHandler.bind(this);
@@ -76,7 +76,7 @@ export class PowerBIKernel implements vscode.NotebookController {
 	}
 
 	get DatasetDetails(): string {
-		let details: string = "some details";
+		let details: string = undefined;
 
 		return details;
 	}

@@ -164,6 +164,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	async createKernel(logMessages: boolean = true): Promise<void> {
 		PowerBIKernelManager.createKernels(this, logMessages);
+		vscode.commands.executeCommand("ipynb.newUntitledIpynb");
 	}
 
 	async removeKernel(): Promise<void> {

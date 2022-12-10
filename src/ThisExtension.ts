@@ -128,7 +128,10 @@ export abstract class ThisExtension {
 				this._settingScope = "Global";
 			}
 
-			await PowerBIApiService.initialize();		
+			let apiUrl = ThisExtension.getConfigurationSetting<string>("powerbi.apiUrl", this.SettingScope, true);
+			let tenantId = ThisExtension.getConfigurationSetting<string>("powerbi.tenantId");
+
+			await PowerBIApiService.initialize(apiUrl.value, tenantId.value);		
 
 		} catch (error) {
 			return false;
@@ -166,7 +169,7 @@ export abstract class ThisExtension {
 	}
 
 	static getConfigurationSetting<T = string>(setting: string, source?: ConfigSettingSource, allowDefaultValue: boolean = false): ConfigSetting<T> {
-		// usage: ThisExtension.getConfigurationSetting('powerbi.connection.default.displayName')
+		// usage: ThisExtension.getConfigurationSetting('powerbi.tenantId')
 
 		let value = vscode.workspace.getConfiguration().get(setting) as T;
 		let inspect = vscode.workspace.getConfiguration().inspect(setting);
