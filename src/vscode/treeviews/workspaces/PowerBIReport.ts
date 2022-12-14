@@ -72,6 +72,14 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 	// #endregion
 
 	// Report-specific funtions
+	public async takeOver(): Promise<void> {
+		ThisExtension.setStatusBar("Taking over report ...", true);
+		PowerBIApiService.post(this.apiPath + "/Default.TakeOver", null);
+		ThisExtension.setStatusBar("Report taken over!");
+
+		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+	}
+
 	public async delete(): Promise<void> {
 		ThisExtension.setStatusBar("Deleting report ...", true);
 		await PowerBICommandBuilder.execute<iPowerBIReport>(this.apiPath, "DELETE", []);

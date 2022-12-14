@@ -3,11 +3,11 @@ export type ApiItemType =
 |	"GROUPS" 
 |	"DATASETS" // container for datasets within workspace
 | 	"DATASET"
-|	"REPORTS" // container for datasets within workspace
+|	"REPORTS" // container for reports within workspace
 | 	"REPORT"
-|	"DATAFLOWS" // container for datasets within workspace
+|	"DATAFLOWS" // container for dataflows within workspace
 |	"DATAFLOW"
-|	"DASHBOARDS" // container for datasets within workspace
+|	"DASHBOARDS" // container for dashboards within workspace
 |	"DASHBOARD"
 |	"CAPACITIES"
 |	"CAPACITY"
@@ -19,6 +19,8 @@ export type ApiItemType =
 |	"PIPELINESTAGE"
 |	"PARAMETERS"
 |	"PARAMETER"
-|	"REFRESHES"
-|	"REFRESH"
+|	"REFRESHES"			// container for Dataset refreshes
+|	"REFRESH"			// single Dataset refresh
+|	"TRANSACTIONS"		// container for Dataflow refreshes
+|	"TRANSACTION"		// single Dataflow refresh
 ;

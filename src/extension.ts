@@ -11,7 +11,7 @@ import { PowerBIDashboard } from './vscode/treeviews/workspaces/PowerBIDashboard
 import { PowerBIDataflow } from './vscode/treeviews/workspaces/PowerBIDataflow';
 import { PowerBIDataset } from './vscode/treeviews/workspaces/PowerBIDataset';
 import { PowerBIParameter } from './vscode/treeviews/workspaces/PowerBIParameter';
-import { PowerBIRefresh } from './vscode/treeviews/workspaces/PowerBIRefresh';
+import { PowerBIDatasetRefresh } from './vscode/treeviews/workspaces/PowerBIDatasetRefresh';
 import { PowerBIReport } from './vscode/treeviews/workspaces/PowerBIReport';
 import { PowerBIWorkspace } from './vscode/treeviews/workspaces/PowerBIWorkspace';
 
@@ -40,19 +40,20 @@ export async function activate(context: vscode.ExtensionContext) {
 	
 
 	// Dataset commands
+	vscode.commands.registerCommand('PowerBIDataset.takeOver', (dataset: PowerBIDataset) => dataset.takeOver());
 	vscode.commands.registerCommand('PowerBIDataset.delete', (dataset: PowerBIDataset) => dataset.delete());
 	vscode.commands.registerCommand('PowerBIDataset.refresh', (dataset: PowerBIDataset) => dataset.refresh());
-	vscode.commands.registerCommand('PowerBIDataset.cancelRefresh', (refresh: PowerBIRefresh) => refresh.cancel());
+	vscode.commands.registerCommand('PowerBIDataset.cancelRefresh', (refresh: PowerBIDatasetRefresh) => refresh.cancel());
 	vscode.commands.registerCommand('PowerBIDataset.createKernel', (dataset: PowerBIDataset) => dataset.createKernel());
 	vscode.commands.registerCommand('PowerBIDataset.removeKernel', (dataset: PowerBIDataset) => dataset.removeKernel());
-	vscode.commands.registerCommand('PowerBIDataset.takeOver', (dataset: PowerBIDataset) => dataset.takeOver());
 	vscode.commands.registerCommand('PowerBIDataset.updateAllParameters', (dataset: PowerBIDataset) => dataset.updateAllParameters());
 
 	// DatasetParameter commands
 	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
 
 	// Report commands
-	vscode.commands.registerCommand('PowerBIReport.delete', (report: PowerBIDataset) => report.delete());
+	vscode.commands.registerCommand('PowerBIReport.takeOver', (report: PowerBIReport) => report.takeOver());
+	vscode.commands.registerCommand('PowerBIReport.delete', (report: PowerBIReport) => report.delete());
 	vscode.commands.registerCommand('PowerBIReport.clone', (report: PowerBIReport) => report.clone());
 	vscode.commands.registerCommand('PowerBIReport.rebind', (report: PowerBIReport) => report.rebind());
 	vscode.commands.registerCommand('PowerBIReport.updateContent', (report: PowerBIReport) => report.updateContent());

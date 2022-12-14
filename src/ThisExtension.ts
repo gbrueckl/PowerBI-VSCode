@@ -115,7 +115,7 @@ export abstract class ThisExtension {
 			this.log("Logger initialized!");
 
 			this._extension = context.extension;
-			this.log(`Loading VS Code extension '${context.extension.packageJSON.displayName}' (${context.extension.packageJSON.id}) version ${context.extension.packageJSON.version} ...`);
+			this.log(`Loading VS Code extension '${context.extension.packageJSON.displayName}' (${context.extension.id}) version ${context.extension.packageJSON.version} ...`);
 			this.log(`If you experience issues please open a ticket at ${context.extension.packageJSON.qna}`);
 			this._context = context;	
 

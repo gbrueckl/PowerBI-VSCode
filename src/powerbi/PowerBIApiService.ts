@@ -19,6 +19,7 @@ export abstract class PowerBIApiService {
 	private static _apiBaseUrl: string;
 	private static _org: string = "myorg"
 	private static _headers;
+	private static _vscodeSession: vscode.AuthenticationSession;
 
 	//#region Initialization
 	static async initialize(apiRootUrl: string = "https://api.powerbi.com/", tenantId: string = undefined): Promise<boolean> {
@@ -27,10 +28,10 @@ export abstract class PowerBIApiService {
 
 			this._apiBaseUrl = Helper.trimChar(apiRootUrl, '/');
 
-			let vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], tenantId);
+			this._vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], tenantId);
 
 			this._headers = {
-				"Authorization": 'Bearer ' + vscodeSession.accessToken,
+				"Authorization": 'Bearer ' + this._vscodeSession.accessToken,
 				"Content-Type": 'application/json',
 				"Accept": 'application/json'
 			}
@@ -70,6 +71,14 @@ export abstract class PowerBIApiService {
 		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes, { createIfNone: true });
 
 		return session;
+	}
+
+	public static get SessionUserEmail(): string {
+		return Helper.trimChar(this._vscodeSession.account.label.split("-")[1], " ");
+	}
+
+	public static get SessionUserId(): string {
+		return this._vscodeSession.account.id.split("/")[1];
 	}
 
 	public static get Org(): string {

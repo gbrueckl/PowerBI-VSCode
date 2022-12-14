@@ -7,10 +7,10 @@ import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIDataset } from './PowerBIDataset';
 import { iPowerBIDataset, iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { PowerBIRefresh } from './PowerBIRefresh';
+import { PowerBIDatasetRefresh } from './PowerBIDatasetRefresh';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIRefreshes extends PowerBIWorkspaceTreeItem {
+export class PowerBIDatasetRefreshes extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		groupId: UniqueId,
@@ -45,11 +45,11 @@ export class PowerBIRefreshes extends PowerBIWorkspaceTreeItem {
 			return element.getChildren();
 		}
 		else {
-			let children: PowerBIRefresh[] = [];
+			let children: PowerBIDatasetRefresh[] = [];
 			let items: iPowerBIDatasetRefresh[] = await PowerBIApiService.getItemList<iPowerBIDatasetRefresh>(this.apiPath, undefined, null);
 
 			for (let item of items) {
-				let treeItem = new PowerBIRefresh(item, this.groupId, this);
+				let treeItem = new PowerBIDatasetRefresh(item, this.groupId, this);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}

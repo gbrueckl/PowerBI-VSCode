@@ -8,15 +8,15 @@ import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIParameters } from './PowerBIParameters';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIDataset } from './PowerBIDataset';
-import { PowerBIRefreshes } from './PowerBIRefreshes';
+import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIRefresh extends PowerBIWorkspaceTreeItem {
+export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		definition: iPowerBIDatasetRefresh,
 		group: UniqueId,
-		parent: PowerBIRefreshes
+		parent: PowerBIDatasetRefreshes
 	) {
 		super(definition.requestId, group, "REFRESH", definition.requestId, parent, vscode.TreeItemCollapsibleState.None);
 
@@ -72,7 +72,7 @@ export class PowerBIRefresh extends PowerBIWorkspaceTreeItem {
 	}
 
 	get dataset(): PowerBIDataset {
-		return (this.parent as PowerBIRefreshes).dataset;
+		return (this.parent as PowerBIDatasetRefreshes).dataset;
 	}
 
 	// Parameter-specific funtions

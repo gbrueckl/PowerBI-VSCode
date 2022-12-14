@@ -175,6 +175,14 @@
 				"icon": "$(pencil)"
 			},
 			{
+				"command": "PowerBIReport.takeOver",
+				"title": "Take Over",
+				"icon": {
+					"light": "resources/light/disconnected.png",
+					"dark": "resources/dark/disconnected.png"
+				}
+			},
+			{
 				"command": "PowerBIReport.delete",
 				"title": "Delete",
 				"icon": "$(remove-close)"
@@ -302,6 +310,10 @@
 					"command": "PowerBIDatasetParameter.update",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,PARAMETER,.*/",
 					"group": "inline"
+				},
+				{
+					"command": "PowerBIReport.takeOver",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/"
 				},
 				{
 					"command": "PowerBIReport.delete",

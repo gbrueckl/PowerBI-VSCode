@@ -73,6 +73,9 @@ export class PowerBICommandInput {
 			case "DATASET_SELECTOR":
 				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("DATASET"), this.Description);
 
+			case "DATAFLOW_SELECTOR":
+				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("DATAFLOW"), this.Description);
+
 			default:
 				return this.InputType;
 		}
@@ -191,7 +194,8 @@ export abstract class PowerBICommandBuilder {
 	): Promise<string> {
 
 		const result = await vscode.window.showQuickPick(items, {
-			placeHolder: toolTip
+			placeHolder: toolTip,
+			ignoreFocusOut: true
 			/*,
 			onDidSelectItem: item => window.showInformationMessage(`Focus ${++i}: ${item}`)
 			*/
@@ -210,6 +214,7 @@ export abstract class PowerBICommandBuilder {
 		valueSelection: [number, number] = undefined,
 	): Promise<string> {
 		const result = await vscode.window.showInputBox({
+			ignoreFocusOut: true,
 			value: defaultValue,
 			valueSelection: valueSelection,
 			placeHolder: toolTip,
