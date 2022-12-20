@@ -54,7 +54,11 @@
 				"properties": {
 					"powerbi.tenantId": {
 						"type": "string",
-						"description": "A custom TenantID to connect to a remote Tenant where you are a guest user."
+						"description": "(Optional) A custom TenantID to connect to a remote Tenant where you are a guest user."
+					},
+					"powerbi.clientId": {
+						"type": "string",
+						"description": "(Optional) A custom ClientID/Application of an AAD application to use when connecting to Power BI."
 					},
 					"powerbi.apiUrl": {
 						"type": "string",

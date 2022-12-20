@@ -22,13 +22,13 @@ export abstract class PowerBIApiService {
 	private static _vscodeSession: vscode.AuthenticationSession;
 
 	//#region Initialization
-	static async initialize(apiRootUrl: string = "https://api.powerbi.com/", tenantId: string = undefined): Promise<boolean> {
+	static async initialize(apiRootUrl: string = "https://api.powerbi.com/", tenantId: string = undefined, clientId: string = undefined): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing PowerBI API Service ...");
 
 			this._apiBaseUrl = Helper.trimChar(apiRootUrl, '/');
 
-			this._vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], tenantId);
+			this._vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], tenantId, clientId);
 
 			this._headers = {
 				"Authorization": 'Bearer ' + this._vscodeSession.accessToken,
@@ -57,7 +57,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static async getAADAccessToken(scopes: string[], tenantId?: string): Promise<vscode.AuthenticationSession> {
+	private static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
 		//https://www.eliostruyf.com/microsoft-authentication-provider-visual-studio-code/
 
 		if (!scopes.includes("offline_access")) {
@@ -67,6 +67,11 @@ export abstract class PowerBIApiService {
 		if (tenantId) {
 			scopes.push("VSCODE_TENANT:" + tenantId);
 		}
+
+		if (clientId) {
+			scopes.push("VSCODE_CLIENT_ID:" + clientId);
+		}
+
 
 		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes, { createIfNone: true });
 
@@ -92,7 +97,12 @@ export abstract class PowerBIApiService {
 
 	//#region Helpers
 	private static async logResponse(response: any): Promise<void> {
-		ThisExtension.log("Response: " + JSON.stringify(response));
+		if (typeof response == "string") {
+			ThisExtension.log("Response: " + response);
+		}
+		else {
+			ThisExtension.log("Response: " + JSON.stringify(response));
+		}
 	}
 
 	private static async handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): Promise<void> {
@@ -140,11 +150,15 @@ export abstract class PowerBIApiService {
 				};
 				let response: Response = await fetch(this.getFullUrl(endpoint, params), config);
 
-				let result = await response.json() as T;
+				let resultText = await response.text();
+				await this.logResponse(resultText);
+				if (response.ok) {
+					return JSON.parse(resultText) as T;
+				}
+				else {
+					throw new Error(resultText);
+				}
 
-				await this.logResponse(result);
-
-				return result;
 			} catch (error) {
 				this.handleApiException(error);
 
@@ -318,8 +332,7 @@ export abstract class PowerBIApiService {
 		if (items == undefined) {
 			return [];
 		}
-		if(sortBy)
-		{
+		if (sortBy) {
 			Helper.sortArrayByProperty(items, sortBy);
 		}
 		return items;

@@ -1,7 +1,8 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { PowerBICommandBuilder, PowerBICommandInput } from './powerbi/CommandBuilder';
+
+import { PowerBICommandBuilder } from './powerbi/CommandBuilder';
 import { ThisExtension } from './ThisExtension';
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
@@ -14,7 +15,6 @@ import { PowerBIParameter } from './vscode/treeviews/workspaces/PowerBIParameter
 import { PowerBIDatasetRefresh } from './vscode/treeviews/workspaces/PowerBIDatasetRefresh';
 import { PowerBIReport } from './vscode/treeviews/workspaces/PowerBIReport';
 import { PowerBIWorkspace } from './vscode/treeviews/workspaces/PowerBIWorkspace';
-
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
 
 export async function activate(context: vscode.ExtensionContext) {

@@ -130,8 +130,9 @@ export abstract class ThisExtension {
 
 			let apiUrl = ThisExtension.getConfigurationSetting<string>("powerbi.apiUrl", this.SettingScope, true);
 			let tenantId = ThisExtension.getConfigurationSetting<string>("powerbi.tenantId");
+			let clientId = ThisExtension.getConfigurationSetting<string>("powerbi.clientId");
 
-			await PowerBIApiService.initialize(apiUrl.value, tenantId.value);		
+			await PowerBIApiService.initialize(apiUrl.value, tenantId.value, clientId.value);		
 
 		} catch (error) {
 			return false;
