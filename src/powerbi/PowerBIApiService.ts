@@ -26,6 +26,8 @@ export abstract class PowerBIApiService {
 		try {
 			ThisExtension.log("Initializing PowerBI API Service ...");
 
+			vscode.authentication.onDidChangeSessions((event) => this._onDidChangeSessions(event));
+
 			this._apiBaseUrl = Helper.trimChar(apiRootUrl, '/');
 
 			this._vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], tenantId, clientId);
@@ -57,6 +59,11 @@ export abstract class PowerBIApiService {
 		}
 	}
 
+	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent)
+	{
+		//vscode.window.showInformationMessage("Session Changed! " + event.provider.id);
+	}
+
 	private static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
 		//https://www.eliostruyf.com/microsoft-authentication-provider-visual-studio-code/
 
@@ -73,7 +80,7 @@ export abstract class PowerBIApiService {
 		}
 
 
-		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes, { createIfNone: true });
+		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes);
 
 		return session;
 	}
