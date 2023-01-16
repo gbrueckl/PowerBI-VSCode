@@ -1,7 +1,8 @@
 # PowerBI-VSCode
-[![Version](https://vsmarketplacebadge.apphb.com/version/GerhardBrueckl.powerbi-vscode.svg?color=orange&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/GerhardBrueckl.powerbi-vscode.svg?color=orange)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
-[![Downloads](https://vsmarketplacebadge.apphb.com/downloads/GerhardBrueckl.powerbi-vscode.svg?color=orange)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
+[![Version](https://vsmarketplacebadges.dev/version/GerhardBrueckl.powerbi-vscode.svg?color=blue&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Installs](https://vsmarketplacebadges.dev/installs/GerhardBrueckl.powerbi-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Downloads](https://vsmarketplacebadges.dev/downloads/GerhardBrueckl.powerbi-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Ratings](https://vsmarketplacebadges.dev/rating/GerhardBrueckl.powerbi-vscode.svg?color=green)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
 
 ![PowerBI-VSCode](/images/PowerBI-VSCode.png?raw=true "PowerBI-VSCode")
 
