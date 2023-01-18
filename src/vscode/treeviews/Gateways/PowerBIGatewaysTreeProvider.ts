@@ -53,7 +53,7 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 			for (let item of items) {
 				let treeItem = new PowerBIGateway(item);
 				children.push(treeItem);
-				//PowerBICommandBuilder.pushQuickPickItem(treeItem);
+				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
 			
 			return children;

@@ -22,6 +22,9 @@ The extensions can be installed directly from within VSCode by searching for thi
 
 # Change Log
 
+**v0.4.1**:
+- fixed issue with Pipelines and Stages
+
 **v0.4.0**:
 - added support for arbitrary REST API calls in a notebook using `%api` magic
 

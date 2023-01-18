@@ -449,13 +449,14 @@ export abstract class PowerBIApiService {
 
 	//#region Pipelines API
 	static async getPipelines(): Promise<iPowerBIPipeline[]> {
-		let items: iPowerBIPipeline[] = await this.getItemList<iPowerBIPipeline>(`v1.0/${PowerBIApiService.Org}/pipelines`);
+		let items: iPowerBIPipeline[] = await this.getItemList<iPowerBIPipeline>(`v1.0/${PowerBIApiService.Org}/pipelines`, undefined, "displayName");
 
 		return items;
 	}
 
 	static async getPipelineStages(pipelineId: string | UniqueId): Promise<iPowerBIPipelineStage[]> {
-		let items: iPowerBIPipelineStage[] = (await this.get(`v1.0/${this.Org}/pipelines/${pipelineId}/stages`)).data.value;
+		let jsonResult = await this.get(`v1.0/${this.Org}/pipelines/${pipelineId}/stages`);
+		let items: iPowerBIPipelineStage[] = jsonResult.value;
 
 		return items;
 	}

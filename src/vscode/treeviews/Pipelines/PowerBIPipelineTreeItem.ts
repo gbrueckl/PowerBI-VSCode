@@ -38,14 +38,14 @@ export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowe
 	get _tooltip(): string {
 		let tooltip: string = "";
 		for (const [key, value] of Object.entries(this.definition)) {
-			if(typeof value === "string")
-			{
-				if(value.length > 100)
-				{
+			if (typeof value === "string") {
+				if (value.length > 100) {
 					continue;
 				}
 			}
-			tooltip += `${key}: ${value.toString()}\n`;
+			if (value) {
+				tooltip += `${key}: ${value.toString()}\n`;
+			}
 		}
 
 		return tooltip.trim();

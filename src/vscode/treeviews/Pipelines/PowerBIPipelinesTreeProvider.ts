@@ -53,7 +53,7 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 			for (let item of items) {
 				let treeItem = new PowerBIPipeline(item);
 				children.push(treeItem);
-				//PowerBICommandBuilder.pushQuickPickItem(treeItem);
+				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
 			
 			return children;

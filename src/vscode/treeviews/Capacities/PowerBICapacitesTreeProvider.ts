@@ -7,6 +7,7 @@ import { PowerBICapacityTreeItem } from './PowerBICapacityTreeItem';
 import { PowerBICapacity } from './PowerBICapacity';
 import { PowerBICapacitiesDragAndDropController } from './PowerBICapacitiesDragAndDropController';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
+import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<PowerBICapacityTreeItem> {
@@ -51,7 +52,7 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 			for (let item of items) {
 				let treeItem = new PowerBICapacity(item, undefined);
 				children.push(treeItem);
-				//PowerBICommandBuilder.pushQuickPickItem(treeItem);
+				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
 			
 			return children;
