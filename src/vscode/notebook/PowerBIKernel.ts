@@ -10,7 +10,8 @@ import { PowerBIDataset } from '../treeviews/workspaces/PowerBIDataset';
 
 export type NotebookMagic =
 	"dax"
-;
+	| "api"
+	;
 
 export type KernelType =
 	"jupyter-notebook"
@@ -110,7 +111,7 @@ export class PowerBIKernel implements vscode.NotebookController {
 		return undefined;
 	}
 
-	
+
 
 	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
 		//throw new Error('Method not implemented.');
@@ -148,14 +149,16 @@ export class PowerBIKernel implements vscode.NotebookController {
 			if (["dax"].includes(magicText)) {
 				language = magicText as QueryLanguage;
 			}
+			else if (["api"].includes(magicText)) {
+				language = magicText as QueryLanguage;
+			}
 			else {
 				// we can run %pip commands "as-is" using the Python language
 				language = "DAX";
 				commandText = cmd;
 			}
 		}
-		else
-		{
+		else {
 			magicText = "dax";
 		}
 
@@ -183,6 +186,48 @@ export class PowerBIKernel implements vscode.NotebookController {
 				case "dax":
 					result = await PowerBIApiService.executeQueries(dataset.groupId, dataset.uid, commandText);
 					break;
+				case "api":
+					let [method, endpoint] = commandText.split(" ");
+					let jsonText: string[] = commandText.split("\n").filter(line => line.trim().length > 0);
+
+					let body = undefined;
+					if (jsonText.length > 1) {
+						body = JSON.parse(jsonText.slice(1).join("\n"));
+					}
+
+					switch (method) {
+						case "GET":
+							result = await PowerBIApiService.get<any>(endpoint, body);
+							break;
+
+						case "POST":
+							result = await PowerBIApiService.post<any>(endpoint, body);
+
+						case "PATCH":
+							result = await PowerBIApiService.patch<any>(endpoint, body);
+							break;
+
+						case "DELETE":
+							result = await PowerBIApiService.delete<any>(endpoint, body);
+							break;
+
+						default:
+							execution.appendOutput(new vscode.NotebookCellOutput([
+								vscode.NotebookCellOutputItem.text("Only GET, POST, PATCH and DELETE are supported.")
+							]));
+
+							execution.end(false, Date.now());
+							return;
+					}
+					break;
+
+				default:
+					execution.appendOutput(new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text("Only %dax and %api magics are supported."),
+					]));
+
+					execution.end(false, Date.now());
+					return;
 			}
 
 			execution.token.onCancellationRequested(() => {
@@ -194,10 +239,9 @@ export class PowerBIKernel implements vscode.NotebookController {
 				return;
 			});
 
-			if(result.error)
-			{
+			if (result.error) {
 				execution.appendOutput(new vscode.NotebookCellOutput([
-					vscode.NotebookCellOutputItem.error(new Error(JSON.stringify(result, undefined, 4))),
+					vscode.NotebookCellOutputItem.text(JSON.stringify(result, undefined, 4)),
 				]));
 
 				execution.end(false, Date.now());
@@ -211,6 +255,15 @@ export class PowerBIKernel implements vscode.NotebookController {
 
 				let rowcount: number = result.results[0].tables[0].rows.length;
 				output.metadata = { row_count: rowcount, truncated: rowcount > 100000 };
+				execution.appendOutput(output);
+
+				execution.end(true, Date.now());
+			}
+			if (magic == "api") {
+				let output: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
+					vscode.NotebookCellOutputItem.json(result, 'application/json') // to be used by proper JSON/table renderers
+				])
+
 				execution.appendOutput(output);
 
 				execution.end(true, Date.now());

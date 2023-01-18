@@ -15,11 +15,18 @@ The extensions can be installed directly from within VSCode by searching for thi
 - GUI to run operations like [rebind](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/rebind-report-in-group), [clone](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/clone-report-in-group), ...
 - Supports VSCode and [vscode.dev](https://vscode.dev)
 - Connect to remote tenants where you are invited as a guest user - see [Configuration](#configuration)
-- Run DAX queries in a notebook against your Power BI Datasets
+- Run DAX queries in a notebook against your Power BI Datasets using `%dax` magic
+- Run arbitrary REST API calls in a notebook using `%api` magic
 - Drag & Drop to run certain commands (e.g. drop a report on a dataset to rebind it)
 - Work-In-Progress: UI for Capacities, Gatways and Pipelines
 
 # Change Log
+
+**v0.4.0**:
+- added support for arbitrary REST API calls in a notebook using `%api` magic
+
+**v0.3.0**:
+- changed authentication happen in the background and automatically reuse it without a prompt
 
 **v0.2.0**:
 - changed authentication to use VSCode authentication (instead of leveraging Azure Extension)

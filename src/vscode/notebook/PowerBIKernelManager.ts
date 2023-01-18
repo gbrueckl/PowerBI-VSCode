@@ -69,7 +69,7 @@ export abstract class PowerBIKernelManager {
 
 	static async createKernels(dataset: PowerBIDataset, logMessages: boolean = true): Promise<void> {
 		if (!this.notebookKernelExists(dataset)) {
-			let notebookKernel: PowerBIKernel = new PowerBIKernel(dataset);
+			let notebookKernel: PowerBIKernel = new PowerBIKernel(dataset, 'jupyter-notebook');
 			this.setKernel(this.getNotebookKernelName(dataset), notebookKernel);
 			if (logMessages) {
 				ThisExtension.log(`Notebook Kernel for PowerBI dataset '${dataset.id}' created!`)

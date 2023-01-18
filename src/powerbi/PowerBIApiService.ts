@@ -130,6 +130,10 @@ export abstract class PowerBIApiService {
 
 	private static getFullUrl(endpoint: string, params?: object): string {
 		let uri = vscode.Uri.parse(`${this._apiBaseUrl}/${Helper.trimChar(endpoint, '/')}`);
+		if(endpoint.startsWith("https://"))
+		{
+			uri = vscode.Uri.parse(endpoint);
+		}		
 
 		if (params) {
 			let urlParams = []
