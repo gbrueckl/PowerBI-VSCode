@@ -117,7 +117,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	// Dataset-specific funtions
 	private get NotebookKernel(): PowerBIKernel {
-		return PowerBIKernelManager.getNotebookKernel(this);
+		return PowerBIKernelManager.getNotebookKernel(this.apiPath);
 	}
 
 	public get NotebookKernelExists(): boolean {
@@ -128,7 +128,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	}
 
 	private get InteractiveKernel(): PowerBIKernel {
-		return PowerBIKernelManager.getNotebookKernel(this);
+		return PowerBIKernelManager.getNotebookKernel(this.apiPath);
 	}
 
 	public get InteractiveKernelExists(): boolean {
@@ -165,11 +165,11 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	}
 
 	async createKernel(logMessages: boolean = true): Promise<void> {
-		PowerBIKernelManager.createKernels(this, logMessages);
+		PowerBIKernelManager.createKernels(this.apiPath, logMessages);
 		vscode.commands.executeCommand("ipynb.newUntitledIpynb");
 	}
 
 	async removeKernel(): Promise<void> {
-		PowerBIKernelManager.removeKernels(this);
+		PowerBIKernelManager.removeKernels(this.apiPath);
 	}
 }

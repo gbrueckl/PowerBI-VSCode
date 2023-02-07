@@ -10,6 +10,7 @@ import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIWorkspacesDragAndDropController } from './PowerBIWorkspacesDragAndDropController';
 import { PowerBIWorkspacePersonal } from './PowerBIWorkspacePersonal';
+import { PowerBIKernelManager } from '../../notebook/PowerBIKernelManager';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<PowerBIWorkspaceTreeItem> {
@@ -92,5 +93,10 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 	// TopLevel workspace functions
 	add(): void {
 		
+	}
+
+	async createGenericNotebookKernel(): Promise<void> {
+		PowerBIKernelManager.createKernels(`v1.0/${PowerBIApiService.Org}`, true);
+		vscode.commands.executeCommand("ipynb.newUntitledIpynb");
 	}
 }

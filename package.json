@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.4.1",
+	"version": "0.5.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -126,6 +126,11 @@
 				"icon": "$(refresh)"
 			},
 			{
+				"command": "PowerBIWorkspaces.notebook",
+				"title": "notebook",
+				"icon": "$(notebook)"
+			},
+			{
 				"command": "PowerBIWorkspaces.add",
 				"title": "Add workspace",
 				"icon": "$(add)"
@@ -134,6 +139,11 @@
 				"command": "PowerBIWorkspace.delete",
 				"title": "Delete",
 				"icon": "$(remove-close)"
+			},
+			{
+				"command": "PowerBIWorkspace.insertPath",
+				"title": "Insert Path",
+				"icon": "$(code)"
 			},
 			{
 				"command": "PowerBIDataset.delete",
@@ -256,6 +266,11 @@
 					"group": "navigation"
 				},
 				{
+					"command": "PowerBIWorkspaces.notebook",
+					"when": "view == PowerBIWorkspaces",
+					"group": "navigation"
+				},
+				{
 					"command": "PowerBICapacities.refresh",
 					"when": "view == PowerBICapacities",
 					"group": "navigation"
@@ -272,6 +287,11 @@
 				}
 			],
 			"view/item/context": [
+				{
+					"command": "PowerBIWorkspace.insertPath",
+					"when": "view == PowerBIWorkspaces",
+					"group": "inline"
+				},
 				{
 					"command": "PowerBIWorkspace.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/",

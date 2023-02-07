@@ -15,10 +15,9 @@ export class UniqueId extends String {
 }
 
 export abstract class Helper {
-	private static _tempFiles: string[];
 	private static _doubleClickTimer: any;
 
-	
+	static SEPARATOR: string = '/';
 
 
 	static async delay(ms: number) {
@@ -45,18 +44,16 @@ export abstract class Helper {
 		});
 	}
 
-	static get tempFiles(): string[] {
-		if (this._tempFiles == undefined) {
-			return [];
-		}
-		return this._tempFiles;
-	}
+	static joinPath(...paths: string[]) {
+		let items: string[] = [];
 
-	static addTempFile(filePath: string): void {
-		if (this._tempFiles == undefined) {
-			this._tempFiles = [];
+		for (let path of paths) {
+			items.push(Helper.trimChar(path, this.SEPARATOR))
 		}
-		this._tempFiles.push(filePath);
+
+		items = items.filter(x => x); // filters out items that would be undefined/null/empty etc.
+
+		return this.SEPARATOR + items.join(this.SEPARATOR);
 	}
 
 	static trimChar(text: string, charToRemove: string, fromLeft: boolean = true, fromRight: boolean = true) {

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import {  UniqueId } from '../../../helpers/Helper';
+import { UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
@@ -8,6 +8,7 @@ import { PowerBIDataset } from './PowerBIDataset';
 import { iPowerBIDataset, iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIDatasetRefresh } from './PowerBIDatasetRefresh';
+import { ThisExtension } from '../../../ThisExtension';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasetRefreshes extends PowerBIWorkspaceTreeItem {
@@ -46,12 +47,20 @@ export class PowerBIDatasetRefreshes extends PowerBIWorkspaceTreeItem {
 		}
 		else {
 			let children: PowerBIDatasetRefresh[] = [];
-			let items: iPowerBIDatasetRefresh[] = await PowerBIApiService.getItemList<iPowerBIDatasetRefresh>(this.apiPath, undefined, null);
 
-			for (let item of items) {
-				let treeItem = new PowerBIDatasetRefresh(item, this.groupId, this);
-				children.push(treeItem);
-				PowerBICommandBuilder.pushQuickPickItem(treeItem);
+			try {
+
+
+				let items: iPowerBIDatasetRefresh[] = await PowerBIApiService.getItemList<iPowerBIDatasetRefresh>(this.apiPath, undefined, null);
+
+				for (let item of items) {
+					let treeItem = new PowerBIDatasetRefresh(item, this.groupId, this);
+					children.push(treeItem);
+					PowerBICommandBuilder.pushQuickPickItem(treeItem);
+				}
+			}
+			catch (e) {
+				ThisExtension.log("No refreshes found for dataset " + this.dataset.name);
 			}
 
 			return children;

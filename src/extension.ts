@@ -16,6 +16,7 @@ import { PowerBIDatasetRefresh } from './vscode/treeviews/workspaces/PowerBIData
 import { PowerBIReport } from './vscode/treeviews/workspaces/PowerBIReport';
 import { PowerBIWorkspace } from './vscode/treeviews/workspaces/PowerBIWorkspace';
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
+import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -35,9 +36,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('PowerBIWorkspaces.notebook', () => pbiWorkspacesTreeProvider.createGenericNotebookKernel());
+
 	//vscode.commands.registerCommand('PowerBIWorkspaces.add', () => pbiWorkspacesTreeProvider.add());
 	vscode.commands.registerCommand('PowerBIWorkspace.delete', (workspace: PowerBIWorkspace) => workspace.delete());
-	
+
+	// generic commands
+	vscode.commands.registerCommand('PowerBIWorkspace.insertPath', (workspaceItem: PowerBIWorkspaceTreeItem) => workspaceItem.insertCode());
 
 	// Dataset commands
 	vscode.commands.registerCommand('PowerBIDataset.takeOver', (dataset: PowerBIDataset) => dataset.takeOver());

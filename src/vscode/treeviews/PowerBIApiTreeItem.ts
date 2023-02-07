@@ -140,17 +140,6 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		return {itemType: this.itemType, itemId: this.id};
 	}
 
-	get apiPath1(): string {
-		if (this.uid != undefined && this.uid != null)
-		{
-			return `v1.0/${PowerBIApiService.Org}/${this.itemType.toString().toLowerCase()}s/${this.uid}`;
-		}
-		else
-		{
-			return `v1.0/${PowerBIApiService.Org}/${this.itemType.toString().toLowerCase()}`;
-		}
-	}
-
 	get apiPath(): string {
 
 		let urlParts: string[] = [];

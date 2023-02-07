@@ -37,86 +37,86 @@ export abstract class PowerBIKernelManager {
 		return this._kernels.get(kernelName);
 	}
 
-	static getNotebookKernelName(dataset: PowerBIDataset): string {
-		return dataset.id + PowerBIKernelManager.NotebookKernelSuffix;
+	static getNotebookKernelName(entryPoint: string): string {
+		return entryPoint + PowerBIKernelManager.NotebookKernelSuffix;
 	}
 
-	static getNotebookKernel(dataset: PowerBIDataset): PowerBIKernel {
-		return this.getKernel(this.getNotebookKernelName(dataset));
+	static getNotebookKernel(entryPoint: string): PowerBIKernel {
+		return this.getKernel(this.getNotebookKernelName(entryPoint));
 	}
 
-	static notebookKernelExists(dataset: PowerBIDataset): boolean {
-		if (this.getKernel(this.getNotebookKernelName(dataset))) {
+	static notebookKernelExists(entryPoint: string): boolean {
+		if (this.getKernel(this.getNotebookKernelName(entryPoint))) {
 			return true;
 		}
 		return false;
 	}
 
-	static getInteractiveKernelName(dataset: PowerBIDataset): string {
-		return dataset.id + PowerBIKernelManager.InteractiveKernelSuffix
+	static getInteractiveKernelName(entryPoint: string): string {
+		return entryPoint + PowerBIKernelManager.InteractiveKernelSuffix
 	}
 
-	static getInteractiveKernel(dataset: PowerBIDataset): PowerBIKernel {
-		return this.getKernel(this.getInteractiveKernelName(dataset));
+	static getInteractiveKernel(entryPoint: string): PowerBIKernel {
+		return this.getKernel(this.getInteractiveKernelName(entryPoint));
 	}
 
-	static interactiveKernelExists(dataset: PowerBIDataset): boolean {
-		if (this.getInteractiveKernel(dataset)) {
+	static interactiveKernelExists(entryPoint: string): boolean {
+		if (this.getInteractiveKernel(entryPoint)) {
 			return true;
 		}
 		return false;
 	}
 
-	static async createKernels(dataset: PowerBIDataset, logMessages: boolean = true): Promise<void> {
-		if (!this.notebookKernelExists(dataset)) {
-			let notebookKernel: PowerBIKernel = new PowerBIKernel(dataset, 'jupyter-notebook');
-			this.setKernel(this.getNotebookKernelName(dataset), notebookKernel);
+	static async createKernels(entryPoint: string, logMessages: boolean = true): Promise<void> {
+		if (!this.notebookKernelExists(entryPoint)) {
+			let notebookKernel: PowerBIKernel = new PowerBIKernel(entryPoint, 'jupyter-notebook');
+			this.setKernel(this.getNotebookKernelName(entryPoint), notebookKernel);
 			if (logMessages) {
-				ThisExtension.log(`Notebook Kernel for PowerBI dataset '${dataset.id}' created!`)
+				ThisExtension.log(`Notebook Kernel for API path '${entryPoint}' created!`)
 			}
 		}
 		else {
 			if (logMessages) {
-				ThisExtension.log(`Notebook Kernel for PowerBI dataset '${dataset.id}' already exists!`)
+				ThisExtension.log(`Notebook Kernel for API path '${entryPoint}' already exists!`)
 			}
 		}
 
-		if (!this.interactiveKernelExists(dataset)) {
-			let interactiveKernel: PowerBIKernel = new PowerBIKernel(dataset, "interactive");
-			this.setKernel(this.getInteractiveKernelName(dataset), interactiveKernel);
+		if (!this.interactiveKernelExists(entryPoint)) {
+			let interactiveKernel: PowerBIKernel = new PowerBIKernel(entryPoint, "interactive");
+			this.setKernel(this.getInteractiveKernelName(entryPoint), interactiveKernel);
 			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for PowerBI dataset '${dataset.id}' created!`)
+				ThisExtension.log(`Interactive Kernel for API path '${entryPoint}' created!`)
 			}
 		}
 		else {
 			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for PowerBI dataset '${dataset.id}' already exists!`)
+				ThisExtension.log(`Interactive Kernel for API path '${entryPoint}' already exists!`)
 			}
 		}
 	}
 
-	static async removeKernels(dataset: PowerBIDataset, logMessages: boolean = true): Promise<void> {
-		if (this.notebookKernelExists(dataset)) {
-			this.removeKernel(this.getNotebookKernelName(dataset));
+	static async removeKernels(entryPoint, logMessages: boolean = true): Promise<void> {
+		if (this.notebookKernelExists(entryPoint)) {
+			this.removeKernel(this.getNotebookKernelName(entryPoint));
 			if (logMessages) {
-				ThisExtension.log(`Notebook Kernel for PowerBI dataset '${dataset.id}' removed!`)
+				ThisExtension.log(`Notebook Kernel for API path '${entryPoint}' removed!`)
 			}
 		}
 		else {
 			if (logMessages) {
-				ThisExtension.log(`Notebook Kernel for PowerBI dataset '${dataset.id}' does not exists!`)
+				ThisExtension.log(`Notebook Kernel for API path '${entryPoint}' does not exists!`)
 			}
 		}
 
-		if (this.interactiveKernelExists(dataset)) {
-			this.removeKernel(this.getInteractiveKernelName(dataset));
+		if (this.interactiveKernelExists(entryPoint)) {
+			this.removeKernel(this.getInteractiveKernelName(entryPoint));
 			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for PowerBI dataset '${dataset.id}' removed!`)
+				ThisExtension.log(`Interactive Kernel for API path '${entryPoint}' removed!`)
 			}
 		}
 		else {
 			if (logMessages) {
-				ThisExtension.log(`Interactive Kernel for Databricks cluster '${dataset.id}' does not exists!`)
+				ThisExtension.log(`Interactive Kernel for API path '${entryPoint}' does not exists!`)
 			}
 		}
 	}

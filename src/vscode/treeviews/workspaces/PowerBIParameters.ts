@@ -8,6 +8,7 @@ import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIDataset } from './PowerBIDataset';
 import { PowerBIParameter } from './PowerBIParameter';
 import { iPowerBIDatasetParameter } from '../../../powerbi/DatasetsAPI/_types';
+import { ThisExtension } from '../../../ThisExtension';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -47,12 +48,16 @@ export class PowerBIParameters extends PowerBIWorkspaceTreeItem {
 		}
 		else {
 			let children: PowerBIParameter[] = [];
-			let items: iPowerBIDatasetParameter[] = await PowerBIApiService.getItemList<iPowerBIDatasetParameter>(this.apiPath);
-
-			for (let item of items) {
-				let treeItem = new PowerBIParameter(item, this.groupId, this);
-				children.push(treeItem);
-				PowerBICommandBuilder.pushQuickPickItem(treeItem);
+			try {
+				let items: iPowerBIDatasetParameter[] = await PowerBIApiService.getItemList<iPowerBIDatasetParameter>(this.apiPath);
+				for (let item of items) {
+					let treeItem = new PowerBIParameter(item, this.groupId, this);
+					children.push(treeItem);
+					PowerBICommandBuilder.pushQuickPickItem(treeItem);
+				}
+			}
+			catch (e) {
+				ThisExtension.log("No parameters found for dataset: " + this.dataset.name);
 			}
 
 			return children;

@@ -62,6 +62,7 @@ export abstract class PowerBIApiService {
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent)
 	{
 		//vscode.window.showInformationMessage("Session Changed! " + event.provider.id);
+		ThisExtension.log("Session Changed! " + event.provider.id);
 	}
 
 	private static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
@@ -202,7 +203,6 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-
 	static async postFile(endpoint: string, uri: vscode.Uri): Promise<any> {
 		ThisExtension.log("POST " + endpoint + " --> (File)" + uri);
 
@@ -228,6 +228,30 @@ export abstract class PowerBIApiService {
 			let response: Response = await fetch(this.getFullUrl(endpoint), config);
 
 			let result = await response.text();
+
+			await this.logResponse(result);
+
+			return result;
+		} catch (error) {
+			this.handleApiException(error);
+
+			return undefined;
+		}
+	}
+
+	static async put<T = any>(endpoint: string, body: object): Promise<T> {
+		ThisExtension.log("PUT " + endpoint + " --> " + JSON.stringify(body));
+
+		try {
+			const config: RequestInit = {
+				method: "PUT",
+				headers: this._headers,
+				body: JSON.stringify(body),
+				agent: getProxyAgent()
+			};
+			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+
+			let result: T = await response.json() as T
 
 			await this.logResponse(result);
 
@@ -336,7 +360,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async getItemList<T>(endpoint: string, body: any = {}, sortBy: string = "name"): Promise<T[]> {
-		let response = await this.get(endpoint, { params: body });
+		let response = await this.get(endpoint, body);
 
 		let items = response.value as T[];
 
@@ -390,8 +414,8 @@ export abstract class PowerBIApiService {
 		return items;
 	}
 
-	static async executeQueries(groupId: string | UniqueId, datasetId: string | UniqueId, daxQuery: string): Promise<iPowerBIDatasetExecuteQueries> {
-		let endpoint: string = `v1.0/${PowerBIApiService.Org}/groups/${groupId}/datasets/${datasetId}/executeQueries`
+	static async executeQueries(apiPath, daxQuery: string): Promise<iPowerBIDatasetExecuteQueries> {
+		let endpoint: string = apiPath + "executeQueries";
 		ThisExtension.log("POST " + endpoint);
 
 		try {

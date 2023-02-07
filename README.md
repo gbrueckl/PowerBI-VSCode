@@ -1,8 +1,8 @@
 # PowerBI-VSCode
-[![Version](https://vsmarketplacebadges.dev/version/GerhardBrueckl.powerbi-vscode.svg?color=blue&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
-[![Installs](https://vsmarketplacebadges.dev/installs/GerhardBrueckl.powerbi-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
-[![Downloads](https://vsmarketplacebadges.dev/downloads/GerhardBrueckl.powerbi-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
-[![Ratings](https://vsmarketplacebadges.dev/rating/GerhardBrueckl.powerbi-vscode.svg?color=green)](https://marketplace.visualstudio.com/items?itemName=paiqo.databricks-vscode)
+[![Version](https://vsmarketplacebadges.dev/version/GerhardBrueckl.powerbi-vscode.svg?color=blue&style=?style=for-the-badge&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
+[![Installs](https://vsmarketplacebadges.dev/installs/GerhardBrueckl.powerbi-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
+[![Downloads](https://vsmarketplacebadges.dev/downloads/GerhardBrueckl.powerbi-vscode.svg?color=yellow)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
+[![Ratings](https://vsmarketplacebadges.dev/rating/GerhardBrueckl.powerbi-vscode.svg?color=green)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
 
 ![PowerBI-VSCode](/images/PowerBI-VSCode.png?raw=true "PowerBI-VSCode")
 
@@ -21,6 +21,13 @@ The extensions can be installed directly from within VSCode by searching for thi
 - Work-In-Progress: UI for Capacities, Gatways and Pipelines
 
 # Change Log
+
+**v0.5.0**:
+- reworked notebook integration for `%api` magic
+  - added generic notebook on root path
+  - added support for relative paths using `./<absolute path>`
+  - added support for absolute paths using `/<absolute path>`
+  - added JSON array table output if the API returns a list of values
 
 **v0.4.1**:
 - fixed issue with Pipelines and Stages

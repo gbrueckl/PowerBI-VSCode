@@ -42,4 +42,22 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 	get groupId(): UniqueId {
 		return this._groupId;
 	}
+
+	async insertCode(): Promise<void> {
+        const editor = vscode.window.activeTextEditor;
+        if (editor === undefined) {
+            return;
+        }
+
+        const start = editor.selection.start;
+        const end = editor.selection.end;
+        const range = new vscode.Range(start.line, start.character, end.line, end.character);
+        await editor.edit((editBuilder) => {
+            editBuilder.replace(range, this.code);
+        });
+    }
+
+	get code(): string {
+		return "/" + this.apiPath.split("/").slice(2).join("/");
+	}	
 }
