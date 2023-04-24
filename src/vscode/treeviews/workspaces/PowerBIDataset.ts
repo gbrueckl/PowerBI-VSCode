@@ -9,8 +9,6 @@ import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/Co
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIReport } from './PowerBIReport';
 import { PowerBIParameters } from './PowerBIParameters';
-import { PowerBIKernelManager } from '../../notebook/PowerBIKernelManager';
-import { PowerBIKernel } from '../../notebook/PowerBIKernel';
 import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -34,15 +32,6 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		let orig: string = super._contextValue;
 
 		let actions: string[] = []
-
-		if(this.NotebookKernelExists)
-		{
-			actions.push("REMOVE_KERNEL")
-		}
-		else
-		{
-			actions.push("CREATE_KERNEL")
-		}
 
 		return orig + actions.join(",") + ",";
 	}
@@ -116,28 +105,6 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	// #endregion
 
 	// Dataset-specific funtions
-	private get NotebookKernel(): PowerBIKernel {
-		return PowerBIKernelManager.getNotebookKernel(this.apiPath);
-	}
-
-	public get NotebookKernelExists(): boolean {
-		if (this.NotebookKernel) {
-			return true;
-		}
-		return false;
-	}
-
-	private get InteractiveKernel(): PowerBIKernel {
-		return PowerBIKernelManager.getNotebookKernel(this.apiPath);
-	}
-
-	public get InteractiveKernelExists(): boolean {
-		if (this.InteractiveKernel) {
-			return true;
-		}
-		return false;
-	}
-
 	public async delete(): Promise<void> {
 		ThisExtension.setStatusBar("Deleting dataset ...", true);
 		await PowerBICommandBuilder.execute<iPowerBIDataset>(this.apiPath, "DELETE", []);
@@ -162,14 +129,5 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	public async updateAllParameters(): Promise<void> {
 		// TODO
-	}
-
-	async createKernel(logMessages: boolean = true): Promise<void> {
-		PowerBIKernelManager.createKernels(this.apiPath, logMessages);
-		vscode.commands.executeCommand("ipynb.newUntitledIpynb");
-	}
-
-	async removeKernel(): Promise<void> {
-		PowerBIKernelManager.removeKernels(this.apiPath);
 	}
 }

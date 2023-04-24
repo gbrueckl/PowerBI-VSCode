@@ -59,8 +59,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent)
-	{
+	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
 		//vscode.window.showInformationMessage("Session Changed! " + event.provider.id);
 		ThisExtension.log("Session Changed! " + event.provider.id);
 	}
@@ -131,10 +130,9 @@ export abstract class PowerBIApiService {
 
 	private static getFullUrl(endpoint: string, params?: object): string {
 		let uri = vscode.Uri.parse(`${this._apiBaseUrl}/${Helper.trimChar(endpoint, '/')}`);
-		if(endpoint.startsWith("https://"))
-		{
+		if (endpoint.startsWith("https://")) {
 			uri = vscode.Uri.parse(endpoint);
-		}		
+		}
 
 		if (params) {
 			let urlParams = []
@@ -152,7 +150,12 @@ export abstract class PowerBIApiService {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
 		else {
-			ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
+			if (params) {
+				ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
+			}
+			else {
+				ThisExtension.log("GET " + endpoint);
+			}
 
 			try {
 				const config: RequestInit = {

@@ -40,10 +40,7 @@
 		"PowerBI"
 	],
 	"activationEvents": [
-		"onView:PowerBIWorkspaces",
-		"onView:PowerBICapacities",
-		"onView:PowerBIGateways",
-		"onView:PowerBIPipelines"
+		"onNotebook:powerbi-notebook"
 	],
 	"main": "./dist/node/extension.js",
 	"browser": "./dist/web/extension.js",
@@ -121,14 +118,14 @@
 				"title": "Update Quick Pick List"
 			},
 			{
+				"command": "PowerBI.openNewNotebook",
+				"title": "Open new Power BI Notebook",
+				"icon": "$(notebook)"
+			},
+			{
 				"command": "PowerBIWorkspaces.refresh",
 				"title": "Refresh",
 				"icon": "$(refresh)"
-			},
-			{
-				"command": "PowerBIWorkspaces.notebook",
-				"title": "notebook",
-				"icon": "$(notebook)"
 			},
 			{
 				"command": "PowerBIWorkspaces.add",
@@ -159,16 +156,6 @@
 				"command": "PowerBIDataset.cancelRefresh",
 				"title": "Cancel",
 				"icon": "$(stop)"
-			},
-			{
-				"command": "PowerBIDataset.createKernel",
-				"title": "Create Notebook Kernel",
-				"icon": "$(notebook)"
-			},
-			{
-				"command": "PowerBIDataset.removeKernel",
-				"title": "Remove Notebook Kernel",
-				"icon": "$(notebook-template)"
 			},
 			{
 				"command": "PowerBIDataset.takeOver",
@@ -266,7 +253,7 @@
 					"group": "navigation"
 				},
 				{
-					"command": "PowerBIWorkspaces.notebook",
+					"command": "PowerBI.openNewNotebook",
 					"when": "view == PowerBIWorkspaces",
 					"group": "navigation"
 				},
@@ -305,16 +292,6 @@
 				{
 					"command": "PowerBIDataset.refresh",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/",
-					"group": "inline"
-				},
-				{
-					"command": "PowerBIDataset.createKernel",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,CREATE_KERNEL,.*/",
-					"group": "inline"
-				},
-				{
-					"command": "PowerBIDataset.removeKernel",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,REMOVE_KERNEL,.*/",
 					"group": "inline"
 				},
 				{
@@ -372,7 +349,30 @@
 					"group": "inline"
 				}
 			]
-		}
+		},
+		"notebooks": [
+			{
+				"type": "powerbi-notebook",
+				"displayName": "Power BI Notebook",
+				"selector": [
+					{
+						"filenamePattern": "*.pbinb"
+					}
+				]
+			}
+		],
+		"languages": [
+			{
+				"id": "powerbi-api",
+				"extensions": [
+					".pbinb"
+				],
+				"icon": {
+					"light": "./resources/light/notebook.png",
+					"dark": "./resources/dark/notebook.png"
+				}
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
@@ -397,6 +397,7 @@
 		"native-ext-loader": "^2.3.0",
 		"node-fetch": "^3.2.10",
 		"process": "^0.11.10",
+		"swagger-typescript-api": "^9.2.0",
 		"ts-loader": "^9.3.1",
 		"typescript": "^4.7.4",
 		"webpack": "^5.74.0",

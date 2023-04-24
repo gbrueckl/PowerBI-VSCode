@@ -1,14 +1,12 @@
 import * as vscode from 'vscode';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { iPowerBIDatasetParameter, iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
-import { Helper, UniqueId } from '../../../helpers/Helper';
-import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
+import { UniqueId } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
-import { PowerBIParameters } from './PowerBIParameters';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIDataset } from './PowerBIDataset';
 import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
+import { iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {

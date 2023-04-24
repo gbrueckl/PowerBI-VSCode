@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 import { Helper } from './helpers/Helper';
 import { PowerBIApiService } from './powerbi/PowerBIApiService';
+import { PowerBINotebookKernel } from './vscode/notebook/PowerBINotebookKernel';
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
 import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/PowerBIPipelinesTreeProvider';
@@ -21,6 +22,8 @@ export abstract class ThisExtension {
 	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
 	private static _treeViewGateways: PowerBIGatewaysTreeProvider;
 	private static _treeViewPipeliness: PowerBIPipelinesTreeProvider;
+
+	private static _notebookKernel: PowerBINotebookKernel;
 
 	static get rootUri(): vscode.Uri {
 		return this._context.extensionUri;
@@ -109,6 +112,12 @@ export abstract class ThisExtension {
 	}
 	//#endregion
 
+
+	static get NotebookKernel(): PowerBINotebookKernel
+	{
+		return this._notebookKernel;
+	}
+
 	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {
 		try {
 			this._logger = vscode.window.createOutputChannel(context.extension.id);
@@ -132,8 +141,9 @@ export abstract class ThisExtension {
 			let tenantId = ThisExtension.getConfigurationSetting<string>("powerbi.tenantId");
 			let clientId = ThisExtension.getConfigurationSetting<string>("powerbi.clientId");
 
-			await PowerBIApiService.initialize(apiUrl.value, tenantId.value, clientId.value);		
+			await PowerBIApiService.initialize(apiUrl.value, tenantId.value, clientId.value);
 
+			this._notebookKernel = new PowerBINotebookKernel();
 		} catch (error) {
 			return false;
 		}

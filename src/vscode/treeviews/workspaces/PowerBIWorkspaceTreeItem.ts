@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 
 import { ApiItemType } from '../_types';
 import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
@@ -58,6 +58,6 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
     }
 
 	get code(): string {
-		return "/" + this.apiPath.split("/").slice(2).join("/");
+		return Helper.trimChar("/" + this.apiPath.split("/").slice(2).join("/"), "/", false);
 	}	
 }

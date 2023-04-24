@@ -7,59 +7,42 @@ import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 import { QueryLanguage } from './_types';
 import { PowerBIDataset } from '../treeviews/workspaces/PowerBIDataset';
 import { iPowerResponseGeneric } from '../../powerbi/_types';
+import { PowerBIApiTreeItem } from '../treeviews/PowerBIApiTreeItem';
+import { PowerBINotebook } from './PowerBINotebook';
+import { PowerBINotebookContext } from './PowerBINotebookContext';
 
 
 export type NotebookMagic =
 	"dax"
 	| "api"
+	| "cmd"
 	;
 
-export type KernelType =
-	"jupyter-notebook"
-	| "interactive"
-
 // https://code.visualstudio.com/blogs/2021/11/08/custom-notebooks
-export class PowerBIKernel implements vscode.NotebookController {
+export class PowerBINotebookKernel implements vscode.NotebookController {
 	private static baseId: string = 'powerbi-';
-	private static baseLabel: string = 'PowerBI: ';
-	public id: string;
-	public label: string;
-	readonly notebookType: KernelType;
-	readonly description: string = 'Execute queires against a PowerBI Dataset';
-	readonly supportedLanguages = []; // any for now, should be DAX, M, ... in the future
+
+	readonly notebookType: string = 'powerbi-notebook';
+	readonly label: string;
+	readonly supportedLanguages = ["powerbi-api", "DAX"]; // any for now, should be DAX, M, ... in the future
 	readonly supportsExecutionOrder: boolean = true;
 
 	private _controller: vscode.NotebookController;
 	private _executionOrder: number;
-	private _executionContexts: Map<string, string>;
-	private _apiRootPath: string;
 
-	constructor(entryPoint?: string, notebookType: KernelType = 'jupyter-notebook') {
-		this.notebookType = notebookType;
-		if(entryPoint)
-		{
-			this._apiRootPath = entryPoint;
-			this.description = entryPoint;
-		}
-		else
-		{
-			this._apiRootPath = `v1.0/${PowerBIApiService.Org}`;
-			this.description = "generic"
-		}
-		this.id = PowerBIKernel.getId(this.description, notebookType);
-		this.label = PowerBIKernel.getLabel(this.description);
+	constructor() {
+		//this._apiRootPath = `v1.0/${PowerBIApiService.Org}/`;
+		this.label = "Power BI REST API";
 
 		this._executionOrder = 0;
-		this._executionContexts = new Map<string, string>;
 
-		ThisExtension.log("Creating new " + this.notebookType + " kernel '" + this.id + "'");
-		this._controller = vscode.notebooks.createNotebookController(this.id,
-			this.notebookType,
-			this.label);
+		ThisExtension.log("Creating new Power BI kernel '" + this.id + "'");
+		this._controller = vscode.notebooks.createNotebookController(this.id, this.notebookType, this.label);
 
+		this._controller.label = this.label;
 		this._controller.supportedLanguages = this.supportedLanguages;
 		this._controller.description = this.description;
-		this._controller.detail = this.DatasetDetails;
+		this._controller.detail = this.detail;
 		this._controller.supportsExecutionOrder = this.supportsExecutionOrder;
 		this._controller.executeHandler = this.executeHandler.bind(this);
 		this._controller.dispose = this.disposeController.bind(this);
@@ -74,54 +57,52 @@ export class PowerBIKernel implements vscode.NotebookController {
 	}
 
 	// #region Cluster-properties
-	static getId(entryPoint: string, kernelType: KernelType) {
-		return this.baseId + entryPoint + "-" + kernelType;
+	get id(): string {
+		return PowerBINotebookKernel.baseId + "generic";
 	}
 
-	static getLabel(entryPoint: string) {
-		return this.baseLabel + entryPoint;
+	// appears next to the label
+	get description(): string {
+		return "Generic Power BI REST API Kernel";
+	}
+
+	// appears below the label
+	get detail(): string {
+		return undefined;
 	}
 
 	get Controller(): vscode.NotebookController {
 		return this._controller;
 	}
 
-	get DatasetDetails(): string {
-		let details: string = undefined;
-
-		return details;
-	}
-
 	// #endregion
 
 	async disposeController(): Promise<void> {
-		for (let context of this._executionContexts.entries()) {
+		// nothing to do at the moment as the connection is stateless
+		/*
+		for (let context of this._notebookContexts.entries()) {
+			
 			try {
 				// nothing to do at the moment as the connection is stateless
 			}
 			catch (e) { };
 		}
 
-		this._executionContexts.clear();
+		this._notebookContexts.clear();
+		*/
 	}
 
 	async dispose(): Promise<void> {
 		this.Controller.dispose(); // bound to disposeController() above
 	}
 
-	setNotebookContext(notebookUri: vscode.Uri, apiRootPath: string): void {
-		this._executionContexts.set(notebookUri.toString(), apiRootPath);
+	public setNotebookContext(notebook: vscode.NotebookDocument, context: PowerBINotebookContext): void {
+		PowerBINotebookContext.set(notebook.metadata.guid, context);
 	}
 
-	getNotebookContext(notebookUri: vscode.Uri): string {
-		let path = notebookUri.toString();
-		if (this._executionContexts.has(path)) {
-			return this._executionContexts.get(path);
-		}
-		return undefined;
+	public getNotebookContext(notebook: vscode.NotebookDocument): PowerBINotebookContext {
+		return PowerBINotebookContext.get(notebook.metadata.guid);
 	}
-
-
 
 	createNotebookCellExecution(cell: vscode.NotebookCell): vscode.NotebookCellExecution {
 		//throw new Error('Method not implemented.');
@@ -131,27 +112,23 @@ export class PowerBIKernel implements vscode.NotebookController {
 	readonly onDidChangeSelectedNotebooks: vscode.Event<{ readonly notebook: vscode.NotebookDocument; readonly selected: boolean; }>;
 	updateNotebookAffinity(notebook: vscode.NotebookDocument, affinity: vscode.NotebookControllerAffinity): void { }
 
+	async executeHandler(cells: vscode.NotebookCell[], notebook: vscode.NotebookDocument, controller: vscode.NotebookController): Promise<void> {
+		let context: PowerBINotebookContext = this.getNotebookContext(notebook);
 
-
-	async executeHandler(cells: vscode.NotebookCell[], _notebook: vscode.NotebookDocument, _controller: vscode.NotebookController): Promise<void> {
-		let apiRootPath: string = this.getNotebookContext(_notebook.uri);
-		if (!apiRootPath) {
-			ThisExtension.setStatusBar("Initializing Kernel ...", true);
-			apiRootPath = this._apiRootPath;
-			this.setNotebookContext(_notebook.uri, apiRootPath);
-			ThisExtension.setStatusBar("Kernel initialized!");
-		}
 		for (let cell of cells) {
-			await this._doExecution(cell);
+			await this._doExecution(cell, context);
 			await Helper.wait(10); // Force some delay before executing/queueing the next cell
 		}
 	}
 
 	private parseCommand(cell: vscode.NotebookCell): [QueryLanguage, string, NotebookMagic] {
 		let cmd: string = cell.document.getText();
-		let magicText: string = undefined;
 		let commandText: string = cmd;
-		let language: QueryLanguage = "DAX";
+
+		// default is API
+		let language: QueryLanguage = "API";
+		let magicText: string = "api";
+
 		if (cmd[0] == "%") {
 			let lines = cmd.split('\n');
 			magicText = lines[0].split(" ")[0].slice(1).trim();
@@ -162,20 +139,19 @@ export class PowerBIKernel implements vscode.NotebookController {
 			else if (["api"].includes(magicText)) {
 				language = magicText as QueryLanguage;
 			}
+			else if (["cmd"].includes(magicText)) {
+				language = magicText as QueryLanguage;
+			}
 			else {
-				// we can run %pip commands "as-is" using the Python language
-				language = "DAX";
+				language = "API";
 				commandText = cmd;
 			}
-		}
-		else {
-			magicText = "dax";
 		}
 
 		return [language, commandText, magicText as NotebookMagic];
 	}
 
-	private async _doExecution(cell: vscode.NotebookCell): Promise<void> {
+	private async _doExecution(cell: vscode.NotebookCell, context: PowerBINotebookContext): Promise<void> {
 		const execution = this.Controller.createNotebookCellExecution(cell);
 		execution.executionOrder = ++this._executionOrder;
 		execution.start(Date.now());
@@ -194,7 +170,7 @@ export class PowerBIKernel implements vscode.NotebookController {
 			let result: iPowerBIDatasetExecuteQueries | iPowerResponseGeneric = undefined;
 			switch (magic) {
 				case "dax":
-					result = await PowerBIApiService.executeQueries(this._apiRootPath, commandText);
+					result = await PowerBIApiService.executeQueries(context.apiRootPath, commandText);
 					break;
 				case "api":
 					let [method, endpoint] = commandText.split(" ");
@@ -205,12 +181,10 @@ export class PowerBIKernel implements vscode.NotebookController {
 						body = JSON.parse(jsonText.slice(1).join("\n"));
 					}
 
-					if(endpoint.startsWith('./'))
-					{
-						endpoint = Helper.joinPath(this._apiRootPath, endpoint.slice(2));
+					if (endpoint.startsWith('./')) {
+						endpoint = Helper.joinPath(context.apiRootPath, endpoint.slice(2));
 					}
-					else if(endpoint.startsWith('/'))
-					{
+					else if (endpoint.startsWith('/')) {
 						endpoint = Helper.joinPath(`v1.0/${PowerBIApiService.Org}`, endpoint);
 					}
 
@@ -242,10 +216,22 @@ export class PowerBIKernel implements vscode.NotebookController {
 							return;
 					}
 					break;
+				case "cmd":
+					const regex = /SET\s*(?<variable>[^=]*)=(?<value>.*)/gm;
 
+					let match = regex.exec(commandText);
+					
+					context.setVariable(match.groups.variable, match.groups.value);
+
+					execution.appendOutput(new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text("Set variable " + match.groups.variable + " to '" + match.groups.value + "'."),
+					]));
+
+					execution.end(true, Date.now());
+					return;
 				default:
 					execution.appendOutput(new vscode.NotebookCellOutput([
-						vscode.NotebookCellOutputItem.text("Only %dax and %api magics are supported."),
+						vscode.NotebookCellOutputItem.text("Only %dax, %api and %cmd magics are supported."),
 					]));
 
 					execution.end(false, Date.now());
@@ -284,17 +270,17 @@ export class PowerBIKernel implements vscode.NotebookController {
 					execution.end(true, Date.now());
 				}
 			}
-			if (magic == "api") {
+			else if (magic == "api") {
 				result = result as iPowerResponseGeneric;
 
 				let output: vscode.NotebookCellOutput;
 
-				if(result.value) {
+				if (result.value) {
 					output = new vscode.NotebookCellOutput([
 						vscode.NotebookCellOutputItem.json(result.value, 'application/json') // to be used by proper JSON/table renderers
 					])
 				}
-				else{
+				else {
 					output = new vscode.NotebookCellOutput([
 						vscode.NotebookCellOutputItem.json(result, 'application/json') // to be used by proper JSON/table renderers
 					])
