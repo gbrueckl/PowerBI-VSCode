@@ -88,7 +88,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 								targetWorkspaceId: this.groupId
 							});
 							
-							ThisExtension.TreeViewWorkspaces.refresh(false, this.parent.parent);
+							ThisExtension.TreeViewWorkspaces.refresh(this.parent.parent, false);
 							break;
 
 					default:
@@ -110,7 +110,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		await PowerBICommandBuilder.execute<iPowerBIDataset>(this.apiPath, "DELETE", []);
 		ThisExtension.setStatusBar("Dataset deleted!");
 
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 	
 	public async refresh(): Promise<void> {
@@ -124,7 +124,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		PowerBIApiService.post(this.apiPath + "/Default.TakeOver", null);
 		ThisExtension.setStatusBar("Dataset taken over!");
 
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public async updateAllParameters(): Promise<void> {

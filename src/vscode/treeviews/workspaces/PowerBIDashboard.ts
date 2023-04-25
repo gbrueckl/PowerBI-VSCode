@@ -36,6 +36,6 @@ export class PowerBIDashboard extends PowerBIWorkspaceTreeItem {
 	public async delete(): Promise<void> {
 		await PowerBICommandBuilder.execute<iPowerBIDashboard>(this.apiPath, "DELETE", []);
 		
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 }

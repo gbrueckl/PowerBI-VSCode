@@ -23,7 +23,7 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 		ThisExtension.TreeViewGateways = this;
 	}
 	
-	refresh(showInfoMessage: boolean = false): void {
+	async refresh(item: PowerBIGatewayTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
 			vscode.window.showInformationMessage('Refreshing Gateways ...');
 		}

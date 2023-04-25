@@ -70,6 +70,6 @@ export class PowerBIParameter extends PowerBIWorkspaceTreeItem {
 		await PowerBIApiService.post(apiUrl, settings);
 		ThisExtension.setStatusBar("Parameter updated!")
 
-		await ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		await ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 }

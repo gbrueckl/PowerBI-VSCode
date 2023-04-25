@@ -23,7 +23,7 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 		ThisExtension.TreeViewPipelines = this;
 	}
 	
-	refresh(showInfoMessage: boolean = false): void {
+	async refresh(item: PowerBIPipelineTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
 			vscode.window.showInformationMessage('Refreshing Pipelines ...');
 		}

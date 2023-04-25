@@ -17,6 +17,8 @@ export abstract class PowerBIApiService {
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
 	private static _apiBaseUrl: string;
+	private static _tenantId: string;
+	private static _clientId: string;
 	private static _org: string = "myorg"
 	private static _headers;
 	private static _vscodeSession: vscode.AuthenticationSession;
@@ -29,14 +31,10 @@ export abstract class PowerBIApiService {
 			vscode.authentication.onDidChangeSessions((event) => this._onDidChangeSessions(event));
 
 			this._apiBaseUrl = Helper.trimChar(apiRootUrl, '/');
+			this._tenantId = tenantId;
+			this._clientId = clientId;
 
-			this._vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], tenantId, clientId);
-
-			this._headers = {
-				"Authorization": 'Bearer ' + this._vscodeSession.accessToken,
-				"Content-Type": 'application/json',
-				"Accept": 'application/json'
-			}
+			await this.refreshHeaders();
 
 			ThisExtension.log(`Testing new PowerBI API (${apiRootUrl}) settings ...`);
 			this._connectionTestRunning = true;
@@ -59,9 +57,22 @@ export abstract class PowerBIApiService {
 		}
 	}
 
+	private static async refreshHeaders(): Promise<void> {
+		this._vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], this._tenantId, this._clientId);
+
+			this._headers = {
+				"Authorization": 'Bearer ' + this._vscodeSession.accessToken,
+				"Content-Type": 'application/json',
+				"Accept": 'application/json'
+			}
+	}
+
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
-		//vscode.window.showInformationMessage("Session Changed! " + event.provider.id);
-		ThisExtension.log("Session Changed! " + event.provider.id);
+		if(event.provider.id == "microsoft")
+		{
+			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing headers! ");
+			vscode.commands.executeCommand("PowerBIWorkspaces.refresh");
+		}
 	}
 
 	private static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
@@ -78,7 +89,6 @@ export abstract class PowerBIApiService {
 		if (clientId) {
 			scopes.push("VSCODE_CLIENT_ID:" + clientId);
 		}
-
 
 		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes);
 

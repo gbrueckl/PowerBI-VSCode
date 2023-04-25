@@ -77,7 +77,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		PowerBIApiService.post(this.apiPath + "/Default.TakeOver", null);
 		ThisExtension.setStatusBar("Report taken over!");
 
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public async delete(): Promise<void> {
@@ -85,7 +85,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		await PowerBICommandBuilder.execute<iPowerBIReport>(this.apiPath, "DELETE", []);
 		ThisExtension.setStatusBar("Report deleted!");
 
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public async clone(settings: object = undefined): Promise<void> {
@@ -103,7 +103,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 			PowerBIApiService.post(apiUrl, settings);
 		}
 
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public async rebind(settings: object = undefined): Promise<void> {
@@ -119,7 +119,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 			PowerBIApiService.post(apiUrl, settings);
 		}
 
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public async updateContent(settings: object = undefined): Promise<void> {
@@ -137,6 +137,6 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 			PowerBIApiService.post(apiUrl, settings);
 		}
 
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 }

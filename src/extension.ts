@@ -20,6 +20,9 @@ import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIW
 import { PowerBINotebookSerializer } from './vscode/notebook/PowerBINotebookSerializer';
 import { PowerBINotebookKernel } from './vscode/notebook/PowerBINotebookKernel';
 import { PowerBIAPICompletionProvider } from './vscode/language/PowerBIAPICompletionProvider';
+import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICapacityTreeItem';
+import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatewayTreeItem';
+import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -48,7 +51,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// register PowerBIWorkspacesTreeProvider
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
-	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (item: PowerBIWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(item, showInfoMessage));
 
 	//vscode.commands.registerCommand('PowerBIWorkspaces.add', () => pbiWorkspacesTreeProvider.add());
 	vscode.commands.registerCommand('PowerBIWorkspace.delete', (workspace: PowerBIWorkspace) => workspace.delete());
@@ -78,25 +81,25 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIDataflow.refresh', (dataflow: PowerBIDataflow) => dataflow.refresh());
 
 	// Dashboard commands
-	vscode.commands.registerCommand('PowerBIDasjbpard.delete', (dashboard: PowerBIDashboard) => dashboard.delete());
+	vscode.commands.registerCommand('PowerBIDashboard.delete', (dashboard: PowerBIDashboard) => dashboard.delete());
 
 
 	// register PowerBICapacitiesTreeProvider
 	let pbiCapacitiesTreeProvider = new PowerBICapacitiesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBICapacities', pbiCapacitiesTreeProvider); // done in constructor which also adds Drag&Drop Controller
-	vscode.commands.registerCommand('PowerBICapacities.refresh', (showInfoMessage: boolean = true) => pbiCapacitiesTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('PowerBICapacities.refresh', (item: PowerBICapacityTreeItem = undefined, showInfoMessage: boolean = true) => pbiCapacitiesTreeProvider.refresh(item, showInfoMessage));
 
 
 	// register PowerBIGatewaysTreeProvider
 	let pbiGatewaysTreeProvider = new PowerBIGatewaysTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIGateways', pbiGatewaysTreeProvider); // done in constructor which also adds Drag&Drop Controller
-	vscode.commands.registerCommand('PowerBIGateways.refresh', (showInfoMessage: boolean = true) => pbiGatewaysTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('PowerBIGateways.refresh', (item: PowerBIGatewayTreeItem = undefined, showInfoMessage: boolean = true) => pbiGatewaysTreeProvider.refresh(item, showInfoMessage));
 
 
 	// register PowerBIPipelinesTreeProvider
 	let pbiPipelinesTreeProvider = new PowerBIPipelinesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIPipelines', pbiPipelinesTreeProvider); // done in constructor which also adds Drag&Drop Controller
-	vscode.commands.registerCommand('PowerBIPipelines.refresh', (showInfoMessage: boolean = true) => pbiPipelinesTreeProvider.refresh(showInfoMessage));
+	vscode.commands.registerCommand('PowerBIPipelines.refresh', (item: PowerBIPipelineTreeItem = undefined, showInfoMessage: boolean = true) => pbiPipelinesTreeProvider.refresh(item, showInfoMessage));
 }
 
 

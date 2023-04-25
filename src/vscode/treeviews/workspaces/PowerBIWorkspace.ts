@@ -116,7 +116,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 								targetWorkspaceId: this.id == "myorg" ? "00000000-0000-0000-0000-000000000000" : this.id
 							});
 							
-							ThisExtension.TreeViewWorkspaces.refresh(false, this);
+							ThisExtension.TreeViewWorkspaces.refresh(this, false);
 							break;
 
 						default:

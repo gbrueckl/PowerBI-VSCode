@@ -24,7 +24,7 @@ export class PowerBINotebookContext {
 
 	static loadFromMetadata(metadata?: { [key: string]: any }): { [key: string]: any } {
 
-		if (!metadata) {
+		if (metadata == undefined) {
 			metadata = {};
 		}
 		let newContext: PowerBINotebookContext = PowerBINotebookContext.generateFromOriginalMetadata(metadata);
@@ -41,10 +41,12 @@ export class PowerBINotebookContext {
 	}
 
 	static saveToMetadata(metadata: { [key: string]: any }): { [key: string]: any } {
-		metadata.context = PowerBINotebookContext.get(metadata.guid);
-		metadata.guid = undefined;
+		if (metadata?.guid) {
+			metadata.context = PowerBINotebookContext.get(metadata.guid);
+			metadata.guid = undefined;
+		}
 
-		// we only return the guid as metadata
+		// we only return the context as metadata
 		return metadata;
 	}
 

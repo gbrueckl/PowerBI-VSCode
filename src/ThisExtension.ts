@@ -59,87 +59,78 @@ export abstract class ThisExtension {
 	}
 
 	static setStatusBar(text: string, inProgress: boolean = false): void {
-		if(inProgress)
-		{
+		if (inProgress) {
 			this.StatusBar.text = "$(loading~spin) " + text;
 		}
-		else
-		{
+		else {
 			this.StatusBar.text = text;
 		}
-		
+
 	}
 	//#endregion
 	// #region TreeViews
-	static set TreeViewWorkspaces(treeView: PowerBIWorkspacesTreeProvider)
-	{
+	static set TreeViewWorkspaces(treeView: PowerBIWorkspacesTreeProvider) {
 		this._treeViewWorkspaces = treeView;
 	}
 
-	static get TreeViewWorkspaces(): PowerBIWorkspacesTreeProvider
-	{
+	static get TreeViewWorkspaces(): PowerBIWorkspacesTreeProvider {
 		return this._treeViewWorkspaces;
 	}
 
-	static set TreeViewCapacities(treeView: PowerBICapacitiesTreeProvider)
-	{
+	static set TreeViewCapacities(treeView: PowerBICapacitiesTreeProvider) {
 		this._treeViewCapacities = treeView;
 	}
 
-	static get TreeViewCapacities(): PowerBICapacitiesTreeProvider
-	{
+	static get TreeViewCapacities(): PowerBICapacitiesTreeProvider {
 		return this._treeViewCapacities;
 	}
 
-	static set TreeViewGateways(treeView: PowerBIGatewaysTreeProvider)
-	{
+	static set TreeViewGateways(treeView: PowerBIGatewaysTreeProvider) {
 		this._treeViewGateways = treeView;
 	}
 
-	static get TreeViewGateways(): PowerBIGatewaysTreeProvider
-	{
+	static get TreeViewGateways(): PowerBIGatewaysTreeProvider {
 		return this._treeViewGateways;
 	}
 
-	static set TreeViewPipelines(treeView: PowerBIPipelinesTreeProvider)
-	{
+	static set TreeViewPipelines(treeView: PowerBIPipelinesTreeProvider) {
 		this._treeViewPipeliness = treeView;
 	}
 
-	static get TreeViewPipelines(): PowerBIPipelinesTreeProvider
-	{
+	static get TreeViewPipelines(): PowerBIPipelinesTreeProvider {
 		return this._treeViewPipeliness;
 	}
 	//#endregion
 
 
-	static get NotebookKernel(): PowerBINotebookKernel
-	{
+	static get NotebookKernel(): PowerBINotebookKernel {
 		return this._notebookKernel;
 	}
 
 	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {
 		try {
-			this._logger = vscode.window.createOutputChannel(context.extension.id);
-			this.log("Logger initialized!");
+			if (!this._logger) {
+				this._logger = vscode.window.createOutputChannel(context.extension.id);
+				this.log("Logger initialized!");
+			}
 
 			this._extension = context.extension;
 			this.log(`Loading VS Code extension '${context.extension.packageJSON.displayName}' (${context.extension.id}) version ${context.extension.packageJSON.version} ...`);
 			this.log(`If you experience issues please open a ticket at ${context.extension.packageJSON.qna}`);
-			this._context = context;	
+			this._context = context;
 
-			if(vscode.workspace.workspaceFolders)
-			{
+			if (vscode.workspace.workspaceFolders) {
+				ThisExtension.log("Using Workspace settings ...");
 				this._settingScope = "Workspace";
 			}
-			else
-			{
+			else {
+				ThisExtension.log("Using User settings ...");
 				this._settingScope = "Global";
 			}
 
 			let apiUrl = ThisExtension.getConfigurationSetting<string>("powerbi.apiUrl", this.SettingScope, true);
-			let tenantId = ThisExtension.getConfigurationSetting<string>("powerbi.tenantId");
-			let clientId = ThisExtension.getConfigurationSetting<string>("powerbi.clientId");
+			let tenantId = ThisExtension.getConfigurationSetting<string>("powerbi.tenantId", this.SettingScope, false);
+			let clientId = ThisExtension.getConfigurationSetting<string>("powerbi.clientId", this.SettingScope, false);
 
 			await PowerBIApiService.initialize(apiUrl.value, tenantId.value, clientId.value);
 
@@ -152,7 +143,7 @@ export abstract class ThisExtension {
 	}
 
 	static cleanUp(): void {
-		
+
 	}
 
 	static log(text: string, newLine: boolean = true): void {
@@ -170,7 +161,7 @@ export abstract class ThisExtension {
 
 	static async getSecureSetting(setting: string): Promise<string> {
 		let value = this.secrets.get(setting); // new way to store secrets
-		
+
 		return value;
 	}
 
