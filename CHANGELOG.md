@@ -1,7 +1,9 @@
 # Change Log
 
-**v0.8.1**:
+**v0.8.2**:
 - fix issue with `New PowerBI Notebook`
+- fix issues with `Refresh` commands
+- fix issue when account token was renewed
 
 **v0.8.0**:
 - added new PowerBI Notebook type
