@@ -71,7 +71,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 				// TODO not yet working as we dont know the relative path - maybe get it from document?
 				currentPath = Helper.joinPath("", currentPath.slice(2));
 			}
-			else if (currentPath.startsWith('/')) {
+			else if (currentPath.startsWith('/') && !currentPath.startsWith('/v1.0')) {
 				currentPath = Helper.joinPath(`/v1.0/${PowerBIApiService.Org}`, currentPath);
 			}
 
@@ -82,7 +82,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 			let completionItems: vscode.CompletionItem[] = [];
 
 			for (let api of matchingApis) {
-				const nextToken = api.path.slice(pathSearch.length + 1).split("/")[0];
+				const nextToken = Helper.trimChar(api.path.slice(pathSearch.length), "/", true).split("/")[0];
 				
 				// placeholder for ID of resource
 				if(nextToken.startsWith("{") && nextToken.endsWith("}")) {

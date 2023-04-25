@@ -184,7 +184,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					if (endpoint.startsWith('./')) {
 						endpoint = Helper.joinPath(context.apiRootPath, endpoint.slice(2));
 					}
-					else if (endpoint.startsWith('/')) {
+					else if (endpoint.startsWith('/') && !endpoint.startsWith("/v1.0")) {
 						endpoint = Helper.joinPath(`v1.0/${PowerBIApiService.Org}`, endpoint);
 					}
 

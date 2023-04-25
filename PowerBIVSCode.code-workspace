@@ -7,7 +7,8 @@
 	"settings": {
 		"typescript.tsdk": "./node_modules/typescript/lib",
 		"typescript.tsc.autoDetect": "off",
-		"python.envFile": "${workspaceFolder}\\.databricks\\.databricks.env"
+		"python.envFile": "${workspaceFolder}\\.databricks\\.databricks.env",
+		"databricks.python.envFile": "${workspaceFolder}\\.databricks\\.databricks.env"
 	},
 	"tasks": {
 		"version": "2.0.0",

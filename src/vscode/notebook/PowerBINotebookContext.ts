@@ -24,6 +24,9 @@ export class PowerBINotebookContext {
 
 	static loadFromMetadata(metadata?: { [key: string]: any }): { [key: string]: any } {
 
+		if (!metadata) {
+			metadata = {};
+		}
 		let newContext: PowerBINotebookContext = PowerBINotebookContext.generateFromOriginalMetadata(metadata);
 		let guid = Helper.newGuid(); // we always generate a new guid for the current session
 
@@ -48,7 +51,7 @@ export class PowerBINotebookContext {
 	static generateFromOriginalMetadata(metadata?: { [key: string]: any }): PowerBINotebookContext {
 		let newContext = new PowerBINotebookContext('/');
 
-		if(metadata?.context) {
+		if (metadata?.context) {
 			if (metadata.context.apiRootPath) {
 				newContext.apiRootPath = metadata.context.apiRootPath;
 			}
