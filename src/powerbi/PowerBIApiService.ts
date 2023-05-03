@@ -256,9 +256,9 @@ export abstract class PowerBIApiService {
 			await this.logResponse(resultText);
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+					return {"value": {"status": response.status, "statusText": response.statusText}};
 				}
-				return JSON.parse(resultText) as T;
+				return JSON.parse(resultText);
 			}
 			else {
 				throw new Error(resultText);
