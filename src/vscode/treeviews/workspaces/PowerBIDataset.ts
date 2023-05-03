@@ -31,7 +31,19 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	get _contextValue(): string {
 		let orig: string = super._contextValue;
 
-		let actions: string[] = []
+		let actions: string[] = [
+			"REFRESH",
+			"DELETE"
+		]
+
+		if(this.definition.configuredBy != PowerBIApiService.SessionUserEmail)
+		{
+			actions.push("TAKEOVER");
+		}
+		else
+		{
+			actions.push("UPDATEPARAMETERS")
+		}
 
 		return orig + actions.join(",") + ",";
 	}

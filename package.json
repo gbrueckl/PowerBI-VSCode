@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.8.2",
+	"version": "0.8.3",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -286,21 +286,21 @@
 				},
 				{
 					"command": "PowerBIDataset.delete",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,DELETE,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIDataset.refresh",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,REFRESH,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIDataset.takeOver",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,TAKEOVER,.*/"
 				},
 				{
 					"command": "PowerBIDataset.updateAllParameters",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,UPDATEPARAMETERS,.*/"
 				},
 				{
 					"command": "PowerBIDataset.cancelRefresh",
@@ -314,7 +314,7 @@
 				},
 				{
 					"command": "PowerBIReport.takeOver",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,TAKEOVER,.*/"
 				},
 				{
 					"command": "PowerBIReport.delete",
@@ -323,15 +323,15 @@
 				},
 				{
 					"command": "PowerBIReport.clone",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,CLONE,.*/"
 				},
 				{
 					"command": "PowerBIReport.rebind",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,REBIND,.*/"
 				},
 				{
 					"command": "PowerBIReport.updateContent",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,UPDATECONTENT,.*/"
 				},
 				{
 					"command": "PowerBIDataflow.delete",

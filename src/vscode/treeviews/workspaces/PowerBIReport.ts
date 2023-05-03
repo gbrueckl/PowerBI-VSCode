@@ -25,6 +25,27 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = [
+			"CLONE",
+			"DELETE"
+		]
+
+		if(this.definition.datasetId != PowerBIApiService.SessionUserEmail)
+		{
+			actions.push("TAKEOVER");
+		}
+		else
+		{
+			actions.push("REBIND")
+			actions.push("UPDATECONTENT")
+		}
+
+		return orig + actions.join(",") + ",";
+	}
+
 	get definition(): iPowerBIReport {
 		return super.definition as iPowerBIReport;
 	}

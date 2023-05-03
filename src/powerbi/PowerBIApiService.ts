@@ -36,7 +36,7 @@ export abstract class PowerBIApiService {
 
 			await this.refreshHeaders();
 
-			ThisExtension.log(`Testing new PowerBI API (${apiRootUrl}) settings ...`);
+			ThisExtension.log(`Testing new PowerBI API (${apiRootUrl}) settings for user '${this.SessionUser}' (${this.SessionUserId}) ...`);
 			this._connectionTestRunning = true;
 			let workspaceList = await this.getGroups();
 			this._connectionTestRunning = false;
@@ -60,16 +60,15 @@ export abstract class PowerBIApiService {
 	private static async refreshHeaders(): Promise<void> {
 		this._vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], this._tenantId, this._clientId);
 
-			this._headers = {
-				"Authorization": 'Bearer ' + this._vscodeSession.accessToken,
-				"Content-Type": 'application/json',
-				"Accept": 'application/json'
-			}
+		this._headers = {
+			"Authorization": 'Bearer ' + this._vscodeSession.accessToken,
+			"Content-Type": 'application/json',
+			"Accept": 'application/json'
+		}
 	}
 
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
-		if(event.provider.id == "microsoft")
-		{
+		if (event.provider.id == "microsoft") {
 			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing headers! ");
 			vscode.commands.executeCommand("PowerBIWorkspaces.refresh");
 		}
@@ -99,8 +98,12 @@ export abstract class PowerBIApiService {
 		return Helper.trimChar(this._vscodeSession.account.label.split("-")[1], " ");
 	}
 
+	public static get SessionUser(): string {
+		return this._vscodeSession.account.label;
+	}
+
 	public static get SessionUserId(): string {
-		return this._vscodeSession.account.id.split("/")[1];
+		return this._vscodeSession.account.id;
 	}
 
 	public static get Org(): string {
@@ -178,6 +181,9 @@ export abstract class PowerBIApiService {
 				let resultText = await response.text();
 				await this.logResponse(resultText);
 				if (response.ok) {
+					if (!resultText || resultText == "") {
+						return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+					}
 					return JSON.parse(resultText) as T;
 				}
 				else {
@@ -204,11 +210,17 @@ export abstract class PowerBIApiService {
 			};
 			let response: Response = await fetch(this.getFullUrl(endpoint), config);
 
-			let result: T = await response.json() as T
-
-			await this.logResponse(result);
-
-			return result;
+			let resultText = await response.text();
+			await this.logResponse(resultText);
+			if (response.ok) {
+				if (!resultText || resultText == "") {
+					return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+				}
+				return JSON.parse(resultText) as T;
+			}
+			else {
+				throw new Error(resultText);
+			}
 		} catch (error) {
 			this.handleApiException(error);
 
@@ -240,11 +252,17 @@ export abstract class PowerBIApiService {
 			};
 			let response: Response = await fetch(this.getFullUrl(endpoint), config);
 
-			let result = await response.text();
-
-			await this.logResponse(result);
-
-			return result;
+			let resultText = await response.text();
+			await this.logResponse(resultText);
+			if (response.ok) {
+				if (!resultText || resultText == "") {
+					return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+				}
+				return JSON.parse(resultText) as T;
+			}
+			else {
+				throw new Error(resultText);
+			}
 		} catch (error) {
 			this.handleApiException(error);
 
@@ -264,11 +282,17 @@ export abstract class PowerBIApiService {
 			};
 			let response: Response = await fetch(this.getFullUrl(endpoint), config);
 
-			let result: T = await response.json() as T
-
-			await this.logResponse(result);
-
-			return result;
+			let resultText = await response.text();
+			await this.logResponse(resultText);
+			if (response.ok) {
+				if (!resultText || resultText == "") {
+					return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+				}
+				return JSON.parse(resultText) as T;
+			}
+			else {
+				throw new Error(resultText);
+			}
 		} catch (error) {
 			this.handleApiException(error);
 
@@ -287,11 +311,18 @@ export abstract class PowerBIApiService {
 				agent: getProxyAgent()
 			};
 			let response: Response = await fetch(this.getFullUrl(endpoint), config);
-			let result: T = await response.json() as T
-
-			await this.logResponse(result);
-
-			return result;
+			
+			let resultText = await response.text();
+			await this.logResponse(resultText);
+			if (response.ok) {
+				if (!resultText || resultText == "") {
+					return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+				}
+				return JSON.parse(resultText) as T;
+			}
+			else {
+				throw new Error(resultText);
+			}
 		} catch (error) {
 			this.handleApiException(error);
 
@@ -310,11 +341,18 @@ export abstract class PowerBIApiService {
 				agent: getProxyAgent()
 			};
 			let response: Response = await fetch(this.getFullUrl(endpoint), config);
-			let result: T = await response.json() as T
-
-			await this.logResponse(result);
-
-			return result;
+			
+			let resultText = await response.text();
+			await this.logResponse(resultText);
+			if (response.ok) {
+				if (!resultText || resultText == "") {
+					return undefined;
+				}
+				return JSON.parse(resultText) as T;
+			}
+			else {
+				throw new Error(resultText);
+			}
 		} catch (error) {
 			this.handleApiException(error);
 

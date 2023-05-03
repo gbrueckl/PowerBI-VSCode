@@ -173,12 +173,14 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					result = await PowerBIApiService.executeQueries(context.apiRootPath, commandText);
 					break;
 				case "api":
-					let [method, endpoint] = commandText.split(" ");
-					let jsonText: string[] = commandText.split("\n").filter(line => line.trim().length > 0);
+					let lines = commandText.split("\n");
+					let method = lines[0].split(" ")[0].trim();
+					let endpoint = lines[0].split(" ")[1].trim();
+					let bodyLines: string[] = lines.slice(1);
 
 					let body = undefined;
-					if (jsonText.length > 1) {
-						body = JSON.parse(jsonText.slice(1).join("\n"));
+					if (bodyLines.length > 1) {
+						body = JSON.parse(bodyLines.join("\n"));
 					}
 
 					if (endpoint.startsWith('./')) {
@@ -195,9 +197,11 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 						case "POST":
 							result = await PowerBIApiService.post<any>(endpoint, body);
+							break;
 
 						case "PUT":
 							result = await PowerBIApiService.put<any>(endpoint, body);
+							break;
 
 						case "PATCH":
 							result = await PowerBIApiService.patch<any>(endpoint, body);
