@@ -51,4 +51,4 @@
 - minor fixes, naming, etc.
 
 **v0.0.1**:
-- initial release
+- initial releas
