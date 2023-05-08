@@ -1,5 +1,9 @@
 # Change Log
 
+**v0.8.4**:
+- fix issue with error handling in notebooks (e.g. invalid endpoint etc.)
+- added details for list items display in completion item
+
 **v0.8.2**:
 - fix issue with `New PowerBI Notebook`
 - fix issues with `Refresh` commands
