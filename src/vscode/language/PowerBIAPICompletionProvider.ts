@@ -7,11 +7,19 @@ import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 import { iPowerResponseGeneric } from '../../powerbi/_types';
 
 
-/** Supported language type */
-const triggers = ['/'];
+/** Supported trigger characters */
+const TRIGGER_CHARS = ['/'];
 
-// TODO implement swagger.json
-// https://raw.githubusercontent.com/microsoft/PowerBI-CSharp/master/sdk/swaggers/swagger.json
+/** sometimes the API is not consistent and Swagger-definition is different from whats returned by the API  */
+const LIST_ITEM_OVERWRITE = {
+	"refreshId": "requestId"
+}
+
+/** black list of properties that are not exposed in the details of the popup
+ *  by default all strings > 100 chars are not shown anyway
+ */
+const DETAILS_BLACKLIST = ["webUrl"];
+
 
 export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvider {
 
@@ -21,7 +29,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 
 		const completionProvider = vscode.languages.registerCompletionItemProvider([PowerBIAPILanguage],
 			this,
-			...triggers);
+			...TRIGGER_CHARS);
 
 		context.subscriptions.push(completionProvider);
 	}
@@ -86,21 +94,18 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 				
 				// placeholder for ID of resource
 				if(nextToken.startsWith("{") && nextToken.endsWith("}")) {
+					const itemType = nextToken.slice(1, nextToken.length - 1);
+
 					const items: iPowerResponseGeneric = await PowerBIApiService.get<iPowerResponseGeneric>(currentPath);
 					for(let item of items.value) {
-						completionItems.push({
-							label: item.name,
-							detail: item.id,
-							insertText: item.id,
-							commitCharacters: triggers,
-						});
+						completionItems.push(await this.getCompletionItem(itemType, item));
 					}
 					break;
 				}
 				let completionItem: vscode.CompletionItem = {
 					label: nextToken,
 					insertText: nextToken,
-					commitCharacters: triggers,
+					commitCharacters: TRIGGER_CHARS,
 					detail: api.summary,
 					documentation: api.description
 				};
@@ -126,5 +131,31 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 		return [];
 	}
 
+	async getCompletionItem(itemType: string, apiItem: any): Promise<vscode.CompletionItem> {
+		let completionItem = new vscode.CompletionItem("Dummy", vscode.CompletionItemKind.Reference);
 
+		// take the overwritten itemtype or ### which will be later replaced via ??
+		const itemTypeOverwrite = LIST_ITEM_OVERWRITE[itemType] ?? "###";
+
+		completionItem.label = apiItem.name ?? apiItem.displayName ?? apiItem[itemTypeOverwrite];
+		completionItem.detail = await this.getCompletionItemDetail(apiItem)
+		completionItem.insertText = apiItem[itemTypeOverwrite] ?? apiItem.id,
+		completionItem.commitCharacters = TRIGGER_CHARS;
+		
+		return completionItem;
+	}
+
+	async getCompletionItemDetail(apiItem: any): Promise<string> {
+		let details = {};
+		for(let property of Object.getOwnPropertyNames(apiItem))
+		{
+			if(DETAILS_BLACKLIST.includes(property) || apiItem[property].toString().length > 100)
+			{
+				continue
+			}
+			details[property] = apiItem[property];
+		}
+
+		return JSON.stringify(details, null, 4);
+	}
 }

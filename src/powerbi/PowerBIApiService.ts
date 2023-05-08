@@ -125,7 +125,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static async handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): Promise<void> {
+	private static handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): void {
 		ThisExtension.log("ERROR: " + error.name);
 		ThisExtension.log("ERROR: " + error.message);
 		if (error.stack) {
@@ -158,7 +158,7 @@ export abstract class PowerBIApiService {
 		return uri.toString(true);
 	}
 
-	static async get<T = any>(endpoint: string, params: object = null): Promise<T> {
+	static async get<T = any>(endpoint: string, params: object = null, raiseError: boolean = false): Promise<T> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
@@ -191,14 +191,14 @@ export abstract class PowerBIApiService {
 				}
 
 			} catch (error) {
-				this.handleApiException(error);
+				this.handleApiException(error, false, raiseError);
 
 				return undefined;
 			}
 		}
 	}
 
-	static async post<T = any>(endpoint: string, body: object): Promise<T> {
+	static async post<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
 		ThisExtension.log("POST " + endpoint + " --> " + JSON.stringify(body));
 
 		try {
@@ -222,13 +222,13 @@ export abstract class PowerBIApiService {
 				throw new Error(resultText);
 			}
 		} catch (error) {
-			this.handleApiException(error);
+			this.handleApiException(error, false, raiseError);
 
 			return undefined;
 		}
 	}
 
-	static async postFile(endpoint: string, uri: vscode.Uri): Promise<any> {
+	static async postFile(endpoint: string, uri: vscode.Uri, raiseError: boolean = false): Promise<any> {
 		ThisExtension.log("POST " + endpoint + " --> (File)" + uri);
 
 		try {
@@ -264,13 +264,13 @@ export abstract class PowerBIApiService {
 				throw new Error(resultText);
 			}
 		} catch (error) {
-			this.handleApiException(error);
+			this.handleApiException(error, false, raiseError);
 
 			return undefined;
 		}
 	}
 
-	static async put<T = any>(endpoint: string, body: object): Promise<T> {
+	static async put<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
 		ThisExtension.log("PUT " + endpoint + " --> " + JSON.stringify(body));
 
 		try {
@@ -294,13 +294,13 @@ export abstract class PowerBIApiService {
 				throw new Error(resultText);
 			}
 		} catch (error) {
-			this.handleApiException(error);
+			this.handleApiException(error, false, raiseError);
 
 			return undefined;
 		}
 	}
 
-	static async patch<T = any>(endpoint: string, body: object): Promise<T> {
+	static async patch<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
 		ThisExtension.log("PATCH " + endpoint + " --> " + JSON.stringify(body));
 
 		try {
@@ -324,13 +324,13 @@ export abstract class PowerBIApiService {
 				throw new Error(resultText);
 			}
 		} catch (error) {
-			this.handleApiException(error);
+			this.handleApiException(error, false, raiseError);
 
 			return undefined;
 		}
 	}
 
-	static async delete<T = any>(endpoint: string, body: object): Promise<T> {
+	static async delete<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
 		ThisExtension.log("DELETE " + endpoint + " --> " + JSON.stringify(body));
 
 		try {
@@ -354,7 +354,7 @@ export abstract class PowerBIApiService {
 				throw new Error(resultText);
 			}
 		} catch (error) {
-			this.handleApiException(error);
+			this.handleApiException(error, false, raiseError);
 
 			return undefined;
 		}

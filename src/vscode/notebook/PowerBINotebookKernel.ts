@@ -192,23 +192,23 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 					switch (method) {
 						case "GET":
-							result = await PowerBIApiService.get<any>(endpoint, body);
+							result = await PowerBIApiService.get<any>(endpoint, body, true);
 							break;
 
 						case "POST":
-							result = await PowerBIApiService.post<any>(endpoint, body);
+							result = await PowerBIApiService.post<any>(endpoint, body, true);
 							break;
 
 						case "PUT":
-							result = await PowerBIApiService.put<any>(endpoint, body);
+							result = await PowerBIApiService.put<any>(endpoint, body, true);
 							break;
 
 						case "PATCH":
-							result = await PowerBIApiService.patch<any>(endpoint, body);
+							result = await PowerBIApiService.patch<any>(endpoint, body, true);
 							break;
 
 						case "DELETE":
-							result = await PowerBIApiService.delete<any>(endpoint, body);
+							result = await PowerBIApiService.delete<any>(endpoint, body, true);
 							break;
 
 						default:
