@@ -199,7 +199,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async post<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
-		ThisExtension.log("POST " + endpoint + " --> " + JSON.stringify(body));
+		ThisExtension.log("POST " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
 			const config: RequestInit = {
@@ -271,7 +271,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async put<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
-		ThisExtension.log("PUT " + endpoint + " --> " + JSON.stringify(body));
+		ThisExtension.log("PUT " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
 			const config: RequestInit = {
@@ -301,7 +301,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async patch<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
-		ThisExtension.log("PATCH " + endpoint + " --> " + JSON.stringify(body));
+		ThisExtension.log("PATCH " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
 			const config: RequestInit = {
@@ -331,7 +331,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async delete<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
-		ThisExtension.log("DELETE " + endpoint + " --> " + JSON.stringify(body));
+		ThisExtension.log("DELETE " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
 			const config: RequestInit = {

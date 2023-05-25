@@ -10,6 +10,8 @@ import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIReport } from './PowerBIReport';
 import { PowerBIParameters } from './PowerBIParameters';
 import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
+import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
+import { QuickPickItem } from 'vscode';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -127,7 +129,27 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	
 	public async refresh(): Promise<void> {
 		ThisExtension.setStatusBar("Triggering dataset-refresh ...", true);
-		PowerBIApiService.post(this.apiPath + "/refreshes", null);
+
+		let body = null;
+
+		// if we are on premium, we can use the Enhanced Refresh API
+		if((this.getParentByType("GROUP").definition as iPowerBIGroup).isOnDedicatedCapacity)
+		{
+			const processType: QuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
+				//placeHolder: toolTip,
+				ignoreFocusOut: true
+				/*,
+				onDidSelectItem: item => window.showInformationMessage(`Focus ${++i}: ${item}`)
+				*/
+			});
+			if (processType == undefined || processType == null) {
+				return;
+			}
+			body = {
+				"type": processType.label
+			}
+		}
+		PowerBIApiService.post(this.apiPath + "/refreshes", body);
 		ThisExtension.setStatusBar("Dataset-refresh triggered!");
 	}
 
@@ -143,3 +165,30 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		// TODO
 	}
 }
+
+const PROCESSING_TYPES: vscode.QuickPickItem[] = [
+	{
+		"label": "full",
+		"detail": "Processes an SQL Server Analysis Services object and all the objects that it contains. When Process Full is executed against an object that has already been processed, SQL Server Analysis Services drops all data in the object, and then processes the object. This kind of processing is required when a structural change has been made to an object, for example, when an attribute hierarchy is added, deleted, or renamed."
+	},
+	{
+		"label": "clearValues",
+		"detail": "Drops the data in the object specified and any lower-level constituent objects. After the data is dropped, it is not reloaded."
+	},
+	{
+		"label": "calculate",
+		"detail": "Updates and recalculates hierarchies, relationships, and calculated columns."
+	},
+	{
+		"label": "dataOnly",
+		"detail": "Processes data only without building aggregations or indexes. If there is data is in the partitions, it will be dropped before re-populating the partition with source data."
+	},
+	{
+		"label": "automatic",
+		"detail": "Detects the process state of database objects, and performs processing necessary to deliver unprocessed or partially processed objects to a fully processed state. If you change a data binding, Process Default will do a Process Full on the affected object."
+	},
+	{
+		"label": "defragment",
+		"detail": "Creates or rebuilds indexes and aggregations for all processed partitions. For unprocessed objects, this option generates an error. Processing with this option is needed if you turn off Lazy Processing."
+	}
+];

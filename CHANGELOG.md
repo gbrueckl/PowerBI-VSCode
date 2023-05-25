@@ -1,5 +1,8 @@
 # Change Log
 
+**v0.8.5**:
+- added support for [Enhanced Refresh API](https://learn.microsoft.com/en-us/power-bi/connect-data/asynchronous-refresh) via UI
+
 **v0.8.4**:
 - fix issue with error handling in notebooks (e.g. invalid endpoint etc.)
 - added details for list items display in completion item
