@@ -1,5 +1,12 @@
 # Change Log
 
+**v0.9.0**:
+- added better support for deployment pipelines
+  - start full and selective deployments
+  - show operations
+  - show artifacts
+- improved completion provider to also support examples
+
 **v0.8.5**:
 - added support for [Enhanced Refresh API](https://learn.microsoft.com/en-us/power-bi/connect-data/asynchronous-refresh) via UI
 

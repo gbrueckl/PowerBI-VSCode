@@ -23,6 +23,7 @@ import { PowerBIAPICompletionProvider } from './vscode/language/PowerBIAPIComple
 import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICapacityTreeItem';
 import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatewayTreeItem';
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
+import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -100,6 +101,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiPipelinesTreeProvider = new PowerBIPipelinesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIPipelines', pbiPipelinesTreeProvider); // done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIPipelines.refresh', (item: PowerBIPipelineTreeItem = undefined, showInfoMessage: boolean = true) => pbiPipelinesTreeProvider.refresh(item, showInfoMessage));
+
+	vscode.commands.registerCommand('PowerBIPipelineStage.deploy', (item: PowerBIPipelineStage = undefined, showInfoMessage: boolean = true) => item.deployToNextStage());
 }
 
 

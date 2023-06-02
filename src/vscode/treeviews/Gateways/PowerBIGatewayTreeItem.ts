@@ -33,10 +33,8 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 	get _tooltip(): string {
 		let tooltip: string = "";
 		for (const [key, value] of Object.entries(this.definition)) {
-			if(typeof value === "string")
-			{
-				if(value.length > 100)
-				{
+			if (typeof value === "string") {
+				if (value.length > 100) {
 					continue;
 				}
 			}
@@ -60,8 +58,8 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 		this._definition = value;
 	}
 
-	get apiPath(): string {
-		return `v1.0/myorg/gateways`;
+	get parent(): PowerBIGatewayTreeItem {
+		return this._parent as PowerBIGatewayTreeItem;
 	}
 
 	/* iPowerBIGatewayItem implementation */

@@ -44,7 +44,7 @@ export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowe
 				}
 			}
 			if (value) {
-				tooltip += `${key}: ${value.toString()}\n`;
+				tooltip += `${key}: ${JSON.stringify(value)}\n`;
 			}
 		}
 
@@ -56,9 +56,10 @@ export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowe
 		return undefined;
 	}
 
-	get apiPath(): string {
-		return `v1.0/myorg/pipelines`;
+	get parent(): PowerBIPipelineTreeItem {
+		return this._parent as PowerBIPipelineTreeItem;
 	}
+
 
 	/* iPowerBIPipelineItem implementation */
 	get stages(): iPowerBIPipelineStage[] {

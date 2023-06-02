@@ -4,7 +4,7 @@ import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { iPowerBIGroup } from './GroupsAPI/_types';
 import { ApiItemType } from '../vscode/treeviews/_types';
-import { iPowerBIPipeline, iPowerBIPipelineStage } from './PipelinesAPI/_types';
+import { iPowerBIPipeline, iPowerBIPipelineOperation, iPowerBIPipelineStage, iPowerBIPipelineStageArtifacts } from './PipelinesAPI/_types';
 import { ApiUrlPair } from './_types';
 import { iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
@@ -60,6 +60,7 @@ export abstract class PowerBIApiService {
 	private static async refreshHeaders(): Promise<void> {
 		this._vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], this._tenantId, this._clientId);
 
+		ThisExtension.log("Refreshing authentication headers ...");
 		this._headers = {
 			"Authorization": 'Bearer ' + this._vscodeSession.accessToken,
 			"Content-Type": 'application/json',
@@ -70,7 +71,8 @@ export abstract class PowerBIApiService {
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
 		if (event.provider.id == "microsoft") {
 			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing headers! ");
-			vscode.commands.executeCommand("PowerBIWorkspaces.refresh");
+			//vscode.commands.executeCommand("PowerBIWorkspaces.refresh");
+			await this.refreshHeaders();
 		}
 	}
 
@@ -534,6 +536,19 @@ export abstract class PowerBIApiService {
 		let items: iPowerBIPipelineStage[] = jsonResult.value;
 
 		return items;
+	}
+
+	static async getPipelineOperations(pipelineId: string | UniqueId): Promise<iPowerBIPipelineOperation[]> {
+		let jsonResult = await this.get(`v1.0/${this.Org}/pipelines/${pipelineId}/operations`);
+		let items: iPowerBIPipelineOperation[] = jsonResult.value;
+
+		return items;
+	}
+
+	static async getPipelineStageArtifacts(pipelineId: string | UniqueId, order: number): Promise<iPowerBIPipelineStageArtifacts> {
+		let jsonResult = await this.get<iPowerBIPipelineStageArtifacts>(`v1.0/${this.Org}/pipelines/${pipelineId}/stages/${order}/artifacts`);
+
+		return jsonResult;
 	}
 	//#endregion
 }

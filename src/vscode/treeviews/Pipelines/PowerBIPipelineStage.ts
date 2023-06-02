@@ -2,9 +2,15 @@ import * as vscode from 'vscode';
 
 
 import { UniqueId } from '../../../helpers/Helper';
-import { iPowerBIPipelineStage } from '../../../powerbi/PipelinesAPI/_types';
+import { iPowerBIPipelineStage, iPowerBIPipelineStageArtifacts, resolveOrder, resolveOrderShort } from '../../../powerbi/PipelinesAPI/_types';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBIPipelineStageArtifact } from './PowerBIPipelineStageArtifact';
+import { PowerBIPipelineStageArtifacts } from './PowerBIPipelineStageArtifacts';
+import { ArtifactType } from '../../../powerbi/SwaggerAPI';
+import { PowerBIPipeline } from './PowerBIPipeline';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
@@ -14,11 +20,11 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 		pipelineId: UniqueId,
 		parent: PowerBIPipelineTreeItem
 	) {
-		super(definition.order.toString(), "PIPELINESTAGE", pipelineId, parent, vscode.TreeItemCollapsibleState.None);
+		super(definition.order.toString(), "PIPELINESTAGE", pipelineId, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
-		super.label = this.getLabel(definition);
-		super.id = definition.order.toString() + "/" + definition.workspaceId;
 		this.definition = definition;
+		super.label = this._Label;
+		super.id = definition.order.toString() + "/" + definition.workspaceId;
 
 		super.tooltip = this._tooltip;
 		super.description = null;
@@ -27,27 +33,36 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
+		super.contextValue = this._contextValue;
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {
-		let stage: string;
-		switch (this.definition.order) {
-			case 0:
-				stage = "_dev";
-				break;
-			case 1:
-				stage = "_test";
-				break;
-			case 2: 
-				stage = "_prod";
-				break;
-			default:
-				return;
-		}
+		let stage: string = `_${resolveOrderShort(this.definition.order)}`;
+
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + stage + '.png');
-	}	
+	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
+	get _Label(): string {
+		let ret: string = resolveOrder(this.definition.order);
+
+		return ret + ": " + this.definition.workspaceName;
+	}
+
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = [
+			"DELETE"
+		]
+
+		if (this.definition.order <= 1) {
+			actions.push("DEPLOY");
+		}
+
+		return orig + actions.join(",") + ",";
+	}
+
 	get definition(): iPowerBIPipelineStage {
 		return super.definition as iPowerBIPipelineStage;
 	}
@@ -56,25 +71,33 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 		super.definition = value;
 	}
 
-	// Pipelinestage-specific funtions
-	private getLabel(definition: iPowerBIPipelineStage): string {
-		let ret: string = "";
-		switch (definition.order) {
-			case 0:
-				ret = "Development";
-				break;
-			case 1:
-				ret = "Test";
-				break;
-			case 2: 
-				ret = "Production";
-				break;
-			default: 
-				ret = "NO_NAME_DEFINED";
+	async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {
+		PowerBICommandBuilder.pushQuickPickItem(this);
+
+		let children: PowerBIPipelineTreeItem[] = [];
+		let artifacts: iPowerBIPipelineStageArtifacts = await PowerBIApiService.getPipelineStageArtifacts(this.getParentByType<PowerBIPipeline>("PIPELINE").uid, this.definition.order);
+
+		if (artifacts.dashboards.length > 0) {
+			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDASHBOARDS", artifacts.dashboards, this));
+		}
+		if (artifacts.dataflows.length > 0) {
+			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATAFLOWS", artifacts.dataflows, this));
+		}
+		if (artifacts.datamarts.length > 0) {
+			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATAMARTS", artifacts.datamarts, this));
+		}
+		if (artifacts.datasets.length > 0) {
+			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATASETS", artifacts.datasets, this));
+		}
+		if (artifacts.reports.length > 0) {
+			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEREPORTS", artifacts.reports, this));
 		}
 
-		return ret + ": " + definition.workspaceName;
+		return children;
 	}
+
+	// Pipelinestage-specific funtions
+
 	/*
 	public async delete(): Promise<void> {
 		await PowerBICommandBuilder.execute<iPowerBIDataflow>(this.apiPath, "DELETE", []);
@@ -86,4 +109,34 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 		PowerBIApiService.post(this.apiPath + "/refreshes", null);
 	}
 	*/
+
+	public async deployToNextStage(settings: object = undefined): Promise<void> {
+		const apiUrl = this.getParentByType("PIPELINE").apiPath + "deployAll";
+		/*
+		if (settings == undefined) // prompt user for inputs
+		{
+			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
+				[
+					new PowerBICommandInput("Target Dataset", "DATASET_SELECTOR", "datasetId", false, "The new dataset for the rebound report. If the dataset resides in a different workspace than the report, a shared dataset will be created in the report's workspace.")
+				]);
+		}
+		else {
+			PowerBIApiService.post(apiUrl, settings);
+		}
+		*/
+		const body = {
+			"sourceStageOrder": this.definition.order,
+			"options": {
+				"allowCreateArtifact": true,
+				"allowOverwriteArtifact": true,
+				"allowOverwriteTargetArtifactLabel": true,
+				"allowPurgeData": true,
+				"allowSkipTilesWithMissingPrerequisites": true,
+				"allowTakeOver": true
+			}
+		}
+		PowerBIApiService.post(apiUrl, body);
+
+		ThisExtension.TreeViewPipelines.refresh(this.parent, false);
+	}
 }

@@ -24,6 +24,10 @@ export class PowerBIGateway extends PowerBIGatewayTreeItem {
 		super.definition = value;
 	}
 
+	get apiUrlPart(): string {
+		return "gateways/" + this.uid;
+	}
+
 	// Dashboard-specific funtions
 	public async delete(): Promise<void> {
 		//PowerBICommandBuilder.execute<iPowerBIGatewayItem>(this.apiPath, "DELETE", []);

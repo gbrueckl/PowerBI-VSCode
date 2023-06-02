@@ -38,16 +38,6 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 		return undefined;
 	}
 
-	getParentByType(type: ApiItemType): PowerBIWorkspaceTreeItem {
-		let parent: PowerBIWorkspaceTreeItem = this.parent;
-
-		while (parent !== undefined && parent.itemType !== type) {
-			parent = parent.parent;
-		}
-
-		return parent;
-	}
-
 	/* iDatabrickWorkspaceItem implementation */
 	get groupId(): UniqueId {
 		return this._groupId;

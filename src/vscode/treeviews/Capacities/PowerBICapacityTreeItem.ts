@@ -61,8 +61,8 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 		this._definition = value;
 	}
 
-	get apiPath(): string {
-		return `v1.0/myorg/capacities`;
+	get parent(): PowerBICapacityTreeItem {
+		return this._parent as PowerBICapacityTreeItem;
 	}
 
 	/* iPowerBICapacityItem implementation */

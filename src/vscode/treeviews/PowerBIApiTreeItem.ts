@@ -120,6 +120,16 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		return this._parent;
 	}
 
+	getParentByType<T = PowerBIApiTreeItem>(type: ApiItemType): T {
+		let parent: PowerBIApiTreeItem = this.parent;
+
+		while (parent !== undefined && parent.itemType !== type) {
+			parent = parent.parent;
+		}
+
+		return parent as T;
+	}
+
 	public CopyPathToClipboard(): void {
 		vscode.env.clipboard.writeText(this._name);
 	}

@@ -173,7 +173,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					result = await PowerBIApiService.executeQueries(context.apiRootPath, commandText);
 					break;
 				case "api":
-					let lines = commandText.split("\n");
+					let lines = commandText.split("\n").filter(l => l.trim()[0] != "#");
 					let method = lines[0].split(" ")[0].trim();
 					let endpoint = lines[0].split(" ")[1].trim();
 					let bodyLines: string[] = lines.slice(1);

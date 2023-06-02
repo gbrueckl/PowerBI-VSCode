@@ -12,6 +12,7 @@ import { PowerBIParameters } from './PowerBIParameters';
 import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
 import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { QuickPickItem } from 'vscode';
+import { PowerBIWorkspace } from './PowerBIWorkspace';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -133,7 +134,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		let body = null;
 
 		// if we are on premium, we can use the Enhanced Refresh API
-		if((this.getParentByType("GROUP").definition as iPowerBIGroup).isOnDedicatedCapacity)
+		if(this.getParentByType<PowerBIWorkspace>("GROUP").definition.isOnDedicatedCapacity)
 		{
 			const processType: QuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
 				//placeHolder: toolTip,
@@ -151,6 +152,8 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		}
 		PowerBIApiService.post(this.apiPath + "/refreshes", body);
 		ThisExtension.setStatusBar("Dataset-refresh triggered!");
+
+		ThisExtension.TreeViewWorkspaces.refresh(this, false);
 	}
 
 	public async takeOver(): Promise<void> {

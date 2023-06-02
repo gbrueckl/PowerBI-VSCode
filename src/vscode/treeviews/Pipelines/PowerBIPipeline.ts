@@ -4,6 +4,7 @@ import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIPipelineStages } from './PowerBIPipelineStages';
 import { iPowerBIPipeline } from '../../../powerbi/PipelinesAPI/_types';
+import { PowerBIPipelineOperations } from './PowerBIPipelineOperations';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIPipeline extends PowerBIPipelineTreeItem {
@@ -32,8 +33,13 @@ export class PowerBIPipeline extends PowerBIPipelineTreeItem {
 		let children: PowerBIPipelineTreeItem[] = [];
 		
 		children.push(new PowerBIPipelineStages(this.uid, this));
+		children.push(new PowerBIPipelineOperations(this.uid, this));
 
 		return children;
+	}
+
+	get apiUrlPart(): string {
+		return "pipelines/" + (this.id ?? this.uid);
 	}
 
 	// Dashboard-specific funtions

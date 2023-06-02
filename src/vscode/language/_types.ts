@@ -19,6 +19,13 @@ export interface ApiEndpointDetails {
 	deprecated: boolean;
 }
 
+export interface ApiEndpointParameter {
+	name: string;
+	in: "body" | "path";
+	description: string;
+	required: boolean;
+}
+
 export interface SwaggerFile {
 	swagger: string;
 	info: { 

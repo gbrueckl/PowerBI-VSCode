@@ -167,4 +167,8 @@ export abstract class Helper {
 		return guidRegex.test(value);
 	}
 
+	static toPascalCase(value: string): string {
+		return value[0].toUpperCase() + value.substring(1).toLowerCase();
+	}
+
 }
