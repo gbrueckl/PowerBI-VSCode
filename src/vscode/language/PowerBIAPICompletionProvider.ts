@@ -47,14 +47,22 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 		}
 		ThisExtension.log("Searching for API paths starting with '" + searchPath + "' ...");
 
+		const searchParts = searchPath.split("/");
 		let matches: ApiEndpointDetails[] = [];
 		for (let item of Object.getOwnPropertyNames(PowerBIAPICompletionProvider.swagger.paths)) {
-			if (item.startsWith(searchPath)) {
-				for (let m of Object.getOwnPropertyNames(PowerBIAPICompletionProvider.swagger.paths[item])) {
-					if (!method || m == method) {
-						let itemToAdd = PowerBIAPICompletionProvider.swagger.paths[item][m];
-						itemToAdd.path = item;
-						matches.push(itemToAdd);
+			
+			// within the same path as the typed path 
+			if (item.startsWith(searchPath))
+			{
+				const parts = item.split("/");
+				// all APIs directly below the current path and all dynamic paths
+				if(parts.length == searchParts.length + 1 || (parts.length > searchParts.length && parts[searchParts.length].startsWith("{"))) {
+					for (let m of Object.getOwnPropertyNames(PowerBIAPICompletionProvider.swagger.paths[item])) {
+						if (!method || m == method) {
+							let itemToAdd = PowerBIAPICompletionProvider.swagger.paths[item][m];
+							itemToAdd.path = item;
+							matches.push(itemToAdd);
+						}
 					}
 				}
 			}
@@ -80,6 +88,9 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 					currentPath = Helper.joinPath(`/v1.0/${PowerBIApiService.Org}`, currentPath);
 				}
 
+				// replace multiple slashes with one
+				currentPath = currentPath.replace(/\/+/gm, "/");
+
 				// replace guids with placeholders from previous path
 				let pathSearch = currentPath.replace(/\/([a-z]*?)\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/gm, "/$1/{$1XXXId}").replace(new RegExp("sXXX", "g"), "");
 
@@ -92,6 +103,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 
 					// placeholder for ID of resource
 					if (nextToken.startsWith("{") && nextToken.endsWith("}")) {
+						ThisExtension.log("Found a placeholder: " + nextToken + " - getting available values from API ...");
 						const itemType = nextToken.slice(1, nextToken.length - 1);
 
 						const items: iPowerResponseGeneric = await PowerBIApiService.get<iPowerResponseGeneric>(currentPath);
@@ -136,6 +148,12 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 				}
 				ThisExtension.log("Found " + completionItems.length + " completions! (filtered duplicates)");
 
+				if(completionItems.length == 0) {
+					completionItems.push({
+						label: "No completion items found!",
+						insertText: ""
+					})
+				}
 				return completionItems;
 			}
 			catch (error) {
