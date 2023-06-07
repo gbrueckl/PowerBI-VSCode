@@ -55,9 +55,6 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 		if (showInfoMessage) {
 			vscode.window.showInformationMessage('Refreshing Workspaces ...');
 		}
-		if(!item) { // on the root we re-initialize the connection
-			await ThisExtension.initialize(ThisExtension.extensionContext);
-		}
 		this._onDidChangeTreeData.fire(item);
 	}
 

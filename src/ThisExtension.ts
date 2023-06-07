@@ -139,7 +139,20 @@ export abstract class ThisExtension {
 			return false;
 		}
 
+		this.refreshUI();
+
 		return true;
+	}
+
+	public static async refreshUI(): Promise<void> {
+		// refresh all treeviews after the extension has been initialized
+		const allCommands = await vscode.commands.getCommands(true);
+		const powerBiRefreshCommands = allCommands.filter(command => command.match(/^PowerBI.*?s\.refresh/));
+
+		for(let command of powerBiRefreshCommands)
+		{
+			vscode.commands.executeCommand(command);
+		}
 	}
 
 	static cleanUp(): void {

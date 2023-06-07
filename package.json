@@ -114,48 +114,62 @@
 		],
 		"commands": [
 			{
+				"command": "PowerBI.Initialize",
+				"title": "Initialize Extension",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBI.updateQuickPickList",
-				"title": "Update Quick Pick List"
+				"title": "Update Quick Pick List",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBI.openNewNotebook",
 				"title": "Open new Power BI Notebook",
-				"icon": "$(notebook)"
+				"icon": "$(notebook)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIWorkspaces.refresh",
 				"title": "Refresh",
-				"icon": "$(refresh)"
+				"icon": "$(refresh)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIWorkspaces.add",
 				"title": "Add workspace",
-				"icon": "$(add)"
+				"icon": "$(add)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIWorkspace.delete",
 				"title": "Delete",
-				"icon": "$(remove-close)"
+				"icon": "$(remove-close)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIWorkspace.insertPath",
 				"title": "Insert Path",
-				"icon": "$(code)"
+				"icon": "$(code)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDataset.delete",
 				"title": "Delete",
-				"icon": "$(remove-close)"
+				"icon": "$(remove-close)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDataset.refresh",
 				"title": "Refresh",
-				"icon": "$(refresh)"
+				"icon": "$(refresh)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDataset.cancelRefresh",
 				"title": "Cancel",
-				"icon": "$(stop)"
+				"icon": "$(stop)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDataset.takeOver",
@@ -163,17 +177,20 @@
 				"icon": {
 					"light": "resources/light/disconnected.png",
 					"dark": "resources/dark/disconnected.png"
-				}
+				},
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDataset.updateAllParameters",
 				"title": "Update Parameters",
-				"icon": "$(pencil)"
+				"icon": "$(pencil)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDatasetParameter.update",
 				"title": "Update",
-				"icon": "$(pencil)"
+				"icon": "$(pencil)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIReport.takeOver",
@@ -181,17 +198,20 @@
 				"icon": {
 					"light": "resources/light/disconnected.png",
 					"dark": "resources/dark/disconnected.png"
-				}
+				},
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIReport.delete",
 				"title": "Delete",
-				"icon": "$(remove-close)"
+				"icon": "$(remove-close)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIReport.clone",
 				"title": "Clone",
-				"icon": "$(copy)"
+				"icon": "$(copy)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIReport.rebind",
@@ -199,7 +219,8 @@
 				"icon": {
 					"light": "resources/light/rebind.png",
 					"dark": "resources/dark/rebind.png"
-				}
+				},
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIReport.updateContent",
@@ -207,42 +228,50 @@
 				"icon": {
 					"light": "resources/light/updateContent.png",
 					"dark": "resources/dark/updateContent.png"
-				}
+				},
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDataflow.delete",
 				"title": "Delete",
-				"icon": "$(remove-close)"
+				"icon": "$(remove-close)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDataflow.refresh",
 				"title": "Refresh",
-				"icon": "$(refresh)"
+				"icon": "$(refresh)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDashboard.delete",
 				"title": "Delete",
-				"icon": "$(remove-close)"
+				"icon": "$(remove-close)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBICapacities.refresh",
 				"title": "Refresh",
-				"icon": "$(refresh)"
+				"icon": "$(refresh)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIGateways.refresh",
 				"title": "Refresh",
-				"icon": "$(refresh)"
+				"icon": "$(refresh)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIPipelines.refresh",
 				"title": "Refresh",
-				"icon": "$(refresh)"
+				"icon": "$(refresh)",
+				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIPipelineStage.deploy",
 				"title": "Deploy",
-				"icon": "$(debug-step-over)"
+				"icon": "$(debug-step-over)",
+				"category": "PowerBI"
 			}
 		],
 		"menus": {

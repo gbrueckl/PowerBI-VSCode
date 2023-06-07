@@ -27,11 +27,7 @@ import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipeli
 
 export async function activate(context: vscode.ExtensionContext) {
 
-	let isValidated: boolean = await ThisExtension.initialize(context);
-	if (!isValidated) {
-		ThisExtension.log("Issue initializing extension - Please update PowerBI settings and restart VSCode!");
-		vscode.window.showErrorMessage("Issue initializing extension - Please update PowerBI settings and restart VSCode!");
-	}
+
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("powerbi-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
@@ -103,6 +99,18 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIPipelines.refresh', (item: PowerBIPipelineTreeItem = undefined, showInfoMessage: boolean = true) => pbiPipelinesTreeProvider.refresh(item, showInfoMessage));
 
 	vscode.commands.registerCommand('PowerBIPipelineStage.deploy', (item: PowerBIPipelineStage = undefined, showInfoMessage: boolean = true) => item.deployToNextStage());
+
+
+	vscode.commands.registerCommand('PowerBIP.initialize', async () => {
+		let isValidated: boolean = await ThisExtension.initialize(context)
+		if (!isValidated) {
+			ThisExtension.log("Issue initializing extension - Please update PowerBI settings and restart VSCode!");
+			vscode.window.showErrorMessage("Issue initializing extension - Please update PowerBI settings and restart VSCode!");
+		}
+	}
+	);
+
+	vscode.commands.executeCommand('PowerBIP.initialize');
 }
 
 
