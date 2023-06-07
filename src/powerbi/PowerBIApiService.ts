@@ -73,6 +73,7 @@ export abstract class PowerBIApiService {
 			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing headers! ");
 			//vscode.commands.executeCommand("PowerBIWorkspaces.refresh");
 			await this.refreshHeaders();
+			ThisExtension.refreshUI();
 		}
 	}
 

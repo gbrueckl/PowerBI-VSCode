@@ -18,7 +18,6 @@ import { PowerBIWorkspace } from './vscode/treeviews/workspaces/PowerBIWorkspace
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
 import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
 import { PowerBINotebookSerializer } from './vscode/notebook/PowerBINotebookSerializer';
-import { PowerBINotebookKernel } from './vscode/notebook/PowerBINotebookKernel';
 import { PowerBIAPICompletionProvider } from './vscode/language/PowerBIAPICompletionProvider';
 import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICapacityTreeItem';
 import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatewayTreeItem';
@@ -27,7 +26,8 @@ import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipeli
 
 export async function activate(context: vscode.ExtensionContext) {
 
-
+	// some of the following code needs the context before the initialization already
+	ThisExtension.extensionContext = context;
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("powerbi-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
@@ -101,7 +101,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIPipelineStage.deploy', (item: PowerBIPipelineStage = undefined, showInfoMessage: boolean = true) => item.deployToNextStage());
 
 
-	vscode.commands.registerCommand('PowerBIP.initialize', async () => {
+	vscode.commands.registerCommand('PowerBI.initialize', async () => {
 		let isValidated: boolean = await ThisExtension.initialize(context)
 		if (!isValidated) {
 			ThisExtension.log("Issue initializing extension - Please update PowerBI settings and restart VSCode!");
@@ -110,7 +110,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 	);
 
-	vscode.commands.executeCommand('PowerBIP.initialize');
+	vscode.commands.executeCommand('PowerBI.initialize');
 }
 
 

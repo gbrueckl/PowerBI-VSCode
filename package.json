@@ -114,7 +114,7 @@
 		],
 		"commands": [
 			{
-				"command": "PowerBI.Initialize",
+				"command": "PowerBI.initialize",
 				"title": "Initialize Extension",
 				"category": "PowerBI"
 			},

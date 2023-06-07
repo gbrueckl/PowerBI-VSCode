@@ -26,15 +26,19 @@ export abstract class ThisExtension {
 	private static _notebookKernel: PowerBINotebookKernel;
 
 	static get rootUri(): vscode.Uri {
-		return this._context.extensionUri;
+		return this.extensionContext.extensionUri;
 	}
 
 	static get extensionContext(): vscode.ExtensionContext {
 		return this._context;
 	}
 
+	static set extensionContext(value: vscode.ExtensionContext) {
+		this._context = value;
+	}
+
 	static get secrets(): vscode.SecretStorage {
-		return this._context.secrets;
+		return this.extensionContext.secrets;
 	}
 
 	static get RefreshAfterUpDownload(): boolean {
