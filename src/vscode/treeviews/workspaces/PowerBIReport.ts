@@ -20,8 +20,9 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		super(definition.name, group, "REPORT", definition.id, parent, vscode.TreeItemCollapsibleState.None);
 
 		this.definition = definition;
-		
+
 		super.tooltip = this._tooltip;
+		super.contextValue = this._contextValue;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
@@ -29,16 +30,17 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		let orig: string = super._contextValue;
 
 		let actions: string[] = [
-			"CLONE",
 			"DELETE"
 		]
 
-		if(this.definition.datasetId != PowerBIApiService.SessionUserEmail)
-		{
-			actions.push("TAKEOVER");
+		if (this.definition.reportType == "PaginatedReport") {
+			if(!this.definition.isOwnedByMe)
+			{
+				actions.push("TAKEOVER")
+			}
 		}
-		else
-		{
+		if (this.definition.reportType == "PowerBIReport") {
+			actions.push("CLONE")
 			actions.push("REBIND")
 			actions.push("UPDATECONTENT")
 		}
@@ -64,9 +66,13 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 
 		const source = sourceItems[0];
 
+		if(source.id == this.id){
+			return;
+		}
+
 		switch (source.itemType) {
 			case "REPORT":
-				const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("update content")], "Action");
+				const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("update content")], "Action", null, null);
 
 				switch (action) {
 					case "update content":

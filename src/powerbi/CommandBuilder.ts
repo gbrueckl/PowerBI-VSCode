@@ -24,19 +24,22 @@ export class PowerBICommandInput {
 	private _key: string;
 	private _optional: boolean;
 	private _description: string;
+	private _currentValue: string;
 
 	constructor(
 		prompt: string,
 		inputType: CommandInputType | string,
 		key: string,
 		optional: boolean = false,
-		description: string = null
+		description: string = null,
+		currentValue?: string
 	) {
 		this._prompt = prompt;
 		this._inputType = inputType;
 		this._key = key;
 		this._optional = optional;
 		this._description = description ?? prompt;
+		this._currentValue = currentValue;
 	}
 
 	get Prompt(): string {
@@ -59,22 +62,26 @@ export class PowerBICommandInput {
 		return this._description;
 	}
 
+	get CurrentValue(): string {
+		return this._currentValue;
+	}
+
 	public async getValue(): Promise<string> {
 		switch (this.InputType) {
 			case "FREE_TEXT":
-				return await PowerBICommandBuilder.showInputBox(this.Prompt, this.Description);
+				return await PowerBICommandBuilder.showInputBox(this.CurrentValue, this.Prompt, this.Description);
 
 			case "WORKSPACE_SELECTOR":
-				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("GROUP"), this.Description);
+				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("GROUP"), this.Prompt, this.Description, this._currentValue);
 
 			case "REPORT_SELECTOR":
-				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("REPORT"), this.Description);
+				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("REPORT"), this.Prompt, this.Description, this._currentValue);
 
 			case "DATASET_SELECTOR":
-				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("DATASET"), this.Description);
+				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("DATASET"), this.Prompt, this.Description, this._currentValue);
 
 			case "DATAFLOW_SELECTOR":
-				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("DATAFLOW"), this.Description);
+				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("DATAFLOW"), this.Prompt, this.Description, this._currentValue);
 
 			default:
 				return this.InputType;
@@ -85,14 +92,17 @@ export class PowerBICommandInput {
 export class PowerBIQuickPickItem {
 	private _name: string;
 	private _value?: string;
+	private _picked?: boolean;
 	private static SEPARATOR: string = '\t';
 
 	constructor(
 		name: string,
-		value?: string
+		value?: string,
+		picked?: boolean
 	) {
 		this._name = name;
 		this._value = value;
+		this._picked = picked;
 	}
 
 	get name(): string {
@@ -113,6 +123,14 @@ export class PowerBIQuickPickItem {
 		}
 
 		return `${this.name}${PowerBIQuickPickItem.SEPARATOR}${this.value}`;
+	}
+
+	get picked(): boolean { 
+		return this._picked ?? false;
+	}
+
+	set picked(value: boolean) {
+		this._picked = value;
 	}
 
 	static GetValueFromLabel(label: string): string {
@@ -190,12 +208,15 @@ export abstract class PowerBICommandBuilder {
 
 	static async showQuickPick(
 		items: PowerBIQuickPickItem[],
-		toolTip: string,
+		title: string,
+		description: string,
+		currentValue: string		
 	): Promise<string> {
 
 		const result = await vscode.window.showQuickPick(items, {
-			placeHolder: toolTip,
-			ignoreFocusOut: true
+			title: title + (description ? (" - " + description) : ""),
+			placeHolder: currentValue,
+			ignoreFocusOut: true,
 			/*,
 			onDidSelectItem: item => window.showInformationMessage(`Focus ${++i}: ${item}`)
 			*/
@@ -210,15 +231,17 @@ export abstract class PowerBICommandBuilder {
 
 	static async showInputBox(
 		defaultValue: string,
-		toolTip: string,
+		title: string,
+		description: string,
 		valueSelection: [number, number] = undefined,
 	): Promise<string> {
 		const result = await vscode.window.showInputBox({
+			title: title + (description ? (" - " + description) : ""),
 			ignoreFocusOut: true,
 			value: defaultValue,
 			valueSelection: valueSelection,
-			placeHolder: toolTip,
-			prompt: toolTip
+			placeHolder: defaultValue,
+			prompt: description
 			/*,
 			validateInput: text => {
 				window.showInformationMessage(`Validating: ${text}`);

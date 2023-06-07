@@ -28,7 +28,7 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 	}
 
 	get apiUrlPart(): string {
-		return "capacities/" + this.uid;
+		return "capacities/" + this.uid.toLocaleLowerCase();
 	}
 
 	// Dashboard-specific funtions

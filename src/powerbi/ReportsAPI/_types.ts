@@ -6,6 +6,10 @@ export class iPowerBIReport {
 	id: UniqueId;
 	item_type: ApiItemType;
 	datasetId: string;
+	datasetWorkspaceId: string;
 	webUrl: string;
 	embedUrl: string;
+	isOwnedByMe: boolean;
+	isFromPbix: boolean;
+	reportType: "PaginatedReport" | "PowerBIReport";
 }

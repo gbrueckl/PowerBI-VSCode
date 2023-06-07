@@ -4,7 +4,7 @@ import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { iPowerBIDataset } from '../../../powerbi/DatasetsAPI/_types';
+import { iPowerBIDataset, iPowerBIDatasetParameter } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIReport } from './PowerBIReport';
@@ -13,6 +13,7 @@ import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
 import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { QuickPickItem } from 'vscode';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
+import { PowerBIParameter } from './PowerBIParameter';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -87,7 +88,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 		switch (source.itemType) {
 			case "REPORT":
-				const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("rebind"), new PowerBIQuickPickItem("clone")], "Action");
+				const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("rebind"), new PowerBIQuickPickItem("clone")], "Action", undefined, undefined);
 
 				switch (action) {
 					case "rebind":
@@ -98,9 +99,9 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 					case "clone":
 							await (source as PowerBIReport).clone({
-								name: source.name,
+								name: source.name + " - Clone",
 								targetModelId: this.id,
-								targetWorkspaceId: this.groupId
+								targetWorkspaceId: !this.groupId ? "00000000-0000-0000-0000-000000000000" : this.groupId
 							});
 							
 							ThisExtension.TreeViewWorkspaces.refresh(this.parent.parent, false);
@@ -153,6 +154,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		PowerBIApiService.post(this.apiPath + "/refreshes", body);
 		ThisExtension.setStatusBar("Dataset-refresh triggered!");
 
+		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this, false);
 	}
 
@@ -165,7 +167,29 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	}
 
 	public async updateAllParameters(): Promise<void> {
-		// TODO
+		let parameters: iPowerBIDatasetParameter[] = await PowerBIApiService.getItemList<iPowerBIDatasetParameter>(this.apiPath + "parameters");
+		
+		let updateDetails: { name: string, newValue: string }[] = [];
+		for(let parameter of parameters)
+		{
+			let newValue: {name: string, newValue: string} = await PowerBIParameter.promptForValue(parameter)
+
+			if (newValue) {
+				updateDetails.push(newValue);
+			}
+		}
+
+		let settings = {
+			"updateDetails": updateDetails
+		}
+
+		const apiUrl = this.apiPath + "Default.UpdateParameters";
+
+		ThisExtension.setStatusBar("Updating parameter ...", true);
+		await PowerBIApiService.post(apiUrl, settings);
+		ThisExtension.setStatusBar("Parameter updated!")
+
+		await ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 }
 

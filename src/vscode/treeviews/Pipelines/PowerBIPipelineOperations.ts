@@ -38,6 +38,10 @@ export class PowerBIPipelineOperations extends PowerBIPipelineTreeItem {
 		return undefined;
 	}
 
+		get apiUrlPart(): string {
+		return "operations";
+	}
+
 	async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {
 		if(!PowerBIApiService.isInitialized) { 			
 			return Promise.resolve([]);

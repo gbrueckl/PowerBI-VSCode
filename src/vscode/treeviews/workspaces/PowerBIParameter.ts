@@ -25,7 +25,8 @@ export class PowerBIParameter extends PowerBIWorkspaceTreeItem {
 		super.description = definition.currentValue;
 
 		// the parameter name is not unique hence we make it unique
-		super.id = this.dataset.uid + "/" + this.itemType.toString();
+		super.id = this.dataset.uid + "/" + this.itemType.toString() + "/" + definition.name;
+		super.tooltip = this._tooltip;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
@@ -41,17 +42,33 @@ export class PowerBIParameter extends PowerBIWorkspaceTreeItem {
 		return (this.parent as PowerBIParameters).dataset;
 	}
 
+	public static async promptForValue(parameter: iPowerBIDatasetParameter): Promise<{name: string, newValue: string}> {
+		let newValue: string = null;
+		if (parameter.suggestedValues && parameter.suggestedValues.length > 0) {
+			newValue = await PowerBICommandBuilder.showQuickPick(parameter.suggestedValues.map(x => new PowerBIQuickPickItem(x)), parameter.name, parameter.description, parameter.currentValue);
+		}
+		else if (parameter.type == "Logical") {
+			newValue = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("TRUE"), new PowerBIQuickPickItem("FALSE")], parameter.name, parameter.description, parameter.currentValue);
+		}
+		else {
+			newValue = await PowerBICommandBuilder.showInputBox(parameter.currentValue, parameter.name, parameter.description);
+		}
+
+		if (!newValue) {
+			return undefined;
+		}
+
+		return	{
+					"name": parameter.name,
+					"newValue": newValue
+				};
+	}
+
 	// Parameter-specific funtions
 	public async update(): Promise<void> {
 		const apiUrl = this.dataset.apiPath + "Default.UpdateParameters";
 
-		let newValue: string = null;
-		if (this.definition.suggestedValues) {
-			newValue = await PowerBICommandBuilder.showQuickPick(this.definition.suggestedValues.map(x => new PowerBIQuickPickItem(x)), this.definition.description);
-		}
-		else {
-			newValue = await PowerBICommandBuilder.showInputBox(this.definition.currentValue, this.definition.description);
-		}
+		let newValue: {name: string, newValue: string} = await PowerBIParameter.promptForValue(this.definition);
 
 		if (!newValue) {
 			return;
@@ -59,10 +76,7 @@ export class PowerBIParameter extends PowerBIWorkspaceTreeItem {
 
 		let settings = {
 			"updateDetails": [
-				{
-					"name": this.definition.name,
-					"newValue": newValue
-				}
+				newValue
 			]
 		}
 

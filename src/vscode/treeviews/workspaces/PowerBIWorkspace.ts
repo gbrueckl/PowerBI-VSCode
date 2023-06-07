@@ -107,7 +107,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 
 			switch (source.itemType) {
 				case "REPORT":
-					const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("clone")], "Action");
+					const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("clone")], "Action", null, null);
 
 					switch (action) {
 						case "clone":

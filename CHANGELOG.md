@@ -1,5 +1,10 @@
 # Change Log
 
+**v0.9.1**:
+- improved `Update Parameter(s)` capailities
+- improved completion provider
+- some minor bugfixes
+
 **v0.9.0**:
 - added better support for deployment pipelines
   - start full and selective deployments
