@@ -226,12 +226,12 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					}
 					break;
 				case "cmd":
-					const regex = /SET\s*(?<variable>[^=]*)\s*=\s*(?<value>.*)/i;
+					const regex = /SET\s*(?<variable>[^=]*)(\s*=\s*(?<value>.*))?/i;
 
 					for (let line of lines) {
 						let match = regex.exec(line.trim());
 
-						if (!match || !match.groups || !match.groups.variable || !match.groups.value) {
+						if (!match || !match.groups || !match.groups.variable) {
 							execution.appendOutput(new vscode.NotebookCellOutput([
 								vscode.NotebookCellOutputItem.text(`Invalid format for %cmd magic in line '${line}'. \nPlease use format \nSET variable=value.`)
 							]));
@@ -240,12 +240,23 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 							return;
 						}
 						const varName = match.groups.variable.trim().toUpperCase();
-						const varValue = match.groups.value.trim();
-						context.setVariable(varName, varValue);
+						if(match.groups.variable && match.groups.value)
+						{
+							const varValue = match.groups.value.trim();
+							context.setVariable(varName, varValue);
 
-						execution.appendOutput(new vscode.NotebookCellOutput([
-							vscode.NotebookCellOutputItem.text("Set variable " + varName + " to '" + varValue + "'."),
-						]));
+							execution.appendOutput(new vscode.NotebookCellOutput([
+								vscode.NotebookCellOutputItem.text(`Set variable ${varName} to '${varValue}'`),
+							]));
+						}
+						else
+						{
+							const value = context.getVariable(varName);
+
+							execution.appendOutput(new vscode.NotebookCellOutput([
+								vscode.NotebookCellOutputItem.text(`${varName} = ${value}`),
+							]));
+						}
 					}
 
 					execution.end(true, Date.now());

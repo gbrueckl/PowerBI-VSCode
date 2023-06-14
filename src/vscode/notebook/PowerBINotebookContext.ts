@@ -20,6 +20,9 @@ export class PowerBINotebookContext {
 	}
 
 	public getVariable(name: string): string {
+		if (["DATASET", "DATASET_PATH", "API_ROOT_PATH"].includes(name.toUpperCase())) {
+			return this.apiRootPath;
+		}
 		return this.variables[name.toUpperCase()];
 	}
 

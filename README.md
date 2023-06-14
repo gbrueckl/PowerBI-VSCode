@@ -79,6 +79,8 @@ There are some special variables that must be set in combination with `%dax` mag
 SET DATASET = /groups/d1f70e51-1234-1234-8e4c-55f35f9fa758/datasets/028d20ca-7777-8888-9999-7a253c7bb6b3
 ```
 
+Note: you can also set multiple variables within the same notebook cell!
+
 # Building Locally
 1. Make sure you have installed [NodeJS](https://nodejs.org/en/) on your development workstation
 2. Clone this repo to your development workstation, then open the cloned folder in [VSCode](https://code.visualstudio.com/)
