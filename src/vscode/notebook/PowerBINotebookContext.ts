@@ -11,11 +11,16 @@ export class PowerBINotebookContext {
 	}
 
 	public setVariable(name: string, value: string): void {
-		this.variables[name] = value;
+		if (["DATASET", "DATASET_PATH", "API_ROOT_PATH"].includes(name.toUpperCase())) {
+			this.apiRootPath = value;
+		}
+		else {
+			this.variables[name.toUpperCase()] = value;
+		}
 	}
 
 	public getVariable(name: string): string {
-		return this.variables[name];
+		return this.variables[name.toUpperCase()];
 	}
 
 	//#region static methods to track the context of the notebook

@@ -107,6 +107,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			ThisExtension.log("Issue initializing extension - Please update PowerBI settings and restart VSCode!");
 			vscode.window.showErrorMessage("Issue initializing extension - Please update PowerBI settings and restart VSCode!");
 		}
+		return isValidated;
 	}
 	);
 

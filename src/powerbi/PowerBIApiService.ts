@@ -24,19 +24,19 @@ export abstract class PowerBIApiService {
 	private static _vscodeSession: vscode.AuthenticationSession;
 
 	//#region Initialization
-	static async initialize(apiRootUrl: string = "https://api.powerbi.com/", tenantId: string = undefined, clientId: string = undefined): Promise<boolean> {
+	static async initialize(apiBaseUrl: string = "https://api.powerbi.com/", tenantId: string = undefined, clientId: string = undefined): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing PowerBI API Service ...");
 
 			vscode.authentication.onDidChangeSessions((event) => this._onDidChangeSessions(event));
 
-			this._apiBaseUrl = Helper.trimChar(apiRootUrl, '/');
+			this._apiBaseUrl = Helper.trimChar(apiBaseUrl, '/');
 			this._tenantId = tenantId;
 			this._clientId = clientId;
 
 			await this.refreshHeaders();
 
-			ThisExtension.log(`Testing new PowerBI API (${apiRootUrl}) settings for user '${this.SessionUser}' (${this.SessionUserId}) ...`);
+			ThisExtension.log(`Testing new PowerBI API (${apiBaseUrl}) settings for user '${this.SessionUser}' (${this.SessionUserId}) ...`);
 			this._connectionTestRunning = true;
 			let workspaceList = await this.getGroups();
 			this._connectionTestRunning = false;
@@ -47,7 +47,7 @@ export abstract class PowerBIApiService {
 			}
 			else {
 				ThisExtension.log(JSON.stringify(workspaceList));
-				throw new Error(`Invalid Configuration for PowerBI REST API: Cannot access '${apiRootUrl}' with given credentials'!`);
+				throw new Error(`Invalid Configuration for PowerBI REST API: Cannot access '${apiBaseUrl}' with given credentials'!`);
 			}
 		} catch (error) {
 			this._connectionTestRunning = false;
@@ -145,6 +145,10 @@ export abstract class PowerBIApiService {
 	}
 
 	private static getFullUrl(endpoint: string, params?: object): string {
+		if (endpoint.startsWith('/') && !endpoint.startsWith("/v1.0")) {
+			endpoint = Helper.joinPath(`v1.0/${PowerBIApiService.Org}`, endpoint);
+		}
+
 		let uri = vscode.Uri.parse(`${this._apiBaseUrl}/${Helper.trimChar(endpoint, '/')}`);
 		if (endpoint.startsWith("https://")) {
 			uri = vscode.Uri.parse(endpoint);
@@ -166,6 +170,7 @@ export abstract class PowerBIApiService {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
 		else {
+			endpoint = this.getFullUrl(endpoint, params);
 			if (params) {
 				ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
 			}
@@ -179,13 +184,13 @@ export abstract class PowerBIApiService {
 					headers: this._headers,
 					agent: getProxyAgent()
 				};
-				let response: Response = await fetch(this.getFullUrl(endpoint, params), config);
+				let response: Response = await fetch(endpoint, config);
 
 				let resultText = await response.text();
 				await this.logResponse(resultText);
 				if (response.ok) {
 					if (!resultText || resultText == "") {
-						return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+						return { "value": { "status": response.status, "statusText": response.statusText } } as T;
 					}
 					return JSON.parse(resultText) as T;
 				}
@@ -202,6 +207,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async post<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("POST " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
@@ -211,17 +217,20 @@ export abstract class PowerBIApiService {
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
-			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+			let response: Response = await fetch(endpoint, config);
 
 			let resultText = await response.text();
 			await this.logResponse(resultText);
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+					return { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				return JSON.parse(resultText) as T;
 			}
 			else {
+				if (!resultText || resultText == "") {
+					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+				}
 				throw new Error(resultText);
 			}
 		} catch (error) {
@@ -232,6 +241,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async postFile(endpoint: string, uri: vscode.Uri, raiseError: boolean = false): Promise<any> {
+		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("POST " + endpoint + " --> (File)" + uri);
 
 		try {
@@ -253,17 +263,20 @@ export abstract class PowerBIApiService {
 				body: data,
 				agent: getProxyAgent()
 			};
-			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+			let response: Response = await fetch(endpoint, config);
 
 			let resultText = await response.text();
 			await this.logResponse(resultText);
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return {"value": {"status": response.status, "statusText": response.statusText}};
+					return { "value": { "status": response.status, "statusText": response.statusText } };
 				}
 				return JSON.parse(resultText);
 			}
 			else {
+				if (!resultText || resultText == "") {
+					return { "error": { "status": response.status, "statusText": response.statusText } };
+				}
 				throw new Error(resultText);
 			}
 		} catch (error) {
@@ -274,6 +287,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async put<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("PUT " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
@@ -283,17 +297,20 @@ export abstract class PowerBIApiService {
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
-			let response: Response = await fetch(this.getFullUrl(endpoint), config);
+			let response: Response = await fetch(endpoint, config);
 
 			let resultText = await response.text();
 			await this.logResponse(resultText);
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+					return { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				return JSON.parse(resultText) as T;
 			}
 			else {
+				if (!resultText || resultText == "") {
+					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+				}
 				throw new Error(resultText);
 			}
 		} catch (error) {
@@ -304,6 +321,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async patch<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("PATCH " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
@@ -313,17 +331,20 @@ export abstract class PowerBIApiService {
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
-			let response: Response = await fetch(this.getFullUrl(endpoint), config);
-			
+			let response: Response = await fetch(endpoint, config);
+
 			let resultText = await response.text();
 			await this.logResponse(resultText);
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return {"value": {"status": response.status, "statusText": response.statusText}} as T;
+					return { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				return JSON.parse(resultText) as T;
 			}
 			else {
+				if (!resultText || resultText == "") {
+					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+				}
 				throw new Error(resultText);
 			}
 		} catch (error) {
@@ -334,6 +355,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async delete<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("DELETE " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
@@ -343,8 +365,8 @@ export abstract class PowerBIApiService {
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
-			let response: Response = await fetch(this.getFullUrl(endpoint), config);
-			
+			let response: Response = await fetch(endpoint, config);
+
 			let resultText = await response.text();
 			await this.logResponse(resultText);
 			if (response.ok) {
@@ -354,6 +376,9 @@ export abstract class PowerBIApiService {
 				return JSON.parse(resultText) as T;
 			}
 			else {
+				if (!resultText || resultText == "") {
+					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+				}
 				throw new Error(resultText);
 			}
 		} catch (error) {
@@ -469,8 +494,7 @@ export abstract class PowerBIApiService {
 	}
 
 	static async executeQueries(apiPath, daxQuery: string): Promise<iPowerBIDatasetExecuteQueries> {
-		let endpoint: string = apiPath + "executeQueries";
-		ThisExtension.log("POST " + endpoint);
+		let endpoint: string = apiPath + "/executeQueries";
 
 		try {
 			let body: any = {

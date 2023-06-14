@@ -151,6 +151,14 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 		return [language, commandText, magicText as NotebookMagic];
 	}
 
+	private resolveRelativePath(endpoint: string, context: PowerBINotebookContext): string {
+		if (endpoint.startsWith('./')) {
+			endpoint = Helper.joinPath(context.apiRootPath, endpoint.slice(2));
+		}
+
+		return endpoint;
+	}
+
 	private async _doExecution(cell: vscode.NotebookCell, context: PowerBINotebookContext): Promise<void> {
 		const execution = this.Controller.createNotebookCellExecution(cell);
 		execution.executionOrder = ++this._executionOrder;
@@ -167,28 +175,25 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 			ThisExtension.log("Executing " + language + ":\n" + commandText);
 
+			let lines = commandText.split("\n").filter(l => l.trim()[0] != "#");
+
 			let result: iPowerBIDatasetExecuteQueries | iPowerResponseGeneric = undefined;
 			switch (magic) {
 				case "dax":
-					result = await PowerBIApiService.executeQueries(context.apiRootPath, commandText);
+					result = await PowerBIApiService.executeQueries(this.resolveRelativePath(context.apiRootPath, context), commandText);
 					break;
 				case "api":
-					let lines = commandText.split("\n").filter(l => l.trim()[0] != "#");
+
 					let method = lines[0].split(" ")[0].trim();
 					let endpoint = lines[0].split(" ")[1].trim();
 					let bodyLines: string[] = lines.slice(1);
 
 					let body = undefined;
-					if (bodyLines.length > 1) {
+					if (bodyLines.length > 0) {
 						body = JSON.parse(bodyLines.join("\n"));
 					}
 
-					if (endpoint.startsWith('./')) {
-						endpoint = Helper.joinPath(context.apiRootPath, endpoint.slice(2));
-					}
-					else if (endpoint.startsWith('/') && !endpoint.startsWith("/v1.0")) {
-						endpoint = Helper.joinPath(`v1.0/${PowerBIApiService.Org}`, endpoint);
-					}
+					endpoint = this.resolveRelativePath(endpoint, context);
 
 					switch (method) {
 						case "GET":
@@ -221,15 +226,27 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					}
 					break;
 				case "cmd":
-					const regex = /SET\s*(?<variable>[^=]*)=(?<value>.*)/gm;
+					const regex = /SET\s*(?<variable>[^=]*)\s*=\s*(?<value>.*)/i;
 
-					let match = regex.exec(commandText);
-					
-					context.setVariable(match.groups.variable, match.groups.value);
+					for (let line of lines) {
+						let match = regex.exec(line.trim());
 
-					execution.appendOutput(new vscode.NotebookCellOutput([
-						vscode.NotebookCellOutputItem.text("Set variable " + match.groups.variable + " to '" + match.groups.value + "'."),
-					]));
+						if (!match || !match.groups || !match.groups.variable || !match.groups.value) {
+							execution.appendOutput(new vscode.NotebookCellOutput([
+								vscode.NotebookCellOutputItem.text(`Invalid format for %cmd magic in line '${line}'. \nPlease use format \nSET variable=value.`)
+							]));
+
+							execution.end(false, Date.now());
+							return;
+						}
+						const varName = match.groups.variable.trim().toUpperCase();
+						const varValue = match.groups.value.trim();
+						context.setVariable(varName, varValue);
+
+						execution.appendOutput(new vscode.NotebookCellOutput([
+							vscode.NotebookCellOutputItem.text("Set variable " + varName + " to '" + varValue + "'."),
+						]));
+					}
 
 					execution.end(true, Date.now());
 					return;
