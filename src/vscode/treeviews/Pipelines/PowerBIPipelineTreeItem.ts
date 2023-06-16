@@ -34,23 +34,6 @@ export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowe
 		};
 	}
 
-	// tooltip shown when hovering over the item
-	get _tooltip(): string {
-		let tooltip: string = "";
-		for (const [key, value] of Object.entries(this.definition)) {
-			if (typeof value === "string") {
-				if (value.length > 100) {
-					continue;
-				}
-			}
-			if (value) {
-				tooltip += `${key}: ${JSON.stringify(value)}\n`;
-			}
-		}
-
-		return tooltip.trim();
-	}
-
 	public async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {
 		await vscode.window.showErrorMessage("getChildren is not implemented! Please overwrite in derived class!");
 		return undefined;

@@ -68,7 +68,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 					continue;
 				}
 			}
-			tooltip += `${key}: ${value.toString()}\n`;
+			tooltip += `${key}: ${JSON.stringify(value, null, 4)}\n`;
 		}
 
 		return tooltip.trim();

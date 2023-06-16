@@ -21,6 +21,7 @@ export type NotebookMagic =
 // https://code.visualstudio.com/blogs/2021/11/08/custom-notebooks
 export class PowerBINotebookKernel implements vscode.NotebookController {
 	private static baseId: string = 'powerbi-';
+	private static _instance: PowerBINotebookKernel;
 
 	readonly notebookType: string = 'powerbi-notebook';
 	readonly label: string;
@@ -35,21 +36,33 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 		this.label = "Power BI REST API";
 
 		this._executionOrder = 0;
+	}
 
-		ThisExtension.log("Creating new Power BI kernel '" + this.id + "'");
-		this._controller = vscode.notebooks.createNotebookController(this.id, this.notebookType, this.label);
+	static async getInstance(): Promise<PowerBINotebookKernel> {
+		if(PowerBINotebookKernel._instance) {
+			return PowerBINotebookKernel._instance;
+		}
 
-		this._controller.label = this.label;
-		this._controller.supportedLanguages = this.supportedLanguages;
-		this._controller.description = this.description;
-		this._controller.detail = this.detail;
-		this._controller.supportsExecutionOrder = this.supportsExecutionOrder;
-		this._controller.executeHandler = this.executeHandler.bind(this);
-		this._controller.dispose = this.disposeController.bind(this);
+		let kernel = new PowerBINotebookKernel();
 
-		vscode.workspace.onDidOpenNotebookDocument((event) => this._onDidOpenNotebookDocument(event));
+		ThisExtension.log("Creating new Power BI kernel '" + kernel.id + "'");
+		kernel._controller = vscode.notebooks.createNotebookController(kernel.id, kernel.notebookType, kernel.label);
 
-		ThisExtension.PushDisposable(this);
+		kernel._controller.label = kernel.label;
+		kernel._controller.supportedLanguages = kernel.supportedLanguages;
+		kernel._controller.description = kernel.description;
+		kernel._controller.detail = kernel.detail;
+		kernel._controller.supportsExecutionOrder = kernel.supportsExecutionOrder;
+		kernel._controller.executeHandler = kernel.executeHandler.bind(kernel);
+		kernel._controller.dispose = kernel.disposeController.bind(kernel);
+
+		vscode.workspace.onDidOpenNotebookDocument((event) => kernel._onDidOpenNotebookDocument(event));
+
+		ThisExtension.PushDisposable(kernel);
+
+		this._instance = kernel;
+
+		return this._instance;
 	}
 
 	async _onDidOpenNotebookDocument(notebook: vscode.NotebookDocument) {

@@ -19,12 +19,20 @@ export abstract class PowerBIApiService {
 	private static _apiBaseUrl: string;
 	private static _tenantId: string;
 	private static _clientId: string;
+	private static _authenticationProvider: string;
+	private static _resourceId: string;
 	private static _org: string = "myorg"
 	private static _headers;
 	private static _vscodeSession: vscode.AuthenticationSession;
 
 	//#region Initialization
-	static async initialize(apiBaseUrl: string = "https://api.powerbi.com/", tenantId: string = undefined, clientId: string = undefined): Promise<boolean> {
+	static async initialize(
+			apiBaseUrl: string = "https://api.powerbi.com/", 
+			tenantId: string = undefined, 
+			clientId: string = undefined, 
+			authenticatinProvider: string = "microsoft", 
+			resourceId: string = "https://analysis.windows.net/powerbi/api"
+		): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing PowerBI API Service ...");
 
@@ -33,6 +41,8 @@ export abstract class PowerBIApiService {
 			this._apiBaseUrl = Helper.trimChar(apiBaseUrl, '/');
 			this._tenantId = tenantId;
 			this._clientId = clientId;
+			this._authenticationProvider = authenticatinProvider;
+			this._resourceId = resourceId;
 
 			await this.refreshHeaders();
 
@@ -58,7 +68,7 @@ export abstract class PowerBIApiService {
 	}
 
 	private static async refreshHeaders(): Promise<void> {
-		this._vscodeSession = await this.getAADAccessToken(["https://analysis.windows.net/powerbi/api/.default", "profile", "email"], this._tenantId, this._clientId);
+		this._vscodeSession = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`, "profile", "email"], this._tenantId, this._clientId);
 
 		ThisExtension.log("Refreshing authentication headers ...");
 		this._headers = {
@@ -69,9 +79,9 @@ export abstract class PowerBIApiService {
 	}
 
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
-		if (event.provider.id == "microsoft") {
+		if (event.provider.id === this._authenticationProvider) {
 			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing headers! ");
-			//vscode.commands.executeCommand("PowerBIWorkspaces.refresh");
+
 			await this.refreshHeaders();
 			ThisExtension.refreshUI();
 		}
@@ -92,7 +102,7 @@ export abstract class PowerBIApiService {
 			scopes.push("VSCODE_CLIENT_ID:" + clientId);
 		}
 
-		let session: vscode.AuthenticationSession = await vscode.authentication.getSession("microsoft", scopes);
+		let session: vscode.AuthenticationSession = await vscode.authentication.getSession(this._authenticationProvider, scopes);
 
 		return session;
 	}
@@ -240,7 +250,9 @@ export abstract class PowerBIApiService {
 		}
 	}
 
+
 	static async postFile(endpoint: string, uri: vscode.Uri, raiseError: boolean = false): Promise<any> {
+		/*
 		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("POST " + endpoint + " --> (File)" + uri);
 
@@ -284,6 +296,7 @@ export abstract class PowerBIApiService {
 
 			return undefined;
 		}
+		*/
 	}
 
 	static async put<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {

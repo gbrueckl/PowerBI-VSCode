@@ -7,6 +7,7 @@ import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/Pow
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
 import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/PowerBIPipelinesTreeProvider';
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
+import { PowerBIConfiugration } from './vscode/configuration/PowerBIConfiguration';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -135,10 +136,13 @@ export abstract class ThisExtension {
 			let apiUrl = ThisExtension.getConfigurationSetting<string>("powerbi.apiUrl", this.SettingScope, true);
 			let tenantId = ThisExtension.getConfigurationSetting<string>("powerbi.tenantId", this.SettingScope, false);
 			let clientId = ThisExtension.getConfigurationSetting<string>("powerbi.clientId", this.SettingScope, false);
+			let authenticatinProvider = ThisExtension.getConfigurationSetting<string>("powerbi.authenticationProvider", this.SettingScope, true);
 
-			await PowerBIApiService.initialize(apiUrl.value, tenantId.value, clientId.value);
+			//await PowerBIApiService.initialize(apiUrl.value, tenantId.value, clientId.value, authenticatinProvider.value);
+			let config = new PowerBIConfiugration();
+			await PowerBIApiService.initialize(config.apiUrl, config.tenantId, config.clientId, config.authenticationProvider, config.resourceId);
 
-			this._notebookKernel = new PowerBINotebookKernel();
+			this._notebookKernel = await PowerBINotebookKernel.getInstance();
 		} catch (error) {
 			return false;
 		}

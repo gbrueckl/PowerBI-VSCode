@@ -30,23 +30,6 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 		};
 	}
 
-	// tooltip shown when hovering over the item
-	get _tooltip(): string {
-		let tooltip: string = "";
-		for (const [key, value] of Object.entries(this.definition)) {
-			if(typeof value === "string")
-			{
-				if(value.length > 100)
-				{
-					continue;
-				}
-			}
-			tooltip += `${key}: ${value.toString()}\n`;
-		}
-
-		return tooltip.trim();
-	}
-
 	public async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
 		await vscode.window.showErrorMessage("getChildren is not implemented! Please overwrite in derived class!");
 		return undefined;

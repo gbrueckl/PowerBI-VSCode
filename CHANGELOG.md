@@ -1,5 +1,9 @@
 # Change Log
 
+**v0.9.2**:
+- added support for governmental and sovereign clouds via new setting `powerbi.authenticationProvider`
+- minor improvements for tooltips in treeviews
+
 **v0.9.1**:
 - improved `Update Parameter(s)` capailities
 - improved completion provider
