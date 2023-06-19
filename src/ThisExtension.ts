@@ -133,13 +133,8 @@ export abstract class ThisExtension {
 				this._settingScope = "Global";
 			}
 
-			let apiUrl = ThisExtension.getConfigurationSetting<string>("powerbi.apiUrl", this.SettingScope, true);
-			let tenantId = ThisExtension.getConfigurationSetting<string>("powerbi.tenantId", this.SettingScope, false);
-			let clientId = ThisExtension.getConfigurationSetting<string>("powerbi.clientId", this.SettingScope, false);
-			let authenticatinProvider = ThisExtension.getConfigurationSetting<string>("powerbi.authenticationProvider", this.SettingScope, true);
-
-			//await PowerBIApiService.initialize(apiUrl.value, tenantId.value, clientId.value, authenticatinProvider.value);
-			let config = new PowerBIConfiugration();
+			let config = PowerBIConfiugration;
+			config.applySettings();
 			await PowerBIApiService.initialize(config.apiUrl, config.tenantId, config.clientId, config.authenticationProvider, config.resourceId);
 
 			this._notebookKernel = await PowerBINotebookKernel.getInstance();

@@ -59,29 +59,6 @@
 						"description": "(Optional) A custom ClientID/Application of an AAD application to use when connecting to Power BI.",
 						"default": null
 					},
-					"powerbi.apiUrl": {
-						"type": "string",
-						"description": "The URL of the Power BI API. Default is https://api.powerbi.com/",
-						"default": "https://api.powerbi.com/"
-					},
-					"powerbi.authenticationProvider": {
-						"type": "string",
-						"description": "VSCode authentication provider to use when connecting to PowerBI.",
-						"default": "microsoft",
-						"enum": [
-							"microsoft",
-							"microsoft-sovereign-cloud"
-						],
-						"enumDescriptions": [
-							"Connect to Azure public cloud",
-							"Connect to Azure sovereign cloud (e.g. Azure Germany, Azure China, Azure US Government)"
-						]
-					},
-					"powerbi.resourceId": {
-						"type": "string",
-						"description": "ResourceID for which to generate a token. Only change this if you are working with a sovereign cloud!",
-						"default": "https://analysis.windows.net/powerbi/api"
-					},
 					"powerbi.cloud": {
 						"type": "string",
 						"description": "The cloud environment to use when connecting to Power BI. Only change if you use a sovereign cloud!",
@@ -132,19 +109,19 @@
 		"viewsWelcome": [
 			{
 				"view": "PowerBIWorkspaces",
-				"contents": "Please log in to VSCode with a Microsoft Account first!"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
 			},
 			{
 				"view": "PowerBICapacities",
-				"contents": "Please log in to VSCode with a Microsoft Account first!"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
 			},
 			{
 				"view": "PowerBIGateways",
-				"contents": "Please log in to VSCode with a Microsoft Account first!"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
 			},
 			{
 				"view": "PowerBIPipelines",
-				"contents": "Please log in to VSCode with a Microsoft Account first!"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
 			}
 		],
 		"commands": [
