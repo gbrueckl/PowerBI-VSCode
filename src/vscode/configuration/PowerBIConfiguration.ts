@@ -8,15 +8,17 @@ Write-host $x
 */
 
 interface iCloudConfig {
+	friendlyName: string;
 	authenticationEndpoint: string;
 	authenticationProvider: string;
 	apiEndpoint: string;
 	resourceId: string;
 	allowedDomains: string[];
-
 }
+
 const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 	"GlobalCloud": {
+		"friendlyName": "Public Azure Cloud",
 		"authenticationProvider": "microsoft",
 		"authenticationEndpoint": undefined,
 		"apiEndpoint": "https://api.powerbi.com",
@@ -24,6 +26,7 @@ const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 		"allowedDomains": ["*.analysis.windows.net"]
 	},
 	"ChinaCloud": {
+		"friendlyName": "China Cloud",
 		"authenticationProvider": "microsoft-sovereign-cloud",
 		"authenticationEndpoint": "https://login.chinacloudapi.cn/common",
 		"apiEndpoint": "https://api.powerbi.cn",
@@ -31,6 +34,7 @@ const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 		"allowedDomains": ["*.analysis.chinacloudapi.cn"]
 	},
 	"GermanyCloud": {
+		"friendlyName": "Germay Cloud",
 		"authenticationProvider": "microsoft-sovereign-cloud",
 		"authenticationEndpoint": "https://login.microsoftonline.de/common",
 		"apiEndpoint": "https://api.powerbi.de",
@@ -38,6 +42,7 @@ const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 		"allowedDomains": ["*.analysis.cloudapi.de"]
 	},
 	"USGovCloud": {
+		"friendlyName": "US Government Community Cloud (GCC)",
 		"authenticationProvider": "microsoft-sovereign-cloud",
 		"authenticationEndpoint": "https://login.microsoftonline.com/common",
 		"apiEndpoint": "https://api.powerbigov.us",
@@ -45,6 +50,7 @@ const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 		"allowedDomains": ["*.analysis.usgovcloudapi.net"]
 	},
 	"USGovDoDL4Cloud": {
+		"friendlyName": "US Government Community Cloud High (GCC High)",
 		"authenticationProvider": "microsoft-sovereign-cloud",
 		"authenticationEndpoint": "https://login.microsoftonline.us/common",
 		"apiEndpoint": "https://api.high.powerbigov.us",
@@ -52,6 +58,7 @@ const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 		"allowedDomains": ["*.high.analysis.usgovcloudapi.net"]
 	},
 	"USGovDoDL5Cloud": {
+		"friendlyName": "US Government DoD",
 		"authenticationProvider": "microsoft-sovereign-cloud",
 		"authenticationEndpoint": "https://login.microsoftonline.us/common",
 		"apiEndpoint": "https://api.mil.powerbigov.us",
@@ -59,6 +66,7 @@ const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 		"allowedDomains": ["*.mil.analysis.usgovcloudapi.net"]
 	},
 	"USNatCloud": {
+		"friendlyName": "US Government Top Secret",
 		"authenticationProvider": "microsoft-sovereign-cloud",
 		"authenticationEndpoint": "https://login.microsoftonline.eaglex.ic.gov/common",
 		"apiEndpoint": "https://api.powerbi.eaglex.ic.gov",
@@ -66,6 +74,7 @@ const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 		"allowedDomains": ["*.analysis.eaglex.ic.gov"]
 	},
 	"USSecCloud": {
+		"friendlyName": "US Government Secret",
 		"authenticationProvider": "microsoft-sovereign-cloud",
 		"authenticationEndpoint": "https://login.microsoftonline.eaglex.ic.gov/common",
 		"apiEndpoint": "https://api.powerbi.microsoft.scloud",
