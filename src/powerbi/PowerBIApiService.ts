@@ -27,12 +27,12 @@ export abstract class PowerBIApiService {
 
 	//#region Initialization
 	static async initialize(
-			apiBaseUrl: string = "https://api.powerbi.com/", 
-			tenantId: string = undefined, 
-			clientId: string = undefined, 
-			authenticatinProvider: string = "microsoft", 
-			resourceId: string = "https://analysis.windows.net/powerbi/api"
-		): Promise<boolean> {
+		apiBaseUrl: string = "https://api.powerbi.com/",
+		tenantId: string = undefined,
+		clientId: string = undefined,
+		authenticatinProvider: string = "microsoft",
+		resourceId: string = "https://analysis.windows.net/powerbi/api"
+	): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing PowerBI API Service ...");
 
@@ -175,7 +175,7 @@ export abstract class PowerBIApiService {
 		return uri.toString(true);
 	}
 
-	static async get<T = any>(endpoint: string, params: object = null, raiseError: boolean = false): Promise<T> {
+	static async get<T = any>(endpoint: string, params: object = null, raiseError: boolean = false, raw: boolean = false): Promise<T> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
 		}
@@ -202,7 +202,12 @@ export abstract class PowerBIApiService {
 					if (!resultText || resultText == "") {
 						return { "value": { "status": response.status, "statusText": response.statusText } } as T;
 					}
-					return JSON.parse(resultText) as T;
+					if (raw) {
+						return resultText as any as T;
+					}
+					else {
+						return JSON.parse(resultText) as T;
+					}
 				}
 				else {
 					throw new Error(resultText);

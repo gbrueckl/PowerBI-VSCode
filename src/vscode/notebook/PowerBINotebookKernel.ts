@@ -327,7 +327,8 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 				}
 				else {
 					output = new vscode.NotebookCellOutput([
-						vscode.NotebookCellOutputItem.json(result, 'application/json') // to be used by proper JSON/table renderers
+						vscode.NotebookCellOutputItem.json(result, 'application/json'), // to be used by proper JSON/table renderers,
+						vscode.NotebookCellOutputItem.text(result as any as string, 'text/plain') // to be used by proper JSON/table renderers
 					])
 				}
 
