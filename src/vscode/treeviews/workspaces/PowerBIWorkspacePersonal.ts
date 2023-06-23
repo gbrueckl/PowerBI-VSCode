@@ -40,6 +40,10 @@ export class PowerBIWorkspacePersonal extends PowerBIWorkspace {
 		return null;
 	}	
 
+	get groupId(): string {
+		return "00000000-0000-0000-0000-000000000000";
+	}
+
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
 		PowerBICommandBuilder.pushQuickPickItem(this);
 

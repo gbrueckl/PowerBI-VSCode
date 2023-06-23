@@ -8,7 +8,6 @@ import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { PowerBIWorkspacesDragAndDropController } from './PowerBIWorkspacesDragAndDropController';
 import { PowerBIWorkspacePersonal } from './PowerBIWorkspacePersonal';
 import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSerializer';
 import { PowerBIApiDragAndDropController } from '../PowerBIApiDragAndDropController';

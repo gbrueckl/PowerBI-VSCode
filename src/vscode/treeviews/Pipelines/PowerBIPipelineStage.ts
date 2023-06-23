@@ -6,7 +6,7 @@ import { iPowerBIPipelineStage, iPowerBIPipelineStageArtifacts, resolveOrder, re
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
 import { PowerBIPipelineStageArtifact } from './PowerBIPipelineStageArtifact';
 import { PowerBIPipelineStageArtifacts } from './PowerBIPipelineStageArtifacts';
 import { ArtifactType } from '../../../powerbi/SwaggerAPI';
@@ -136,6 +136,22 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 			}
 		}
 		PowerBIApiService.post(apiUrl, body);
+
+		ThisExtension.TreeViewPipelines.refresh(this.parent, false);
+	}
+
+	public async assignWorkspace(settings: object = undefined): Promise<void> {
+		const apiUrl = this.apiPath + "/assignWorkspace";
+		if (settings == undefined) // prompt user for inputs
+		{
+			PowerBICommandBuilder.execute<any>(apiUrl, "POST",
+				[
+					new PowerBICommandInput("Workspace", "WORKSPACE_SELECTOR", "workspaceId", false, "The workspace ID.")
+				]);
+		}
+		else {
+			PowerBIApiService.post(apiUrl, settings);
+		}
 
 		ThisExtension.TreeViewPipelines.refresh(this.parent, false);
 	}

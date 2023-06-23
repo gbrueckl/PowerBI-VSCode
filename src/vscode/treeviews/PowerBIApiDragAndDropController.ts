@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../ThisExtension';
 
-import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../powerbi/CommandBuilder';
 import { PowerBIApiTreeItem } from './PowerBIApiTreeItem';
 
 
@@ -19,21 +18,82 @@ class PowerBIObjectTransferItem extends vscode.DataTransferItem {
 		return this._nodes;
 	}
 
-	asString(): Promise<string> {
-		return this.value[0].toString();
+	async asString(): Promise<string> {
+		return this.jsonifyObject(this.value);
 	}
+
+	jsonifyObject(obj: Object, maxLevels: number = 2, currentLevel: number = 0): string {
+
+		if(currentLevel == maxLevels)
+		{
+			return obj.toString();
+		}
+		var arrOfKeyVals = [],
+			arrVals = [],
+			objKeys = [];
+
+		/*********CHECK FOR PRIMITIVE TYPES**********/
+		if (typeof obj === 'number' || typeof obj === 'boolean' || obj === null)
+			return '' + obj;
+		else if (typeof obj === 'string')
+			return '"' + obj + '"';
+
+		/*********CHECK FOR ARRAY**********/
+		else if (Array.isArray(obj)) {
+			//check for empty array
+			if (obj[0] === undefined)
+				return '[]';
+			else {
+				obj.forEach( (el) => {
+					arrVals.push(this.jsonifyObject(el, maxLevels, currentLevel + 1));
+				});
+				return '[' + arrVals + ']';
+			}
+		}
+		/*********CHECK FOR OBJECT**********/
+		else if (obj instanceof Object) {
+			//get object keys
+			objKeys = Object.keys(obj);
+			//set key output;
+			objKeys.forEach((key) => {
+				var keyOut = '"' + key + '":';
+				var keyValOut = obj[key];
+				//skip functions and undefined properties
+				if (keyValOut instanceof Function || typeof keyValOut === undefined)
+					arrOfKeyVals.push('');
+				else if (typeof keyValOut === 'string')
+					arrOfKeyVals.push(keyOut + '"' + keyValOut + '"');
+				else if (typeof keyValOut === 'boolean' || typeof keyValOut === 'number' || keyValOut === null)
+					arrOfKeyVals.push(keyOut + keyValOut);
+				//check for nested objects, call recursively until no more objects
+				else if (keyValOut instanceof Object) {
+					arrOfKeyVals.push(keyOut + this.jsonifyObject(keyValOut, maxLevels, currentLevel + 1));
+				}
+			});
+			return '{' + arrOfKeyVals + '}';
+		}
+	};
 }
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropController<PowerBIApiTreeItem> {
 
-	dropMimeTypes: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString()).concat([ 
+	dropMimeTypes123: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString()).concat([
+		"powerbiapidragdrop",
 		"text/uri-list" // to support drag and drop from the file explorer (not yet working)
-		]);
-	dragMimeTypes: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString());
+	]);
+	dragMimeTypes123: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString()).concat([
+		"powerbiapidragdrop"
+	]);
 
+	dropMimeTypes: readonly string[] = [
+		"powerbiapidragdrop"
+	];
+	dragMimeTypes: readonly string[] = [
+		"powerbiapidragdrop"
+	];
 	public async handleDrag?(source: readonly PowerBIApiTreeItem[], dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
-		dataTransfer.set("application/vnd.code.tree.powerbiworkspaces", new PowerBIObjectTransferItem(source));
+		dataTransfer.set(source[0].TreeProvider, new PowerBIObjectTransferItem(source));
 		dataTransfer.set("powerbiapidragdrop", new PowerBIObjectTransferItem(source));
 	}
 
@@ -41,12 +101,18 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		ThisExtension.log("Dropped item on " + target.itemType + " ...");
 
 		let uriList = await dataTransfer.get("text/uri-list");
-		if(uriList != null)
-		{
+		if (uriList != null) {
 			ThisExtension.log(await uriList.asString());
 		}
 
+		const ws = dataTransfer.get("application/vnd.code.tree.powerbiworkspaces");
 		const transferItem = dataTransfer.get('powerbiapidragdrop');
+
+		dataTransfer.forEach((item, mimeType, transfer) => { 
+			ThisExtension.log("MimeType: " + mimeType); 
+			ThisExtension.log("Item: " + item);
+			ThisExtension.log("Transfer: " + transfer);
+		});
 
 		if (!transferItem) {
 			ThisExtension.log("Item dropped on PowerBI Workspace Tree-View - but MimeType 'application/vnd.code.tree.powerbiworkspaces' was not found!");
@@ -60,8 +126,7 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		if ('handleBeingDropped' in source) {
 			(source as any as iHandleBeingDropped).handleBeingDropped(target);
 		}
-		else
-		{
+		else {
 			ThisExtension.log("No action defined when dropping an '" + source.itemType + "' on a '" + target.itemType + "' node!");
 		}
 	}

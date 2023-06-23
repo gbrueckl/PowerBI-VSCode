@@ -7,20 +7,28 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIPipeline } from './PowerBIPipeline';
-import { PowerBIPipelinesDragAndDropController } from './PowerBIPipelineDragAndDropController';
 import { iPowerBIPipeline } from '../../../powerbi/PipelinesAPI/_types';
+import { PowerBIApiDragAndDropController } from '../PowerBIApiDragAndDropController';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<PowerBIPipelineTreeItem> {
 
+	private _previousSelection: {item: PowerBIPipelineTreeItem, time: number};
 	private _onDidChangeTreeData: vscode.EventEmitter<PowerBIPipelineTreeItem | undefined> = new vscode.EventEmitter<PowerBIPipelineTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<PowerBIPipelineTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBIPipelines', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIPipelinesDragAndDropController() });
+		const view = vscode.window.createTreeView('PowerBIPipelines', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIApiDragAndDropController() });
 		context.subscriptions.push(view);
 
+		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+
 		ThisExtension.TreeViewPipelines = this;
+	}
+
+	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void>
+	{
 	}
 	
 	async refresh(item: PowerBIPipelineTreeItem = null, showInfoMessage: boolean = false): Promise<void> {

@@ -83,6 +83,9 @@ export class PowerBICommandInput {
 			case "DATAFLOW_SELECTOR":
 				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("DATAFLOW"), this.Prompt, this.Description, this._currentValue);
 
+			case "CAPACITY_SELECTOR":
+				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("CAPACITY"), this.Prompt, this.Description, this._currentValue);
+
 			default:
 				return this.InputType;
 		}

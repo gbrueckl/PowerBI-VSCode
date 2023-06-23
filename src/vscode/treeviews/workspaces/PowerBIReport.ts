@@ -55,6 +55,50 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 	private set definition(value: iPowerBIReport) {
 		super.definition = value;
 	}
+
+	// #region iHandleBeingDropped implementation
+	async handleBeingDropped(target: PowerBIApiTreeItem): Promise<void> {
+		let actions: Map<string, ()=>Promise<void>> = new Map<string, ()=>Promise<void>>();
+
+		if(["GROUP", "REPORTS"].includes(target.itemType))
+		{
+			const action =  async () => this.clone({ name: this.name + " - Clone", targetWorkspaceId: (target as PowerBIWorkspaceTreeItem).groupId }) ;
+			actions.set("clone", action);
+		}
+		if(["REPORT"].includes(target.itemType))
+		{
+			const action =  async () => (target as PowerBIReport).updateContent({ sourceType: "ExistingReport" , sourceReport: { sourceReportId: this.id, sourceWorkspaceId: this.groupId }}) ;
+			actions.set("updateContent", action);
+		}
+		if(["DATASET"].includes(target.itemType))
+		{
+			const action =  async () => this.rebind({ datasetId: target.uid }) ;
+			actions.set("rebind", action);
+		}
+		
+		
+		if(actions.size > 0)
+		{
+			let items: PowerBIQuickPickItem[] = [];
+			for(const key of actions.keys())
+			{
+				items.push(new PowerBIQuickPickItem(key));
+			}
+			const action: string = await PowerBICommandBuilder.showQuickPick(items, "Action", null, null);
+
+			if(!action)
+			{
+				return;
+			}
+
+			await actions.get(action)();
+		}
+		else {
+				ThisExtension.log("No action defined when dropping a '" + this.itemType + "' on a '" + target.itemType + "'!");
+		}
+	}
+	// #endregion
+
 	// #region iHandleDrop implementation
 	public async handleDrop(dataTransfer: vscode.DataTransfer): Promise<void> {
 		const transferItem = dataTransfer.get('application/vnd.code.tree.powerbiworkspaces');

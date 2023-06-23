@@ -8,13 +8,17 @@ import { PowerBIDatasets } from './PowerBIDatasets';
 import { PowerBIReports } from './PowerBIReports';
 import { PowerBIDashboards } from './PowerBIDashboards';
 import { PowerBIDataflows } from './PowerBIDataflows';
-import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
 import { PowerBIReport } from './PowerBIReport';
+import { iHandleBeingDropped } from '../PowerBIApiDragAndDropController';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { PowerBICapacity } from '../Capacities/PowerBICapacity';
+import { PowerBIPipelineStage } from '../Pipelines/PowerBIPipelineStage';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandleDrop {
+export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandleBeingDropped {
 	constructor(
 		definition: iPowerBIGroup
 	) {
@@ -79,58 +83,40 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 		return children;
 	}
 	
-	// #region iHandleDrop implementation
-	public async handleDrop(dataTransfer: vscode.DataTransfer): Promise<void> {
-		const transferItem = dataTransfer.get('application/vnd.code.tree.powerbiworkspaces');
-		const fileItem = dataTransfer.get('text/uri-list');
-		if (!transferItem && !fileItem) {
-			ThisExtension.log("Item dropped on PowerBI Workspace Tree-View - but MimeType 'application/vnd.code.tree.powerbiworkspaces' was not found!");
-			return;
+	// #region iHandleBeingDropped implementation
+	async handleBeingDropped(target: PowerBIApiTreeItem): Promise<void> {
+		let actions: Map<string, ()=>Promise<void>> = new Map<string, ()=>Promise<void>>();
+
+		if(["CAPACITY"].includes(target.itemType))
+		{
+			const action =  async () => this.assignToCapacity({ capacityId: (target as PowerBICapacity).uid }) ;
+			actions.set("assign to capacity", action);
+		}
+		if(["PIPELINESTAGE"].includes(target.itemType))
+		{
+			const action =  async () => (target as PowerBIPipelineStage).assignWorkspace({ workspaceId: this.id }) ;
+			actions.set("assign to stage", action);
 		}
 
-		if(fileItem)
+		if(actions.size > 0)
 		{
-			const fileUri = vscode.Uri.parse(await fileItem.asString());// "file:///d:/Desktop/DeltaLake_New.pbix"; //await fileItem.asString();
-			const fileName = fileUri.path.split("/").pop().split(".")[0];
-
-			let url = this.apiPath + "imports?datasetDisplayName=" + fileName;
-			
-			
-			let importRequest = await PowerBIApiService.postFile(url, fileUri);
-		}
-
-		if(transferItem)
-		{
-			const sourceItems: PowerBIWorkspaceTreeItem[] = transferItem.value;
-
-			const source = sourceItems[0];
-
-			switch (source.itemType) {
-				case "REPORT":
-					const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("clone")], "Action", null, null);
-
-					switch (action) {
-						case "clone":
-							await (source as PowerBIReport).clone({
-								name: source.name + " - Clone",
-								targetWorkspaceId: this.id == "myorg" ? "00000000-0000-0000-0000-000000000000" : this.id
-							});
-							
-							ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
-							break;
-
-						default:
-							ThisExtension.setStatusBar("Drag&Drop aborted!");
-							ThisExtension.log("Invalid or no action selected!");
-					}
-
-					break;
-
-				default:
-					ThisExtension.log("No action defined when dropping a " + source.itemType + " on " + this.itemType + "!");
+			let items: PowerBIQuickPickItem[] = [];
+			for(const key of actions.keys())
+			{
+				items.push(new PowerBIQuickPickItem(key));
 			}
+			const action: string = await PowerBICommandBuilder.showQuickPick(items, "Action", null, null);
+
+			if(!action)
+			{
+				return;
+			}
+
+			await actions.get(action)();
 		}
-		
+		else {
+				ThisExtension.log("No action defined when dropping a '" + this.itemType + "' on a '" + target.itemType + "'!");
+		}
 	}
 	// #endregion
 
@@ -144,5 +130,22 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
 		*/
 		vscode.window.showWarningMessage("For safety-reasons workspaces cannot be deleted using this extension!");
+	}
+
+	public async assignToCapacity(settings: object = undefined): Promise<void> {
+		const apiUrl = this.apiPath + "/AssignToCapacity";
+		if (settings == undefined) // prompt user for inputs
+		{
+			PowerBICommandBuilder.execute<any>(apiUrl, "POST",
+				[
+					new PowerBICommandInput("Capacity", "CAPACITY_SELECTOR", "capacityId", true, "The capacity ID. To unassign from a capacity, use an empty GUID (00000000-0000-0000-0000-000000000000).")
+				]);
+		}
+		else {
+			PowerBIApiService.post(apiUrl, settings);
+		}
+
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
+		ThisExtension.TreeViewCapacities.refresh(null, false);
 	}
 }
