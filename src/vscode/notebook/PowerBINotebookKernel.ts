@@ -91,18 +91,6 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 	// #endregion
 
 	async disposeController(): Promise<void> {
-		// nothing to do at the moment as the connection is stateless
-		/*
-		for (let context of this._notebookContexts.entries()) {
-			
-			try {
-				// nothing to do at the moment as the connection is stateless
-			}
-			catch (e) { };
-		}
-
-		this._notebookContexts.clear();
-		*/
 	}
 
 	async dispose(): Promise<void> {

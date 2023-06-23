@@ -1,6 +1,6 @@
 # Change Log
 
-**v0.9.2**:
+**v0.9.3**:
 - added support for governmental and sovereign clouds via new setting `powerbi.cloud`
 - minor improvements for tooltips in treeviews
 

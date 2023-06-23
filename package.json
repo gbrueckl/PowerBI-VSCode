@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.9.2",
+	"version": "0.9.3",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -76,7 +76,7 @@
 						"enumItemLabels": [
 							"Public Azure Cloud",
 							"China Cloud",
-							"Germay Cloud",
+							"German Cloud",
 							"US Government Community Cloud (GCC)",
 							"US Government Community Cloud High (GCC High)",
 							"US Government DoD",
@@ -87,7 +87,7 @@
 						"markdownEnumDescriptions": [
 							"**Public Azure Cloud**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.powerbi.com|\n|ResourceId|https://analysis.windows.net/powerbi/api|\n|AuthenticationProvider|microsoft|",
 							"**China Cloud**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.powerbi.cn|\n|ResourceId|https://analysis.chinacloudapi.cn/powerbi/api|\n|AuthenticationProvider|microsoft-sovereign-cloud|\n|AuthenticationEndpoint|https://login.chinacloudapi.cn/common|",
-							"**Germay Cloud**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.powerbi.de|\n|ResourceId|https://analysis.cloudapi.de/powerbi/api|\n|AuthenticationProvider|microsoft-sovereign-cloud|\n|AuthenticationEndpoint|https://login.microsoftonline.de/common|",
+							"**German Cloud**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.powerbi.de|\n|ResourceId|https://analysis.cloudapi.de/powerbi/api|\n|AuthenticationProvider|microsoft-sovereign-cloud|\n|AuthenticationEndpoint|https://login.microsoftonline.de/common|",
 							"**US Government Community Cloud (GCC)**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.powerbigov.us|\n|ResourceId|https://analysis.usgovcloudapi.net/powerbi/api|\n|AuthenticationProvider|microsoft-sovereign-cloud|\n|AuthenticationEndpoint|https://login.microsoftonline.com/common|",
 							"**US Government Community Cloud High (GCC High)**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.high.powerbigov.us|\n|ResourceId|https://high.analysis.usgovcloudapi.net/powerbi/api|\n|AuthenticationProvider|microsoft-sovereign-cloud|\n|AuthenticationEndpoint|https://login.microsoftonline.us/common|",
 							"**US Government DoD**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.mil.powerbigov.us|\n|ResourceId|https://mil.analysis.usgovcloudapi.net/powerbi/api|\n|AuthenticationProvider|microsoft-sovereign-cloud|\n|AuthenticationEndpoint|https://login.microsoftonline.us/common|",
