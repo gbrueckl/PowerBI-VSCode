@@ -61,6 +61,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIDataset.delete', (dataset: PowerBIDataset) => dataset.delete());
 	vscode.commands.registerCommand('PowerBIDataset.refresh', (dataset: PowerBIDataset) => dataset.refresh());
 	vscode.commands.registerCommand('PowerBIDataset.cancelRefresh', (refresh: PowerBIDatasetRefresh) => refresh.cancel());
+	vscode.commands.registerCommand('PowerBIDataset.showRefresh', async (refresh: PowerBIDatasetRefresh) => refresh.showDefinition());
 	vscode.commands.registerCommand('PowerBIDataset.updateAllParameters', (dataset: PowerBIDataset) => dataset.updateAllParameters());
 
 	// DatasetParameter commands

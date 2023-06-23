@@ -11,6 +11,8 @@ import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIWorkspacesDragAndDropController } from './PowerBIWorkspacesDragAndDropController';
 import { PowerBIWorkspacePersonal } from './PowerBIWorkspacePersonal';
 import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSerializer';
+import { PowerBIApiDragAndDropController } from '../PowerBIApiDragAndDropController';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<PowerBIWorkspaceTreeItem> {
@@ -20,7 +22,7 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 	readonly onDidChangeTreeData: vscode.Event<PowerBIWorkspaceTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBIWorkspaces', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIWorkspacesDragAndDropController() });
+		const view = vscode.window.createTreeView('PowerBIWorkspaces', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIApiDragAndDropController() });
 		context.subscriptions.push(view);
 
 		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
@@ -28,7 +30,7 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 		ThisExtension.TreeViewWorkspaces = this;
 	}
 
-	private async _onDidChangeSelection(items: readonly PowerBIWorkspaceTreeItem[]): Promise<void>
+	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void>
 	{
 		/*vscode.window.showInformationMessage("Preview: " + items[0].label.toString())
 

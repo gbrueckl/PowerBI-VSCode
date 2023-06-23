@@ -205,6 +205,12 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIDataset.showRefresh",
+				"title": "Show Refresh",
+				"icon": "$(checklist)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIDataset.takeOver",
 				"title": "Take Over",
 				"icon": {

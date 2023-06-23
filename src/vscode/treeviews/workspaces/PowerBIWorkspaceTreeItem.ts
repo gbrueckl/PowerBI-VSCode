@@ -5,6 +5,7 @@ import { Helper, UniqueId } from '../../../helpers/Helper';
 import { ApiItemType } from '../_types';
 import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { TreeProviderId } from '../../../ThisExtension';
 
 export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPowerBIWorkspaceItem {
 	protected _groupId: UniqueId;
@@ -29,6 +30,10 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 		};
 	}
 
+	get TreeProvider(): TreeProviderId {
+		return "application/vnd.code.tree.powerbiworkspaces";
+	}
+	
 	get parent(): PowerBIWorkspaceTreeItem {
 		return this._parent as PowerBIWorkspaceTreeItem;
 	}

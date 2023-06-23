@@ -9,6 +9,13 @@ import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/Power
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
 import { PowerBIConfiugration } from './vscode/configuration/PowerBIConfiguration';
 
+
+export type TreeProviderId = 
+	"application/vnd.code.tree.powerbiworkspaces"
+|	"application/vnd.code.tree.powerbicapacities"
+|	"application/vnd.code.tree.powerbigateways"
+|	"application/vnd.code.tree.powerbipipelines";
+
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
 
@@ -146,6 +153,16 @@ export abstract class ThisExtension {
 
 		return true;
 	}
+
+	public static get TreeProviderIds(): TreeProviderId[] {
+		return [
+		"application/vnd.code.tree.powerbiworkspaces", 
+		"application/vnd.code.tree.powerbipipelines", 
+		"application/vnd.code.tree.powerbigateways",
+		"application/vnd.code.tree.powerbicapacities", 
+		];
+	}
+
 
 	public static async refreshUI(): Promise<void> {
 		// refresh all treeviews after the extension has been initialized

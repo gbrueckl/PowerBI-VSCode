@@ -53,7 +53,7 @@ export class iPowerBIDatasetExecuteQueries {
 }
 
 export class iPowerBIDatasetRefresh {
-    refreshType: string;
+    refreshType: "OnDemand" | "ViaXmlaEndpoint" | "ViaEnhancedApi" | "ViaAoi";
     startTime: Date;
     endTime: Date;
     status: string;

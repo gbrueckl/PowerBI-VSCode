@@ -4,6 +4,7 @@ import { ApiItemType } from '../_types';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBIGateway } from '../../../powerbi/GatewayAPI/_types';
 import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
+import { TreeProviderId } from '../../../ThisExtension';
 
 export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPowerBIGatewayItem {
 	protected _definition: iPowerBIGateway;
@@ -27,6 +28,10 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
+	}
+
+	get TreeProvider(): TreeProviderId {
+		return "application/vnd.code.tree.powerbigateways";
 	}
 
 	// tooltip shown when hovering over the item

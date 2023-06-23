@@ -29,6 +29,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
+		super.command = this._command;
 	}
 
 	get _label(): string {
@@ -48,19 +49,25 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, status + '.png');
 	}
 
+	get _command(): vscode.Command {
+		return {
+			command: 'PowerBIDataset.showRefresh', title: "Show Refresh", arguments: [this]
+		}
+	}
+
 	/* Overwritten properties from PowerBIApiTreeItem */
 	get _contextValue(): string {
 		let orig: string = super._contextValue;
 
 		let actions: string[] = []
 
-		if(this.definition.status == "Unknown")
-		{
+		if (this.definition.status == "Unknown") {
 			actions.push("CANCEL")
 		}
 
 		return orig + actions.join(",") + ",";
 	}
+
 	get definition(): iPowerBIDatasetRefresh {
 		return super.definition as iPowerBIDatasetRefresh;
 	}
@@ -73,10 +80,21 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		return (this.parent as PowerBIDatasetRefreshes).dataset;
 	}
 
-	// Parameter-specific funtions
+	// DatasetRefresh-specific funtions
 	public async cancel(): Promise<void> {
 		ThisExtension.setStatusBar("Cancelling dataset-refresh ...", true);
 		PowerBIApiService.delete(this.apiPath, null);
 		ThisExtension.setStatusBar("Dataset-refresh cancelled!");
+	}
+
+	public async showDefinition(): Promise<void> {
+		let result = this.definition;
+		if (this.definition.refreshType == "ViaEnhancedApi") {
+			result = await PowerBIApiService.get(this.apiPath);
+		}
+
+		vscode.workspace.openTextDocument({ language: "json", content: JSON.stringify(result, null, "\t") }).then(
+			document => vscode.window.showTextDocument(document)
+		);
 	}
 }

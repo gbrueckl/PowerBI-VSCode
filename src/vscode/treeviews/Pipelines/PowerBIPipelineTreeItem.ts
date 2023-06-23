@@ -5,6 +5,7 @@ import { UniqueId } from '../../../helpers/Helper';
 import { ApiItemType } from '../_types';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBIPipeline, iPowerBIPipelineStage } from '../../../powerbi/PipelinesAPI/_types';
+import { TreeProviderId } from '../../../ThisExtension';
 
 export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowerBIPipeline {
 
@@ -32,6 +33,10 @@ export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowe
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
+	}
+
+	get TreeProvider(): TreeProviderId {
+		return "application/vnd.code.tree.powerbipipelines";
 	}
 
 	public async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {

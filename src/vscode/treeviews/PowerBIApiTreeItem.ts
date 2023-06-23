@@ -4,7 +4,7 @@ import { UniqueId } from '../../helpers/Helper';
 
 import { ApiItemType } from './_types';
 import { iPowerBIApiItem } from './iPowerBIApiItem';
-import { ThisExtension } from '../../ThisExtension';
+import { ThisExtension, TreeProviderId } from '../../ThisExtension';
 import { ApiUrlPair } from '../../powerbi/_types';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 
@@ -128,6 +128,20 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		}
 
 		return parent as T;
+	}
+
+	getPathItemByType<T = PowerBIApiTreeItem>(type: ApiItemType): T {
+		let parent: PowerBIApiTreeItem = this;
+
+		while (parent !== undefined && parent.itemType !== type) {
+			parent = parent.parent;
+		}
+
+		return parent as T;
+	}
+
+	get TreeProvider(): TreeProviderId {
+		throw new Error("Method not implemented.");
 	}
 
 	public CopyPathToClipboard(): void {

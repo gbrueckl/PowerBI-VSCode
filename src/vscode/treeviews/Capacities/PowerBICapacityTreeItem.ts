@@ -4,6 +4,7 @@ import { iPowerBICapacityItem } from './iPowerBICapacityItem';
 import { ApiItemType } from '../_types';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
+import { TreeProviderId } from '../../../ThisExtension';
 
 export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowerBICapacityItem {
 	protected _definition: iPowerBICapacity;
@@ -28,6 +29,10 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
+	}
+
+	get TreeProvider(): TreeProviderId {
+		return "application/vnd.code.tree.powerbicapacities";
 	}
 
 	public async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
