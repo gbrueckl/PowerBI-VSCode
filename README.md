@@ -22,10 +22,12 @@ The extensions can be installed directly from within VSCode by searching for thi
 
 # Configuration
 The extension supports the following VSCode settings:
+
 |Setting|Description|Example value|
 |-------|-----------|-------------|
-|`powerbi.tenantId`|The tenant ID of the remote tenant that you want to connect to.|A GUID, `93519689-1234-5678-9abcd-e4b9f59d1963`|
-|`powerbi.apiUrl`|The Power BI API URL, default is `https://api.powerbi.com/`|`https://api.powerbi.com/`|
+|`powerbi.tenantId`|The tenant ID of the remote tenant that you want to connect to.|A GUID, `abcd1234-1234-5678-9abcd-9d1963e4b9f5`|
+|`powerbi.clientId`|(Optional) A custom ClientID/Application of an AAD application to use when connecting to Power BI.|A GUID, `99887766-1234-5678-9abcd-e4b9f59d1963`|
+|`powerbi.cloud`|(Optional) Onnly use when you want to connect to a sovereign or governmental cloud!|GlobalCloud|
 
 # Notebooks
 You can open a new Power BI notebook via the UI from the header of each treeview or by running the command __Open new PowerBI Notebook__ (command `PowerBI.openNewNotebook`). Power BI notebooks have the file extension `.pbinb` and will automatically open in the notebook editor.
