@@ -43,8 +43,8 @@ const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 	},
 	"USGovCloud": {
 		"friendlyName": "US Government Community Cloud (GCC)",
-		"authenticationProvider": "microsoft-sovereign-cloud",
-		"authenticationEndpoint": "https://login.microsoftonline.com/common",
+		"authenticationProvider": "microsoft",
+		"authenticationEndpoint": "https://login.windows.net/common",
 		"apiEndpoint": "https://api.powerbigov.us",
 		"resourceId": "https://analysis.usgovcloudapi.net/powerbi/api",
 		"allowedDomains": ["*.analysis.usgovcloudapi.net"]
@@ -84,7 +84,7 @@ const CLOUD_CONFIGS: { [key: string]: iCloudConfig } = {
 }
 
 
-export abstract class PowerBIConfiugration {
+export abstract class PowerBIConfiguration {
 	static get cloud(): string { return this.getValue("cloud"); }
 	static set cloud(value: string) { this.setValue("cloud", value); }
 
@@ -103,7 +103,9 @@ export abstract class PowerBIConfiugration {
 	static get resourceId(): string { return CLOUD_CONFIGS[this.cloud].resourceId; }
 
 	static get isSovereignCloud(): boolean {
-		return this.authenticationProvider === "microsoft-sovereign-cloud";
+		// If the base URL for the API is not pointed to api.powerbi.com assume 
+		// we are pointed to the sovereign tenant
+		return this.apiUrl !== "https://api.powerbi.com/"
 	}
 
 	static get config(): vscode.WorkspaceConfiguration {

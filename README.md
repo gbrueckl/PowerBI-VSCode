@@ -27,7 +27,7 @@ The extension supports the following VSCode settings:
 |-------|-----------|-------------|
 |`powerbi.tenantId`|The tenant ID of the remote tenant that you want to connect to.|A GUID, `abcd1234-1234-5678-9abcd-9d1963e4b9f5`|
 |`powerbi.clientId`|(Optional) A custom ClientID/Application of an AAD application to use when connecting to Power BI.|A GUID, `99887766-1234-5678-9abcd-e4b9f59d1963`|
-|`powerbi.cloud`|(Optional) Onnly use when you want to connect to a sovereign or governmental cloud!|GlobalCloud|
+|`powerbi.cloud`|(Optional) Only use when you want to connect to a sovereign or governmental cloud!|GlobalCloud|
 
 # Notebooks
 You can open a new Power BI notebook via the UI from the header of each treeview or by running the command __Open new PowerBI Notebook__ (command `PowerBI.openNewNotebook`). Power BI notebooks have the file extension `.pbinb` and will automatically open in the notebook editor.
@@ -88,9 +88,10 @@ Current values of variables can be retrieved by running `SET MY_VARIABLE`.
 # Building Locally
 1. Make sure you have installed [NodeJS](https://nodejs.org/en/) on your development workstation
 2. Clone this repo to your development workstation, then open the cloned folder in [VSCode](https://code.visualstudio.com/)
-3. To install all dependencies, switch to the terminal and run `npm install`
-4. To run the extension in debug mode (for using break-points, etc.), press `F5`
-5. To generate the `.vsix`, switch to the terminal and run `vsce package`
+3. Install Visual Studio Code Extension Manager by running `npm install @vscode/vsce -g --force`
+4. To install all dependencies, switch to the terminal and run `npm install`
+5. To run the extension in debug mode (for using break-points, etc.), press `F5`
+6. To generate the `.vsix`, switch to the terminal and run `vsce package`
 
 # VSCode Extension Development Details
 Please refer to the [official docs and samples](https://github.com/microsoft/vscode-extension-samples#prerequisites)
