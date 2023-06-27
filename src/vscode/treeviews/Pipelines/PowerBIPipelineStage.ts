@@ -54,10 +54,18 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 
 		let actions: string[] = [
 			"DELETE"
-		]
+		];
 
 		if (this.definition.order <= 1) {
 			actions.push("DEPLOY");
+		}
+
+		if (this.definition.workspaceId) {
+			actions.push("UNASSIGN");
+		}
+		else
+		{
+			actions.push("ASSIGN");
 		}
 
 		return orig + actions.join(",") + ",";
@@ -69,6 +77,10 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 
 	set definition(value: iPowerBIPipelineStage) {
 		super.definition = value;
+	}
+
+	get apiUrlPart(): string {
+		return this.definition.order.toString();
 	}
 
 	async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {
@@ -110,8 +122,8 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 	}
 	*/
 
-	public async deployToNextStage(settings: object = undefined): Promise<void> {
-		const apiUrl = this.getParentByType("PIPELINE").apiPath + "deployAll";
+	public static async deployToNextStage(stage: PowerBIPipelineStage, settings: object = undefined): Promise<void> {
+		const apiUrl = stage.getParentByType("PIPELINE").apiPath + "deployAll";
 		/*
 		if (settings == undefined) // prompt user for inputs
 		{
@@ -125,7 +137,7 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 		}
 		*/
 		const body = {
-			"sourceStageOrder": this.definition.order,
+			"sourceStageOrder": stage.definition.order,
 			"options": {
 				"allowCreateArtifact": true,
 				"allowOverwriteArtifact": true,
@@ -137,11 +149,11 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 		}
 		PowerBIApiService.post(apiUrl, body);
 
-		ThisExtension.TreeViewPipelines.refresh(this.parent, false);
+		ThisExtension.TreeViewPipelines.refresh(stage.parent, false);
 	}
 
-	public async assignWorkspace(settings: object = undefined): Promise<void> {
-		const apiUrl = this.apiPath + "/assignWorkspace";
+	public static async assignWorkspace(stage: PowerBIPipelineStage, settings: object = undefined): Promise<void> {
+		const apiUrl = stage.apiPath + "assignWorkspace";
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<any>(apiUrl, "POST",
@@ -153,6 +165,14 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 			PowerBIApiService.post(apiUrl, settings);
 		}
 
-		ThisExtension.TreeViewPipelines.refresh(this.parent, false);
+		ThisExtension.TreeViewPipelines.refresh(stage.parent, false);
+	}
+
+	public static async unassignWorkspace(stage: PowerBIPipelineStage): Promise<void> {
+		const apiUrl = stage.apiPath + "unassignWorkspace";
+
+		PowerBIApiService.post(apiUrl, null);
+
+		ThisExtension.TreeViewPipelines.refresh(stage.parent, false);
 	}
 }

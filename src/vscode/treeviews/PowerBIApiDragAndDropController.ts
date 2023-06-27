@@ -1,8 +1,14 @@
 import * as vscode from 'vscode';
 
-import { ThisExtension } from '../../ThisExtension';
+import { ThisExtension, TreeProviderId } from '../../ThisExtension';
 
 import { PowerBIApiTreeItem } from './PowerBIApiTreeItem';
+import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../powerbi/CommandBuilder';
+import { PowerBIWorkspace } from './workspaces/PowerBIWorkspace';
+import { PowerBIPipelineStage } from './Pipelines/PowerBIPipelineStage';
+import { PowerBICapacity } from './Capacities/PowerBICapacity';
+import { PowerBIReport } from './workspaces/PowerBIReport';
+import { Helper } from '../../helpers/Helper';
 
 
 export interface iHandleBeingDropped {
@@ -134,16 +140,98 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		}
 		const source: PowerBIApiTreeItem = sourceItems[0];
 
-		// check if target implemnts iHandleDrop interface / has handleDrop function
+		await this.handlePowerBIAPIDrop(source, target);
+
+		/*// check if target implemnts iHandleDrop interface / has handleDrop function
 		if ('handleBeingDropped' in source) {
 			const treeView = ThisExtension.getTreeView(source.TreeProvider);
 			const treeItem = treeView.getTreeItem(source as PowerBIApiTreeItem) as PowerBIApiTreeItem;
-			treeItem.handleBeingDropped(target);
+			//treeItem.handleBeingDropped(target);
 			// not yet working for cross-treeview drag&drops
-			//(source as any as iHandleBeingDropped).handleBeingDropped(target);
+			(source as any as iHandleBeingDropped).handleBeingDropped(target);
 		}
 		else {
 			ThisExtension.log("No action defined when dropping an '" + source.itemType + "' on a '" + target.itemType + "' node!");
+		}
+		*/
+	}
+
+	public async handlePowerBIAPIDrop(source: PowerBIApiTreeItem, target: PowerBIApiTreeItem): Promise<void> {
+
+		/* 
+		// TODO
+		Workspace -> PipelineStage
+		Report -> Dataset (Clone, Rebind)
+		Report -> Reports, Workspace (Clone)
+		Dashboard -> Dashboard, Workspace (Clone) ?
+		*/
+		let actions: Map<string, () => Promise<void>> = new Map<string, () => Promise<void>>();
+
+		// by default we refresh the treeview of the target item
+		let treeViewtoRefresh: TreeProviderId = target.TreeProvider;
+
+		if (source.itemType == "GROUP") {
+			if (["CAPACITY"].includes(target.itemType)) {
+				const assignCapacity = async () => PowerBIWorkspace.assignToCapacity((source as PowerBIWorkspace), { capacityId: (target as PowerBICapacity).uid });
+				actions.set("assign to capacity", assignCapacity);
+				treeViewtoRefresh = source.TreeProvider;
+			}
+			if (["PIPELINESTAGE"].includes(target.itemType)) {
+				const assignStage = async () => PowerBIPipelineStage.assignWorkspace(target as PowerBIPipelineStage, { workspaceId: source.uid });
+				actions.set("assign to stage", assignStage);
+			}
+		}
+		else if (source.itemType == "REPORT") {
+			if (["GROUP", "REPORTS"].includes(target.itemType)) {
+				const targetGroup = (target as PowerBIWorkspace).groupId;
+				const clone = async () => PowerBIReport.clone(source as PowerBIReport, {
+					name: source.name + " - Clone",
+					targetWorkspaceId: (target as PowerBIWorkspace).groupId
+				});
+				actions.set("clone", clone);
+			}
+			if (target.itemType == "DATASET") {
+				const rebind = async () => PowerBIReport.rebind(source as PowerBIReport, { datasetId: target.uid });
+				actions.set("rebind", rebind);
+
+				const clone = async () => PowerBIReport.clone(source as PowerBIReport, {
+					name: source.name + " - Clone",
+					targetModelId: target.uid,
+					targetWorkspaceId: (source as PowerBIReport).groupId
+				});
+				actions.set("clone", clone);
+			}
+			else if (target.itemType == "REPORT") {
+				const updateContent = async () => PowerBIReport.updateContent(target as PowerBIReport, {
+					sourceReport: {
+						sourceReportId: source.uid,
+						sourceWorkspaceId: (source as PowerBIReport).groupId
+					},
+					sourceType: "ExistingReport"
+				});
+				actions.set("update content", updateContent);
+			}
+		}
+
+		if (actions.size > 0) {
+			let items: PowerBIQuickPickItem[] = [];
+			for (const key of actions.keys()) {
+				items.push(new PowerBIQuickPickItem(key));
+			}
+			const action: string = await PowerBICommandBuilder.showQuickPick(items, "Action", null, null);
+
+			if (!action) {
+				return;
+			}
+
+			await actions.get(action)();
+
+			ThisExtension.refreshTreeView(treeViewtoRefresh);
+		}
+		else {
+			const msg: string = "No action defined when dropping a '" + source.itemType + "' on a '" + target.itemType + "'!"
+			ThisExtension.log(msg);
+			Helper.showTemporaryInformationMessage(msg)
 		}
 	}
 }

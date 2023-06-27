@@ -6,11 +6,10 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { UniqueId } from '../../../helpers/Helper';
 import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
-import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDrop {
+export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		definition: iPowerBIReport,
@@ -56,92 +55,6 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		super.definition = value;
 	}
 
-	// #region iHandleBeingDropped implementation
-	async handleBeingDropped(target: PowerBIApiTreeItem): Promise<void> {
-		let actions: Map<string, ()=>Promise<void>> = new Map<string, ()=>Promise<void>>();
-
-		if(["GROUP", "REPORTS"].includes(target.itemType))
-		{
-			const action =  async () => this.clone({ name: this.name + " - Clone", targetWorkspaceId: (target as PowerBIWorkspaceTreeItem).groupId }) ;
-			actions.set("clone", action);
-		}
-		if(["REPORT"].includes(target.itemType))
-		{
-			const action =  async () => (target as PowerBIReport).updateContent({ sourceType: "ExistingReport" , sourceReport: { sourceReportId: this.id, sourceWorkspaceId: this.groupId }}) ;
-			actions.set("updateContent", action);
-		}
-		if(["DATASET"].includes(target.itemType))
-		{
-			const action =  async () => this.rebind({ datasetId: target.uid }) ;
-			actions.set("rebind", action);
-		}
-		
-		
-		if(actions.size > 0)
-		{
-			let items: PowerBIQuickPickItem[] = [];
-			for(const key of actions.keys())
-			{
-				items.push(new PowerBIQuickPickItem(key));
-			}
-			const action: string = await PowerBICommandBuilder.showQuickPick(items, "Action", null, null);
-
-			if(!action)
-			{
-				return;
-			}
-
-			await actions.get(action)();
-		}
-		else {
-				ThisExtension.log("No action defined when dropping a '" + this.itemType + "' on a '" + target.itemType + "'!");
-		}
-	}
-	// #endregion
-
-	// #region iHandleDrop implementation
-	public async handleDrop(dataTransfer: vscode.DataTransfer): Promise<void> {
-		const transferItem = dataTransfer.get('application/vnd.code.tree.powerbiworkspaces');
-		if (!transferItem) {
-			ThisExtension.log("Item dropped on PowerBI Workspace Tree-View - but MimeType 'application/vnd.code.tree.powerbiworkspaces' was not found!");
-			return;
-		}
-		const sourceItems: PowerBIWorkspaceTreeItem[] = transferItem.value;
-
-		const source = sourceItems[0];
-
-		if(source.id == this.id){
-			return;
-		}
-
-		switch (source.itemType) {
-			case "REPORT":
-				const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("update content")], "Action", null, null);
-
-				switch (action) {
-					case "update content":
-						this.updateContent({
-							sourceReport: {
-								sourceReportId: source.id,
-								sourceWorkspaceId: source.groupId
-							},
-							sourceType: "ExistingReport"
-						});
-						break;
-
-					default:
-						ThisExtension.setStatusBar("Drag&Drop aborted!");
-						ThisExtension.log("Invalid or no action selected!");
-				}
-
-				break;
-
-			default:
-				ThisExtension.log("No action defined when dropping a " + source.itemType + " on " + this.itemType + "!");
-		}
-	}
-	// #endregion
-
 	// Report-specific funtions
 	public async takeOver(): Promise<void> {
 		ThisExtension.setStatusBar("Taking over report ...", true);
@@ -159,8 +72,8 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
-	public async clone(settings: object = undefined): Promise<void> {
-		const apiUrl = this.apiPath + "/Clone";
+	public static async clone(report: PowerBIReport, settings: object = undefined): Promise<void> {
+		const apiUrl = report.apiPath + "Clone";
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
@@ -174,11 +87,11 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 			PowerBIApiService.post(apiUrl, settings);
 		}
 
-		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
+		ThisExtension.TreeViewWorkspaces.refresh(report.parent, false);
 	}
 
-	public async rebind(settings: object = undefined): Promise<void> {
-		const apiUrl = this.apiPath + "/Rebind";
+	public static async rebind(report: PowerBIReport, settings: object = undefined): Promise<void> {
+		const apiUrl = report.apiPath + "Rebind";
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
@@ -190,11 +103,11 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 			PowerBIApiService.post(apiUrl, settings);
 		}
 
-		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
+		ThisExtension.TreeViewWorkspaces.refresh(report.parent, false);
 	}
 
-	public async updateContent(settings: object = undefined): Promise<void> {
-		const apiUrl = this.apiPath + "/UpdateReportContent";
+	public static async updateContent(report: PowerBIReport, settings: object = undefined): Promise<void> {
+		const apiUrl = report.apiPath + "UpdateReportContent";
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
@@ -208,6 +121,6 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem implements iHandleDr
 			PowerBIApiService.post(apiUrl, settings);
 		}
 
-		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
+		ThisExtension.TreeViewWorkspaces.refresh(report.parent, false);
 	}
 }

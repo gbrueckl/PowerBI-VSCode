@@ -75,51 +75,6 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		return children;
 	}
 
-	// #region iHandleDrop implementation
-	public async handleDrop(dataTransfer: vscode.DataTransfer): Promise<void> {
-		const transferItem = dataTransfer.get('application/vnd.code.tree.powerbiworkspaces');
-		if (!transferItem) {
-			ThisExtension.log("Item dropped on PowerBI Workspace Tree-View - but MimeType 'application/vnd.code.tree.powerbiworkspaces' was not found!");
-			return;
-		}
-		const sourceItems: PowerBIWorkspaceTreeItem[] = transferItem.value;
-
-		const source = sourceItems[0];
-
-		switch (source.itemType) {
-			case "REPORT":
-				const action: string = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("rebind"), new PowerBIQuickPickItem("clone")], "Action", undefined, undefined);
-
-				switch (action) {
-					case "rebind":
-						(source as PowerBIReport).rebind({
-							datasetId: this.id
-						});
-						break;
-
-					case "clone":
-							await (source as PowerBIReport).clone({
-								name: source.name + " - Clone",
-								targetModelId: this.id,
-								targetWorkspaceId: !this.groupId ? "00000000-0000-0000-0000-000000000000" : this.groupId
-							});
-							
-							ThisExtension.TreeViewWorkspaces.refresh(this.parent.parent, false);
-							break;
-
-					default:
-						ThisExtension.setStatusBar("Drag&Drop aborted!");
-						ThisExtension.log("Invalid or no action selected!");
-				}
-
-				break;
-
-			default:
-				ThisExtension.log("No action defined when dropping a " + source.itemType + " on " + this.itemType + "!");
-		}
-	}
-	// #endregion
-
 	// Dataset-specific funtions
 	public async delete(): Promise<void> {
 		ThisExtension.setStatusBar("Deleting dataset ...", true);

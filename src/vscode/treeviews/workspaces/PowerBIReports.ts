@@ -7,11 +7,7 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIReport } from './PowerBIReport';
 import { iPowerBIReport } from '../../../powerbi/ReportsAPI/_types';
-import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
-import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
-import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
-import { ThisExtension } from '../../../ThisExtension';
-import { iHandleBeingDropped } from '../PowerBIApiDragAndDropController';
+import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html

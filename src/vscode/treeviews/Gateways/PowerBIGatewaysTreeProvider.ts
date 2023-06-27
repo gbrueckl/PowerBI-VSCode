@@ -7,8 +7,10 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIGatewayTreeItem } from './PowerBIGatewayTreeItem';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIGateway } from './PowerBIGateway';
-import { PowerBIGatewaysDragAndDropController } from './PowerBIGatewaysDragAndDropController';
 import { iPowerBIGateway } from '../../../powerbi/GatewayAPI/_types';
+import { Helper } from '../../../helpers/Helper';
+import { PowerBIApiDragAndDropController } from '../PowerBIApiDragAndDropController';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<PowerBIGatewayTreeItem> {
@@ -17,15 +19,22 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 	readonly onDidChangeTreeData: vscode.Event<PowerBIGatewayTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBIGateways', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIGatewaysDragAndDropController() });
+		const view = vscode.window.createTreeView('PowerBIGateways', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIApiDragAndDropController() });
 		context.subscriptions.push(view);
+
+		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
 
 		ThisExtension.TreeViewGateways = this;
 	}
 	
+	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void>
+	{
+		vscode.commands.executeCommand("PowerBI.updateQuickPickList", this);
+	}
+
 	async refresh(item: PowerBIGatewayTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
-			vscode.window.showInformationMessage('Refreshing Gateways ...');
+			Helper.showTemporaryInformationMessage('Refreshing Gateways ...');
 		}
 		this._onDidChangeTreeData.fire(null);
 	}

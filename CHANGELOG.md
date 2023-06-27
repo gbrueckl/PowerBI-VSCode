@@ -1,5 +1,13 @@
 # Change Log
 
+**v0.9.4**:
+- fixed issue with configuration for GCC cloud (thanks to [John Kerski](https://github.com/kerski))
+- fixed issue with dataflows not being displayed (thanks to [John Kerski](https://github.com/kerski))
+- completely reworked Drag & Drop capabilities to also support cross-treeview operations
+  - drag a workspace onto a pipeline stage to assign it
+  - drag a workspace to a capacity to assign that capacity to the workspace
+- added `Add` and `Delete` capabilities for Deployment Pipelines
+
 **v0.9.3**:
 - added support for governmental and sovereign clouds via new setting `powerbi.cloud`
 - minor improvements for tooltips in treeviews

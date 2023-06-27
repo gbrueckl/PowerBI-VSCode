@@ -5,11 +5,12 @@ import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
 import { PowerBIPipeline } from './PowerBIPipeline';
 import { iPowerBIPipeline } from '../../../powerbi/PipelinesAPI/_types';
 import { PowerBIApiDragAndDropController } from '../PowerBIApiDragAndDropController';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { Helper } from '../../../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<PowerBIPipelineTreeItem> {
@@ -29,11 +30,12 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 
 	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void>
 	{
+		vscode.commands.executeCommand("PowerBI.updateQuickPickList", this);
 	}
 	
 	async refresh(item: PowerBIPipelineTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
-			vscode.window.showInformationMessage('Refreshing Pipelines ...');
+			Helper.showTemporaryInformationMessage('Refreshing Pipelines ...');
 		}
 		this._onDidChangeTreeData.fire(null);
 	}
@@ -69,7 +71,13 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 	}
 
 	// TopLevel Pipeline functions
-	add(): void {
-		
+	async add(): Promise<void> {
+		await PowerBICommandBuilder.execute<iPowerBIPipeline>("/v1.0/myorg/pipelines", "POST",
+				[
+					new PowerBICommandInput("Name of new pipeline", "FREE_TEXT", "displayName", false, "The name for the new deployment pipeline"),
+					new PowerBICommandInput("Description of the new pipeline Dataset", "FREE_TEXT", "description", true, "Optional. The description for the new deployment pipeline")
+				]);
+
+		await this.refresh();
 	}
 }

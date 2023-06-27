@@ -125,6 +125,19 @@ export abstract class ThisExtension {
 				return this.TreeViewPipelines;
 		}
 	}
+
+	static async refreshTreeView(id: TreeProviderId): Promise<void> {
+		switch (id) {
+			case "application/vnd.code.tree.powerbiworkspaces":
+				await this.TreeViewWorkspaces.refresh();
+			case "application/vnd.code.tree.powerbicapacities":
+				await this.TreeViewCapacities.refresh();
+			case "application/vnd.code.tree.powerbigateways":
+				await this.TreeViewGateways.refresh();
+			case "application/vnd.code.tree.powerbipipelines":
+				await this.TreeViewPipelines.refresh();
+		}
+	}
 	//#endregion
 
 

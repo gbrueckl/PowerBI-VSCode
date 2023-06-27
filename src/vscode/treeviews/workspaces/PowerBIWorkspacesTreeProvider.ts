@@ -12,6 +12,7 @@ import { PowerBIWorkspacePersonal } from './PowerBIWorkspacePersonal';
 import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSerializer';
 import { PowerBIApiDragAndDropController } from '../PowerBIApiDragAndDropController';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { Helper } from '../../../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<PowerBIWorkspaceTreeItem> {
@@ -31,30 +32,12 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 
 	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void>
 	{
-		/*vscode.window.showInformationMessage("Preview: " + items[0].label.toString())
-
-		let currentTime = Date.now();
-		let doubleClickTime = 500;
-		let preview = this._previousSelection == null || this._previousSelection == undefined
-			|| this._previousSelection.item != items[0]
-			|| (currentTime - this._previousSelection.time) >= doubleClickTime;
-		
-		if(preview)
-		{
-			vscode.window.showInformationMessage("Preview: " + items[0].label.toString())
-		}
-		else
-		{
-			vscode.window.showWarningMessage("Open: " + items[0].label.toString())
-		}
-
-		this._previousSelection = {item: items[0], time: currentTime};
-		*/
+		vscode.commands.executeCommand("PowerBI.updateQuickPickList", this);
 	}
 	
 	async refresh(item: PowerBIWorkspaceTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
-			vscode.window.showInformationMessage('Refreshing Workspaces ...');
+			Helper.showTemporaryInformationMessage('Refreshing Workspaces ...');
 		}
 		this._onDidChangeTreeData.fire(item);
 	}

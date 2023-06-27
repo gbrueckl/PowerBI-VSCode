@@ -23,6 +23,7 @@ import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICa
 import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatewayTreeItem';
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
 import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
+import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -70,9 +71,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Report commands
 	vscode.commands.registerCommand('PowerBIReport.takeOver', (report: PowerBIReport) => report.takeOver());
 	vscode.commands.registerCommand('PowerBIReport.delete', (report: PowerBIReport) => report.delete());
-	vscode.commands.registerCommand('PowerBIReport.clone', (report: PowerBIReport) => report.clone());
-	vscode.commands.registerCommand('PowerBIReport.rebind', (report: PowerBIReport) => report.rebind());
-	vscode.commands.registerCommand('PowerBIReport.updateContent', (report: PowerBIReport) => report.updateContent());
+	vscode.commands.registerCommand('PowerBIReport.clone', (report: PowerBIReport) => PowerBIReport.clone(report));
+	vscode.commands.registerCommand('PowerBIReport.rebind', (report: PowerBIReport) => PowerBIReport.rebind(report));
+	vscode.commands.registerCommand('PowerBIReport.updateContent', (report: PowerBIReport) => PowerBIReport.updateContent(report));
 
 	// Dataflow commands
 	vscode.commands.registerCommand('PowerBIDataflow.delete', (dataflow: PowerBIDataflow) => dataflow.delete());
@@ -98,8 +99,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiPipelinesTreeProvider = new PowerBIPipelinesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIPipelines', pbiPipelinesTreeProvider); // done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIPipelines.refresh', (item: PowerBIPipelineTreeItem = undefined, showInfoMessage: boolean = true) => pbiPipelinesTreeProvider.refresh(item, showInfoMessage));
+	vscode.commands.registerCommand('PowerBIPipelines.add', (item: PowerBIPipelineTreeItem = undefined) => pbiPipelinesTreeProvider.add());
 
-	vscode.commands.registerCommand('PowerBIPipelineStage.deploy', (item: PowerBIPipelineStage = undefined, showInfoMessage: boolean = true) => item.deployToNextStage());
+	vscode.commands.registerCommand('PowerBIPipeline.delete', async (item: PowerBIPipeline) => await item.delete());
+	vscode.commands.registerCommand('PowerBIPipelineStage.deploy', (item: PowerBIPipelineStage = undefined, showInfoMessage: boolean = true) => PowerBIPipelineStage.deployToNextStage(item));
+	vscode.commands.registerCommand('PowerBIPipelineStage.assignWorkspace', (item: PowerBIPipelineStage) => PowerBIPipelineStage.assignWorkspace(item));
+	vscode.commands.registerCommand('PowerBIPipelineStage.unassignWorkspace', (item: PowerBIPipelineStage) => PowerBIPipelineStage.unassignWorkspace(item));
 
 
 	vscode.commands.registerCommand('PowerBI.initialize', async () => {

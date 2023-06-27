@@ -307,11 +307,36 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIPipelines.add",
+				"title": "Add",
+				"icon": "$(add)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIPipeline.delete",
+				"title": "Delete",
+				"icon": "$(remove-close)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIPipelineStage.deploy",
 				"title": "Deploy",
 				"icon": "$(debug-step-over)",
 				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIPipelineStage.assignWorkspace",
+				"title": "Assign",
+				"icon": "$(debug-step-into)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIPipelineStage.unassignWorkspace",
+				"title": "Unassign",
+				"icon": "$(debug-step-out)",
+				"category": "PowerBI"
 			}
+
 		],
 		"menus": {
 			"view/title": [
@@ -342,6 +367,11 @@
 				},
 				{
 					"command": "PowerBIPipelines.refresh",
+					"when": "view == PowerBIPipelines",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIPipelines.add",
 					"when": "view == PowerBIPipelines",
 					"group": "navigation"
 				}
@@ -422,8 +452,23 @@
 					"group": "inline"
 				},
 				{
+					"command": "PowerBIPipeline.delete",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINE,.*/ && viewItem =~ /.*,DELETE,.*/",
+					"group": "inline"
+				},				
+				{
 					"command": "PowerBIPipelineStage.deploy",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,DEPLOY,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIPipelineStage.assignWorkspace",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,ASSIGN,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIPipelineStage.unassignWorkspace",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,UNASSIGN,.*/",
 					"group": "inline"
 				}
 			]

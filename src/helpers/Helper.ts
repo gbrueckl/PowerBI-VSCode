@@ -24,6 +24,20 @@ export abstract class Helper {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
+	static async showTemporaryInformationMessage(message: string, timeout: number = 2000): Promise<void> {
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: message,
+			cancellable: false
+		}, (progress) => {
+			return new Promise<void>(resolve => {
+				setTimeout(() => {
+					resolve();
+				}, timeout);
+			});
+		});
+	}
+
 	static mapToObject<T>(map: Map<string, any>): T {
 		const obj = {};
 		for (let [key, value] of map) {

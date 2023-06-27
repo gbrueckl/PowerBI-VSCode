@@ -5,9 +5,11 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBICapacityTreeItem } from './PowerBICapacityTreeItem';
 import { PowerBICapacity } from './PowerBICapacity';
-import { PowerBICapacitiesDragAndDropController } from './PowerBICapacitiesDragAndDropController';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { Helper } from '../../../helpers/Helper';
+import { PowerBIApiDragAndDropController } from '../PowerBIApiDragAndDropController';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<PowerBICapacityTreeItem> {
@@ -16,15 +18,22 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 	readonly onDidChangeTreeData: vscode.Event<PowerBICapacityTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBICapacities', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBICapacitiesDragAndDropController() });
+		const view = vscode.window.createTreeView('PowerBICapacities', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIApiDragAndDropController() });
 		context.subscriptions.push(view);
 
+		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+
 		ThisExtension.TreeViewCapacities = this;
+	}
+
+	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void>
+	{
+		vscode.commands.executeCommand("PowerBI.updateQuickPickList", this);
 	}
 	
 	async refresh(item: PowerBICapacityTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
-			vscode.window.showInformationMessage('Refreshing Capacities ...');
+			Helper.showTemporaryInformationMessage('Refreshing Capacities ...');
 		}
 		this._onDidChangeTreeData.fire(null);
 	}

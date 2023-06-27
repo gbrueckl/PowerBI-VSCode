@@ -8,17 +8,11 @@ import { PowerBIDatasets } from './PowerBIDatasets';
 import { PowerBIReports } from './PowerBIReports';
 import { PowerBIDashboards } from './PowerBIDashboards';
 import { PowerBIDataflows } from './PowerBIDataflows';
-import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
-import { iHandleDrop } from './PowerBIWorkspacesDragAndDropController';
-import { PowerBIReport } from './PowerBIReport';
-import { iHandleBeingDropped } from '../PowerBIApiDragAndDropController';
-import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
-import { PowerBICapacity } from '../Capacities/PowerBICapacity';
-import { PowerBIPipelineStage } from '../Pipelines/PowerBIPipelineStage';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandleBeingDropped {
+export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 	constructor(
 		definition: iPowerBIGroup
 	) {
@@ -82,47 +76,6 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 
 		return children;
 	}
-	
-	// #region iHandleBeingDropped implementation
-	get canBeDropped(): boolean {
-		return true;
-	}
-	
-	async handleBeingDropped(target: PowerBIApiTreeItem): Promise<void> {
-		let actions: Map<string, ()=>Promise<void>> = new Map<string, ()=>Promise<void>>();
-
-		if(["CAPACITY"].includes(target.itemType))
-		{
-			const action =  async () => this.assignToCapacity({ capacityId: (target as PowerBICapacity).uid }) ;
-			actions.set("assign to capacity", action);
-		}
-		if(["PIPELINESTAGE"].includes(target.itemType))
-		{
-			const action =  async () => (target as PowerBIPipelineStage).assignWorkspace({ workspaceId: this.id }) ;
-			actions.set("assign to stage", action);
-		}
-
-		if(actions.size > 0)
-		{
-			let items: PowerBIQuickPickItem[] = [];
-			for(const key of actions.keys())
-			{
-				items.push(new PowerBIQuickPickItem(key));
-			}
-			const action: string = await PowerBICommandBuilder.showQuickPick(items, "Action", null, null);
-
-			if(!action)
-			{
-				return;
-			}
-
-			await actions.get(action)();
-		}
-		else {
-				ThisExtension.log("No action defined when dropping a '" + this.itemType + "' on a '" + target.itemType + "'!");
-		}
-	}
-	// #endregion
 
 	// Workspace-specific functions
 	public async delete(): Promise<void> {
@@ -136,8 +89,8 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 		vscode.window.showWarningMessage("For safety-reasons workspaces cannot be deleted using this extension!");
 	}
 
-	public async assignToCapacity(settings: object = undefined): Promise<void> {
-		const apiUrl = this.apiPath + "/AssignToCapacity";
+	public static async assignToCapacity(workspace: PowerBIWorkspace, settings: object = undefined): Promise<void> {
+		const apiUrl = workspace.apiPath + "/AssignToCapacity";
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<any>(apiUrl, "POST",
@@ -149,7 +102,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 			PowerBIApiService.post(apiUrl, settings);
 		}
 
-		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
+		ThisExtension.TreeViewWorkspaces.refresh(workspace.parent, false);
 		ThisExtension.TreeViewCapacities.refresh(null, false);
 	}
 }
