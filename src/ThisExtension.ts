@@ -1,14 +1,13 @@
 import * as vscode from 'vscode';
 
-import { Helper } from './helpers/Helper';
 import { PowerBIApiService } from './powerbi/PowerBIApiService';
 import { PowerBINotebookKernel } from './vscode/notebook/PowerBINotebookKernel';
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
 import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/PowerBIPipelinesTreeProvider';
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
-import { PowerBIConfiugration } from './vscode/configuration/PowerBIConfiguration';
 import { PowerBIApiTreeItem } from './vscode/treeviews/PowerBIApiTreeItem';
+import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
 
 
 export type TreeProviderId = 
@@ -154,7 +153,7 @@ export abstract class ThisExtension {
 				this._settingScope = "Global";
 			}
 
-			let config = PowerBIConfiugration;
+			let config = PowerBIConfiguration;
 			config.applySettings();
 			await PowerBIApiService.initialize(config.apiUrl, config.tenantId, config.clientId, config.authenticationProvider, config.resourceId);
 
