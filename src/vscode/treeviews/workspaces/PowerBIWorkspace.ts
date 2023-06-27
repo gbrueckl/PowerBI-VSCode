@@ -84,6 +84,10 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements iHandl
 	}
 	
 	// #region iHandleBeingDropped implementation
+	get canBeDropped(): boolean {
+		return true;
+	}
+	
 	async handleBeingDropped(target: PowerBIApiTreeItem): Promise<void> {
 		let actions: Map<string, ()=>Promise<void>> = new Map<string, ()=>Promise<void>>();
 

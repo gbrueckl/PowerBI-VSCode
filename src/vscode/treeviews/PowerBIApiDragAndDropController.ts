@@ -6,6 +6,7 @@ import { PowerBIApiTreeItem } from './PowerBIApiTreeItem';
 
 
 export interface iHandleBeingDropped {
+	get canBeDropped(): boolean;
 	handleBeingDropped(target: PowerBIApiTreeItem): Promise<void>;
 }
 
@@ -19,14 +20,13 @@ class PowerBIObjectTransferItem extends vscode.DataTransferItem {
 	}
 
 	async asString(): Promise<string> {
-		return this.jsonifyObject(this.value);
+		return this.jsonifyObject(this.value, 3);
 	}
 
 	jsonifyObject(obj: Object, maxLevels: number = 2, currentLevel: number = 0): string {
 
-		if(currentLevel == maxLevels)
-		{
-			return obj.toString();
+		if (currentLevel == maxLevels) {
+			return "\"MaxRecrusionlevelReached!\"";
 		}
 		var arrOfKeyVals = [],
 			arrVals = [],
@@ -36,7 +36,7 @@ class PowerBIObjectTransferItem extends vscode.DataTransferItem {
 		if (typeof obj === 'number' || typeof obj === 'boolean' || obj === null)
 			return '' + obj;
 		else if (typeof obj === 'string')
-			return '"' + obj + '"';
+			return JSON.stringify(obj);
 
 		/*********CHECK FOR ARRAY**********/
 		else if (Array.isArray(obj)) {
@@ -44,7 +44,7 @@ class PowerBIObjectTransferItem extends vscode.DataTransferItem {
 			if (obj[0] === undefined)
 				return '[]';
 			else {
-				obj.forEach( (el) => {
+				obj.forEach((el) => {
 					arrVals.push(this.jsonifyObject(el, maxLevels, currentLevel + 1));
 				});
 				return '[' + arrVals + ']';
@@ -53,16 +53,17 @@ class PowerBIObjectTransferItem extends vscode.DataTransferItem {
 		/*********CHECK FOR OBJECT**********/
 		else if (obj instanceof Object) {
 			//get object keys
-			objKeys = Object.keys(obj);
+			//objKeys = Object.keys(obj);
+			objKeys = this.getAllProperties(obj)
 			//set key output;
 			objKeys.forEach((key) => {
-				var keyOut = '"' + key + '":';
+				var keyOut = JSON.stringify(key) + ':';
 				var keyValOut = obj[key];
 				//skip functions and undefined properties
 				if (keyValOut instanceof Function || typeof keyValOut === undefined)
-					arrOfKeyVals.push('');
+					arrOfKeyVals.push(keyOut + JSON.stringify("function " + keyValOut + "()"));
 				else if (typeof keyValOut === 'string')
-					arrOfKeyVals.push(keyOut + '"' + keyValOut + '"');
+					arrOfKeyVals.push(keyOut + JSON.stringify(keyValOut));
 				else if (typeof keyValOut === 'boolean' || typeof keyValOut === 'number' || keyValOut === null)
 					arrOfKeyVals.push(keyOut + keyValOut);
 				//check for nested objects, call recursively until no more objects
@@ -73,25 +74,28 @@ class PowerBIObjectTransferItem extends vscode.DataTransferItem {
 			return '{' + arrOfKeyVals + '}';
 		}
 	};
+
+	getAllProperties(obj) {
+		let properties = new Set()
+		let currentObj = obj
+		do {
+			Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
+		} while ((currentObj = Object.getPrototypeOf(currentObj)))
+		return [...properties.keys()].filter((item: string) => !item.startsWith("_"))
+	}
 }
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropController<PowerBIApiTreeItem> {
 
-	dropMimeTypes123: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString()).concat([
+	dropMimeTypes: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString()).concat([
 		"powerbiapidragdrop",
 		"text/uri-list" // to support drag and drop from the file explorer (not yet working)
 	]);
-	dragMimeTypes123: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString()).concat([
+	dragMimeTypes: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString()).concat([
 		"powerbiapidragdrop"
 	]);
 
-	dropMimeTypes: readonly string[] = [
-		"powerbiapidragdrop"
-	];
-	dragMimeTypes: readonly string[] = [
-		"powerbiapidragdrop"
-	];
 	public async handleDrag?(source: readonly PowerBIApiTreeItem[], dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
 		dataTransfer.set(source[0].TreeProvider, new PowerBIObjectTransferItem(source));
 		dataTransfer.set("powerbiapidragdrop", new PowerBIObjectTransferItem(source));
@@ -108,23 +112,35 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		const ws = dataTransfer.get("application/vnd.code.tree.powerbiworkspaces");
 		const transferItem = dataTransfer.get('powerbiapidragdrop');
 
-		dataTransfer.forEach((item, mimeType, transfer) => { 
-			ThisExtension.log("MimeType: " + mimeType); 
-			ThisExtension.log("Item: " + item);
-			ThisExtension.log("Transfer: " + transfer);
-		});
-
 		if (!transferItem) {
 			ThisExtension.log("Item dropped on PowerBI Workspace Tree-View - but MimeType 'application/vnd.code.tree.powerbiworkspaces' was not found!");
 			return;
 		}
 
-		const sourceItems: PowerBIApiTreeItem[] = transferItem.value;
-		const source = sourceItems[0];
+		let sourceItems: PowerBIApiTreeItem[];
+		ThisExtension.log("TransferItem: \n" + transferItem.value);
+		if (typeof transferItem.value === 'string' || transferItem.value instanceof String) {
+			try {
+				let x = transferItem.value as string
+				let y = JSON.parse(x)
+				sourceItems = y as PowerBIApiTreeItem[];
+			}
+			catch (e) {
+				ThisExtension.log("Error parsing dropped item: " + e);
+			}
+		}
+		else {
+			sourceItems = transferItem.value;
+		}
+		const source: PowerBIApiTreeItem = sourceItems[0];
 
 		// check if target implemnts iHandleDrop interface / has handleDrop function
 		if ('handleBeingDropped' in source) {
-			(source as any as iHandleBeingDropped).handleBeingDropped(target);
+			const treeView = ThisExtension.getTreeView(source.TreeProvider);
+			const treeItem = treeView.getTreeItem(source as PowerBIApiTreeItem) as PowerBIApiTreeItem;
+			treeItem.handleBeingDropped(target);
+			// not yet working for cross-treeview drag&drops
+			//(source as any as iHandleBeingDropped).handleBeingDropped(target);
 		}
 		else {
 			ThisExtension.log("No action defined when dropping an '" + source.itemType + "' on a '" + target.itemType + "' node!");

@@ -8,6 +8,7 @@ import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBI
 import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/PowerBIPipelinesTreeProvider';
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
 import { PowerBIConfiugration } from './vscode/configuration/PowerBIConfiguration';
+import { PowerBIApiTreeItem } from './vscode/treeviews/PowerBIApiTreeItem';
 
 
 export type TreeProviderId = 
@@ -111,6 +112,19 @@ export abstract class ThisExtension {
 
 	static get TreeViewPipelines(): PowerBIPipelinesTreeProvider {
 		return this._treeViewPipeliness;
+	}
+
+	static getTreeView(id: TreeProviderId): vscode.TreeDataProvider<PowerBIApiTreeItem> {
+		switch (id) {
+			case "application/vnd.code.tree.powerbiworkspaces":
+				return this.TreeViewWorkspaces;
+			case "application/vnd.code.tree.powerbicapacities":
+				return this.TreeViewCapacities;
+			case "application/vnd.code.tree.powerbigateways":
+				return this.TreeViewGateways;
+			case "application/vnd.code.tree.powerbipipelines":
+				return this.TreeViewPipelines;
+		}
 	}
 	//#endregion
 

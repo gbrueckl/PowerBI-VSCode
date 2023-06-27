@@ -7,9 +7,10 @@ import { iPowerBIApiItem } from './iPowerBIApiItem';
 import { ThisExtension, TreeProviderId } from '../../ThisExtension';
 import { ApiUrlPair } from '../../powerbi/_types';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
+import { iHandleBeingDropped } from './PowerBIApiDragAndDropController';
 
 
-export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiItem {
+export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiItem, iHandleBeingDropped {
 	protected _itemType: ApiItemType;
 	protected _id: UniqueId;
 	protected _name: string;
@@ -183,5 +184,13 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		urlParts = urlParts.filter(x => x.length > 0)
 
 		return `v1.0/${urlParts.reverse().join("/")}/`;
+	}
+
+	// #region iHandleBeingDropped implementation
+	async handleBeingDropped(target: PowerBIApiTreeItem): Promise<void> {
+	}
+
+	get canBeDropped(): boolean {
+		return false;
 	}
 }
