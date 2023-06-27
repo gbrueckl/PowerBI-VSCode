@@ -27,10 +27,11 @@ export abstract class PowerBIApiService {
 
 	//#region Initialization
 	static async initialize(
+		// Default settings will be for Azure Global
 		apiBaseUrl: string = "https://api.powerbi.com/",
 		tenantId: string = undefined,
 		clientId: string = undefined,
-		authenticatinProvider: string = "microsoft",
+		authenticationProvider: string = "microsoft",
 		resourceId: string = "https://analysis.windows.net/powerbi/api"
 	): Promise<boolean> {
 		try {
@@ -41,7 +42,7 @@ export abstract class PowerBIApiService {
 			this._apiBaseUrl = Helper.trimChar(apiBaseUrl, '/');
 			this._tenantId = tenantId;
 			this._clientId = clientId;
-			this._authenticationProvider = authenticatinProvider;
+			this._authenticationProvider = authenticationProvider;
 			this._resourceId = resourceId;
 
 			await this.refreshHeaders();
