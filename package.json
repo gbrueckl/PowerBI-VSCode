@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.9.4",
+	"version": "0.9.5",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -448,7 +448,7 @@
 				},
 				{
 					"command": "PowerBIDashboard.delete",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATAFLOW,.*/",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DASHBOARD,.*/",
 					"group": "inline"
 				},
 				{
