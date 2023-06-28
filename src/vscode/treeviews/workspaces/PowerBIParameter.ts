@@ -18,7 +18,7 @@ export class PowerBIParameter extends PowerBIWorkspaceTreeItem {
 		group: UniqueId,
 		parent: PowerBIParameters
 	) {
-		super(definition.name, group, "PARAMETER", definition.name, parent, vscode.TreeItemCollapsibleState.None);
+		super(definition.name, group, "DATASETPARAMETER", definition.name, parent, vscode.TreeItemCollapsibleState.None);
 
 		this.definition = definition;
 
@@ -66,7 +66,7 @@ export class PowerBIParameter extends PowerBIWorkspaceTreeItem {
 
 	// Parameter-specific funtions
 	public async update(): Promise<void> {
-		const apiUrl = this.dataset.apiPath + "Default.UpdateParameters";
+		const apiUrl =  Helper.joinPath(this.dataset.apiPath, "Default.UpdateParameters");
 
 		let newValue: {name: string, newValue: string} = await PowerBIParameter.promptForValue(this.definition);
 

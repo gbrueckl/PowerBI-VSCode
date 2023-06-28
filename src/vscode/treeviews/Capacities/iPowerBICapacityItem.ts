@@ -1,4 +1,5 @@
 import { UniqueId } from '../../../helpers/Helper';
+import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 import { ApiItemType } from '../_types';
 
 export interface iPowerBICapacityItem {
@@ -9,10 +10,5 @@ export interface iPowerBICapacityItem {
 	name: string;
 
 	/* new properties */
-	displayName: string;
-	admins: string[];
-	sku: string;
-	state: string;
-	region: string;
-	capacityUserAccessRight: string;
+	capacity: iPowerBICapacity;
 }

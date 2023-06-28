@@ -10,6 +10,7 @@ import { PowerBIDashboards } from './PowerBIDashboards';
 import { PowerBIDataflows } from './PowerBIDataflows';
 import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { Helper } from '../../../helpers/Helper';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
@@ -21,6 +22,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 		this.definition = definition;
 		
 		super.tooltip = this._tooltip;
+		super.contextValue = this._contextValue;
 
 		super.iconPath = {
 			light: this.getIconPath("light"),
@@ -29,6 +31,25 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = [
+			"DELETE"
+		]
+
+		if(this.definition.isOnDedicatedCapacity)
+		{
+			actions.push("UNASSIGNCAPACITY");
+		}
+		else
+		{
+			actions.push("ASSIGNCAPACITY")
+		}
+
+		return orig + actions.join(",") + ",";
+	}
+
 	get definition(): iPowerBIGroup {
 		return super.definition as iPowerBIGroup;
 	}
@@ -90,7 +111,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 	}
 
 	public static async assignToCapacity(workspace: PowerBIWorkspace, settings: object = undefined): Promise<void> {
-		const apiUrl = workspace.apiPath + "/AssignToCapacity";
+		const apiUrl =  Helper.joinPath(workspace.apiPath, "AssignToCapacity");
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<any>(apiUrl, "POST",
@@ -101,6 +122,24 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 		else {
 			PowerBIApiService.post(apiUrl, settings);
 		}
+
+		ThisExtension.TreeViewWorkspaces.refresh(workspace.parent, false);
+		ThisExtension.TreeViewCapacities.refresh(null, false);
+	}
+
+	public static async unassignFromCapacity(workspace: PowerBIWorkspace): Promise<void> {
+		const apiUrl =  Helper.joinPath(workspace.apiPath, "AssignToCapacity");
+
+		let confirm: string = await PowerBICommandBuilder.showInputBox("", "Confirm unassignment from capacity by typeing the Workspace name '" + this.name + "' again.", undefined, undefined);
+		
+		if (!confirm || confirm != this.name) {
+			ThisExtension.log("Unassignment from capacity '" + this.name + "' aborted!")
+			return;
+		}
+
+		let settings: object = {"capacityId": "00000000-0000-0000-0000-000000000000"};
+
+		PowerBIApiService.post(apiUrl, settings);
 
 		ThisExtension.TreeViewWorkspaces.refresh(workspace.parent, false);
 		ThisExtension.TreeViewCapacities.refresh(null, false);

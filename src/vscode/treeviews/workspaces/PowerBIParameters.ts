@@ -18,7 +18,7 @@ export class PowerBIParameters extends PowerBIWorkspaceTreeItem {
 		groupId: UniqueId,
 		parent: PowerBIDataset
 	) {
-		super("Parameters", groupId, "PARAMETERS", parent.uid, parent);
+		super("Parameters", groupId, "DATASETPARAMETERS", parent.uid, parent);
 
 		// the groupId is not unique for logical folders hence we make it unique
 		super.id = groupId + "/" + this.parent.uid + "/" + this.itemType.toString();

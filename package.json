@@ -181,6 +181,18 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIWorkspace.assignToCapacity",
+				"title": "Assign to Capacity",
+				"icon": "$(debug-step-into)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIWorkspace.unassignFromCapacity",
+				"title": "Unassign from Capacity",
+				"icon": "$(debug-step-out)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIWorkspace.insertPath",
 				"title": "Insert Path",
 				"icon": "$(code)",
@@ -199,7 +211,7 @@
 				"category": "PowerBI"
 			},
 			{
-				"command": "PowerBIDataset.cancelRefresh",
+				"command": "PowerBIDatasetRefresh.cancel",
 				"title": "Cancel",
 				"icon": "$(stop)",
 				"category": "PowerBI"
@@ -388,6 +400,16 @@
 					"group": "inline"
 				},
 				{
+					"command": "PowerBIWorkspace.assignToCapacity",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,ASSIGNCAPACITY,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIWorkspace.unassignFromCapacity",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,UNASSIGNCAPACITY,.*/",
+					"group": "inline"
+				},
+				{
 					"command": "PowerBIDataset.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,DELETE,.*/",
 					"group": "inline"
@@ -403,16 +425,16 @@
 				},
 				{
 					"command": "PowerBIDataset.updateAllParameters",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,UPDATEPARAMETERS,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,UPDATEDATASETPARAMETERS,.*/"
 				},
 				{
-					"command": "PowerBIDataset.cancelRefresh",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REFRESH,.*/ && viewItem =~ /.*,CANCEL,.*/",
+					"command": "PowerBIDatasetRefresh.cancel",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESH,.*/ && viewItem =~ /.*,CANCEL,.*/",
 					"group": "inline"
 				},
 				{
 					"command": "PowerBIDatasetParameter.update",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,PARAMETER,.*/",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETPARAMETER,.*/",
 					"group": "inline"
 				},
 				{

@@ -506,7 +506,7 @@ export abstract class PowerBIApiService {
 		let items: iPowerBIDatasetParameter[] = await this.getItemList2<iPowerBIDatasetParameter>([
 			{ itemType: "GROUPS", itemId: groupId },
 			{ itemType: "DATASETS", itemId: datasetId },
-			{ itemType: "PARAMETERS" }
+			{ itemType: "DATASETPARAMETERS" }
 		]);
 
 		return items;
