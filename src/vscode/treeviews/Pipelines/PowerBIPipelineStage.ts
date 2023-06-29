@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 
-import { UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 import { iPowerBIPipelineStage, iPowerBIPipelineStageArtifacts, resolveOrder, resolveOrderShort } from '../../../powerbi/PipelinesAPI/_types';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
@@ -109,34 +109,9 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 	}
 
 	// Pipelinestage-specific funtions
-
-	/*
-	public async delete(): Promise<void> {
-		await PowerBICommandBuilder.execute<iPowerBIDataflow>(this.apiPath, "DELETE", []);
-		
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
-	}
-
-	public async refresh(): Promise<void> {
-		PowerBIApiService.post(this.apiPath + "/refreshes", null);
-	}
-	*/
-
 	public static async deployToNextStage(stage: PowerBIPipelineStage, settings: object = undefined): Promise<void> {
-		const apiUrl = stage.getParentByType("PIPELINE").apiPath + "deployAll";
-		
-		/*
-		if (settings == undefined) // prompt user for inputs
-		{
-			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
-				[
-					new PowerBICommandInput("Target Dataset", "DATASET_SELECTOR", "datasetId", false, "The new dataset for the rebound report. If the dataset resides in a different workspace than the report, a shared dataset will be created in the report's workspace.")
-				]);
-		}
-		else {
-			PowerBIApiService.post(apiUrl, settings);
-		}
-		*/
+		const apiUrl =  Helper.joinPath(stage.getParentByType("PIPELINE").apiPath, "deployAll");
+
 		const body = {
 			"sourceStageOrder": stage.definition.order,
 			"options": {
@@ -154,7 +129,7 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 	}
 
 	public static async assignWorkspace(stage: PowerBIPipelineStage, settings: object = undefined): Promise<void> {
-		const apiUrl = stage.apiPath + "assignWorkspace";
+		const apiUrl = Helper.joinPath(stage.apiPath, "assignWorkspace");
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<any>(apiUrl, "POST",
@@ -170,7 +145,7 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 	}
 
 	public static async unassignWorkspace(stage: PowerBIPipelineStage): Promise<void> {
-		const apiUrl = stage.apiPath + "unassignWorkspace";
+		const apiUrl =  Helper.joinPath(stage.apiPath, "unassignWorkspace");
 
 		PowerBIApiService.post(apiUrl, null);
 

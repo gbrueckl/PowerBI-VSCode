@@ -5,22 +5,23 @@ import { ApiItemType } from '../_types';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 import { TreeProviderId } from '../../../ThisExtension';
+import { UniqueId } from '../../../helpers/Helper';
 
 export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowerBICapacityItem {
-	protected _definition: iPowerBICapacity;
-	protected _itemType: ApiItemType;
+	protected _capacity: iPowerBICapacity;
 
 	constructor(
-		definition: iPowerBICapacity,
+		id: string | UniqueId,
+		name: string,
+		itemType: ApiItemType,
+		capacity: iPowerBICapacity,
 		parent: PowerBIApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(definition.id, definition.displayName, "CAPACITY", parent, collapsibleState);
+		super(id, name, itemType, parent, collapsibleState);
 
-		this._definition = definition;
-
-		super.id = this.uid as string;
-		super.label = definition.displayName;
+		this._capacity = capacity;
+		
 		super.tooltip = this._tooltip;
 		super.description = this._description;
 		super.contextValue = this._contextValue;
@@ -41,40 +42,12 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-	get definition(): iPowerBICapacity {
-		return super.definition as iPowerBICapacity;
-	}
-
-	set definition(value: iPowerBICapacity) {
-		this._definition = value;
-	}
-
 	get parent(): PowerBICapacityTreeItem {
 		return this._parent as PowerBICapacityTreeItem;
 	}
 
 	/* iPowerBICapacityItem implementation */
-	get displayName(): string {
-		return this.definition.displayName;
-	}
-
-	get sku(): string {
-		return this.definition.sku;
-	}
-
-	get region(): string {
-		return this.definition.region;
-	}
-
-	get state(): string {
-		return this.definition.state;
-	}
-
-	get admins(): string[] {
-		return this.definition.admins;
-	}
-
-	get capacityUserAccessRight(): string {
-		return this.definition.capacityUserAccessRight;
+	get capacity(): iPowerBICapacity {
+		return this._capacity;
 	}
 }

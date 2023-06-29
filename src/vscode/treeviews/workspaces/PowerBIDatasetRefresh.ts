@@ -16,7 +16,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		group: UniqueId,
 		parent: PowerBIDatasetRefreshes
 	) {
-		super(definition.requestId, group, "REFRESH", definition.requestId, parent, vscode.TreeItemCollapsibleState.None);
+		super(definition.requestId, group, "DATASETREFRESH", definition.requestId, parent, vscode.TreeItemCollapsibleState.None);
 
 		this.definition = definition;
 

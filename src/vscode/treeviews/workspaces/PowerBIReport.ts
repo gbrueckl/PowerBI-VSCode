@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { iPowerBIReport } from '../../../powerbi/ReportsAPI/_types';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
-import { UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
@@ -58,7 +58,9 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	// Report-specific funtions
 	public async takeOver(): Promise<void> {
 		ThisExtension.setStatusBar("Taking over report ...", true);
-		PowerBIApiService.post(this.apiPath + "/Default.TakeOver", null);
+		const apiUrl =  Helper.joinPath(this.apiPath, "Default.TakeOver");
+
+		PowerBIApiService.post(apiUrl, null);
 		ThisExtension.setStatusBar("Report taken over!");
 
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
@@ -73,7 +75,8 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	}
 
 	public static async clone(report: PowerBIReport, settings: object = undefined): Promise<void> {
-		const apiUrl = report.apiPath + "Clone";
+		const apiUrl =  Helper.joinPath(report.apiPath, "Clone");
+		
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
@@ -91,7 +94,8 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	}
 
 	public static async rebind(report: PowerBIReport, settings: object = undefined): Promise<void> {
-		const apiUrl = report.apiPath + "Rebind";
+		const apiUrl =  Helper.joinPath(report.apiPath, "Rebind");
+
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
@@ -107,7 +111,8 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	}
 
 	public static async updateContent(report: PowerBIReport, settings: object = undefined): Promise<void> {
-		const apiUrl = report.apiPath + "UpdateReportContent";
+		const apiUrl =  Helper.joinPath(report.apiPath, "UpdateReportContent");
+
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",

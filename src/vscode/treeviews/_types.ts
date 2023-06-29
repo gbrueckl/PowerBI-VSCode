@@ -11,6 +11,10 @@ export type ApiItemType =
 |	"DASHBOARD"
 |	"CAPACITIES"
 |	"CAPACITY"
+|	"CAPACITYREFRESHABLES"
+|	"CAPACITYREFRESHABLE"
+|	"CAPACITYWORKLOADS"
+|	"CAPACITYWORKLOAD"
 |	"GATEWAYS"
 |	"GATEWAY"
 |	"PIPELINES"
@@ -24,10 +28,10 @@ export type ApiItemType =
 | 	"PIPELINESTAGEDATAMARTS"
 |	"PIPELINESTAGEDATASETS"
 |	"PIPELINESTAGEREPORTS" 
-|	"PARAMETERS"
-|	"PARAMETER"
-|	"REFRESHES"			// container for Dataset refreshes
-|	"REFRESH"			// single Dataset refresh
+|	"DATASETPARAMETERS"
+|	"DATASETPARAMETER"
+|	"DATASETREFRESHES"			// container for Dataset refreshes
+|	"DATASETREFRESH"			// single Dataset refresh
 |	"TRANSACTIONS"		// container for Dataflow refreshes
 |	"TRANSACTION"		// single Dataflow refresh
 ;

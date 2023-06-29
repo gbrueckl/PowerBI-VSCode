@@ -17,7 +17,7 @@ export class PowerBIDatasetRefreshes extends PowerBIWorkspaceTreeItem {
 		groupId: UniqueId,
 		parent: PowerBIWorkspaceTreeItem
 	) {
-		super("Refreshes", groupId, "REFRESHES", groupId, parent);
+		super("Refreshes", groupId, "DATASETREFRESHES", groupId, parent);
 
 		// the groupId is not unique for logical folders hence we make it unique
 		super.id = groupId + "/" + this.parent.uid + "/" + this.itemType.toString();

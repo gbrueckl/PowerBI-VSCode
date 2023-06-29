@@ -26,11 +26,20 @@ export class PowerBIWorkspacePersonal extends PowerBIWorkspace {
 	/* Overwritten properties from PowerBIApiTreeItem */
 
 	get _contextValue(): string {
-		let context: string[] = [
+		let actions: string[] = [
 			"MYWORKSPACE"
 		]
 
-		return context.join(",") + ",";
+		if(this.definition.isOnDedicatedCapacity)
+		{
+			actions.push("UNASSIGNCAPACITY");
+		}
+		else
+		{
+			actions.push("ASSIGNCAPACITY")
+		}
+
+		return actions.join(",") + ",";
 	}
 	protected getIconPath(theme: string): vscode.Uri {
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + '.png');

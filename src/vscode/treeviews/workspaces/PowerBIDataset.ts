@@ -46,7 +46,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		}
 		else
 		{
-			actions.push("UPDATEPARAMETERS")
+			actions.push("UPDATEDATASETPARAMETERS")
 		}
 
 		return orig + actions.join(",") + ",";
@@ -86,6 +86,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	
 	public async refresh(): Promise<void> {
 		ThisExtension.setStatusBar("Triggering dataset-refresh ...", true);
+		const apiUrl =  Helper.joinPath(this.apiPath, "refreshes");
 
 		let body = null;
 
@@ -106,7 +107,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 				"type": processType.label
 			}
 		}
-		PowerBIApiService.post(this.apiPath + "/refreshes", body);
+		PowerBIApiService.post( apiUrl, body);
 		ThisExtension.setStatusBar("Dataset-refresh triggered!");
 
 		await Helper.delay(1000);
@@ -115,13 +116,16 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	public async takeOver(): Promise<void> {
 		ThisExtension.setStatusBar("Taking over dataset ...", true);
-		PowerBIApiService.post(this.apiPath + "/Default.TakeOver", null);
+
+		const apiUrl =  Helper.joinPath(this.apiPath, "Default.TakeOver");
+		PowerBIApiService.post(apiUrl, null);
 		ThisExtension.setStatusBar("Dataset taken over!");
 
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public async updateAllParameters(): Promise<void> {
+		const apiUrl =  Helper.joinPath(this.apiPath, "Default.UpdateParameters");
 		let parameters: iPowerBIDatasetParameter[] = await PowerBIApiService.getItemList<iPowerBIDatasetParameter>(this.apiPath + "parameters");
 		
 		let updateDetails: { name: string, newValue: string }[] = [];
@@ -137,8 +141,6 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		let settings = {
 			"updateDetails": updateDetails
 		}
-
-		const apiUrl = this.apiPath + "Default.UpdateParameters";
 
 		ThisExtension.setStatusBar("Updating parameter ...", true);
 		await PowerBIApiService.post(apiUrl, settings);

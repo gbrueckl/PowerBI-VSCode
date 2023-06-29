@@ -1,9 +1,12 @@
 import * as vscode from 'vscode';
 
 import { PowerBICapacityTreeItem } from './PowerBICapacityTreeItem';
-import { iPowerBICapacityItem } from './iPowerBICapacityItem';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
+import { PowerBICapacityRefreshables } from './PowerBICapacityRefreshables';
+import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBICapacityWorkloads } from './PowerBICapacityWorkloads';
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBICapacity extends PowerBICapacityTreeItem {
@@ -12,9 +15,9 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 		definition: iPowerBICapacity,
 		parent: PowerBIApiTreeItem,
 	) {
-		super(definition, parent, vscode.TreeItemCollapsibleState.None);
+		super(definition.id.toString(), definition.displayName, "CAPACITY", definition, parent);
 		this.definition = definition;
-		
+
 		super.tooltip = this._tooltip;
 	}
 
@@ -27,8 +30,45 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 		super.definition = value;
 	}
 
+	get displayName(): string {
+		return this.definition.displayName;
+	}
+
+	get sku(): string {
+		return this.definition.sku;
+	}
+
+	get region(): string {
+		return this.definition.region;
+	}
+
+	get state(): string {
+		return this.definition.state;
+	}
+
+	get admins(): string[] {
+		return this.definition.admins;
+	}
+
+	get capacityUserAccessRight(): string {
+		return this.definition.capacityUserAccessRight;
+	}
+
 	get apiUrlPart(): string {
 		return "capacities/" + this.uid.toLocaleLowerCase();
+	}
+
+	async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
+		PowerBICommandBuilder.pushQuickPickItem(this);
+
+		let children: PowerBICapacityTreeItem[] = [];
+
+		children.push(new PowerBICapacityRefreshables(this));
+		if (this.admins.includes(PowerBIApiService.SessionUserEmail)) {
+			children.push(new PowerBICapacityWorkloads(this));
+		}
+
+		return children;
 	}
 
 	// Dashboard-specific funtions

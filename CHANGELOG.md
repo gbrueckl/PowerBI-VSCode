@@ -1,5 +1,9 @@
 # Change Log
 
+**v0.9.5**:
+- fixed issue with dataflow refresh (thanks to [John Kerski](https://github.com/kerski))
+- added commands to context menue to assign/unassign a workspace to/from a capacity
+
 **v0.9.4**:
 - fixed issue with configuration for GCC cloud (thanks to [John Kerski](https://github.com/kerski))
 - fixed issue with dataflows not being displayed (thanks to [John Kerski](https://github.com/kerski))
