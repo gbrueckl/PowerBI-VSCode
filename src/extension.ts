@@ -24,6 +24,8 @@ import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatew
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
 import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
 import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
+import { PowerBIPipelineStageArtifacts } from './vscode/treeviews/Pipelines/PowerBIPipelineStageArtifacts';
+import { PowerBIPipelineStageArtifact } from './vscode/treeviews/Pipelines/PowerBIPipelineStageArtifact';
 
 export async function activate(context: vscode.ExtensionContext) {
 
@@ -108,6 +110,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIPipelineStage.assignWorkspace', (item: PowerBIPipelineStage) => PowerBIPipelineStage.assignWorkspace(item));
 	vscode.commands.registerCommand('PowerBIPipelineStage.unassignWorkspace', (item: PowerBIPipelineStage) => PowerBIPipelineStage.unassignWorkspace(item));
 
+	// Add collections of datasets, dashboards, dataflows, and reports
+	vscode.commands.registerCommand('PowerBIPipelineStageArtifacts.deploy', async (item: PowerBIPipelineStageArtifacts) => await item.deployToNextStage(item));
+    // Add specific deploys for datasets, dashboards, dataflows, and reports
+	vscode.commands.registerCommand('PowerBIPipelineStageArtifact.deploy', async (item: PowerBIPipelineStageArtifact) => await item.deployToNextStage(item));
 
 	vscode.commands.registerCommand('PowerBI.initialize', async () => {
 		let isValidated: boolean = await ThisExtension.initialize(context)
