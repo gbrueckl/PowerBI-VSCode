@@ -324,6 +324,13 @@
 				"icon": "$(debug-step-over)",
 				"category": "PowerBI"
 			},
+
+			{
+				"command": "PowerBIPipelineStageArtifact.deploy",
+				"title": "DeployArtifact",
+				"icon": "$(debug-step-over)",
+				"category": "PowerBI"
+			},			
 			{
 				"command": "PowerBIPipelineStage.assignWorkspace",
 				"title": "Assign",
@@ -461,6 +468,31 @@
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,DEPLOY,.*/",
 					"group": "inline"
 				},
+				{
+					"command": "PowerBIPipelineStageArtifact.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDASHBOARDS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIPipelineStageArtifact.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDATAFLOWS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIPipelineStageArtifact.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDATAMARTS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIPipelineStageArtifact.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDATASETS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
+					"group": "inline"
+				},				
+				{
+					"command": "PowerBIPipelineStageArtifact.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEREPORTS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
+					"group": "inline"
+				},				
 				{
 					"command": "PowerBIPipelineStage.assignWorkspace",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,ASSIGN,.*/",

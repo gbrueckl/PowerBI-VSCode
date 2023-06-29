@@ -47,7 +47,7 @@ export class PowerBIPipelineStageArtifact extends PowerBIPipelineTreeItem {
 		let orig: string = super._contextValue;
 
 		let actions: string[] = [
-			"DEPLOY"
+			"DEPLOYARTIFACT"
 		]
 
 		return orig + actions.join(",") + ",";

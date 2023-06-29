@@ -124,6 +124,7 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 
 	public static async deployToNextStage(stage: PowerBIPipelineStage, settings: object = undefined): Promise<void> {
 		const apiUrl = stage.getParentByType("PIPELINE").apiPath + "deployAll";
+		
 		/*
 		if (settings == undefined) // prompt user for inputs
 		{
