@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.9.5",
+	"version": "0.9.6",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -336,7 +336,12 @@
 				"icon": "$(debug-step-over)",
 				"category": "PowerBI"
 			},
-
+			{
+				"command": "PowerBIPipelineStageArtifacts.deploy",
+				"title": "DeployArtifacts",
+				"icon": "$(debug-step-over)",
+				"category": "PowerBI"
+			},
 			{
 				"command": "PowerBIPipelineStageArtifact.deploy",
 				"title": "DeployArtifact",
@@ -491,28 +496,33 @@
 					"group": "inline"
 				},
 				{
-					"command": "PowerBIPipelineStageArtifact.deploy",
-					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDASHBOARDS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
-					"group": "inline"
-				},
-				{
-					"command": "PowerBIPipelineStageArtifact.deploy",
-					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDATAFLOWS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
-					"group": "inline"
-				},
-				{
-					"command": "PowerBIPipelineStageArtifact.deploy",
-					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDATAMARTS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
-					"group": "inline"
-				},
-				{
-					"command": "PowerBIPipelineStageArtifact.deploy",
-					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDATASETS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
+					"command": "PowerBIPipelineStageArtifacts.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGE,.*/ && viewItem =~ /.*,DEPLOYARTIFACTS,.*/",
 					"group": "inline"
 				},				
 				{
 					"command": "PowerBIPipelineStageArtifact.deploy",
-					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEREPORTS,.*/ && viewItem =~ /.*,DEPLOYARTIFACT,.*/",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDASHBOARDS,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIPipelineStageArtifact.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDATAFLOWS,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIPipelineStageArtifact.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDATAMARTS,.*/",
+					"group": "inline"
+				},
+				{
+					"command": "PowerBIPipelineStageArtifact.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEDATASETS,.*/",
+					"group": "inline"
+				},				
+				{
+					"command": "PowerBIPipelineStageArtifact.deploy",
+					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINESTAGEREPORTS,.*/",
 					"group": "inline"
 				},				
 				{
