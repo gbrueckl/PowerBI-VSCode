@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { ThisExtension } from '../ThisExtension';
 
 export class UniqueId extends String {
 	// placeholder class for unique-ids in Power BI
@@ -52,6 +53,7 @@ export abstract class Helper {
 		unsortedArray.sort((t1, t2) => {
 			if(!t1.hasOwnProperty(property) || !t2.hasOwnProperty(property))
 			{
+				ThisExtension.log("WARNING: sortArrayByProperty: property '" + property + "' does not exist on one of the items.\n" + JSON.stringify(t1) + "\n" + JSON.stringify(t2));
 				return 0;
 			}
 			const name1 = t1[property].toString().toLowerCase();
