@@ -138,9 +138,9 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		else {
 			sourceItems = transferItem.value;
 		}
-		const source: PowerBIApiTreeItem = sourceItems[0];
+		
 
-		await this.handlePowerBIAPIDrop(source, target);
+		await this.handlePowerBIAPIDrop(sourceItems, target);
 
 		/*// check if target implemnts iHandleDrop interface / has handleDrop function
 		if ('handleBeingDropped' in source) {
@@ -156,7 +156,7 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		*/
 	}
 
-	public async handlePowerBIAPIDrop(source: PowerBIApiTreeItem, target: PowerBIApiTreeItem): Promise<void> {
+	public async handlePowerBIAPIDrop(sourceItems: PowerBIApiTreeItem[], target: PowerBIApiTreeItem): Promise<void> {
 
 		/* 
 		// TODO
@@ -165,6 +165,8 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		Report -> Reports, Workspace (Clone)
 		Dashboard -> Dashboard, Workspace (Clone) ?
 		*/
+		const source: PowerBIApiTreeItem = sourceItems[0];
+
 		let actions: Map<string, () => Promise<void>> = new Map<string, () => Promise<void>>();
 
 		// by default we refresh the treeview of the target item
