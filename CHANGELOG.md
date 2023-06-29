@@ -2,6 +2,7 @@
 
 **v0.9.5**:
 - fixed issue with dataflow refresh (thanks to [John Kerski](https://github.com/kerski))
+- added `Refreshables` and `Workloads` to Capacity treeview
 - added commands to context menue to assign/unassign a workspace to/from a capacity
 
 **v0.9.4**:

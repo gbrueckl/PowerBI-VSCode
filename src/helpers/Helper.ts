@@ -50,6 +50,10 @@ export abstract class Helper {
 		let direction_num: number = (direction == "ASC" ? 1 : -1);
 
 		unsortedArray.sort((t1, t2) => {
+			if(!t1.hasOwnProperty(property) || !t2.hasOwnProperty(property))
+			{
+				return 0;
+			}
 			const name1 = t1[property].toString().toLowerCase();
 			const name2 = t2[property].toString().toLowerCase();
 			if (name1 > name2) { return 1 * direction_num; }
