@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import {  Helper, UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { iPowerBIDataflow } from '../../../powerbi/DataflowsAPI/_types';
@@ -11,11 +11,12 @@ import { PowerBIPipelineStage } from './PowerBIPipelineStage';
 import { PipelineStageArtifact, iPowerBIPipelineStage, iPowerBIPipelineStageArtifact } from '../../../powerbi/PipelinesAPI/_types';
 import { PowerBIPipelineStageArtifact } from './PowerBIPipelineStageArtifact';
 import { ThisExtension } from '../../../ThisExtension';
+import { iPowerBIPipelineDeployableItem } from './iPowerBIPipelineDeployableItem';
 
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIPipelineStageArtifacts extends PowerBIPipelineTreeItem {
+export class PowerBIPipelineStageArtifacts extends PowerBIPipelineTreeItem implements iPowerBIPipelineDeployableItem {
 	private _pipelineId: UniqueId;
 	private _stageOrder: number;
 	private _items: iPowerBIPipelineStageArtifact[];
@@ -63,12 +64,26 @@ export class PowerBIPipelineStageArtifacts extends PowerBIPipelineTreeItem {
 		let children: PowerBIPipelineStageArtifact[] = [];
 
 		for (let item of this._items) {
-			let treeItem = new PowerBIPipelineStageArtifact(item, this._pipelineId, 0, this.itemType as PipelineStageArtifact, this);
+			let treeItem = new PowerBIPipelineStageArtifact(item, this._pipelineId, 0, Helper.trimChar(this.itemType, "S", false, true) as PipelineStageArtifact, this);
 			children.push(treeItem);
 			PowerBICommandBuilder.pushQuickPickItem(treeItem);
 		}
-		
+
 		return children;
+	}
+
+	// properties of iPowerBIPipelineDeployableItem
+	get artifactIds(): { sourceId: string }[] {
+		return this._items.map((item) => { return { "sourceId": item.artifactId } });
+	}
+	get artifactType(): string {
+		return this.itemType.replace("PIPELINESTAGE", "").toLowerCase();
+	}
+
+	async getDeployableItems(): Promise<{ [key: string]: { sourceId: string }[] }> {
+		let obj = {};
+		obj[this.artifactType] = this.artifactIds;
+		return obj;
 	}
 
 
@@ -97,7 +112,7 @@ export class PowerBIPipelineStageArtifacts extends PowerBIPipelineTreeItem {
 				"allowTakeOver": true
 			}
 		}
-		body[this.itemType.replace("PIPELINESTAGE", "").toLowerCase()] = this._items.map(item => ({"sourceId": item.artifactId}));
+		body[this.itemType.replace("PIPELINESTAGE", "").toLowerCase()] = this._items.map(item => ({ "sourceId": item.artifactId }));
 		PowerBIApiService.post(apiUrl, body);
 
 		ThisExtension.TreeViewPipelines.refresh(this.parent, false);

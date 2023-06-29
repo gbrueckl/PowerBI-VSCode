@@ -8,9 +8,10 @@ import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PipelineStage } from '../../../powerbi/SwaggerAPI';
 import { PowerBIPipelineStage } from './PowerBIPipelineStage';
+import { iPowerBIPipelineDeployableItem } from './iPowerBIPipelineDeployableItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIPipelineStageArtifact extends PowerBIPipelineTreeItem {
+export class PowerBIPipelineStageArtifact extends PowerBIPipelineTreeItem implements iPowerBIPipelineDeployableItem {
 	private _artifactType: PipelineStageArtifact;
 
 	constructor(
@@ -61,6 +62,20 @@ export class PowerBIPipelineStageArtifact extends PowerBIPipelineTreeItem {
 		super.definition = value;
 	}
 
+	// properties of iPowerBIPipelineDeployableItem
+	get artifactIds(): { sourceId: string }[] {
+		return [{ "sourceId": this.id }];
+	}
+	get artifactType(): string {
+		return this.itemType.replace("PIPELINESTAGE", "").toLowerCase() + "s";
+	}
+
+	async getDeployableItems(): Promise<{ [key: string]: { sourceId: string }[] }> {
+		let obj = {};
+		obj[this.artifactType] = this.artifactIds;
+		return obj;
+	}
+
 	// Pipelinestage-specific funtions
 
 	/*
@@ -100,7 +115,7 @@ export class PowerBIPipelineStageArtifact extends PowerBIPipelineTreeItem {
 				"allowTakeOver": true
 			}
 		}
-		body[this.itemType.replace("PIPELINESTAGE", "").toLowerCase()] = [{"sourceId": this.definition.artifactId}];
+		body[this.itemType.replace("PIPELINESTAGE", "").toLowerCase()] = [{ "sourceId": this.definition.artifactId }];
 		PowerBIApiService.post(apiUrl, body);
 
 		ThisExtension.TreeViewPipelines.refresh(this.parent, false);

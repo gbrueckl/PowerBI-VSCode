@@ -7,13 +7,12 @@ import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
-import { PowerBIPipelineStageArtifact } from './PowerBIPipelineStageArtifact';
 import { PowerBIPipelineStageArtifacts } from './PowerBIPipelineStageArtifacts';
-import { ArtifactType } from '../../../powerbi/SwaggerAPI';
 import { PowerBIPipeline } from './PowerBIPipeline';
+import { iPowerBIPipelineDeployableItem } from './iPowerBIPipelineDeployableItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
+export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPowerBIPipelineDeployableItem {
 
 	constructor(
 		definition: iPowerBIPipelineStage,
@@ -23,7 +22,7 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 		super(definition.order.toString(), "PIPELINESTAGE", pipelineId, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this.definition = definition;
-		super.label = this._Label;
+		super.label = this._label;
 		super.id = definition.order.toString() + "/" + definition.workspaceId;
 
 		super.tooltip = this._tooltip;
@@ -43,7 +42,7 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-	get _Label(): string {
+	get _label(): string {
 		let ret: string = resolveOrder(this.definition.order);
 
 		return ret + ": " + this.definition.workspaceName;
@@ -106,6 +105,26 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem {
 		}
 
 		return children;
+	}
+
+	// properties of iPowerBIPipelineDeployableItem
+	get artifactIds(): {sourceId: string}[] {
+		return [];
+	}
+	get artifactType(): string
+	{
+		return this.itemType;
+	}
+
+	async getDeployableItems(): Promise<{[key: string]: {sourceId: string}[]}>
+	{
+		const allArtifacts = await this.getChildren() as PowerBIPipelineStageArtifacts[];
+		let obj = {};
+		for(let stageArtifacts  of allArtifacts) {
+			obj[stageArtifacts.itemType.replace("PIPELINESTAGE", "").toLowerCase()] = stageArtifacts.artifactIds;
+		}
+
+		return obj;
 	}
 
 	// Pipelinestage-specific funtions

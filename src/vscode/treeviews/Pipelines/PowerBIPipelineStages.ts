@@ -3,12 +3,11 @@ import * as vscode from 'vscode';
 import {  UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
-import { iPowerBIDataflow } from '../../../powerbi/DataflowsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
 import { PowerBIPipelineStage } from './PowerBIPipelineStage';
 import { iPowerBIPipelineStage } from '../../../powerbi/PipelinesAPI/_types';
+import { iPowerBIPipelineDeployableItem } from './iPowerBIPipelineDeployableItem';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html

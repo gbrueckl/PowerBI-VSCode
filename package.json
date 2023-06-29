@@ -319,6 +319,12 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIPipelines.deploy",
+				"title": "Deploy",
+				"icon": "$(debug-step-over)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIPipelines.add",
 				"title": "Add",
 				"icon": "$(add)",
@@ -392,6 +398,11 @@
 				{
 					"command": "PowerBIPipelines.refresh",
 					"when": "view == PowerBIPipelines",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIPipelines.deploy",
+					"when": "view == PowerBIPipelines && powerbi.deployablePipelineContentSelected",
 					"group": "navigation"
 				},
 				{
@@ -489,7 +500,7 @@
 					"command": "PowerBIPipeline.delete",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINE,.*/ && viewItem =~ /.*,DELETE,.*/",
 					"group": "inline"
-				},				
+				},		
 				{
 					"command": "PowerBIPipelineStage.deploy",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,DEPLOY,.*/",
