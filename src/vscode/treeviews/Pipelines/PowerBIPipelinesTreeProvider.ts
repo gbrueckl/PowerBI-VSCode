@@ -118,8 +118,6 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 
 		const apiUrl = Helper.joinPath(firstItem.getPathItemByType("PIPELINE").apiPath, "deploy");
 
-
-
 		let body = {
 			"sourceStageOrder": firstStage.definition.order,
 			"options": {
@@ -133,13 +131,21 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 		};
 
 		const note = await PowerBICommandBuilder.showInputBox("Deployment triggered from VSCode", "Deployment note", "Free text you want to add to the deployment");
-		if (note) {
+		if (note == undefined) {
+			await Helper.showTemporaryInformationMessage('Deployment aborted!', 4000);
+			return
+		}
+		else if (note.length > 0) {
 			const noteJson = { "note": note };
 			body = { ...body, ...noteJson };
 		}
 		const updateApp = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("No", undefined, true), new PowerBIQuickPickItem("Yes")], "Update app in " + (resolveOrderShort(firstStage.definition.order + 1)) + " after deployment?", "If you want to update the app in the " + (resolveOrderShort(firstStage.definition.order + 1)) + " stage after deployment, select Yes. Otherwise select No (default).", "No");
 
-		if (updateApp == "Yes") {
+		if (updateApp == undefined) {
+			await Helper.showTemporaryInformationMessage('Deployment aborted!', 4000);
+			return
+		}
+		else if (updateApp == "Yes") {
 			const updateAppJson = { "updateAppSettings": { "updateAppInTargetWorkspace": true } };
 			body = { ...body, ...updateAppJson };
 		}
@@ -197,7 +203,7 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 			ThisExtension.log(response);
 			return;
 		}
-		Helper.showTemporaryInformationMessage("Deployment to stage " + (resolveOrderShort(firstStage.definition.order + 1)) + " started ...");
+		Helper.showTemporaryInformationMessage("Deployment to stage " + (resolveOrderShort(firstStage.definition.order + 1)) + " started ...", 4000);
 
 		this.refresh(undefined, false);
 	}
