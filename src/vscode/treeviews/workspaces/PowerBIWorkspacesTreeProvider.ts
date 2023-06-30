@@ -17,12 +17,12 @@ import { Helper } from '../../../helpers/Helper';
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<PowerBIWorkspaceTreeItem> {
 
-	private _previousSelection: {item: PowerBIWorkspaceTreeItem, time: number};
+	private _previousSelection: { item: PowerBIWorkspaceTreeItem, time: number };
 	private _onDidChangeTreeData: vscode.EventEmitter<PowerBIWorkspaceTreeItem | undefined> = new vscode.EventEmitter<PowerBIWorkspaceTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<PowerBIWorkspaceTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBIWorkspaces', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIApiDragAndDropController() });
+		const view = vscode.window.createTreeView('PowerBIWorkspaces', { treeDataProvider: this, showCollapseAll: true, canSelectMany: false, dragAndDropController: new PowerBIApiDragAndDropController() });
 		context.subscriptions.push(view);
 
 		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
@@ -30,11 +30,12 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 		ThisExtension.TreeViewWorkspaces = this;
 	}
 
-	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void>
-	{
-		vscode.commands.executeCommand("PowerBI.updateQuickPickList", this);
+	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void> {
+		if (items.length > 0) {
+			vscode.commands.executeCommand("PowerBI.updateQuickPickList", items.slice(-1)[0]);
+		}
 	}
-	
+
 	async refresh(item: PowerBIWorkspaceTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Workspaces ...');
@@ -51,7 +52,7 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		if(!PowerBIApiService.isInitialized) { 			
+		if (!PowerBIApiService.isInitialized) {
 			return Promise.resolve([]);
 		}
 
@@ -69,14 +70,14 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
-			
+
 			return children;
 		}
 	}
 
 	// TopLevel workspace functions
 	add(): void {
-		
+
 	}
 
 	async newNotebook(workspaceItem: PowerBIWorkspaceTreeItem): Promise<void> {

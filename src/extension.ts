@@ -104,17 +104,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	//vscode.window.registerTreeDataProvider('PowerBIPipelines', pbiPipelinesTreeProvider); // done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIPipelines.refresh', (item: PowerBIPipelineTreeItem = undefined, showInfoMessage: boolean = true) => pbiPipelinesTreeProvider.refresh(item, showInfoMessage));
 	vscode.commands.registerCommand('PowerBIPipelines.add', (item: PowerBIPipelineTreeItem = undefined) => pbiPipelinesTreeProvider.add());
-	vscode.commands.registerCommand('PowerBIPipelines.deploy', () => pbiPipelinesTreeProvider.deploySelection());
+	vscode.commands.registerCommand('PowerBIPipelines.deploySelection', () => pbiPipelinesTreeProvider.deploySelection());
 
 	vscode.commands.registerCommand('PowerBIPipeline.delete', async (item: PowerBIPipeline) => await item.delete());
-	vscode.commands.registerCommand('PowerBIPipelineStage.deploy', (item: PowerBIPipelineStage = undefined, showInfoMessage: boolean = true) => PowerBIPipelineStage.deployToNextStage(item));
 	vscode.commands.registerCommand('PowerBIPipelineStage.assignWorkspace', (item: PowerBIPipelineStage) => PowerBIPipelineStage.assignWorkspace(item));
 	vscode.commands.registerCommand('PowerBIPipelineStage.unassignWorkspace', (item: PowerBIPipelineStage) => PowerBIPipelineStage.unassignWorkspace(item));
-
-	// Add collections of datasets, dashboards, dataflows, and reports
-	vscode.commands.registerCommand('PowerBIPipelineStageArtifacts.deploy', async (item: PowerBIPipelineStageArtifacts) => await item.deployToNextStage(item));
-    // Add specific deploys for datasets, dashboards, dataflows, and reports
-	vscode.commands.registerCommand('PowerBIPipelineStageArtifact.deploy', async (item: PowerBIPipelineStageArtifact) => await item.deployToNextStage(item));
 
 	vscode.commands.registerCommand('PowerBI.initialize', async () => {
 		let isValidated: boolean = await ThisExtension.initialize(context)

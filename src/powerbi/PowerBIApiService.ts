@@ -211,7 +211,15 @@ export abstract class PowerBIApiService {
 					}
 				}
 				else {
-					throw new Error(resultText);
+					if (!resultText || resultText == "") {
+						return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+					}
+					if (raiseError) {
+						throw new Error(resultText);
+					}
+					else {
+						return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+					}
 				}
 
 			} catch (error) {
@@ -247,7 +255,12 @@ export abstract class PowerBIApiService {
 				if (!resultText || resultText == "") {
 					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				throw new Error(resultText);
+				if (raiseError) {
+					throw new Error(resultText);
+				}
+				else {
+					return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+				}
 			}
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);
@@ -330,7 +343,12 @@ export abstract class PowerBIApiService {
 				if (!resultText || resultText == "") {
 					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				throw new Error(resultText);
+				if (raiseError) {
+					throw new Error(resultText);
+				}
+				else {
+					return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+				}
 			}
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);
@@ -364,7 +382,12 @@ export abstract class PowerBIApiService {
 				if (!resultText || resultText == "") {
 					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				throw new Error(resultText);
+				if (raiseError) {
+					throw new Error(resultText);
+				}
+				else {
+					return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+				}
 			}
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);
@@ -398,7 +421,12 @@ export abstract class PowerBIApiService {
 				if (!resultText || resultText == "") {
 					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				throw new Error(resultText);
+				if (raiseError) {
+					throw new Error(resultText);
+				}
+				else {
+					return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+				}
 			}
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);

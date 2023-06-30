@@ -1,5 +1,11 @@
 # Change Log
 
+**v0.9.6**:
+- reworked how to deploy pipeline artifacts
+  - added support for selective pipeline deployments
+  - conditionally also update the app after the deployment
+  - optionally add a note to the deployment
+
 **v0.9.5**:
 - fixed issue with dataflow refresh (thanks to [John Kerski](https://github.com/kerski))
 - added `Refreshables` and `Workloads` to Capacity treeview

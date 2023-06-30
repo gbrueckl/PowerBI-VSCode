@@ -18,7 +18,7 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 	readonly onDidChangeTreeData: vscode.Event<PowerBICapacityTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBICapacities', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIApiDragAndDropController() });
+		const view = vscode.window.createTreeView('PowerBICapacities', { treeDataProvider: this, showCollapseAll: true, canSelectMany: false, dragAndDropController: new PowerBIApiDragAndDropController() });
 		context.subscriptions.push(view);
 
 		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
@@ -26,11 +26,12 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 		ThisExtension.TreeViewCapacities = this;
 	}
 
-	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void>
-	{
-		vscode.commands.executeCommand("PowerBI.updateQuickPickList", this);
+	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void> {
+		if (items.length > 0) {
+			vscode.commands.executeCommand("PowerBI.updateQuickPickList", items.slice(-1)[0]);
+		}
 	}
-	
+
 	async refresh(item: PowerBICapacityTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing Capacities ...');
@@ -47,7 +48,7 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 	}
 
 	async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
-		if(!PowerBIApiService.isInitialized) { 			
+		if (!PowerBIApiService.isInitialized) {
 			return Promise.resolve([]);
 		}
 
@@ -63,13 +64,13 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
-			
+
 			return children;
 		}
 	}
 
 	// TopLevel Capacity functions
 	add(): void {
-		
+
 	}
 }

@@ -19,17 +19,18 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 	readonly onDidChangeTreeData: vscode.Event<PowerBIGatewayTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBIGateways', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIApiDragAndDropController() });
+		const view = vscode.window.createTreeView('PowerBIGateways', { treeDataProvider: this, showCollapseAll: true, canSelectMany: false, dragAndDropController: new PowerBIApiDragAndDropController() });
 		context.subscriptions.push(view);
 
 		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
 
 		ThisExtension.TreeViewGateways = this;
 	}
-	
-	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void>
-	{
-		vscode.commands.executeCommand("PowerBI.updateQuickPickList", this);
+
+	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void> {
+		if (items.length > 0) {
+			vscode.commands.executeCommand("PowerBI.updateQuickPickList", items.slice(-1)[0]);
+		}
 	}
 
 	async refresh(item: PowerBIGatewayTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
@@ -48,7 +49,7 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 	}
 
 	async getChildren(element?: PowerBIGatewayTreeItem): Promise<PowerBIGatewayTreeItem[]> {
-		if(!PowerBIApiService.isInitialized) { 			
+		if (!PowerBIApiService.isInitialized) {
 			return Promise.resolve([]);
 		}
 
@@ -64,13 +65,13 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
-			
+
 			return children;
 		}
 	}
 
 	// TopLevel Gateway functions
 	add(): void {
-		
+
 	}
 }

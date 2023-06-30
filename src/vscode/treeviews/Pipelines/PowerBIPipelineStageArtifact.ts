@@ -44,16 +44,6 @@ export class PowerBIPipelineStageArtifact extends PowerBIPipelineTreeItem implem
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-	get _contextValue(): string {
-		let orig: string = super._contextValue;
-
-		let actions: string[] = [
-			"DEPLOYARTIFACT"
-		]
-
-		return orig + actions.join(",") + ",";
-	}
-
 	get definition(): iPowerBIPipelineStageArtifact {
 		return super.definition as iPowerBIPipelineStageArtifact;
 	}
@@ -74,50 +64,5 @@ export class PowerBIPipelineStageArtifact extends PowerBIPipelineTreeItem implem
 		let obj = {};
 		obj[this.artifactType] = this.artifactIds;
 		return obj;
-	}
-
-	// Pipelinestage-specific funtions
-
-	/*
-	public async delete(): Promise<void> {
-		await PowerBICommandBuilder.execute<iPowerBIDataflow>(this.apiPath, "DELETE", []);
-		
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
-	}
-
-	public async refresh(): Promise<void> {
-		PowerBIApiService.post(this.apiPath + "/refreshes", null);
-	}
-	*/
-
-	public async deployToNextStage(settings: object = undefined): Promise<void> {
-		const apiUrl = this.getParentByType("PIPELINE").apiPath + "deploy";
-		/*
-		if (settings == undefined) // prompt user for inputs
-		{
-			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
-				[
-					new PowerBICommandInput("Target Dataset", "DATASET_SELECTOR", "datasetId", false, "The new dataset for the rebound report. If the dataset resides in a different workspace than the report, a shared dataset will be created in the report's workspace.")
-				]);
-		}
-		else {
-			PowerBIApiService.post(apiUrl, settings);
-		}
-		*/
-		let body = {
-			"sourceStageOrder": this.getParentByType<PowerBIPipelineStage>("PIPELINESTAGE").definition.order,
-			"options": {
-				"allowCreateArtifact": true,
-				"allowOverwriteArtifact": true,
-				"allowOverwriteTargetArtifactLabel": true,
-				"allowPurgeData": true,
-				"allowSkipTilesWithMissingPrerequisites": true,
-				"allowTakeOver": true
-			}
-		}
-		body[this.itemType.replace("PIPELINESTAGE", "").toLowerCase()] = [{ "sourceId": this.definition.artifactId }];
-		PowerBIApiService.post(apiUrl, body);
-
-		ThisExtension.TreeViewPipelines.refresh(this.parent, false);
 	}
 }

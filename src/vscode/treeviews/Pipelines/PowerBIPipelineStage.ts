@@ -51,13 +51,7 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 	get _contextValue(): string {
 		let orig: string = super._contextValue;
 
-		let actions: string[] = [
-			"DELETE"
-		];
-
-		if (this.definition.order <= 1) {
-			actions.push("DEPLOY");
-		}
+		let actions: string[] = [];
 
 		if (this.definition.workspaceId) {
 			actions.push("UNASSIGN");
@@ -128,25 +122,6 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 	}
 
 	// Pipelinestage-specific funtions
-	public static async deployToNextStage(stage: PowerBIPipelineStage, settings: object = undefined): Promise<void> {
-		const apiUrl =  Helper.joinPath(stage.getParentByType("PIPELINE").apiPath, "deployAll");
-
-		const body = {
-			"sourceStageOrder": stage.definition.order,
-			"options": {
-				"allowCreateArtifact": true,
-				"allowOverwriteArtifact": true,
-				"allowOverwriteTargetArtifactLabel": true,
-				"allowPurgeData": true,
-				"allowSkipTilesWithMissingPrerequisites": true,
-				"allowTakeOver": true
-			}
-		}
-		PowerBIApiService.post(apiUrl, body);
-
-		ThisExtension.TreeViewPipelines.refresh(stage.parent, false);
-	}
-
 	public static async assignWorkspace(stage: PowerBIPipelineStage, settings: object = undefined): Promise<void> {
 		const apiUrl = Helper.joinPath(stage.apiPath, "assignWorkspace");
 		if (settings == undefined) // prompt user for inputs

@@ -44,16 +44,6 @@ export class PowerBIPipelineStageArtifacts extends PowerBIPipelineTreeItem imple
 		super.contextValue = this._contextValue;
 	}
 
-	get _contextValue(): string {
-		let orig: string = super._contextValue;
-
-		let actions: string[] = [
-			"DEPLOYARTIFACTS"
-		]
-
-		return orig + actions.join(",") + ",";
-	}
-
 	protected getIconPath(theme: string): vscode.Uri {
 		let artifactItemType: string = this.itemType.replace("PIPELINESTAGE", "");
 
@@ -84,37 +74,5 @@ export class PowerBIPipelineStageArtifacts extends PowerBIPipelineTreeItem imple
 		let obj = {};
 		obj[this.artifactType] = this.artifactIds;
 		return obj;
-	}
-
-
-	public async deployToNextStage(settings: object = undefined): Promise<void> {
-		const apiUrl = this.getParentByType("PIPELINE").apiPath + "deploy";
-		/*
-		if (settings == undefined) // prompt user for inputs
-		{
-			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
-				[
-					new PowerBICommandInput("Target Dataset", "DATASET_SELECTOR", "datasetId", false, "The new dataset for the rebound report. If the dataset resides in a different workspace than the report, a shared dataset will be created in the report's workspace.")
-				]);
-		}
-		else {
-			PowerBIApiService.post(apiUrl, settings);
-		}
-		*/
-		let body = {
-			"sourceStageOrder": this.getParentByType<PowerBIPipelineStage>("PIPELINESTAGE").definition.order,
-			"options": {
-				"allowCreateArtifact": true,
-				"allowOverwriteArtifact": true,
-				"allowOverwriteTargetArtifactLabel": true,
-				"allowPurgeData": true,
-				"allowSkipTilesWithMissingPrerequisites": true,
-				"allowTakeOver": true
-			}
-		}
-		body[this.itemType.replace("PIPELINESTAGE", "").toLowerCase()] = this._items.map(item => ({ "sourceId": item.artifactId }));
-		PowerBIApiService.post(apiUrl, body);
-
-		ThisExtension.TreeViewPipelines.refresh(this.parent, false);
 	}
 }

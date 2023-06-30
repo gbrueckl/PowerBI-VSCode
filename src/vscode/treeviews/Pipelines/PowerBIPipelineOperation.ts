@@ -85,41 +85,4 @@ export class PowerBIPipelineOperation extends PowerBIPipelineTreeItem {
 	get success(): boolean {
 		return this.definition.status == "Succeeded";
 	}
-
-
-
-	// PipelineOperation-specific funtions
-
-	/*
-	public async delete(): Promise<void> {
-		await PowerBICommandBuilder.execute<iPowerBIDataflow>(this.apiPath, "DELETE", []);
-		
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
-	}
-
-	public async refresh(): Promise<void> {
-		PowerBIApiService.post(this.apiPath + "/refreshes", null);
-	}
-
-	public async deployToNextStage(settings: object = undefined): Promise<void> {
-		const apiUrl = this.parent.apiPath + "/deployAll";
-		if (settings == undefined) // prompt user for inputs
-		{
-			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
-				[
-					new PowerBICommandInput("Target Dataset", "DATASET_SELECTOR", "datasetId", false, "The new dataset for the rebound report. If the dataset resides in a different workspace than the report, a shared dataset will be created in the report's workspace.")
-				]);
-		}
-		else {
-			PowerBIApiService.post(apiUrl, settings);
-		}
-		
-		const body = {
-			"sourceStageOrder": this.order,
-		}
-		PowerBIApiService.post(apiUrl, body);
-
-		ThisExtension.TreeViewPipelines.refresh(this.parent, false);
-	}
-	*/
 }
