@@ -5,9 +5,9 @@ import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
-import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { PowerBIPipeline } from './PowerBIPipeline';
-import { iPowerBIPipeline, iPowerBIPipelineStageArtifacts, resolveOrderShort } from '../../../powerbi/PipelinesAPI/_types';
+import { iPowerBIPipeline, resolveOrderShort } from '../../../powerbi/PipelinesAPI/_types';
 import { PowerBIApiDragAndDropController } from '../PowerBIApiDragAndDropController';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { Helper } from '../../../helpers/Helper';
@@ -33,7 +33,9 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 	}
 
 	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void> {
-		vscode.commands.executeCommand("PowerBI.updateQuickPickList", items.slice(-1)[0]);
+		if (items.length > 0) {
+			vscode.commands.executeCommand("PowerBI.updateQuickPickList", items.slice(-1)[0]);
+		}
 
 		let allDeployable: boolean = false;
 		if (this._treeView.selection.every(item => "artifactIds" in item)) {
@@ -114,7 +116,9 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 			return;
 		}
 
-		const apiUrl = firstItem.getPathItemByType("PIPELINE").apiPath + "deploy";
+		const apiUrl = Helper.joinPath(firstItem.getPathItemByType("PIPELINE").apiPath, "deploy");
+
+
 
 		let body = {
 			"sourceStageOrder": firstStage.definition.order,
@@ -126,7 +130,20 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 				"allowSkipTilesWithMissingPrerequisites": true,
 				"allowTakeOver": true
 			}
+		};
+
+		const note = await PowerBICommandBuilder.showInputBox("Deployment triggered from VSCode", "Deployment note", "Free text you want to add to the deployment");
+		if (note) {
+			const noteJson = { "note": note };
+			body = { ...body, ...noteJson };
 		}
+		const updateApp = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("No", undefined, true), new PowerBIQuickPickItem("Yes")], "Update app in " + (resolveOrderShort(firstStage.definition.order + 1)) + " after deployment?", "If you want to update the app in the " + (resolveOrderShort(firstStage.definition.order + 1)) + " stage after deployment, select Yes. Otherwise select No (default).", "No");
+
+		if (updateApp == "Yes") {
+			const updateAppJson = { "updateAppSettings": { "updateAppInTargetWorkspace": true } };
+			body = { ...body, ...updateAppJson };
+		}
+
 		let wholeStage: { [key: string]: { sourceId: string }[] } = {};
 
 		let itemsToDeploy: { [key: string]: { sourceId: string }[] } = {};
@@ -173,8 +190,13 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 			...wholeStage
 		};
 
-		PowerBIApiService.post(apiUrl, body);
+		const response = await PowerBIApiService.post(apiUrl, body, false);
 
+		if ("error" in response) {
+			vscode.window.showErrorMessage(response.error.message);
+			ThisExtension.log(response);
+			return;
+		}
 		Helper.showTemporaryInformationMessage("Deployment to stage " + (resolveOrderShort(firstStage.definition.order + 1)) + " started ...");
 
 		this.refresh(undefined, false);
