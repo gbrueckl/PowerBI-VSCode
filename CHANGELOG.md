@@ -1,5 +1,8 @@
 # Change Log
 
+**v0.9.7**:
+- fixed issue with dataseet refreshes and parameters ([#9](/../../issues/9))
+
 **v0.9.6**:
 - reworked how to deploy pipeline artifacts
   - added support for selective pipeline deployments

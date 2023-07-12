@@ -34,6 +34,10 @@ export class PowerBIParameters extends PowerBIWorkspaceTreeItem {
 		return undefined;
 	}
 
+	get apiUrlPart(): string {
+		return "parameters";
+	}
+
 	get dataset(): PowerBIDataset {
 		return this.parent as PowerBIDataset;
 	}

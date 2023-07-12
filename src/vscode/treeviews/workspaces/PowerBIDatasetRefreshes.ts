@@ -33,6 +33,10 @@ export class PowerBIDatasetRefreshes extends PowerBIWorkspaceTreeItem {
 		return undefined;
 	}
 
+	get apiUrlPart(): string {
+		return "refreshes";
+	}
+
 	get dataset(): PowerBIDataset {
 		return this.parent as PowerBIDataset;
 	}
