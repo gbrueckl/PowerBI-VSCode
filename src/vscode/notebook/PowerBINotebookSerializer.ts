@@ -42,7 +42,7 @@ export class PowerBINotebookSerializer implements vscode.NotebookSerializer {
 		let apiPath = "/groups";
 
 		if (apiItem) {
-			apiPath = 'GET /' + Helper.trimChar(apiItem.apiPath.split("/").slice(2).join("/"), "/", false, true);
+			apiPath = '/' + Helper.trimChar(apiItem.apiPath.split("/").slice(2).join("/"), "/", false, true);
 		}
 
 		let firstCell = new PowerBINotebookCell(vscode.NotebookCellKind.Code, 'GET ' + apiPath, PowerBIAPILanguage);
