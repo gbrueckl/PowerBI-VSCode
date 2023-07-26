@@ -1,5 +1,8 @@
 # Change Log
 
+**v0.9.8**:
+- fixed issue when opening a new PBI notebook ([#10](/../../issues/10))
+
 **v0.9.7**:
 - fixed issue with dataseet refreshes and parameters ([#9](/../../issues/9))
 

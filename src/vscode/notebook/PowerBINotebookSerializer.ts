@@ -39,13 +39,19 @@ export class PowerBINotebookSerializer implements vscode.NotebookSerializer {
 	}
 
 	static async openNewNotebook(apiItem: PowerBIApiTreeItem): Promise<vscode.NotebookEditor> {
-		// contents will be ignored
-		const cell = new PowerBINotebookCell(vscode.NotebookCellKind.Code, 'GET /' + Helper.trimChar(apiItem.apiPath.split("/").slice(2).join("/"), "/", false, true), PowerBIAPILanguage);
-		const notebook = new PowerBINotebook([cell]);
+		let apiPath = "/groups";
+
+		if (apiItem) {
+			apiPath = 'GET /' + Helper.trimChar(apiItem.apiPath.split("/").slice(2).join("/"), "/", false, true);
+		}
+
+		let firstCell = new PowerBINotebookCell(vscode.NotebookCellKind.Code, 'GET ' + apiPath, PowerBIAPILanguage);
+
+		const notebook = new PowerBINotebook([firstCell]);
 
 		const doc = await vscode.workspace.openNotebookDocument(PowerBINotebookType, notebook);
 
-		ThisExtension.NotebookKernel.setNotebookContext(doc, new PowerBINotebookContext(apiItem.apiPath));
+		ThisExtension.NotebookKernel.setNotebookContext(doc, new PowerBINotebookContext(apiPath));
 
 		return vscode.window.showNotebookDocument(doc);
 	}
