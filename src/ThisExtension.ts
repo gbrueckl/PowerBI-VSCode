@@ -10,11 +10,11 @@ import { PowerBIApiTreeItem } from './vscode/treeviews/PowerBIApiTreeItem';
 import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
 
 
-export type TreeProviderId = 
+export type TreeProviderId =
 	"application/vnd.code.tree.powerbiworkspaces"
-|	"application/vnd.code.tree.powerbicapacities"
-|	"application/vnd.code.tree.powerbigateways"
-|	"application/vnd.code.tree.powerbipipelines";
+	| "application/vnd.code.tree.powerbicapacities"
+	| "application/vnd.code.tree.powerbigateways"
+	| "application/vnd.code.tree.powerbipipelines";
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -145,13 +145,15 @@ export abstract class ThisExtension {
 		return this._notebookKernel;
 	}
 
+	static async initializeLogger(context: vscode.ExtensionContext): Promise<void> {
+		if (!this._logger) {
+			this._logger = vscode.window.createOutputChannel(context.extension.id);
+			this.log("Logger initialized!");
+		}
+	}
+
 	static async initialize(context: vscode.ExtensionContext): Promise<boolean> {
 		try {
-			if (!this._logger) {
-				this._logger = vscode.window.createOutputChannel(context.extension.id);
-				this.log("Logger initialized!");
-			}
-
 			this._extension = context.extension;
 			this.log(`Loading VS Code extension '${context.extension.packageJSON.displayName}' (${context.extension.id}) version ${context.extension.packageJSON.version} ...`);
 			this.log(`If you experience issues please open a ticket at ${context.extension.packageJSON.qna}`);
@@ -182,10 +184,10 @@ export abstract class ThisExtension {
 
 	public static get TreeProviderIds(): TreeProviderId[] {
 		return [
-		"application/vnd.code.tree.powerbiworkspaces", 
-		"application/vnd.code.tree.powerbipipelines", 
-		"application/vnd.code.tree.powerbigateways",
-		"application/vnd.code.tree.powerbicapacities", 
+			"application/vnd.code.tree.powerbiworkspaces",
+			"application/vnd.code.tree.powerbipipelines",
+			"application/vnd.code.tree.powerbigateways",
+			"application/vnd.code.tree.powerbicapacities",
 		];
 	}
 
@@ -195,8 +197,7 @@ export abstract class ThisExtension {
 		const allCommands = await vscode.commands.getCommands(true);
 		const powerBiRefreshCommands = allCommands.filter(command => command.match(/^PowerBI.*?s\.refresh/));
 
-		for(let command of powerBiRefreshCommands)
-		{
+		for (let command of powerBiRefreshCommands) {
 			vscode.commands.executeCommand(command);
 		}
 	}
@@ -206,6 +207,9 @@ export abstract class ThisExtension {
 	}
 
 	static log(text: string, newLine: boolean = true): void {
+		if (!this._logger) {
+			vscode.window.showErrorMessage(text);
+		}
 		if (newLine) {
 			this._logger.appendLine(text);
 		}

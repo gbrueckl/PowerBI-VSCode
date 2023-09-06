@@ -1,0 +1,33 @@
+{
+  "profiles": {
+    "TMDLVSCodeProxy": {
+      "commandName": "Project",
+      "commandLineArgs": "40999 MySecret",
+      "launchBrowser": true,
+      "launchUrl": "tmdl/test",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": ""
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "commandLineArgs": "40999 MySecret",
+      "launchBrowser": true,
+      "launchUrl": "tmdl/test",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  },
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:19176",
+      "sslPort": 44348
+    }
+  }
+}

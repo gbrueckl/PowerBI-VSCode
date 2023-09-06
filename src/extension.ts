@@ -4,6 +4,8 @@ import * as vscode from 'vscode';
 
 import { PowerBICommandBuilder } from './powerbi/CommandBuilder';
 import { ThisExtension } from './ThisExtension';
+import { TMDLProxy } from './helpers/TMDLProxy';
+
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
 import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/PowerBIPipelinesTreeProvider';
@@ -24,13 +26,18 @@ import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatew
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
 import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
 import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
-import { PowerBIPipelineStageArtifacts } from './vscode/treeviews/Pipelines/PowerBIPipelineStageArtifacts';
-import { PowerBIPipelineStageArtifact } from './vscode/treeviews/Pipelines/PowerBIPipelineStageArtifact';
+
 
 export async function activate(context: vscode.ExtensionContext) {
 
+	await ThisExtension.initializeLogger(context);
+	
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
+
+	await TMDLProxy.ensureProxy(context, 40999);
+
+	vscode.commands.registerCommand('PowerBIDataset.testTMDL', () => TMDLProxy.test(undefined));
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("powerbi-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
@@ -70,6 +77,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIDataset.updateAllParameters', (dataset: PowerBIDataset) => dataset.updateAllParameters());
 	vscode.commands.registerCommand('PowerBIDataset.configureScaleOut', (dataset: PowerBIDataset) => dataset.configureScaleOut());
 	vscode.commands.registerCommand('PowerBIDataset.syncReadOnlyReplicas', (dataset: PowerBIDataset) => dataset.syncReadOnlyReplicas());
+	vscode.commands.registerCommand('PowerBIDataset.editTMDL', (dataset: PowerBIDataset) => dataset.editTMDL());
 	// DatasetParameter commands
 	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
 
