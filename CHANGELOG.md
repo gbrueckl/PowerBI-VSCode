@@ -1,5 +1,9 @@
 # Change Log
 
+**v0.9.9**:
+- added new commands for Datast Query Scale Out
+- updated icons for Premium and PPU workspaces to easier identify them
+
 **v0.9.8**:
 - fixed issue when opening a new PBI notebook ([#10](/../../issues/10))
 
