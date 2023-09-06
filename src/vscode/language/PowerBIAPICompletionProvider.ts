@@ -56,7 +56,10 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 			{
 				const parts = item.split("/");
 				// all APIs directly below the current path and all dynamic paths
-				if(parts.length == searchParts.length + 1 || (parts.length > searchParts.length && parts[searchParts.length].startsWith("{"))) {
+				if(parts.length == searchParts.length + 1 
+					// special case for Dataset queryScaleOut which has two fixed parts after the searchPath
+					|| (parts.length == searchParts.length + 2 && ["queryScaleOut"].includes(parts[searchParts.length]))
+					|| (parts.length > searchParts.length && parts[searchParts.length].startsWith("{"))) {
 					for (let m of Object.getOwnPropertyNames(PowerBIAPICompletionProvider.swagger.paths[item])) {
 						if (!method || m == method) {
 							let itemToAdd = PowerBIAPICompletionProvider.swagger.paths[item][m];

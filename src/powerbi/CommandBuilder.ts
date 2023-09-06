@@ -15,6 +15,9 @@ export type CommandInputType =
 	| "WORKSPACE_SELECTOR"
 	| "DATASET_SELECTOR"
 	| "REPORT_SELECTOR"
+	| "DATAFLOW_SELECTOR"
+	| "CAPACITY_SELECTOR"
+	| "CUSTOM_SELECTOR"
 	;
 
 export class PowerBICommandInput {
@@ -25,6 +28,7 @@ export class PowerBICommandInput {
 	private _optional: boolean;
 	private _description: string;
 	private _currentValue: string;
+	private _customOptions: PowerBIQuickPickItem[];
 
 	constructor(
 		prompt: string,
@@ -32,7 +36,8 @@ export class PowerBICommandInput {
 		key: string,
 		optional: boolean = false,
 		description: string = null,
-		currentValue?: string
+		currentValue?: string,
+		customOptions?: PowerBIQuickPickItem[]
 	) {
 		this._prompt = prompt;
 		this._inputType = inputType;
@@ -40,6 +45,7 @@ export class PowerBICommandInput {
 		this._optional = optional;
 		this._description = description ?? prompt;
 		this._currentValue = currentValue;
+		this._customOptions = customOptions;
 	}
 
 	get Prompt(): string {
@@ -66,6 +72,10 @@ export class PowerBICommandInput {
 		return this._currentValue;
 	}
 
+	get CustomOptions(): PowerBIQuickPickItem[] {
+		return this._customOptions;
+	}
+
 	public async getValue(): Promise<string> {
 		switch (this.InputType) {
 			case "FREE_TEXT":
@@ -86,6 +96,8 @@ export class PowerBICommandInput {
 			case "CAPACITY_SELECTOR":
 				return await PowerBICommandBuilder.showQuickPick(PowerBICommandBuilder.getQuickPickItems("CAPACITY"), this.Prompt, this.Description, this._currentValue);
 
+			case "CUSTOM_SELECTOR":
+				return await PowerBICommandBuilder.showQuickPick(this.CustomOptions, this.Prompt, this.Description, this._currentValue);
 			default:
 				return this.InputType;
 		}

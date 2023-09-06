@@ -22,7 +22,10 @@ export class iPowerBIDataset {
 	upstreamDataflows: object; //[]	The upstream dataflows
 	//users: DatasetUser; //[]	(Empty value) The dataset user access details. This property will be removed from the payload response in an upcoming release. You can retrieve user information on a Power BI item (such as a report or a dashboard) by using the Get Dataset Users as Admin API, or the PostWorkspaceInfo API with the getArtifactUsers parameter.
 	webUrl: string; //	The web URL of the dataset
-
+	queryScaleOutSettings?: {
+		autoSyncReadOnlyReplicas: boolean,
+		maxReadOnlyReplicas: number
+	};
 }
 
 export class iPowerBIDatasetParameter {
@@ -58,4 +61,11 @@ export class iPowerBIDatasetRefresh {
     endTime: Date;
     status: string;
     requestId: string;
+}
+
+export class iPowerBIDatasetGenericResponse {
+	error?: {
+		code: string;
+		message: string
+	};
 }

@@ -8,7 +8,9 @@
 		"typescript.tsdk": "./node_modules/typescript/lib",
 		"typescript.tsc.autoDetect": "off",
 		"python.envFile": "${workspaceFolder}\\.databricks\\.databricks.env",
-		"databricks.python.envFile": "${workspaceFolder}\\.env"
+		"databricks.python.envFile": "${workspaceFolder}\\.env",
+		"jupyter.interactiveWindow.cellMarker.codeRegex": "^# COMMAND ----------|^# Databricks notebook source|^(#\\s*COMMAND\\s*[-]*|#\\s*%%|#\\s*\\<codecell\\>|#\\s*In\\[\\d*?\\]|#\\s*In\\[ \\])",
+		"jupyter.interactiveWindow.cellMarker.default": "# COMMAND ----------"
 	},
 	"tasks": {
 		"version": "2.0.0",

@@ -232,6 +232,24 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIDataset.configureScaleOut",
+				"title": "Configure Scale Out",
+				"icon": {
+					"light": "$(repo-forked)",
+					"dark": "$(repo-forked)"
+				},
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIDataset.syncReadOnlyReplicas",
+				"title": "Sync RO Replicas",
+				"icon": {
+					"light": "$(repo-sync)",
+					"dark": "$(repo-sync)"
+				},
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIDataset.updateAllParameters",
 				"title": "Update Parameters",
 				"icon": "$(pencil)",
@@ -427,6 +445,14 @@
 				{
 					"command": "PowerBIDataset.takeOver",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,TAKEOVER,.*/"
+				},
+				{
+					"command": "PowerBIDataset.configureScaleOut",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,CONFIGURESCALEOUT,.*/"
+				},
+				{
+					"command": "PowerBIDataset.syncReadOnlyReplicas",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,SYNCREADONLYREPLICAS,.*/"
 				},
 				{
 					"command": "PowerBIDataset.updateAllParameters",
