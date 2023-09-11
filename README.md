@@ -85,6 +85,15 @@ Current values of variables can be retrieved by running `SET MY_VARIABLE`.
 
 **Note:** you can also set/get multiple variables within the same notebook cell!
 
+# TMDL requirements
+The following prerequisites have to be fulfilled to use all TMDL features:
+
+- [ASP.NET Core Runtime 7.0.10](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (or higher)
+- A custom Azure Active Directory Application with the following settings:
+  - Redirect URIs for Mobile and desktop applications: https://vscode.dev/redirect
+  - Delegated Permissions: All PowerBI permissions
+
+
 # Building Locally
 1. Make sure you have installed [NodeJS](https://nodejs.org/en/) on your development workstation
 2. Clone this repo to your development workstation, then open the cloned folder in [VSCode](https://code.visualstudio.com/)

@@ -35,9 +35,10 @@ export async function activate(context: vscode.ExtensionContext) {
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
 
-	await TMDLProxy.ensureProxy(context, 40999);
-
-	vscode.commands.registerCommand('PowerBIDataset.testTMDL', () => TMDLProxy.test(undefined));
+	if (!ThisExtension.isInBrowser) {
+		TMDLProxy.ensureProxy(context, 40999);
+		//vscode.commands.registerCommand('PowerBIDataset.testTMDL', () => TMDLProxy.test(undefined));
+	}
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("powerbi-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();

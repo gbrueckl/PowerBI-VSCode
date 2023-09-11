@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import { ENVIRONMENT } from '@env/env';
+
 import { PowerBIApiService } from './powerbi/PowerBIApiService';
 import { PowerBINotebookKernel } from './vscode/notebook/PowerBINotebookKernel';
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
@@ -173,6 +175,8 @@ export abstract class ThisExtension {
 			await PowerBIApiService.initialize(config.apiUrl, config.tenantId, config.clientId, config.authenticationProvider, config.resourceId);
 
 			this._notebookKernel = await PowerBINotebookKernel.getInstance();
+
+			await this.setContext();
 		} catch (error) {
 			return false;
 		}
@@ -180,6 +184,15 @@ export abstract class ThisExtension {
 		this.refreshUI();
 
 		return true;
+	}
+
+	private static async setContext(): Promise<void> {
+		// we hide the Connections Tab as we load all information from the Databricks Extension
+		await vscode.commands.executeCommand(
+			"setContext",
+			"powerbi.isInBrowser",
+			this.isInBrowser
+		);
 	}
 
 	public static get TreeProviderIds(): TreeProviderId[] {
@@ -301,6 +314,10 @@ export abstract class ThisExtension {
 		}
 
 		return this._isVirtualWorkspace;
+	}
+
+	static get isInBrowser(): boolean {
+		return ENVIRONMENT == "web";
 	}
 
 	static get useProxy(): boolean {

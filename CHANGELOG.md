@@ -1,5 +1,9 @@
 # Change Log
 
+**v1.0.0**:
+- added support for TMDL (see [TMDL requirements](/README.md#tmdl-requirements))
+  - Edit, validate and publish directly from VSCode to the PBI Service!
+
 **v0.9.9**:
 - added new commands for Datast Query Scale Out
 - updated icons for Premium and PPU workspaces to easier identify them

@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.9.9",
+	"version": "1.0.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -252,10 +252,7 @@
 			{
 				"command": "PowerBIDataset.editTMDL",
 				"title": "Edit TMDL",
-				"icon": {
-					"light": "$(edit)",
-					"dark": "$(edit)"
-				},
+				"icon": "$(edit)",
 				"category": "PowerBI"
 			},
 			{
@@ -273,11 +270,9 @@
 			{
 				"command": "PowerBIDataset.testTMDL",
 				"title": "Test TMDL",
-				"icon": {
-					"light": "$(symbol-class)",
-					"dark": "$(symbol-class)"
-				},
-				"category": "PowerBI"
+				"icon": "$(symbol-class)",
+				"category": "PowerBI",
+				"enablement": "!powerbi.isInBrowser"
 			},
 			{
 				"command": "PowerBIDataset.updateAllParameters",
@@ -485,7 +480,7 @@
 				},
 				{
 					"command": "PowerBIDataset.editTMDL",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,EDITTMDL,.*/"
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,EDITTMDL,.*/"
 				},
 				{
 					"command": "PowerBIDataset.updateAllParameters",
@@ -556,12 +551,12 @@
 			"editor/title": [
 				{
 					"command": "PowerBIDataset.publishTMDL",
-					"when": "resourceExtname == .tmdl",
+					"when": "resourceExtname == .tmdl && !powerbi.isInBrowser",
 					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.validateTMDL",
-					"when": "resourceExtname == .tmdl",
+					"when": "resourceExtname == .tmdl && !powerbi.isInBrowser",
 					"group": "navigation"
 				}
 			]
