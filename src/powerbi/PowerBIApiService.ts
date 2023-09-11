@@ -87,23 +87,27 @@ export abstract class PowerBIApiService {
 
 	public static async getXmlaSession(): Promise<vscode.AuthenticationSession> {
 		let scopes = [
-			"cf710c6e-dfcc-4fa8-a093-d47294e44c66/.default", //ADOMD
+			//"cf710c6e-dfcc-4fa8-a093-d47294e44c66/.default", //ADOMD
 			//"058487e5-bde7-4aba-a5dc-2f9ac58cb668", // custom
-			//`${Helper.trimChar(this._resourceId, "/")}/.default`
-			//`${Helper.trimChar(this._resourceId, "/")}/Content.Create`,
-			//`${Helper.trimChar(this._resourceId, "/")}/Dataset.Read.All`,
-			//`${Helper.trimChar(this._resourceId, "/")}/Dataset.ReadWrite.All`,
-			//`${Helper.trimChar(this._resourceId, "/")}/Workspace.Read.All`,
-			//`${Helper.trimChar(this._resourceId, "/")}/Workspace.ReadWrite.All`
-			/*`cf710c6e-dfcc-4fa8-a093-d47294e44c66/Workspace.Read.All`,
-			`cf710c6e-dfcc-4fa8-a093-d47294e44c66/Dataset.Read.All`,
-			`cf710c6e-dfcc-4fa8-a093-d47294e44c66/Dataset.ReadWrite.All`,*/
-			//`058487e5-bde7-4aba-a5dc-2f9ac58cb668/Workspace.Read.All`,
-			//`058487e5-bde7-4aba-a5dc-2f9ac58cb668/Dataset.Read.All`,
-			//`058487e5-bde7-4aba-a5dc-2f9ac58cb668/Dataset.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/.default`,
+			/*`${Helper.trimChar(this._resourceId, "/")}/Content.Create`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.ReadWrite.All`,
+			*/
+			/*
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Group.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Group.Read`,
+			*/
+			
 			"openid", "offline_access", "email", "profile"
 			];
-		let session = await this.getAADAccessToken(scopes, this._tenantId, this._clientId);
+		let session = await this.getAADAccessToken(scopes, this._tenantId, "058487e5-bde7-4aba-a5dc-2f9ac58cb668");
 		return session;
 	}
 

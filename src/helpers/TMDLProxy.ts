@@ -13,6 +13,7 @@ import { spawn } from 'child_process';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { Helper } from './Helper';
 
+const SETTINGS_FILE = ".pbivscode.settings.json";
 interface TMDLProxyData {
 	connectionString: string;
 	accessToken: string;
@@ -39,7 +40,7 @@ export abstract class TMDLProxy {
 		this._secret = "MySecret";
 		this._tmdlProxyUri = vscode.Uri.parse(`http://127.0.0.1:${this._port}`);
 
-		this._tmdlProxyUri = vscode.Uri.parse("http://localhost:19176");
+		//this._tmdlProxyUri = vscode.Uri.parse("http://localhost:19176");
 
 		this._headers = {
 			"X-TMDLProxy-Secret": this._secret,
@@ -86,10 +87,20 @@ export abstract class TMDLProxy {
 		return this._datasetTmdlPathMapping.get(dataset);
 	}
 
-	private static getLocalPathRecursive(localPath: vscode.Uri): vscode.Uri {
+	private static async getLocalPathRecursive(localPath: vscode.Uri): Promise<vscode.Uri> {
 		for (const [dataset, path] of this._datasetTmdlPathMapping) {
 			if (localPath.fsPath.startsWith(path.fsPath)) {
 				return path;
+			}
+		}
+
+		while (localPath.fsPath != "/") {
+			localPath = vscode.Uri.joinPath(localPath, "..");
+			let files = await vscode.workspace.fs.readDirectory(localPath);
+			for (const file of files) {
+				if (file[0] == SETTINGS_FILE) {
+					return localPath;
+				}
 			}
 		}
 	}
@@ -134,19 +145,15 @@ export abstract class TMDLProxy {
 			};
 			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/serialize").toString();
 
-			let response = await fetch(endpoint, config);
+			let success = await Helper.fetchWithProgress("TMDL Publish", fetch(endpoint, config));
+			
+			if (success) {
+				let settings = body;
+				delete settings.accessToken;
+				vscode.workspace.fs.writeFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE), Buffer.from(JSON.stringify(settings)));
 
-			let resultText = await response.text();
-			vscode.window.showInformationMessage(resultText);
-
-			if (response.status == 200) {
-				Helper.showTemporaryInformationMessage(resultText, 5000);
+				Helper.addToWorkspace(vscode.Uri.file(localPath.fsPath), `PowerBI Dataseet - ${dataset.name}`, true);
 			}
-			else {
-				vscode.window.showErrorMessage(resultText);
-			}
-
-			Helper.addToWorkspace(vscode.Uri.file("D:\\Desktop\\TMDL"), `PowerBI Dataseet - ${dataset.name}`, true);
 		} catch (error) {
 			vscode.window.showErrorMessage(error);
 		}
@@ -154,7 +161,7 @@ export abstract class TMDLProxy {
 
 	static async validate(resourceUri: vscode.Uri): Promise<void> {
 		try {
-			const localPath = TMDLProxy.getLocalPathRecursive(resourceUri);
+			const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
 			if (!localPath) {
 				vscode.window.showErrorMessage("Could not find local path for resourceUri: " + resourceUri.fsPath);
 				return;
@@ -171,16 +178,7 @@ export abstract class TMDLProxy {
 			};
 			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/validate").toString();
 
-			let response = await fetch(endpoint, config);
-
-			let resultText = await response.text();
-
-			if (response.status == 200) {
-				Helper.showTemporaryInformationMessage(resultText, 5000);
-			}
-			else {
-				vscode.window.showErrorMessage(resultText);
-			}
+			let success = await Helper.fetchWithProgress("Validate TMDL", fetch(endpoint, config));
 		} catch (error) {
 			vscode.window.showErrorMessage(error);
 		}
@@ -189,18 +187,28 @@ export abstract class TMDLProxy {
 	static async publish(resourceUri: vscode.Uri): Promise<void> {
 		try {
 			const accessToken = (await PowerBIApiService.getXmlaSession()).accessToken;
-			const localPath = TMDLProxy.getLocalPathRecursive(resourceUri);
+			const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
 			if (!localPath) {
 				vscode.window.showErrorMessage("Could not find local path for resourceUri: " + resourceUri.fsPath);
 				return;
 			}
+			let body: TMDLProxyData;
+
 			const dataset: PowerBIDataset = TMDLProxy.getDataset(localPath);
-			let body: TMDLProxyData = {
-				"connectionString": await dataset.getXMLACConnectionString(),
-				"accessToken": accessToken,
-				"datasetName": dataset.name,
-				"localPath": localPath.fsPath,
-			};
+
+			// if the export was done in the current session, we can use the dataset object
+			if (dataset) {
+				body = {
+					"connectionString": await dataset.getXMLACConnectionString(),
+					"accessToken": accessToken,
+					"datasetName": dataset.name,
+					"localPath": localPath.fsPath,
+				};
+			}
+			else {
+				body = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
+				body.accessToken = accessToken;
+			}
 
 			const config: RequestInit = {
 				method: "POST",
@@ -209,16 +217,7 @@ export abstract class TMDLProxy {
 			};
 			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/publish").toString();
 
-			let response = await fetch(endpoint, config);
-
-			let resultText = await response.text();
-			
-			if (response.status == 200) {
-				Helper.showTemporaryInformationMessage(resultText, 5000);
-			}
-			else {
-				vscode.window.showErrorMessage(resultText);
-			}
+			let success = await Helper.fetchWithProgress("Publish TMDL", fetch(endpoint, config));
 		} catch (error) {
 			vscode.window.showErrorMessage(error);
 		}

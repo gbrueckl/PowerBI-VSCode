@@ -40,7 +40,8 @@
 		"PowerBI"
 	],
 	"activationEvents": [
-		"onNotebook:powerbi-notebook"
+		"onNotebook:powerbi-notebook",
+		"onLanguage:tmdl"
 	],
 	"main": "./dist/node/extension.js",
 	"browser": "./dist/web/extension.js",

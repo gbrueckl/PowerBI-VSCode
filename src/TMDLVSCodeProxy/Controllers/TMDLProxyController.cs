@@ -68,7 +68,7 @@ namespace TMDLVSCodeProxy.Controllers
         public IActionResult SerializeDatasetTMDL(
             [FromBody] TMDLProxyData requestBody,
             [FromHeader] TMDLProxyHeader header
-            )
+        )
         {
             if (!header.secret.Equals(TMDLProxyController.secret))
             {
@@ -110,7 +110,7 @@ namespace TMDLVSCodeProxy.Controllers
         public IActionResult ValidateDatasetTMDL(
             [FromBody] TMDLProxyDataValidation requestBody,
             [FromHeader] TMDLProxyHeader header
-            )
+        )
         {
             if (!header.secret.Equals(TMDLProxyController.secret))
             {
@@ -132,12 +132,12 @@ namespace TMDLVSCodeProxy.Controllers
             }
         }
 
-            [HttpPost(Name = "PublishDatasetTMDL")]
+        [HttpPost(Name = "PublishDatasetTMDL")]
         [Route("/tmdl/publish")]
         public IActionResult PublishDatasetTMDL(
             [FromBody] TMDLProxyData requestBody,
             [FromHeader] TMDLProxyHeader header
-            )
+        )
         {
             if (!header.secret.Equals(TMDLProxyController.secret))
             {

@@ -39,6 +39,39 @@ export abstract class Helper {
 		});
 	}
 
+	static async fetchWithProgress(message: string, fetchPromise: Promise<any>): Promise<boolean> {
+		let success: boolean = false;
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: message,
+			cancellable: false
+		}, async (progress: vscode.Progress<any>) => {
+			progress.report({ message: "running ..." });
+			let response = await fetchPromise;
+
+			let resultText = await response.text();
+
+			if (!response.ok) {
+				vscode.window.showErrorMessage(resultText);
+				progress.report({ increment: 100, message: "ERROR!" });
+				success = false;
+			}
+			else{
+				progress.report({ increment: 100, message: "Success!" });
+				success = true;
+			}
+
+			const p = await new Promise<void>(resolve => {
+				setTimeout(() => {
+					resolve();
+				}, 2000);
+			});
+			return p;
+		});
+
+		return success;
+	}
+
 	static mapToObject<T>(map: Map<string, any>): T {
 		const obj = {};
 		for (let [key, value] of map) {
@@ -51,8 +84,7 @@ export abstract class Helper {
 		let direction_num: number = (direction == "ASC" ? 1 : -1);
 
 		unsortedArray.sort((t1, t2) => {
-			if(!t1.hasOwnProperty(property) || !t2.hasOwnProperty(property))
-			{
+			if (!t1.hasOwnProperty(property) || !t2.hasOwnProperty(property)) {
 				ThisExtension.log("WARNING: sortArrayByProperty: property '" + property + "' does not exist on one of the items.\n" + JSON.stringify(t1) + "\n" + JSON.stringify(t2));
 				return 0;
 			}
@@ -102,7 +134,7 @@ export abstract class Helper {
 		vscode.commands.executeCommand("vscode.diff", localFileUri, onlnieFileUri, "Online <-> Local", options);
 	}
 
-	
+
 	static openLink(link: string): void {
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(link));
 	}
@@ -166,13 +198,12 @@ export abstract class Helper {
 		var mDisplay = m > 0 ? `${m.toString().length > 1 ? `${m}` : `0${m}`}` : '00';
 		var sDisplay = s > 0 ? `${s.toString().length > 1 ? `${s}` : `0${s}`}` : '00';
 
-		return `${hDisplay}:${mDisplay}:${sDisplay}`; 
+		return `${hDisplay}:${mDisplay}:${sDisplay}`;
 	}
 
 	static getFirstRegexGroup(regexp: RegExp, text: string): string {
 		const array = [...text.matchAll(regexp)];
-		if(array.length >= 1)
-		{
+		if (array.length >= 1) {
 			return array[0][1];
 		}
 		return null;
@@ -191,14 +222,13 @@ export abstract class Helper {
 		return value[0].toUpperCase() + value.substring(1).toLowerCase();
 	}
 
-		static async addToWorkspace(uri: vscode.Uri, name: string, showMessage: boolean = true): Promise<void> {
+	static async addToWorkspace(uri: vscode.Uri, name: string, showMessage: boolean = true): Promise<void> {
 		if (!vscode.workspace.workspaceFolders) {
 			vscode.window.showErrorMessage("Please save your current session as a VSCode workspace first to use this feature!");
 		}
 		else {
 			// add at the end of the workspace
-			if(showMessage)
-			{
+			if (showMessage) {
 				vscode.window.showWarningMessage("This feature is still experimental!");
 			}
 			vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: uri, name: name });

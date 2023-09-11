@@ -31,7 +31,7 @@ import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
 export async function activate(context: vscode.ExtensionContext) {
 
 	await ThisExtension.initializeLogger(context);
-	
+
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
 
