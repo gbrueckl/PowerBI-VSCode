@@ -14,6 +14,7 @@ import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { QuickPickItem } from 'vscode';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { PowerBIParameter } from './PowerBIParameter';
+import { TMDLProxy } from '../../../helpers/TMDLProxy';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -69,6 +70,13 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	get canDoChanges(): boolean {
 		return "" == this.definition.configuredBy;
+	}
+
+	async getXMLACConnectionString(): Promise<string> {
+		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
+		const xmlaServer = PowerBIApiService.getXmlaServer(workspace).toString();
+
+		return `Data Source=${xmlaServer};Initial Catalog=${this.name};`;
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
@@ -170,13 +178,12 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	public async editTMDL(): Promise<void> {
 		ThisExtension.setStatusBar("Starting TMDL editor ...", true);
 
+		TMDLProxy.serialize(this);
 		// get path where to store the TMDL definition
 		// call external service and export TMDL definition to that path
 		// persist link of TMDL definition path and dataset in a static variable
 		// add TMDL definition to vscode workspace
 		// open TMDL definition in vscode
-
-		vscode.window.showErrorMessage("NOT YET IMPLEMENTED");
 
 		ThisExtension.setStatusBar("TMDL editor started!");
 

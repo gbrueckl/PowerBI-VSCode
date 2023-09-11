@@ -81,6 +81,14 @@ export async function activate(context: vscode.ExtensionContext) {
 	// DatasetParameter commands
 	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
 
+	// new editor commands for TMDL files
+	vscode.commands.registerCommand('PowerBIDataset.validateTMDL',
+		TMDLProxy.validate
+	);
+	vscode.commands.registerCommand('PowerBIDataset.publishTMDL',
+		TMDLProxy.publish
+	);
+
 	// Report commands
 	vscode.commands.registerCommand('PowerBIReport.takeOver', (report: PowerBIReport) => report.takeOver());
 	vscode.commands.registerCommand('PowerBIReport.delete', (report: PowerBIReport) => report.delete());

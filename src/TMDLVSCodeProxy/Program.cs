@@ -1,7 +1,11 @@
+using TMDLVSCodeProxy.Controllers;
+
 var builder = WebApplication.CreateBuilder(args);
 
-var port = args[0];
+var hostingUrl = args[0];
 var secret = args[1];
+
+TMDLProxyController.SetSecret(secret);
 
 // Add services to the container.
 
@@ -11,16 +15,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "AllowAll",
+    options.AddDefaultPolicy(
         policy =>
         {
-            policy.AllowAnyHeader();
-            policy.AllowAnyOrigin();
-            policy.AllowAnyMethod();
+            policy.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
         });
 });
 
-builder.WebHost.UseUrls("https://localhost:" + port);
+builder.WebHost.UseUrls(hostingUrl);
 
 var app = builder.Build();
 
@@ -31,10 +33,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection(); // we want to use HTTP
+app.UseRouting();
+
+app.UseCors();
 
 //app.UseAuthorization();
-app.UseCors();
 
 app.MapControllers();
 

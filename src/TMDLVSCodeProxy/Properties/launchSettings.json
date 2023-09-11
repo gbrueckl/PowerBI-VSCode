@@ -2,7 +2,7 @@
   "profiles": {
     "TMDLVSCodeProxy": {
       "commandName": "Project",
-      "commandLineArgs": "40999 MySecret",
+      "commandLineArgs": "http://localhost:40999 MySecret",
       "launchBrowser": true,
       "launchUrl": "tmdl/test",
       "environmentVariables": {
@@ -12,13 +12,13 @@
       "applicationUrl": ""
     },
     "IIS Express": {
-      "commandName": "IISExpress",
-      "commandLineArgs": "40999 MySecret",
-      "launchBrowser": true,
-      "launchUrl": "tmdl/test",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+        "commandName": "IISExpress",
+        "commandLineArgs": "http://localhost:40999 MySecret",
+        "launchBrowser": true,
+        "launchUrl": "tmdl/test",
+        "environmentVariables": {
+            "ASPNETCORE_ENVIRONMENT": "Development"
+        }
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json",

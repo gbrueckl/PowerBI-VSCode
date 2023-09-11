@@ -12,6 +12,7 @@ import { iPowerBIGateway } from './GatewayAPI/_types';
 
 
 import { fetch, getProxyAgent, RequestInit, Response, File, FormData } from '@env/fetch';
+import { PowerBIWorkspace } from '../vscode/treeviews/workspaces/PowerBIWorkspace';
 
 export abstract class PowerBIApiService {
 	private static _isInitialized: boolean = false;
@@ -69,7 +70,7 @@ export abstract class PowerBIApiService {
 	}
 
 	private static async refreshHeaders(): Promise<void> {
-		this._vscodeSession = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`, "profile", "email"], this._tenantId, this._clientId);
+		this._vscodeSession = await this.getPowerBISession();
 
 		ThisExtension.log("Refreshing authentication headers ...");
 		this._headers = {
@@ -77,6 +78,37 @@ export abstract class PowerBIApiService {
 			"Content-Type": 'application/json',
 			"Accept": 'application/json'
 		}
+	}
+
+	public static async getPowerBISession(): Promise<vscode.AuthenticationSession> {
+		let session = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`, "profile", "email"], this._tenantId, this._clientId);
+		return session;
+	}
+
+	public static async getXmlaSession(): Promise<vscode.AuthenticationSession> {
+		let scopes = [
+			"cf710c6e-dfcc-4fa8-a093-d47294e44c66/.default", //ADOMD
+			//"058487e5-bde7-4aba-a5dc-2f9ac58cb668", // custom
+			//`${Helper.trimChar(this._resourceId, "/")}/.default`
+			//`${Helper.trimChar(this._resourceId, "/")}/Content.Create`,
+			//`${Helper.trimChar(this._resourceId, "/")}/Dataset.Read.All`,
+			//`${Helper.trimChar(this._resourceId, "/")}/Dataset.ReadWrite.All`,
+			//`${Helper.trimChar(this._resourceId, "/")}/Workspace.Read.All`,
+			//`${Helper.trimChar(this._resourceId, "/")}/Workspace.ReadWrite.All`
+			/*`cf710c6e-dfcc-4fa8-a093-d47294e44c66/Workspace.Read.All`,
+			`cf710c6e-dfcc-4fa8-a093-d47294e44c66/Dataset.Read.All`,
+			`cf710c6e-dfcc-4fa8-a093-d47294e44c66/Dataset.ReadWrite.All`,*/
+			//`058487e5-bde7-4aba-a5dc-2f9ac58cb668/Workspace.Read.All`,
+			//`058487e5-bde7-4aba-a5dc-2f9ac58cb668/Dataset.Read.All`,
+			//`058487e5-bde7-4aba-a5dc-2f9ac58cb668/Dataset.ReadWrite.All`,
+			"openid", "offline_access", "email", "profile"
+			];
+		let session = await this.getAADAccessToken(scopes, this._tenantId, this._clientId);
+		return session;
+	}
+
+	public static getXmlaServer(workspace: PowerBIWorkspace): vscode.Uri {
+		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl).with({ scheme: "powerbi" }), "v1.0", this.Org, workspace.name);
 	}
 
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
@@ -88,7 +120,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
+	public static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
 		//https://www.eliostruyf.com/microsoft-authentication-provider-visual-studio-code/
 
 		if (!scopes.includes("offline_access")) {
