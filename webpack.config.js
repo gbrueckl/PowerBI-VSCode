@@ -49,7 +49,8 @@ const webConfig = /** @type WebpackConfig */ {
         }),
     ],
     externals: {
-        vscode: "commonjs vscode" // ignored because it doesn't exist
+        vscode: "commonjs vscode", // ignored because it doesn't exist
+        child_process: "child_process"
     },
     performance: {
         hints: false,
