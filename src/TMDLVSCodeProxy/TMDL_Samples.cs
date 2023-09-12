@@ -189,6 +189,45 @@ namespace TMDLVSCodeProxy
             }
         }
 
+        private static void Sample_ForHackathon()
+        {
+            // I'm using a BIM file, but for Hackathon you should already have a model
+            var bimPath = $"{outputPath}\\Sales.bim";
+
+            var modelFromLocalAS = GetDatabaseFromBIM(bimPath).Model;
+
+            var selectedTable = "Product";
+
+            var tableTMDLText = TOM.TmdlSerializer.SerializeObject(modelFromLocalAS.Tables[selectedTable], qualifyObject: true);
+
+            tableTMDLText += @"
+
+column NewColumn
+    sourceColumn: NewColumn
+    dataType: String
+    isDataTypeInferred: false
+    summarizeBy: None
+    lineageTag: 0f4b99cc-fdb6-4f04-b7d9-bbdc34b2c601";
+
+            // We dont yet expose a DeserializeObject, you can do this as alternative
+
+            var context = MetadataSerializationContext.Create(MetadataSerializationStyle.Tmdl);
+
+            using (var reader = new StringReader(tableTMDLText))
+            {
+                context.ReadFromDocument("./tables/product.tmd", reader);
+            }
+
+            var modelFromTMDL = context.ToModel();
+
+            // Copy the table to the Local AS Model
+
+            modelFromTMDL.Tables[selectedTable].CopyTo(modelFromLocalAS.Tables[selectedTable]);
+
+            // Write new column to confirm its on the localAS Model
+            Console.WriteLine(modelFromLocalAS.Tables[selectedTable].Columns["NewColumn"].Name);
+        }
+
         private static void Sample_Deploy2()
         {
             var xmlaServer = "powerbi://api.powerbi.com/v1.0/myorg/Demo%20-%20TMDL%20API";

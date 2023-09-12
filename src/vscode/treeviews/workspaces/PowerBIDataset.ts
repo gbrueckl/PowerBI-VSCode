@@ -50,7 +50,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 		if (this.getParentByType<PowerBIWorkspace>("GROUP").definition.isOnDedicatedCapacity) {
 			actions.push("CONFIGURESCALEOUT");
-			actions.push("EDITTMDL");
+			actions.push("EDIT_TMDL");
 
 			if (this.definition.queryScaleOutSettings?.maxReadOnlyReplicas != 0) {
 				actions.push("SYNCREADONLYREPLICAS");
@@ -178,12 +178,12 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	public async editTMDL(): Promise<void> {
 		ThisExtension.setStatusBar("Starting TMDL editor ...", true);
 
-		TMDLProxy.serialize(this);
-		// get path where to store the TMDL definition
-		// call external service and export TMDL definition to that path
-		// persist link of TMDL definition path and dataset in a static variable
-		// add TMDL definition to vscode workspace
-		// open TMDL definition in vscode
+		let success = await TMDLProxy.export(this);
+
+		if (success) {
+			let localPath = TMDLProxy.getLocalPath(this);
+			Helper.addToWorkspace(vscode.Uri.file(localPath.fsPath), `PowerBI Dataset - ${this.name}`, true);
+		}
 
 		ThisExtension.setStatusBar("TMDL editor started!");
 

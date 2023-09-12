@@ -86,6 +86,7 @@ export abstract class PowerBIApiService {
 	}
 
 	public static async getXmlaSession(): Promise<vscode.AuthenticationSession> {
+		return await this.getPowerBISession();
 		let scopes = [
 			//"cf710c6e-dfcc-4fa8-a093-d47294e44c66/.default", //ADOMD
 			//"058487e5-bde7-4aba-a5dc-2f9ac58cb668", // custom
@@ -107,7 +108,8 @@ export abstract class PowerBIApiService {
 			
 			"openid", "offline_access", "email", "profile"
 			];
-		let session = await this.getAADAccessToken(scopes, this._tenantId, "058487e5-bde7-4aba-a5dc-2f9ac58cb668");
+		let session = await this.getAADAccessToken(scopes, this._tenantId, this._clientId);
+
 		return session;
 	}
 

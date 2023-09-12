@@ -62,10 +62,10 @@ namespace TMDLVSCodeProxy.Controllers
             public string secret { get; set; }
         }
 
-        [HttpPost(Name = "SerializeDatasetTMDL")]
-        [Route("/tmdl/serialize")]
+        [HttpPost(Name = "ExportDatasetTMDL")]
+        [Route("/tmdl/export")]
         [Consumes("application/json")]
-        public IActionResult SerializeDatasetTMDL(
+        public IActionResult ExportDatasetTMDL(
             [FromBody] TMDLProxyData requestBody,
             [FromHeader] TMDLProxyHeader header
         )
@@ -126,6 +126,10 @@ namespace TMDLVSCodeProxy.Controllers
 
                 return Ok("Validation successful!");
             }
+            catch(TmdlFormatException fex)
+            {
+                return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
+            }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -166,6 +170,10 @@ namespace TMDLVSCodeProxy.Controllers
                     }
                     return Ok("Publish successful!");
                 }
+            }
+            catch (TmdlFormatException fex)
+            {
+                return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
             }
             catch (Exception ex)
             {

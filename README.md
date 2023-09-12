@@ -88,11 +88,10 @@ Current values of variables can be retrieved by running `SET MY_VARIABLE`.
 # TMDL requirements
 The following prerequisites have to be fulfilled to use all TMDL features:
 
-- [ASP.NET Core Runtime 7.0.10](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (or higher)
-- A custom Azure Active Directory Application with the following settings:
-  - Redirect URIs for Mobile and desktop applications: https://vscode.dev/redirect
+- make sure that the VSCode Setting `powerbi.clientId` is set to either `058487e5-bde7-4aba-a5dc-2f9ac58cb668` or a custom AAD Application configured as described below:
+  - Redirect URIs for Mobile and desktop applications: `https://vscode.dev/redirect`
   - Delegated Permissions: All PowerBI permissions
-
+- [ASP.NET Core Runtime 7.0.10](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (or higher)
 
 # Building Locally
 1. Make sure you have installed [NodeJS](https://nodejs.org/en/) on your development workstation
