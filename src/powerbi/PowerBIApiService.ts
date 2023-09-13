@@ -81,12 +81,12 @@ export abstract class PowerBIApiService {
 	}
 
 	public static async getPowerBISession(): Promise<vscode.AuthenticationSession> {
-		let session = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`, "profile", "email"], this._tenantId, this._clientId);
+		// we dont need to specify a clientId here as VSCode is a first party app and can use impersonation by default
+		let session = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`, "profile", "email"], this._tenantId, undefined);
 		return session;
 	}
 
 	public static async getXmlaSession(): Promise<vscode.AuthenticationSession> {
-		return await this.getPowerBISession();
 		let scopes = [
 			//"cf710c6e-dfcc-4fa8-a093-d47294e44c66/.default", //ADOMD
 			//"058487e5-bde7-4aba-a5dc-2f9ac58cb668", // custom
@@ -106,7 +106,7 @@ export abstract class PowerBIApiService {
 			`${Helper.trimChar(this._resourceId, "/")}/Group.Read`,
 			*/
 			
-			"openid", "offline_access", "email", "profile"
+			"offline_access", "email", "profile"
 			];
 		let session = await this.getAADAccessToken(scopes, this._tenantId, this._clientId);
 

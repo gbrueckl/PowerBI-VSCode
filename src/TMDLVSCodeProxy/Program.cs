@@ -2,8 +2,7 @@ using TMDLVSCodeProxy.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var hostingUrl = args[0];
-var secret = args[1];
+var secret = args[0];
 
 TMDLProxyController.SetSecret(secret);
 
@@ -22,7 +21,8 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.WebHost.UseUrls(hostingUrl);
+//builder.WebHost.UseUrls(hostingUrl);
+builder.WebHost.UseUrls("http://127.0.0.1:0");
 
 var app = builder.Build();
 

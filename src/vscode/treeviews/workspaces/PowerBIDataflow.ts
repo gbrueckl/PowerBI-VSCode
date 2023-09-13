@@ -34,9 +34,7 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 	}
 	// Dataflow-specific funtions
 	public async delete(): Promise<void> {
-		ThisExtension.setStatusBar("Deleting dataflow ...", true);
-		await PowerBICommandBuilder.execute<iPowerBIDataflow>(this.apiPath, "DELETE", []);
-		ThisExtension.setStatusBar("Dataflow deleted!");
+		await PowerBIApiTreeItem.delete(this, "yesNo");
 		
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}

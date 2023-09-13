@@ -26,39 +26,66 @@ interface TMDLProxyDataValidation {
 }
 export abstract class TMDLProxy {
 	private static _secret: string;
-	private static _port: number;
 	private static _headers;
 	private static _tmdlProxyUri: vscode.Uri;
+	private static _logger: vscode.OutputChannel;
 
 	private static _tmdlProxyProcess: any;
 
 	private static _datasetTmdlPathMapping: Map<PowerBIDataset, vscode.Uri> = new Map<PowerBIDataset, vscode.Uri>();
 
-	static async ensureProxy(context: vscode.ExtensionContext, port: number): Promise<void> {
+	static async initializeLogger(context: vscode.ExtensionContext): Promise<void> {
+		if (!this._logger) {
+			this._logger = vscode.window.createOutputChannel("PowerBI.TMDLProxy");
+			this.log("Logger initialized!");
 
-		this._port = port;
+			context.subscriptions.push(this._logger);
+		}
+	}
+
+	static log(text: string, newLine: boolean = true): void {
+		if (!this._logger) {
+			vscode.window.showErrorMessage(text);
+		}
+		if (newLine) {
+			this._logger.appendLine(text);
+		}
+		else {
+			this._logger.append(text);
+		}
+	}
+
+	static async ensureProxy(context: vscode.ExtensionContext): Promise<void> {
+
+		await this.initializeLogger(context);
+
 		this._secret = this.generateSecret(64);
-		this._tmdlProxyUri = vscode.Uri.parse(`http://127.0.0.1:${this._port}`);
+		this._secret = "ZwzCF1Zysal9NcK5lfmlDPnbtJmTw4TOltpHhjkWzDDiamOjpUVvMoblUsdQXzLw";
 
 		if (!TMDLProxy._tmdlProxyProcess) {
 
 			const proxyDllPath = vscode.Uri.joinPath(context.extensionUri, "resources", "TMDLProxy", "TMDLVSCodeProxy.dll").fsPath;
 
-			ThisExtension.log(`Starting TMDLProxy from ${proxyDllPath} on port ${this._port} with secret ${this._secret}`);
-			TMDLProxy._tmdlProxyProcess = spawn("dotnet", [proxyDllPath, this._tmdlProxyUri.toString(), this._secret]);
+			ThisExtension.log(`Starting TMDLProxy from ${proxyDllPath} with secret ${this._secret}`);
+			ThisExtension.log(`CMD> dotnet "${proxyDllPath}" ${this._secret}`);
+
+			TMDLProxy._tmdlProxyProcess = spawn("dotnet", [proxyDllPath, this._secret]);
 
 			TMDLProxy._tmdlProxyProcess.stdout.on('data', (data: any) => {
-				ThisExtension.log("TMDLProxy\t" + data.toString());
+				if (!TMDLProxy._tmdlProxyUri) {
+					TMDLProxy._tmdlProxyUri = vscode.Uri.parse(Helper.getFirstRegexGroup(/Now listening on:\s(.*)/gm, data.toString()));
+				}
+				TMDLProxy.log(data.toString());
 			});
 			TMDLProxy._tmdlProxyProcess.stderr.on('data', (data: any) => {
-				ThisExtension.log("TMDLProxy\t" + "ERROR: " + data.toString());
+				TMDLProxy.log("ERROR: " + data.toString());
 			});
 
 			TMDLProxy._tmdlProxyProcess.on('error', (err) => {
-				ThisExtension.log("TMDLProxy\t" + "Error starting TMDLProxy: " + err);
+				TMDLProxy.log("Error with TMDLProxy: " + err);
 			});
 			TMDLProxy._tmdlProxyProcess.on('close', (code) => {
-				ThisExtension.log("TMDLProxy\t" + "TMDLProxy closed with code: " + code);
+				TMDLProxy.log("TMDLProxy closed with code: " + code);
 			});
 
 			if (false) {
@@ -191,6 +218,8 @@ export abstract class TMDLProxy {
 
 	static async validate(resourceUri: vscode.Uri): Promise<boolean> {
 		try {
+			vscode.window.activeTextEditor.document.save();
+
 			ThisExtension.log("Validating TMDL from " + resourceUri.fsPath + " ...");
 			const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
 			if (!localPath) {
@@ -220,6 +249,8 @@ export abstract class TMDLProxy {
 
 	static async publish(resourceUri: vscode.Uri): Promise<boolean> {
 		try {
+			vscode.window.activeTextEditor.document.save();
+			
 			ThisExtension.log("Publishing TMDL from " + resourceUri.fsPath + " ...");
 			const accessToken = (await PowerBIApiService.getXmlaSession()).accessToken;
 			const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
@@ -258,6 +289,16 @@ export abstract class TMDLProxy {
 		} catch (error) {
 			vscode.window.showErrorMessage(error);
 			return false;
+		}
+	}
+
+	static async cleanUp(): Promise<void> {
+		if (TMDLProxy._tmdlProxyProcess) {
+			TMDLProxy._tmdlProxyProcess.kill();
+		}
+
+		if (TMDLProxy._logger) {
+			TMDLProxy._logger.dispose();
 		}
 	}
 }

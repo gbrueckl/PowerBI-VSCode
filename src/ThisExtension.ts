@@ -149,8 +149,10 @@ export abstract class ThisExtension {
 
 	static async initializeLogger(context: vscode.ExtensionContext): Promise<void> {
 		if (!this._logger) {
-			this._logger = vscode.window.createOutputChannel(context.extension.id);
+			this._logger = vscode.window.createOutputChannel("PowerBI.VSCode");
 			this.log("Logger initialized!");
+
+			context.subscriptions.push(this._logger);
 		}
 	}
 

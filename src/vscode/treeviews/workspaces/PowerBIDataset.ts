@@ -15,6 +15,7 @@ import { QuickPickItem } from 'vscode';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { PowerBIParameter } from './PowerBIParameter';
 import { TMDLProxy } from '../../../helpers/TMDLProxy';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -92,10 +93,8 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	// Dataset-specific funtions
 	public async delete(): Promise<void> {
-		ThisExtension.setStatusBar("Deleting dataset ...", true);
-		await PowerBICommandBuilder.execute<iPowerBIDataset>(this.apiPath, "DELETE", []);
-		ThisExtension.setStatusBar("Dataset deleted!");
-
+		await PowerBIApiTreeItem.delete(this, "yesNo");
+		
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 

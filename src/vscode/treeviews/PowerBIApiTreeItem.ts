@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { UniqueId } from '../../helpers/Helper';
+import { Helper, UniqueId } from '../../helpers/Helper';
 
 import { ApiItemType } from './_types';
 import { iPowerBIApiItem } from './iPowerBIApiItem';
@@ -8,6 +8,7 @@ import { ThisExtension, TreeProviderId } from '../../ThisExtension';
 import { ApiUrlPair } from '../../powerbi/_types';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 import { iHandleBeingDropped } from './PowerBIApiDragAndDropController';
+import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../powerbi/CommandBuilder';
 
 
 export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiItem {
@@ -51,7 +52,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 
 	protected getIconPath(theme: string): vscode.Uri {
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + '.png');
-	}	
+	}
 
 	// command to execute when clicking the TreeItem
 	command: vscode.Command = {
@@ -63,10 +64,8 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	get _tooltip(): string {
 		let tooltip: string = "";
 		for (const [key, value] of Object.entries(this.definition)) {
-			if(typeof value === "string")
-			{
-				if(value.length > 100)
-				{
+			if (typeof value === "string") {
+				if (value.length > 100) {
 					continue;
 				}
 			}
@@ -76,7 +75,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		return tooltip.trim();
 	}
 
-	
+
 
 	// description is show next to the label
 	get _description(): string {
@@ -87,7 +86,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	get _contextValue(): string {
 		return "," + this.itemType + ",";
 	}
-	
+
 	public async getChildren(element?: PowerBIApiTreeItem): Promise<PowerBIApiTreeItem[]> {
 		await vscode.window.showErrorMessage("getChildren is not implemented! Please overwrite in derived class!");
 		return undefined;
@@ -151,19 +150,17 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	}
 
 	get apiUrlPart(): string {
-		if(this.itemType.endsWith("S"))
-		{
+		if (this.itemType.endsWith("S")) {
 			return this.itemType.toLowerCase();
 		}
-		if(this.uid)
-		{
+		if (this.uid) {
 			return this.uid.toString();
 		}
 		return this.id;
 	}
 
 	get apiUrlPair(): ApiUrlPair {
-		return {itemType: this.itemType, itemId: this.id};
+		return { itemType: this.itemType, itemId: this.id };
 	}
 
 	get apiPath(): string {
@@ -172,10 +169,8 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 
 		let apiItem: PowerBIApiTreeItem = this;
 
-		while(apiItem)
-		{
-			if(apiItem.apiUrlPart)
-			{
+		while (apiItem) {
+			if (apiItem.apiUrlPart) {
 				urlParts.push(apiItem.apiUrlPart)
 			}
 			apiItem = apiItem.parent;
@@ -184,5 +179,34 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		urlParts = urlParts.filter(x => x.length > 0)
 
 		return `v1.0/${urlParts.reverse().join("/")}/`;
+	}
+
+	public static async delete(apiItem: PowerBIApiTreeItem, confirmation: "yesNo" | "name" | undefined = undefined): Promise<void> {
+		if (confirmation) {
+			let confirm: string;
+			switch (confirmation) {
+				case "yesNo":
+					confirm = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Do you really want to delete ${apiItem.itemType.toLowerCase()} '${apiItem.name}'?`, undefined, undefined);
+					break;
+				case "name":
+					confirm = await PowerBICommandBuilder.showInputBox("", `Confirm deletion by typeing the ${apiItem.itemType.toLowerCase()} name '${apiItem.name}' again.`, undefined, undefined);
+					break;
+			}
+
+			if (!confirm
+				|| (confirmation == "name" && confirm != apiItem.name)
+				|| (confirmation == "yesNo" && confirm != "yes")) {
+				const abortMsg = `Deletion of ${apiItem.itemType.toLowerCase()} '${apiItem.name}' aborted!`
+				ThisExtension.log(abortMsg);
+				Helper.showTemporaryInformationMessage(abortMsg, 2000)
+				return;
+			}
+		}
+
+		ThisExtension.setStatusBar(`Deleting ${apiItem.itemType.toLowerCase()} '${apiItem.name}' ...`, true);
+		await PowerBICommandBuilder.execute<any>(apiItem.apiPath, "DELETE", []);
+		const successMsg = `${apiItem.itemType.toLowerCase()} '${apiItem.name}' deleted!`
+		ThisExtension.setStatusBar(successMsg);
+		Helper.showTemporaryInformationMessage(successMsg, 2000);
 	}
 }

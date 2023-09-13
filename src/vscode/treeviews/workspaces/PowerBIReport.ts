@@ -67,10 +67,8 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	}
 
 	public async delete(): Promise<void> {
-		ThisExtension.setStatusBar("Deleting report ...", true);
-		await PowerBICommandBuilder.execute<iPowerBIReport>(this.apiPath, "DELETE", []);
-		ThisExtension.setStatusBar("Report deleted!");
-
+		await PowerBIApiTreeItem.delete(this, "yesNo");
+		
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 

@@ -36,7 +36,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	ThisExtension.extensionContext = context;
 
 	if (!ThisExtension.isInBrowser) {
-		TMDLProxy.ensureProxy(context, 40999);
+		TMDLProxy.ensureProxy(context);
 		//vscode.commands.registerCommand('PowerBIDataset.testTMDL', () => TMDLProxy.test(undefined));
 	}
 
@@ -63,8 +63,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	//vscode.commands.registerCommand('PowerBIWorkspaces.add', () => pbiWorkspacesTreeProvider.add());
 	vscode.commands.registerCommand('PowerBIWorkspace.delete', (workspace: PowerBIWorkspace) => workspace.delete());
-	vscode.commands.registerCommand('PowerBIWorkspace.PowerBIWorkspace.assignToCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.assignToCapacity(workspace));
-	vscode.commands.registerCommand('PowerBIWorkspace.PowerBIWorkspace.unassignFromCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.unassignFromCapacity(workspace));
+	vscode.commands.registerCommand('PowerBIWorkspace.assignToCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.assignToCapacity(workspace));
+	vscode.commands.registerCommand('PowerBIWorkspace.unassignFromCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.unassignFromCapacity(workspace));
 
 	// generic commands
 	vscode.commands.registerCommand('PowerBIWorkspace.insertPath', (workspaceItem: PowerBIWorkspaceTreeItem) => workspaceItem.insertCode());
@@ -144,4 +144,5 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
 	ThisExtension.cleanUp();
+	TMDLProxy.cleanUp();
 }

@@ -2,18 +2,17 @@
   "profiles": {
     "TMDLVSCodeProxy": {
       "commandName": "Project",
-      "commandLineArgs": "http://localhost:40999 MySecret",
+      "commandLineArgs": "MySecret",
       "launchBrowser": true,
       "launchUrl": "tmdl/test",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "dotnetRunMessages": true,
-      "applicationUrl": ""
+      "dotnetRunMessages": true
     },
     "IIS Express": {
         "commandName": "IISExpress",
-        "commandLineArgs": "http://localhost:40999 MySecret",
+        "commandLineArgs": "MySecret",
         "launchBrowser": true,
         "launchUrl": "tmdl/test",
         "environmentVariables": {

@@ -57,7 +57,7 @@
 					},
 					"powerbi.clientId": {
 						"type": "string",
-						"markdownDescription": "A custom ClientID/Application to use when interacting with Power BI. \n\n If you want to use **TMDL**, you can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` or your own client id (see README.md in the repo).",
+						"markdownDescription": "A custom ClientID/Application to use when interacting with Power BI. \n\n If you want to use **TMDL**, you can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permited in your tenant or you can use your own client id (see README.md in the repo).",
 						"default": null
 					},
 					"powerbi.cloud": {
@@ -449,12 +449,12 @@
 				{
 					"command": "PowerBIWorkspace.assignToCapacity",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,ASSIGNCAPACITY,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIWorkspace.unassignFromCapacity",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,UNASSIGNCAPACITY,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.delete",
@@ -468,23 +468,28 @@
 				},
 				{
 					"command": "PowerBIDataset.takeOver",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,TAKEOVER,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,TAKEOVER,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.configureScaleOut",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,CONFIGURESCALEOUT,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,CONFIGURESCALEOUT,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.syncReadOnlyReplicas",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,SYNCREADONLYREPLICAS,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,SYNCREADONLYREPLICAS,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.editTMDL",
-					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,EDIT_TMDL,.*/"
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,EDIT_TMDL,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.updateAllParameters",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,UPDATEDATASETPARAMETERS,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,UPDATEDATASETPARAMETERS,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDatasetRefresh.cancel",
@@ -498,7 +503,8 @@
 				},
 				{
 					"command": "PowerBIReport.takeOver",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,TAKEOVER,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,TAKEOVER,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIReport.delete",
@@ -507,15 +513,18 @@
 				},
 				{
 					"command": "PowerBIReport.clone",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,CLONE,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,CLONE,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIReport.rebind",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,REBIND,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,REBIND,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIReport.updateContent",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,UPDATECONTENT,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,UPDATECONTENT,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataflow.delete",
@@ -535,17 +544,17 @@
 				{
 					"command": "PowerBIPipeline.delete",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINE,.*/ && viewItem =~ /.*,DELETE,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIPipelineStage.assignWorkspace",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,ASSIGN,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIPipelineStage.unassignWorkspace",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,UNASSIGN,.*/",
-					"group": "inline"
+					"group": "navigation"
 				}
 			],
 			"editor/title": [
