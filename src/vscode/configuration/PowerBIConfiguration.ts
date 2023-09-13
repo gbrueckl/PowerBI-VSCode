@@ -94,6 +94,9 @@ export abstract class PowerBIConfiguration {
 	static get clientId(): string { return this.getValue("clientId"); }
 	static set clientId(value: string) { this.setValue("clientId", value); }
 
+	static get tmdlClientId(): string { return this.getValue("TMDLClientId"); }
+	static set tmdlClientId(value: string) { this.setValue("TMDLClientId", value); }
+
 	static get apiUrl(): string { return CLOUD_CONFIGS[this.cloud].apiEndpoint; }
 
 	static get authenticationProvider(): string { return CLOUD_CONFIGS[this.cloud].authenticationProvider; }
@@ -106,6 +109,12 @@ export abstract class PowerBIConfiguration {
 		// If the base URL for the API is not pointed to api.powerbi.com assume 
 		// we are pointed to the sovereign tenant
 		return this.apiUrl !== "https://api.powerbi.com/"
+	}
+
+	static get isTMDLConfigured(): boolean {
+		// If the base URL for the API is not pointed to api.powerbi.com assume 
+		// we are pointed to the sovereign tenant
+		return this.tmdlClientId !== undefined && this.tmdlClientId !== "";
 	}
 
 	static get config(): vscode.WorkspaceConfiguration {

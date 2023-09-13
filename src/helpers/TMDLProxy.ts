@@ -206,6 +206,7 @@ export abstract class TMDLProxy {
 			if (success) {
 				let settings = body;
 				delete settings.accessToken;
+				delete settings.localPath;
 				await vscode.workspace.fs.writeFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE), Buffer.from(JSON.stringify(settings)));
 			}
 
@@ -274,6 +275,7 @@ export abstract class TMDLProxy {
 			else {
 				body = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
 				body.accessToken = accessToken;
+				body.localPath = localPath.fsPath;
 			}
 
 			const config: RequestInit = {

@@ -26,6 +26,7 @@ import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatew
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
 import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
 import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
+import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -35,9 +36,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
 
-	if (!ThisExtension.isInBrowser) {
+	if (!ThisExtension.isInBrowser && PowerBIConfiguration.isTMDLConfigured) {
 		TMDLProxy.ensureProxy(context);
 		//vscode.commands.registerCommand('PowerBIDataset.testTMDL', () => TMDLProxy.test(undefined));
+	}
+	else
+	{
+		ThisExtension.log("TMDL is not configured! Please use the setting `powerbi.TMDLClientId` to configure it.");
 	}
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("powerbi-vscode", vscode.StatusBarAlignment.Right);

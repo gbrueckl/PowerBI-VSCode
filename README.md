@@ -85,12 +85,15 @@ Current values of variables can be retrieved by running `SET MY_VARIABLE`.
 
 **Note:** you can also set/get multiple variables within the same notebook cell!
 
-# TMDL requirements
+# TMDL
+Using this extension you can modify your Power BI Datasets directly within VSCode using Tabular Model Definition Language (**TMDL**). For datasets that reside in a Premium Capacity, you can select `Edit TMDL` from the context menu. A pop up will ask you to select a local folder to store the TMDL definition. Once you `Export` the TMDL definition to that folder, the folder will also be added to your VSCode session/workspace from where you can now edit the dataset. When you are done with your changes, you will fined a `Validate TMDL` and a `Publish TMDL` button at the right top of your editor.
+## Prerequisites
 The following prerequisites have to be fulfilled to use all TMDL features:
 
-- make sure that the VSCode Setting `powerbi.clientId` is set to either `058487e5-bde7-4aba-a5dc-2f9ac58cb668` or a custom AAD Application configured as described below:
+- make sure that the VSCode Setting `powerbi.TMDLClientId` is set to either `058487e5-bde7-4aba-a5dc-2f9ac58cb668` or a custom AAD Application configured as described below:
   - Redirect URIs for Mobile and desktop applications: `https://vscode.dev/redirect`
-  - Delegated Permissions: All PowerBI permissions
+  - Delegated Permissions: `Workspace.Read.All`, `Dataset.Read.All`, `Dataset.ReadWrite.All`
+  - Consent granted for the permissions above
 - [ASP.NET Core Runtime 7.0.10](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (or higher)
 
 # Building Locally

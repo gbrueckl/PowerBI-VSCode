@@ -174,7 +174,13 @@ export abstract class ThisExtension {
 
 			let config = PowerBIConfiguration;
 			config.applySettings();
-			await PowerBIApiService.initialize(config.apiUrl, config.tenantId, config.clientId, config.authenticationProvider, config.resourceId);
+			await PowerBIApiService.initialize(
+				config.apiUrl, 
+				config.tenantId, 
+				config.clientId, 
+				config.tmdlClientId,
+				config.authenticationProvider, 
+				config.resourceId);
 
 			this._notebookKernel = await PowerBINotebookKernel.getInstance();
 
@@ -194,6 +200,12 @@ export abstract class ThisExtension {
 			"setContext",
 			"powerbi.isInBrowser",
 			this.isInBrowser
+		);
+
+		await vscode.commands.executeCommand(
+			"setContext",
+			"powerbi.isTMDLConfigured",
+			PowerBIConfiguration.isTMDLConfigured
 		);
 	}
 
