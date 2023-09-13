@@ -19,15 +19,16 @@ The extensions can be installed directly from within VSCode by searching for thi
 - Run DAX queries in a notebook against your Power BI Datasets using `%dax` magic
 - Run arbitrary REST API calls in a notebook using `%api` magic - see [Notebooks](#notebooks)
 - Drag & Drop to run certain commands (e.g. drop a report on a dataset to rebind it)
-- UI for Capacities, Gatways and Pipelines
+- GUI to manage Capacities, Gatways and Pipelines
 
 # Configuration
 The extension supports the following VSCode settings:
 
 |Setting|Description|Example value|
 |-------|-----------|-------------|
-|`powerbi.tenantId`|The tenant ID of the remote tenant that you want to connect to.|A GUID, `abcd1234-1234-5678-9abcd-9d1963e4b9f5`|
+|`powerbi.tenantId`|(Optional) The tenant ID of the remote tenant that you want to connect to.|A GUID, `abcd1234-1234-5678-9abcd-9d1963e4b9f5`|
 |`powerbi.clientId`|(Optional) A custom ClientID/Application of an AAD application to use when connecting to Power BI.|A GUID, `99887766-1234-5678-9abcd-e4b9f59d1963`|
+|`powerbi.TMDLClientId`|(Optional) To use **TMDL features**, a custom ClientID/Application is mandatory. \n\n You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permited in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details.\n\nIf this field is not set, all TMDL features will be disabled/hidden!|A GUID, `058487e5-bde7-4aba-a5dc-2f9ac58cb668`|
 |`powerbi.cloud`|(Optional) Only use when you want to connect to a sovereign or governmental cloud!|GlobalCloud|
 
 # Notebooks
@@ -36,6 +37,7 @@ You can open a new Power BI notebook via the UI from the header of each treeview
 There are two core features of notebooks:
 - running arbitrary REST API calls
 - executing DAX queries against a dataset
+- set variables to be used in subsequent cells
 
 ## Run REST API calls
 To run a REST API call from the notebook you can simply write the following:
