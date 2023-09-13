@@ -37,7 +37,11 @@
 		"API",
 		"Reporting",
 		"Management",
-		"PowerBI"
+		"PowerBI",
+		"TMDL",
+		"XMLA",
+		"TMSL",
+		"TOM"
 	],
 	"activationEvents": [
 		"onNotebook:powerbi-notebook",

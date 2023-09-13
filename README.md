@@ -6,13 +6,14 @@
 
 ![PowerBI-VSCode](/images/PowerBI-VSCode.png?raw=true "PowerBI-VSCode")
 
-A [VSCode](https://code.visualstudio.com/) extension for managing your Power BI tenant using the [Power BI REST API](https://docs.microsoft.com/en-us/rest/api/power-bi/).
+A [VSCode](https://code.visualstudio.com/) extension for managing your Power BI tenant using the [Power BI REST API](https://docs.microsoft.com/en-us/rest/api/power-bi/) and modify Power BI datasets using TMDL (Tabular Model Definition Language) from within VSCode.
 
 # Installation
 The extensions can be installed directly from within VSCode by searching for this extension (`GerhardBrueckl.powerbi-vscode`) or downloaded from the official Visual Studio Code extension gallery at [PowerBI VSCode](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode) and installed manually as `VSIX`.
 
 # Features
-- GUI to run operations like [rebind](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/rebind-report-in-group), [clone](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/clone-report-in-group), ...
+- GUI to browse your workspace and run operations like [rebind](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/rebind-report-in-group), [clone](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/clone-report-in-group), ...
+- Modify Power BI datasets using **TMDL** - see [TMDL](#tmdl)
 - Supports VSCode and [vscode.dev](https://vscode.dev)
 - Connect to remote tenants where you are invited as a guest user - see [Configuration](#configuration)
 - Run DAX queries in a notebook against your Power BI Datasets using `%dax` magic
