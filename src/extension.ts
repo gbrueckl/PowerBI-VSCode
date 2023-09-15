@@ -27,6 +27,7 @@ import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPip
 import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
 import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
 import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
+import { TMDLFileSystemProvider, TMDL_SCHEME } from './vscode/filesystemProvider/TMDLFileSystemProvider';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -35,15 +36,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
-
-	if (!ThisExtension.isInBrowser && PowerBIConfiguration.isTMDLConfigured) {
-		TMDLProxy.ensureProxy(context);
-		//vscode.commands.registerCommand('PowerBIDataset.testTMDL', () => TMDLProxy.test(undefined));
-	}
-	else
-	{
-		ThisExtension.log("TMDL is not configured! Please use the setting `powerbi.TMDLClientId` to configure it.");
-	}
 
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("powerbi-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
@@ -143,7 +135,39 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 	);
 
-	vscode.commands.executeCommand('PowerBI.initialize');
+	await vscode.commands.executeCommand('PowerBI.initialize');
+
+	// Workspace File System Provider
+	if (!ThisExtension.isInBrowser && PowerBIConfiguration.isTMDLConfigured) {
+		await TMDLProxy.ensureProxy(context);
+		//vscode.commands.registerCommand('PowerBIDataset.testTMDL', () => TMDLProxy.test(undefined));
+		TMDLFileSystemProvider.register(context);
+
+		const workspaceFolders = vscode.workspace.workspaceFolders;
+		for(const folder of workspaceFolders)
+		{
+			if(folder.uri.scheme == TMDL_SCHEME)
+			{
+				TMDLFileSystemProvider.loadModel(folder.uri);
+			}
+		}
+
+		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
+	}
+	else {
+		ThisExtension.log("TMDL is not configured! Please use the setting `powerbi.TMDLClientId` to configure it.");
+	}
+
+	vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
+		if (event.added[0].uri.scheme == TMDL_SCHEME) {
+			const uri = event.added[0].uri;
+			await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", uri);
+
+			vscode.workspace
+				.openTextDocument(vscode.Uri.joinPath(uri, "model.tmdl"))
+				.then(vscode.window.showTextDocument);
+		}
+	});
 }
 
 

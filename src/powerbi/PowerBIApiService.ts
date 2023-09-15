@@ -6,7 +6,7 @@ import { iPowerBIGroup } from './GroupsAPI/_types';
 import { ApiItemType } from '../vscode/treeviews/_types';
 import { iPowerBIPipeline, iPowerBIPipelineOperation, iPowerBIPipelineStage, iPowerBIPipelineStageArtifacts } from './PipelinesAPI/_types';
 import { ApiUrlPair } from './_types';
-import { iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
+import { iPowerBIDataset, iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
 
@@ -110,8 +110,18 @@ export abstract class PowerBIApiService {
 		return session;
 	}
 
-	public static getXmlaServer(workspace: PowerBIWorkspace): vscode.Uri {
-		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl).with({ scheme: "powerbi" }), "v1.0", this.Org, workspace.name);
+	public static getXmlaServer(workspace: string): vscode.Uri {
+		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl).with({ scheme: "powerbi" }), "v1.0", this.Org, workspace);
+	}
+
+	public static async getDatasetUrl(workspaceName: string, datasetName: string): Promise<vscode.Uri> {
+		//https://app.powerbi.com/groups/ccce57d1-10af-1234-1234-665f8bbd8458/datasets/7cdff921-9999-8888-b0c8-34be20567742
+
+		const workspaces = await PowerBIApiService.getGroups();
+		const workspace = workspaces.find((workspace) => workspace.name == workspaceName);
+		const datasets = await PowerBIApiService.getItemList<iPowerBIDataset>(`/groups/${workspace.id}/datasets`);
+		const dataset = datasets.find((dataset) => dataset.name == datasetName);
+		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl.replace("api.", "app.")), "groups", workspace.id.toString(), "datasets", dataset.id.toString());
 	}
 
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {

@@ -45,7 +45,8 @@
 	],
 	"activationEvents": [
 		"onNotebook:powerbi-notebook",
-		"onLanguage:tmdl"
+		"onLanguage:tmdl",
+		"onFileSystem:tmdl"
 	],
 	"main": "./dist/node/extension.js",
 	"browser": "./dist/web/extension.js",
@@ -621,6 +622,7 @@
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
 		"eslint": "^8.19.0",
+		"buffer": "^6.0.3",
 		"form-data": "^4.0.0",
 		"glob": "^8.0.3",
 		"https-agent": "^1.0.0",

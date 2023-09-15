@@ -12,17 +12,26 @@ import { fetch, getProxyAgent, RequestInit, Response } from '@env/fetch';
 import { spawn } from 'child_process';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { Helper } from './Helper';
+import { TMDL_SCHEME, TMDLFileSystemProvider, TMDLFSUri } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
 
 const SETTINGS_FILE = ".pbivscode.settings.json";
 interface TMDLProxyData {
 	connectionString: string;
 	accessToken: string;
 	datasetName: string;
-	localPath: string;
+	localPath?: string;
+	streamEntries?: TMDLProxyStreamEntry[];
 }
 
 interface TMDLProxyDataValidation {
-	localPath: string;
+	localPath?: string;
+	streamEntries?: TMDLProxyStreamEntry[];
+}
+
+export interface TMDLProxyStreamEntry {
+	logicalPath: string;
+	content: string;
+	size: number;
 }
 export abstract class TMDLProxy {
 	private static _secret: string;
@@ -74,6 +83,15 @@ export abstract class TMDLProxy {
 			TMDLProxy._tmdlProxyProcess.stdout.on('data', (data: any) => {
 				if (!TMDLProxy._tmdlProxyUri) {
 					TMDLProxy._tmdlProxyUri = vscode.Uri.parse(Helper.getFirstRegexGroup(/Now listening on:\s(.*)/gm, data.toString()));
+
+					// for debugging purposes
+					if (false) {
+						this._secret = "MySecret";
+						this._tmdlProxyUri = vscode.Uri.parse("http://localhost:19176");
+					}
+
+					ThisExtension.log(`Communication with TMDLProxy via ${TMDLProxy._tmdlProxyUri} `);
+					TMDLProxy.log(`Communication with TMDLProxy via ${TMDLProxy._tmdlProxyUri} `);
 				}
 				TMDLProxy.log(data.toString());
 			});
@@ -88,16 +106,13 @@ export abstract class TMDLProxy {
 				TMDLProxy.log("TMDLProxy closed with code: " + code);
 			});
 
-			if (false) {
-				this._secret = "MySecret";
-				this._tmdlProxyUri = vscode.Uri.parse("http://localhost:19176");
-			}
-
 			this._headers = {
 				"X-TMDLProxy-Secret": this._secret,
 				"Content-Type": 'application/json',
 				"Accept": 'application/json'
 			}
+
+			Helper.wait(1000);
 		}
 	}
 
@@ -218,6 +233,15 @@ export abstract class TMDLProxy {
 	}
 
 	static async validate(resourceUri: vscode.Uri): Promise<boolean> {
+		if (resourceUri.scheme == TMDL_SCHEME) {
+			return await TMDLProxy.validateStream(resourceUri);
+		}
+		else {
+			return await TMDLProxy.validateFolder(resourceUri);
+		}
+	}
+
+	static async validateFolder(resourceUri: vscode.Uri): Promise<boolean> {
 		try {
 			vscode.window.activeTextEditor.document.save();
 
@@ -248,10 +272,104 @@ export abstract class TMDLProxy {
 		}
 	}
 
-	static async publish(resourceUri: vscode.Uri): Promise<boolean> {
+	static async validateStream(resourceUri: vscode.Uri): Promise<boolean> {
 		try {
 			vscode.window.activeTextEditor.document.save();
-			
+
+			ThisExtension.log("Validating TMDL from " + resourceUri.fsPath + " ...");
+
+			const tmdlEntry = new TMDLFSUri(resourceUri);
+
+			let body: TMDLProxyDataValidation = {
+				"streamEntries": await tmdlEntry.getStreamEntries()
+			};
+
+			const config: RequestInit = {
+				method: "POST",
+				headers: TMDLProxy._headers,
+				body: JSON.stringify(body),
+			};
+			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/validateStream").toString();
+
+			let success = await Helper.fetchWithProgress("Validate TMDL", fetch(endpoint, config));
+
+			return success;
+		} catch (error) {
+			vscode.window.showErrorMessage(error);
+			return false;
+		}
+	}
+
+	static async exportStream(tmdlUri: TMDLFSUri): Promise<TMDLProxyStreamEntry[]> {
+		try {
+			//ThisExtension.log("Exporting TMDL Stream from '" + dataset.name + "' ...");
+			const accessToken = (await PowerBIApiService.getXmlaSession()).accessToken;
+
+			const xmlaServer = PowerBIApiService.getXmlaServer(tmdlUri.workspace).toString();
+
+			const connectionString = `Data Source=${xmlaServer};Initial Catalog=${tmdlUri.dataset};`;
+
+			let body: TMDLProxyData = {
+				"connectionString": connectionString,
+				"accessToken": accessToken,
+				"datasetName": tmdlUri.dataset
+			};
+
+			const config: RequestInit = {
+				method: "POST",
+				headers: TMDLProxy._headers,
+				body: JSON.stringify(body),
+			};
+			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/exportStream").toString();
+
+			let response = await fetch(endpoint, config);
+
+			if (response.ok) {
+				let result = await response.json() as TMDLProxyStreamEntry[];
+				return result;
+			}
+			else {
+				let resultText = await response.text();
+				vscode.window.showErrorMessage(resultText);
+				return;
+			}
+		} catch (error) {
+			vscode.window.showErrorMessage(error);
+			return;
+		}
+	}
+
+	static async publish(resourceUri: vscode.Uri): Promise<boolean> {
+		let success: boolean = false;
+		let link: vscode.Uri; 
+		if (resourceUri.scheme == TMDL_SCHEME) {
+			success = await TMDLProxy.publishStream(resourceUri);
+			const tmdlUri: TMDLFSUri = new TMDLFSUri(resourceUri);
+			link = await PowerBIApiService.getDatasetUrl(tmdlUri.workspace, tmdlUri.dataset);
+		}
+		else {
+			success = await TMDLProxy.publishFolder(resourceUri);
+		}
+
+		if(success)
+		{
+			vscode.window.showInformationMessage("TMDL published successfully!", "Open in PowerBI")
+				.then(async (value) => {
+					if(value == "Open in PowerBI") {
+						Helper.openLink(link.toString());
+					}
+				});
+		}
+		else {
+			vscode.window.showErrorMessage("TMDL publish failed!");
+		}
+
+		return success;
+	}
+	static async publishFolder(resourceUri: vscode.Uri): Promise<boolean> {
+		try {
+			vscode.window.activeTextEditor.document.save();
+
 			ThisExtension.log("Publishing TMDL from " + resourceUri.fsPath + " ...");
 			const accessToken = (await PowerBIApiService.getXmlaSession()).accessToken;
 			const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
@@ -285,7 +403,39 @@ export abstract class TMDLProxy {
 			};
 			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/publish").toString();
 
-			let success = await Helper.fetchWithProgress("Publish TMDL", fetch(endpoint, config));
+			let success = await Helper.fetchWithProgress("Publish TMDL", fetch(endpoint, config), 0);
+
+			return success;
+		} catch (error) {
+			vscode.window.showErrorMessage(error);
+			return false;
+		}
+	}
+
+	static async publishStream(resourceUri: vscode.Uri): Promise<boolean> {
+		try {
+			vscode.window.activeTextEditor.document.save();
+
+			ThisExtension.log("Publishing TMDL from " + resourceUri.fsPath + " ...");
+			const accessToken = (await PowerBIApiService.getXmlaSession()).accessToken;
+
+			const tmdlEntry = new TMDLFSUri(resourceUri);
+
+			let body: TMDLProxyData = {
+				"connectionString": PowerBIApiService.getXmlaServer(tmdlEntry.workspace).toString(),
+				"accessToken": accessToken,
+				"datasetName": tmdlEntry.dataset,
+				"streamEntries": await tmdlEntry.getStreamEntries()
+			};
+
+			const config: RequestInit = {
+				method: "POST",
+				headers: TMDLProxy._headers,
+				body: JSON.stringify(body),
+			};
+			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/publishStream").toString();
+
+			let success = await Helper.fetchWithProgress("Publish TMDL", fetch(endpoint, config), 0);
 
 			return success;
 		} catch (error) {

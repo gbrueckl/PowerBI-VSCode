@@ -39,7 +39,7 @@ export abstract class Helper {
 		});
 	}
 
-	static async fetchWithProgress(message: string, fetchPromise: Promise<any>): Promise<boolean> {
+	static async fetchWithProgress(message: string, fetchPromise: Promise<any>, keepResultMessage: number = 5000): Promise<boolean> {
 		let success: boolean = false;
 		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
@@ -64,12 +64,36 @@ export abstract class Helper {
 			const p = await new Promise<void>(resolve => {
 				setTimeout(() => {
 					resolve();
-				}, 2000);
+				}, keepResultMessage);
 			});
 			return p;
 		});
 
 		return success;
+	}
+
+	static async awaitWithProgress<T>(message: string, promise: Promise<any>, keepResultMessage: number = 5000): Promise<T> {
+		let ret: T = undefined;
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: message,
+			cancellable: false
+		}, async (progress: vscode.Progress<any>) => {
+			progress.report({ message: "..." });
+			let result = await promise;
+
+			progress.report({ increment: 100, message: "Finished!" });
+			ret = result;
+
+			const p = await new Promise<void>(resolve => {
+				setTimeout(() => {
+					resolve();
+				}, keepResultMessage);
+			});
+			return p;
+		});
+
+		return ret;
 	}
 
 	static mapToObject<T>(map: Map<string, any>): T {
@@ -224,17 +248,29 @@ export abstract class Helper {
 
 	static async addToWorkspace(uri: vscode.Uri, name: string, showMessage: boolean = true): Promise<void> {
 		if (!vscode.workspace.workspaceFolders) {
-			let success = await vscode.commands.executeCommand('vscode.openFolder', uri);
+			await vscode.commands.executeCommand('vscode.openFolder', uri);
 			//vscode.window.showErrorMessage("Please save your current session as a VSCode workspace first to use this feature!");
 		}
 		else {
-			// add at the end of the workspace
-			if (showMessage) {
-				vscode.window.showWarningMessage("This feature is still experimental!");
-			}
-			vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: uri, name: name });
-
-			vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", uri);
+			await vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: uri, name: name });
 		}
+	}
+
+	static parentUri(uri: vscode.Uri): vscode.Uri {
+		let parentPaths = uri.path.split(this.SEPARATOR).slice(0, -1);
+		let parentPath: string = "/";
+
+		if(parentPaths.length > 1)
+		{
+			parentPath = parentPaths.join(this.SEPARATOR)
+		}
+		return uri.with({ path: parentPath });
+	}
+
+	static cutEnd(text: string, cutOffText: string): string {
+		if (text.endsWith(cutOffText)) {
+			return text.substring(0, text.length - cutOffText.length);
+		}
+		return text;
 	}
 }

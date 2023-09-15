@@ -16,6 +16,8 @@ using System.Reflection;
 using System.Text.Json;
 using System.Drawing;
 using System.Runtime.CompilerServices;
+using System.Reflection.Metadata;
+using System.Text.Json.Nodes;
 
 namespace TMDLVSCodeProxy.Controllers
 {
@@ -43,17 +45,26 @@ namespace TMDLVSCodeProxy.Controllers
             return Ok("Hello World!");
         }
 
+        public class TMDLProxyStreamEntry
+        {
+            public string logicalPath { get; set; }
+            public Int64 size { get; set; }
+            public string content { get; set; }
+        }
         public class TMDLProxyData
         {
             public string connectionString { get; set; }
             public string accessToken { get; set; }
             public string datasetName { get; set; }
-            public string localPath { get; set; }
+            public string? localPath { get; set; }
+
+            public TMDLProxyStreamEntry[]? streamEntries { get; set; }
         }
 
         public class TMDLProxyDataValidation
         {
-            public string localPath { get; set; }
+            public string? localPath { get; set; }
+            public TMDLProxyStreamEntry[]? streamEntries { get; set; }
         }
 
         public class TMDLProxyHeader
@@ -126,9 +137,13 @@ namespace TMDLVSCodeProxy.Controllers
 
                 return Ok("Validation successful!");
             }
-            catch(TmdlFormatException fex)
+            catch (TmdlFormatException fex)
             {
                 return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
+            }
+            catch (TmdlAmbiguousSourceException asex)
+            {
+                return BadRequest(asex.ToString());
             }
             catch (Exception ex)
             {
@@ -174,6 +189,165 @@ namespace TMDLVSCodeProxy.Controllers
             catch (TmdlFormatException fex)
             {
                 return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
+            }
+            catch (TmdlAmbiguousSourceException asex)
+            {
+                return BadRequest(asex.ToString());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        [HttpPost(Name = "ExportDatasetTMDLStream")]
+        [Route("/tmdl/exportStream")]
+        public IActionResult ExportDatasetTMDLStream(
+            [FromBody] TMDLProxyData requestBody,
+            [FromHeader] TMDLProxyHeader header
+        )
+        {
+            if (!header.secret.Equals(TMDLProxyController.secret))
+            {
+                return BadRequest("Invalid Secret!");
+            }
+
+            var connectionString = requestBody.connectionString;
+            var datasetName = requestBody.datasetName;
+
+            try
+            {
+                using (var server = new TOM.Server())
+                {
+                    server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
+
+                    server.Connect(connectionString);
+
+                    var database = server.Databases.GetByName(datasetName);
+
+                    var ret = new JsonArray();
+
+                    foreach (MetadataDocument document in database.Model.ToTmdl())
+                    {
+                        StringBuilder output = new StringBuilder();
+                        using (TextWriter writer = new StringWriter(output))
+                        {
+                            document.WriteTo(writer);
+                        }
+                        TMDLProxyStreamEntry tmdlEntry = new TMDLProxyStreamEntry
+                        {
+                            logicalPath = document.LogicalPath,
+                            size = output.Length,
+                            content = output.ToString()
+                        };
+
+                        ret.Add(tmdlEntry);
+                    }
+
+                    return Ok(ret);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost(Name = "PublishDatasetTMDLStream")]
+        [Route("/tmdl/publishStream")]
+        public IActionResult PublishDatasetTMDLStream(
+            [FromBody] TMDLProxyData requestBody,
+            [FromHeader] TMDLProxyHeader header
+        )
+        {
+            if (!header.secret.Equals(TMDLProxyController.secret))
+            {
+                return BadRequest("Invalid Secret!");
+            }
+
+            var connectionString = requestBody.connectionString;
+            var datasetName = requestBody.datasetName;
+            var localPath = requestBody.localPath;
+            var streamEntries = requestBody.streamEntries;
+
+            try
+            {
+                var context = MetadataSerializationContext.Create(MetadataSerializationStyle.Tmdl);
+
+                foreach (var entry in streamEntries)
+                {
+                    context.ReadFromDocument(entry.logicalPath, new MemoryStream(Encoding.UTF8.GetBytes(entry.content)));
+                }
+
+                var model = context.ToModel();
+
+                Console.WriteLine($"Publishing TMDL from Stream to Dataset '{datasetName}' ...");
+
+                using (var server = new TOM.Server())
+                {
+                    server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
+                    server.Connect(connectionString);
+
+                    using (var remoteDatabase = server.Databases[model.Database.ID])
+                    {
+                        model.CopyTo(remoteDatabase.Model);
+
+                        remoteDatabase.Model.SaveChanges();
+                    }
+                    return Ok("Publish Stream successful!");
+                }
+            }
+            catch (TmdlFormatException fex)
+            {
+                return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
+            }
+            catch (TmdlAmbiguousSourceException asex)
+            {
+                return BadRequest(asex.ToString());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost(Name = "ValidateDatasetTMDLStream")]
+        [Route("/tmdl/validateStream")]
+        public IActionResult ValidateDatasetTMDLStream(
+            [FromBody] TMDLProxyDataValidation requestBody,
+            [FromHeader] TMDLProxyHeader header
+        )
+        {
+            if (!header.secret.Equals(TMDLProxyController.secret))
+            {
+                return BadRequest("Invalid Secret!");
+            }
+
+            var streamEntries = requestBody.streamEntries;
+
+            try
+            {
+                var context = MetadataSerializationContext.Create(MetadataSerializationStyle.Tmdl);
+
+                foreach (var entry in streamEntries)
+                {
+                    context.ReadFromDocument(entry.logicalPath, new MemoryStream(Encoding.UTF8.GetBytes(entry.content)));
+                }
+
+                Console.WriteLine($"Validating TMDL Stream ...");
+                var model = context.ToModel();
+
+                return Ok("Validation successful!");
+            }
+            catch (TmdlFormatException fex)
+            {
+                return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
+            }
+            catch (TmdlAmbiguousSourceException asex)
+            {
+                return BadRequest(asex.ToString());
             }
             catch (Exception ex)
             {

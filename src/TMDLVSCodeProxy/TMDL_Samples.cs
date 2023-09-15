@@ -137,7 +137,7 @@ namespace TMDLVSCodeProxy
                     context.ReadFromDocument(relativePath, reader);
                 }
             }
-
+            
             var model = context.ToModel();
 
             // Stream Serialization
@@ -150,7 +150,7 @@ namespace TMDLVSCodeProxy
                 {
                     Console.WriteLine("About Table");
                 }
-
+                
                 using (TextWriter writer = new StringWriter(output))
                 {
                     document.WriteTo(writer);

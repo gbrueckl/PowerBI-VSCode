@@ -16,6 +16,7 @@ import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { PowerBIParameter } from './PowerBIParameter';
 import { TMDLProxy } from '../../../helpers/TMDLProxy';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { TMDLFSUri, TMDLFileSystemProvider } from '../../filesystemProvider/TMDLFileSystemProvider';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -75,7 +76,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	async getXMLACConnectionString(): Promise<string> {
 		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
-		const xmlaServer = PowerBIApiService.getXmlaServer(workspace).toString();
+		const xmlaServer = PowerBIApiService.getXmlaServer(workspace.name).toString();
 
 		return `Data Source=${xmlaServer};Initial Catalog=${this.name};`;
 	}
@@ -175,19 +176,11 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	}
 
 	public async editTMDL(): Promise<void> {
-		ThisExtension.setStatusBar("Starting TMDL editor ...", true);
+		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
+		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`tmdl:/powerbi/${workspace.name}/${this.name}`))
 
-		let success = await TMDLProxy.export(this);
-
-		if (success) {
-			let localPath = TMDLProxy.getLocalPath(this);
-			Helper.addToWorkspace(vscode.Uri.file(localPath.fsPath), `PowerBI Dataset - ${this.name}`, true);
-		}
-
-		ThisExtension.setStatusBar("TMDL editor started!");
-
-		//await Helper.delay(1000);
-		//ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
+		await TMDLFileSystemProvider.loadModel(tmdlUri.uri);
+		await Helper.addToWorkspace(tmdlUri.uri, `PowerBI Dataset - ${this.name}`, true);
 	}
 
 	public async updateAllParameters(): Promise<void> {
