@@ -45,6 +45,11 @@ namespace TMDLVSCodeProxy.Controllers
             return Ok("Hello World!");
         }
 
+        public class TMDLProxyDatabase
+        {
+            public string name { get; set; }
+            public string id { get; set; }
+        }
         public class TMDLProxyStreamEntry
         {
             public string logicalPath { get; set; }
@@ -55,7 +60,7 @@ namespace TMDLVSCodeProxy.Controllers
         {
             public string connectionString { get; set; }
             public string accessToken { get; set; }
-            public string datasetName { get; set; }
+            public string? datasetName { get; set; }
             public string? localPath { get; set; }
 
             public TMDLProxyStreamEntry[]? streamEntries { get; set; }
@@ -71,6 +76,52 @@ namespace TMDLVSCodeProxy.Controllers
         {
             [FromHeader(Name = "X-TMDLProxy-Secret")]
             public string secret { get; set; }
+        }
+
+        [HttpPost(Name = "GetDatabases")]
+        [Route("/tmdl/databases")]
+        public IActionResult GetDatabases(
+            [FromBody] TMDLProxyData requestBody,
+            [FromHeader] TMDLProxyHeader header
+        )
+        {
+            if (!header.secret.Equals(TMDLProxyController.secret))
+            {
+                return BadRequest("Invalid Secret!");
+            }
+
+            var connectionString = requestBody.connectionString;
+
+            try
+            {
+                using (var server = new TOM.Server())
+                {
+                    server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
+
+                    server.Connect(connectionString);
+
+                    /*
+                    var database = server.Databases.GetByName(datasetName);
+
+                    Console.WriteLine($"Exporting Dataset '{datasetName}' as TMDL to local folder '{localPath}' ...");
+
+                    TOM.TmdlSerializer.SerializeModelToFolder(database.Model, localPath);
+
+                    Console.WriteLine($"Export successful!");
+                    */
+                    List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
+
+                    foreach (TOM.Database db in server.Databases)
+                    {
+                        dbs.Add(new TMDLProxyDatabase{ name = db.Name, id = db.ID});
+                    }
+                    return Ok(dbs);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost(Name = "ExportDatasetTMDL")]
@@ -139,7 +190,7 @@ namespace TMDLVSCodeProxy.Controllers
             }
             catch (TmdlFormatException fex)
             {
-                return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
+                return BadRequest(fex.ToString());
             }
             catch (TmdlAmbiguousSourceException asex)
             {
@@ -188,7 +239,7 @@ namespace TMDLVSCodeProxy.Controllers
             }
             catch (TmdlFormatException fex)
             {
-                return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
+                return BadRequest(fex.ToString());
             }
             catch (TmdlAmbiguousSourceException asex)
             {
@@ -301,7 +352,7 @@ namespace TMDLVSCodeProxy.Controllers
             }
             catch (TmdlFormatException fex)
             {
-                return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
+                return BadRequest(fex.ToString());
             }
             catch (TmdlAmbiguousSourceException asex)
             {
@@ -343,7 +394,7 @@ namespace TMDLVSCodeProxy.Controllers
             }
             catch (TmdlFormatException fex)
             {
-                return BadRequest($"{fex.Message} at '{fex.Path}' line {fex.LineNumber}: {fex.LineText}");
+                return BadRequest(fex.ToString());
             }
             catch (TmdlAmbiguousSourceException asex)
             {

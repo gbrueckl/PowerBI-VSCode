@@ -135,7 +135,10 @@ export abstract class PowerBIApiService {
 
 	public static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
 		//https://www.eliostruyf.com/microsoft-authentication-provider-visual-studio-code/
-
+		
+		if (!scopes.includes("offline_access")) {
+			scopes.push("offline_access") // Required for the refresh token.
+		}
 		if (tenantId) {
 			scopes.push("VSCODE_TENANT:" + tenantId);
 		}

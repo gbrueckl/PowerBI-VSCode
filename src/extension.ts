@@ -27,7 +27,7 @@ import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPip
 import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
 import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
 import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
-import { TMDLFileSystemProvider, TMDL_SCHEME } from './vscode/filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFSUri, TMDLFileSystemProvider, TMDL_SCHEME } from './vscode/filesystemProvider/TMDLFileSystemProvider';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -140,6 +140,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Workspace File System Provider
 	if (!ThisExtension.isInBrowser && PowerBIConfiguration.isTMDLConfigured) {
 		await TMDLProxy.ensureProxy(context);
+
 		//vscode.commands.registerCommand('PowerBIDataset.testTMDL', () => TMDLProxy.test(undefined));
 		TMDLFileSystemProvider.register(context);
 
@@ -148,7 +149,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		{
 			if(folder.uri.scheme == TMDL_SCHEME)
 			{
-				TMDLFileSystemProvider.loadModel(folder.uri);
+				TMDLFileSystemProvider.loadModel(new TMDLFSUri(folder.uri));
 			}
 		}
 

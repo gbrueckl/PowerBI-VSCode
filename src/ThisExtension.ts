@@ -245,6 +245,18 @@ export abstract class ThisExtension {
 		}
 	}
 
+	static logDebug(text: string, newLine: boolean = true): void {
+		if (!this._logger) {
+			vscode.window.showErrorMessage(text);
+		}
+		if (newLine) {
+			this._logger.appendLine("DEBUG: " + text);
+		}
+		else {
+			this._logger.append("DEBUG: " + text);
+		}
+	}
+
 	static get configuration(): vscode.Extension<any> {
 		return this._extension;
 	}

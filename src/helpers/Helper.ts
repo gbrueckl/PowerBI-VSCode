@@ -161,6 +161,7 @@ export abstract class Helper {
 
 	static openLink(link: string): void {
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(link));
+		//vscode.env.openExternal(vscode.Uri.parse(link));
 	}
 
 	static async wait(ms: number): Promise<void> {
@@ -272,5 +273,31 @@ export abstract class Helper {
 			return text.substring(0, text.length - cutOffText.length);
 		}
 		return text;
+	}
+
+	static async awaitCondition(
+		condition: () => Promise<boolean>,
+		timeout: number,
+		interval: number
+	): Promise<boolean> {
+		// Set a timer that will resolve with null
+		return new Promise<boolean>((resolve) => {
+			let finish: (result: boolean) => void;
+			const timer = setTimeout(() => finish(false), timeout);
+			const intervalId = setInterval(() => {
+				condition()
+					.then((r) => {
+						if (r) {
+							finish(true);
+						}
+					})
+					.catch((_e) => finish(false));
+			}, interval);
+			finish = (result: boolean) => {
+				clearTimeout(timer);
+				clearInterval(intervalId);
+				resolve(result);
+			};
+		});
 	}
 }

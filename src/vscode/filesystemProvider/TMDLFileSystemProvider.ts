@@ -38,6 +38,29 @@ export class TMDLFSUri {
 		this.logicalPath = "." + Helper.cutEnd(match.groups["logicalPath"], TMDL_EXTENSION);
 	}
 
+	static async getInstance(uri: vscode.Uri): Promise<TMDLFSUri> {
+		const tmdlUri = new TMDLFSUri(uri);
+
+		if(tmdlUri.isVSCodeInternalURI)
+		{
+			throw vscode.FileSystemError.FileNotFound(uri);
+		}
+		await TMDLFileSystemProvider.loadModel(tmdlUri);
+
+		return tmdlUri;
+	}
+
+	get isVSCodeInternalURI(): boolean {
+		if (this.logicalPath.startsWith("./.vscode")
+			|| this.logicalPath.startsWith("./.git")
+			|| this.logicalPath == "./pom.xml"
+			|| this.logicalPath == "./node_modules"
+			|| this.logicalPath.endsWith("AndroidManifest.xml")) {
+			return true;
+		}
+		return false;
+	}
+
 	async getStreamEntries(): Promise<TMDLProxyStreamEntry[]> {
 
 		let entries = TMDLFileSystemProvider.loadedModels.get(this.modelId);
@@ -63,40 +86,42 @@ export class TMDLFSUri {
 export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	static loadedModels: Map<string, TMDLProxyStreamEntry[]> = new Map<string, TMDLProxyStreamEntry[]>();
 
-	constructor() {	}
+	constructor() { }
 
 	public static async register(context: vscode.ExtensionContext) {
 		context.subscriptions.push(vscode.workspace.registerFileSystemProvider(TMDL_SCHEME, new TMDLFileSystemProvider(), { isCaseSensitive: false }));
 	}
 
-	public static async loadModel(uri: vscode.Uri): Promise<void> {
-		const tmdlUri: TMDLFSUri = new TMDLFSUri(uri);
-
-		ThisExtension.log("Loading TMDL model " + tmdlUri.modelId);
-		// set the model to an empty array to prevent multiple requests
-		let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>("Loading TMDL model " + tmdlUri.modelId, TMDLProxy.exportStream(tmdlUri), 1000);
-
-		TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, stream);
-	}
-
-	public static isVSCodeInternalURI(tmdlUri: TMDLFSUri): boolean {
-		if (tmdlUri.logicalPath.startsWith("./.vscode")
-			|| tmdlUri.logicalPath.startsWith("./.git")
-			|| tmdlUri.logicalPath == "./pom.xml"
-			|| tmdlUri.logicalPath == "./node_modules"
-			|| tmdlUri.logicalPath.endsWith("AndroidManifest.xml")) {
+	public static isModelLoaded(modelId: string): boolean {
+		if(TMDLFileSystemProvider.loadedModels.has(modelId))
+		{
 			return true;
 		}
 		return false;
 	}
 
+	public static async loadModel(tmdlUri: TMDLFSUri): Promise<void> {
+		if (this.isModelLoaded(tmdlUri.modelId)) {
+			if(TMDLFileSystemProvider.loadedModels.get(tmdlUri.modelId).length == 0)
+			{
+				ThisExtension.logDebug(`Model '${tmdlUri.modelId}' is loading in other process - waiting ... `);
+				await Helper.awaitCondition(async () => TMDLFileSystemProvider.loadedModels.get(tmdlUri.modelId).length > 0, 50000, 200);
+				ThisExtension.logDebug(`Model '${tmdlUri.modelId}' successfully loaded in other process!`);
+			}	
+		}
+		else {
+			ThisExtension.log(`Loading TMDL Model '${tmdlUri.modelId}' ... `);
+			TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, []);
+			// set the model to an empty array to prevent multiple requests
+			let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>("Loading TMDL model " + tmdlUri.modelId, TMDLProxy.exportStream(tmdlUri), 1000);
+			TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, stream);
+			ThisExtension.log(`TMDL Model '${tmdlUri.modelId}' loaded!`);
+		}
+	}
+
 	// --- manage file metadata
 	async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
-		const tmdlUri: TMDLFSUri = new TMDLFSUri(uri);
-
-		if (TMDLFileSystemProvider.isVSCodeInternalURI(tmdlUri)) {
-			throw vscode.FileSystemError.FileNotFound(uri);
-		}
+		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
 
 		if (tmdlUri.logicalPath == ".") {
 			return {
@@ -130,11 +155,8 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	}
 
 	async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
-		const tmdlUri: TMDLFSUri = new TMDLFSUri(uri);
+		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
 
-		if(!TMDLFileSystemProvider.loadedModels.has(tmdlUri.modelId)) {
-			await TMDLFileSystemProvider.loadModel(uri);
-		}
 		const entries: TMDLProxyStreamEntry[] = await tmdlUri.getStreamEntries();
 
 		const folders: [string, vscode.FileType][] = [];
@@ -156,11 +178,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	// --- manage file contents
 
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
-		const tmdlUri: TMDLFSUri = new TMDLFSUri(uri);
-
-		if (TMDLFileSystemProvider.isVSCodeInternalURI(tmdlUri)) {
-			throw vscode.FileSystemError.FileNotFound(uri);
-		}
+		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
 
 		const entry = await tmdlUri.getStreamEntry();
 		if (!entry) {
@@ -175,7 +193,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	}
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
-		const tmdlUri: TMDLFSUri = new TMDLFSUri(uri);
+		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
 
 		const entry = await tmdlUri.getStreamEntry();
 		if (!entry) {
@@ -206,8 +224,8 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	// --- manage files/folders
 
 	async rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean }): Promise<void> {
-		const oldTmdlUri: TMDLFSUri = new TMDLFSUri(oldUri);
-		const newTmdlUri: TMDLFSUri = new TMDLFSUri(oldUri);
+		const oldTmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(oldUri);
+		const newTmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(newUri);
 
 		const oldEntry = await oldTmdlUri.getStreamEntry();
 		if (!oldEntry) {
@@ -221,7 +239,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	}
 
 	async delete(uri: vscode.Uri): Promise<void> {
-		const tmdlUri: TMDLFSUri = new TMDLFSUri(uri);
+		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
 
 		const entry = await tmdlUri.getStreamEntry();
 		if (!entry) {
