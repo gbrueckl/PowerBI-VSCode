@@ -335,8 +335,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	}
 
 	async createDirectory(uri: vscode.Uri): Promise<void> {
-		//await DatabricksApiService.createDBFSFolder(uri.path);
-
+		throw vscode.FileSystemError.Unavailable("Creating directories in TMDL is not supported! Consider creating/copying a file at any location and do your changes there.");
 		//this._fireSoon({ type: vscode.FileChangeType.Changed, uri: FSHelper.parent(uri) }, { type: vscode.FileChangeType.Created, uri });
 	}
 
