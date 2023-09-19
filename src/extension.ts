@@ -144,10 +144,12 @@ export async function activate(context: vscode.ExtensionContext) {
 			for (const tmdlFolder of tmdlFolders) {
 				TMDLFileSystemProvider.loadModel(new TMDLFSUri(tmdlFolder.uri));
 			}
+			
 			if (tmdlFolders.length > 0) {
 				vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
 			}
 		}
+		
 	}
 	else {
 		ThisExtension.log("TMDL is not configured! Please use the setting `powerbi.TMDLClientId` to configure it.");

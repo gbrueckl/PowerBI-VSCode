@@ -137,7 +137,6 @@ export abstract class PowerBIApiService {
 
 		this._xmlaSession = await this.getAADAccessToken(scopes, this._tenantId, this._tmdlClientId);
 
-
 		return this._xmlaSession;
 	}
 
@@ -157,9 +156,9 @@ export abstract class PowerBIApiService {
 
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
 		if (event.provider.id === this._authenticationProvider) {
-			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing headers! ");
+			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing connections! ");
 
-			this.refreshXmlaSession();
+			await this.refreshXmlaSession();
 			await this.refreshConnection();
 			ThisExtension.refreshUI();
 		}
@@ -179,7 +178,7 @@ export abstract class PowerBIApiService {
 			scopes.push("VSCODE_CLIENT_ID:" + clientId);
 		}
 
-		let session: vscode.AuthenticationSession = await vscode.authentication.getSession(this._authenticationProvider, scopes);
+		let session: vscode.AuthenticationSession = await vscode.authentication.getSession(this._authenticationProvider, scopes, { createIfNone: true });
 
 		return session;
 	}

@@ -40,13 +40,13 @@ export class TMDLFSUri {
 		this.logicalPath = "." + Helper.cutEnd(match.groups["logicalPath"], TMDL_EXTENSION);
 	}
 
-	static async getInstance(uri: vscode.Uri): Promise<TMDLFSUri> {
+	static async getInstance(uri: vscode.Uri, awaitModel: boolean = false): Promise<TMDLFSUri> {
 		const tmdlUri = new TMDLFSUri(uri);
 
 		if (tmdlUri.isVSCodeInternalURI) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
-		await TMDLFileSystemProvider.loadModel(tmdlUri);
+		await TMDLFileSystemProvider.loadModel(tmdlUri, awaitModel);
 
 		return tmdlUri;
 	}
@@ -155,12 +155,15 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 		return false;
 	}
 
-	public static async loadModel(tmdlUri: TMDLFSUri): Promise<void> {
+	public static async loadModel(tmdlUri: TMDLFSUri, awaitModel: boolean = false): Promise<void> {
 		if (this.isModelLoaded(tmdlUri.modelId)) {
 			if(TMDLFileSystemProvider.loadedModels.get(tmdlUri.modelId).length == 0)
 			{
 				ThisExtension.logDebug(`Model '${tmdlUri.modelId}' is loading in other process - waiting ... `);
-				await Helper.awaitCondition(async () => this.isModelLoaded(tmdlUri.modelId) && TMDLFileSystemProvider.loadedModels.get(tmdlUri.modelId).length > 0, 10000, 200);
+				if(awaitModel)
+				{
+					await Helper.awaitCondition(async () => this.isModelLoaded(tmdlUri.modelId) && TMDLFileSystemProvider.loadedModels.get(tmdlUri.modelId).length > 0, 60000, 200);
+				}
 				ThisExtension.logDebug(`Model '${tmdlUri.modelId}' successfully loaded in other process!`);
 			}	
 		}
@@ -172,6 +175,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 			if (stream) {
 				TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, stream);
 				ThisExtension.log(`TMDL Model '${tmdlUri.modelId}' loaded!`);
+				vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
 			}
 			else {
 				TMDLFileSystemProvider.loadedModels.delete(tmdlUri.modelId);
@@ -186,7 +190,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 		}
 	}
 
-	// --- manage file metadata
+	// -- manage file metadata
 	async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
 		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
 
@@ -259,16 +263,14 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	// --- manage file contents
 
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
-		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
+		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri, true);
 
 		const entry = await tmdlUri.getStreamEntry();
 		if (!entry) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
-		/*if (dbfsItem.is_dir) {
-			throw vscode.FileSystemError.FileIsADirectory(uri);
-		}
-		*/
+
+		this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
 
 		return Buffer.from(entry.content, 'latin1');
 	}
