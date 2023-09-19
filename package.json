@@ -20,7 +20,7 @@
 	},
 	"qna": "https://github.com/gbrueckl/PowerBI-VSCode",
 	"engines": {
-		"vscode": "^1.68.0"
+		"vscode": "^1.82.0"
 	},
 	"galleryBanner": {
 		"color": "#0ea5ff",
@@ -68,7 +68,7 @@
 					"powerbi.TMDLClientId": {
 						"type": "string",
 						"markdownDescription": "(Optional) To use **TMDL features**, a custom ClientID/Application is mandatory. \n\n You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permited in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details.\n\nIf this field is not set, all TMDL features will be disabled/hidden!",
-						"default": null
+						"default": "058487e5-bde7-4aba-a5dc-2f9ac58cb668"
 					},
 					"powerbi.cloud": {
 						"type": "string",
@@ -267,21 +267,35 @@
 				"enablement": "powerbi.isTMDLConfigured"
 			},
 			{
-				"command": "PowerBIDataset.validateTMDL",
+				"command": "PowerBI.TMDL.validate",
 				"title": "Validate TMDL",
 				"icon": "$(bracket-dot)",
 				"category": "PowerBI",
 				"enablement": "powerbi.isTMDLConfigured"
 			},
 			{
-				"command": "PowerBIDataset.publishTMDL",
+				"command": "PowerBI.TMDL.publish",
 				"title": "Publish TMDL",
 				"icon": "$(cloud-upload)",
 				"category": "PowerBI",
 				"enablement": "powerbi.isTMDLConfigured"
 			},
 			{
-				"command": "PowerBIDataset.testTMDL",
+				"command": "PowerBI.TMDL.load",
+				"title": "Load TMDL from server",
+				"icon": "$(cloud-download)",
+				"category": "PowerBI",
+				"enablement": "powerbi.isTMDLConfigured"
+			},
+			{
+				"command": "PowerBI.TMDL.saveLocally",
+				"title": "Save TMDL locally",
+				"icon": "$(cloud-download)",
+				"category": "PowerBI",
+				"enablement": "powerbi.isTMDLConfigured"
+			},
+			{
+				"command": "PowerBI.TMDL.test",
 				"title": "Test TMDL",
 				"icon": "$(symbol-class)",
 				"category": "PowerBI",
@@ -572,14 +586,36 @@
 			],
 			"editor/title": [
 				{
-					"command": "PowerBIDataset.publishTMDL",
+					"command": "PowerBI.TMDL.publish",
 					"when": "resourceExtname == .tmdl && !powerbi.isInBrowser",
 					"group": "navigation"
 				},
 				{
-					"command": "PowerBIDataset.validateTMDL",
+					"command": "PowerBI.TMDL.validate",
 					"when": "resourceExtname == .tmdl && !powerbi.isInBrowser",
 					"group": "navigation"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "PowerBI.TMDL.publish",
+					"when": "resourceScheme == tmdl && !powerbi.isInBrowser",
+					"group": "2_workspace"
+				},
+				{
+					"command": "PowerBI.TMDL.validate",
+					"when": "resourceScheme == tmdl && !powerbi.isInBrowser",
+					"group": "2_workspace"
+				},
+				{
+					"command": "PowerBI.TMDL.load",
+					"when": "resourceScheme == tmdl && !powerbi.isInBrowser",
+					"group": "2_workspace"
+				},
+				{
+					"command": "PowerBI.TMDL.saveLocally",
+					"when": "(resourceScheme == tmdl || resourceExtname == .tmdl) && !powerbi.isInBrowser",
+					"group": "2_workspace"
 				}
 			]
 		},

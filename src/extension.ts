@@ -79,13 +79,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// DatasetParameter commands
 	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
 
-	// new editor commands for TMDL files
-	vscode.commands.registerCommand('PowerBIDataset.validateTMDL',
-		TMDLProxy.validate
-	);
-	vscode.commands.registerCommand('PowerBIDataset.publishTMDL',
-		TMDLProxy.publish
-	);
+
 
 	// Report commands
 	vscode.commands.registerCommand('PowerBIReport.takeOver', (report: PowerBIReport) => report.takeOver());
@@ -141,23 +135,37 @@ export async function activate(context: vscode.ExtensionContext) {
 	if (!ThisExtension.isInBrowser && PowerBIConfiguration.isTMDLConfigured) {
 		await TMDLProxy.ensureProxy(context);
 
-		//vscode.commands.registerCommand('PowerBIDataset.testTMDL', () => TMDLProxy.test(undefined));
+		//vscode.commands.registerCommand('PowerBI.TMDL.test', () => TMDLProxy.test(undefined));
 		TMDLFileSystemProvider.register(context);
 
 		const workspaceFolders = vscode.workspace.workspaceFolders;
-		for(const folder of workspaceFolders)
-		{
-			if(folder.uri.scheme == TMDL_SCHEME)
-			{
-				TMDLFileSystemProvider.loadModel(new TMDLFSUri(folder.uri));
+		if (workspaceFolders) {
+			const tmdlFolders = workspaceFolders.filter(f => f.uri.scheme == TMDL_SCHEME)
+			for (const tmdlFolder of tmdlFolders) {
+				TMDLFileSystemProvider.loadModel(new TMDLFSUri(tmdlFolder.uri));
+			}
+			if (tmdlFolders.length > 0) {
+				vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
 			}
 		}
-
-		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
 	}
 	else {
 		ThisExtension.log("TMDL is not configured! Please use the setting `powerbi.TMDLClientId` to configure it.");
 	}
+
+	// new editor commands for TMDL files
+	vscode.commands.registerCommand('PowerBI.TMDL.validate',
+		TMDLProxy.validate
+	);
+	vscode.commands.registerCommand('PowerBI.TMDL.publish',
+		TMDLProxy.publish
+	);
+	vscode.commands.registerCommand('PowerBI.TMDL.load',
+		TMDLProxy.load
+	);
+	vscode.commands.registerCommand('PowerBI.TMDL.saveLocally',
+		TMDLProxy.saveLocally
+	);
 
 	vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
 		if (event.added[0].uri.scheme == TMDL_SCHEME) {

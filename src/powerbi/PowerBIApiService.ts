@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 
+import { fetch, getProxyAgent, RequestInit, Response, File, FormData } from '@env/fetch';
+
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { iPowerBIGroup } from './GroupsAPI/_types';
@@ -9,10 +11,9 @@ import { ApiUrlPair } from './_types';
 import { iPowerBIDataset, iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
+import { TMDLFileSystemProvider } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
 
 
-import { fetch, getProxyAgent, RequestInit, Response, File, FormData } from '@env/fetch';
-import { PowerBIWorkspace } from '../vscode/treeviews/workspaces/PowerBIWorkspace';
 
 export abstract class PowerBIApiService {
 	private static _isInitialized: boolean = false;
@@ -26,6 +27,7 @@ export abstract class PowerBIApiService {
 	private static _org: string = "myorg"
 	private static _headers;
 	private static _vscodeSession: vscode.AuthenticationSession;
+	private static _xmlaSession: vscode.AuthenticationSession;
 
 	//#region Initialization
 	static async initialize(
@@ -49,21 +51,7 @@ export abstract class PowerBIApiService {
 			this._authenticationProvider = authenticationProvider;
 			this._resourceId = resourceId;
 
-			await this.refreshHeaders();
-
-			ThisExtension.log(`Testing new PowerBI API (${apiBaseUrl}) settings for user '${this.SessionUser}' (${this.SessionUserId}) ...`);
-			this._connectionTestRunning = true;
-			let workspaceList = await this.getGroups();
-			this._connectionTestRunning = false;
-			if (workspaceList.length > 0) {
-				ThisExtension.log("Power BI API Service initialized!");
-				this._isInitialized = true;
-				return true;
-			}
-			else {
-				ThisExtension.log(JSON.stringify(workspaceList));
-				throw new Error(`Invalid Configuration for PowerBI REST API: Cannot access '${apiBaseUrl}' with given credentials'!`);
-			}
+			await this.refreshConnection();
 		} catch (error) {
 			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
@@ -72,14 +60,32 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static async refreshHeaders(): Promise<void> {
+	private static async refreshConnection(): Promise<void> {
 		this._vscodeSession = await this.getPowerBISession();
+
+		if (!this._vscodeSession || !this._vscodeSession.accessToken) {
+			vscode.window.showInformationMessage("PowerBI / API: Please log in with your Microsoft account first!");
+			return;
+		}
 
 		ThisExtension.log("Refreshing authentication headers ...");
 		this._headers = {
 			"Authorization": 'Bearer ' + this._vscodeSession.accessToken,
 			"Content-Type": 'application/json',
 			"Accept": 'application/json'
+		}
+
+		ThisExtension.log(`Testing new PowerBI API (${this._apiBaseUrl}) settings for user '${this.SessionUser}' (${this.SessionUserId}) ...`);
+		this._connectionTestRunning = true;
+		let workspaceList = await this.getGroups();
+		this._connectionTestRunning = false;
+		if (workspaceList.length > 0) {
+			ThisExtension.log("Power BI API Service initialized!");
+			this._isInitialized = true;
+		}
+		else {
+			ThisExtension.log(JSON.stringify(workspaceList));
+			throw new Error(`Invalid Configuration for PowerBI REST API: Cannot access '${this._apiBaseUrl}' with given credentials'!`);
 		}
 	}
 
@@ -89,10 +95,33 @@ export abstract class PowerBIApiService {
 		return session;
 	}
 
+	public static async refreshXmlaSession(): Promise<boolean> {
+		this._xmlaSession = await this.getXmlaSession();
+
+		if (!this._xmlaSession) {
+			vscode.window.showInformationMessage("PowerBI / TMDL: Please log in with your Microsoft account first!");
+			return false;
+		}
+
+		const keys = TMDLFileSystemProvider.loadedModels.keys();
+		for(const model of TMDLFileSystemProvider.loadedModels)
+		{
+			if(model[1] == undefined || model[1].length == 0)
+			{
+				TMDLFileSystemProvider.loadedModels.delete(model[0]);
+			}
+		}
+		return true;
+	}
+
 	public static async getXmlaSession(): Promise<vscode.AuthenticationSession> {
+		if(this._xmlaSession)
+		{
+			return this._xmlaSession;
+		}
 		let scopes = [
 			//`${Helper.trimChar(this._resourceId, "/")}/.default`,
-			
+
 			`${Helper.trimChar(this._resourceId, "/")}/Dataset.Read.All`,
 			`${Helper.trimChar(this._resourceId, "/")}/Dataset.ReadWrite.All`,
 			`${Helper.trimChar(this._resourceId, "/")}/Workspace.Read.All`,
@@ -105,9 +134,11 @@ export abstract class PowerBIApiService {
 			`${Helper.trimChar(this._resourceId, "/")}/Group.Read`,
 			*/
 		];
-		let session = await this.getAADAccessToken(scopes, this._tenantId, this._tmdlClientId);
 
-		return session;
+		this._xmlaSession = await this.getAADAccessToken(scopes, this._tenantId, this._tmdlClientId);
+
+
+		return this._xmlaSession;
 	}
 
 	public static getXmlaServer(workspace: string): vscode.Uri {
@@ -128,14 +159,15 @@ export abstract class PowerBIApiService {
 		if (event.provider.id === this._authenticationProvider) {
 			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing headers! ");
 
-			await this.refreshHeaders();
+			this.refreshXmlaSession();
+			await this.refreshConnection();
 			ThisExtension.refreshUI();
 		}
 	}
 
 	public static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
 		//https://www.eliostruyf.com/microsoft-authentication-provider-visual-studio-code/
-		
+
 		if (!scopes.includes("offline_access")) {
 			scopes.push("offline_access") // Required for the refresh token.
 		}
@@ -153,19 +185,40 @@ export abstract class PowerBIApiService {
 	}
 
 	public static get SessionUserEmail(): string {
-		return Helper.trimChar(this._vscodeSession.account.label.split("-")[1], " ");
+		if (this._vscodeSession) {
+			return Helper.trimChar(this._vscodeSession.account.label.split("-")[1], " ");
+		}
+		return "UNAUTHENTICATED";
 	}
 
 	public static get SessionUser(): string {
-		return this._vscodeSession.account.label;
+		if (this._vscodeSession) {
+			return this._vscodeSession.account.label;
+		}
+		return "UNAUTHENTICATED";
 	}
 
 	public static get SessionUserId(): string {
-		return this._vscodeSession.account.id;
+		if (this._vscodeSession) {
+			return this._vscodeSession.account.id;
+		}
+		return "UNAUTHENTICATED";
 	}
 
 	public static get Org(): string {
 		return this._org;
+	}
+
+	public static get TenantId(): string {
+		return this._tenantId;
+	}
+
+	public static get ClientId(): string {
+		return this._clientId;
+	}
+
+	public static get TmdlClientId(): string {
+		return this._tmdlClientId;
 	}
 
 	public static get isInitialized(): boolean {

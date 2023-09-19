@@ -176,6 +176,11 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	}
 
 	public async editTMDL(): Promise<void> {
+		const xmlaConnected = await PowerBIApiService.refreshXmlaSession();
+		if(!xmlaConnected)
+		{
+			return;
+		}
 		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
 		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`tmdl:/powerbi/${workspace.name}/${this.name}`))
 

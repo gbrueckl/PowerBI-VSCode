@@ -10,6 +10,7 @@ import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/Power
 import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/PowerBIWorkspacesTreeProvider';
 import { PowerBIApiTreeItem } from './vscode/treeviews/PowerBIApiTreeItem';
 import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
+import { TMDLFileSystemProvider } from './vscode/filesystemProvider/TMDLFileSystemProvider';
 
 
 export type TreeProviderId =
@@ -28,6 +29,7 @@ export abstract class ThisExtension {
 	private static _settingScope: ConfigSettingSource;
 	private static _isVirtualWorkspace: boolean = undefined;
 	private static _statusBar: vscode.StatusBarItem;
+	private static _tmdlFileSystemProvider: TMDLFileSystemProvider;
 	private static _treeViewWorkspaces: PowerBIWorkspacesTreeProvider;
 	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
 	private static _treeViewGateways: PowerBIGatewaysTreeProvider;
@@ -82,6 +84,14 @@ export abstract class ThisExtension {
 
 	}
 	//#endregion
+	// #region FileSystemProvider
+	static set TMDLFileSystemProvider(provider: TMDLFileSystemProvider) {
+		this._tmdlFileSystemProvider = provider;
+	}
+	static get TMDLFileSystemProvider(): TMDLFileSystemProvider {
+		return this._tmdlFileSystemProvider;
+	}
+	// #endregion
 	// #region TreeViews
 	static set TreeViewWorkspaces(treeView: PowerBIWorkspacesTreeProvider) {
 		this._treeViewWorkspaces = treeView;
@@ -224,9 +234,12 @@ export abstract class ThisExtension {
 		const allCommands = await vscode.commands.getCommands(true);
 		const powerBiRefreshCommands = allCommands.filter(command => command.match(/^PowerBI.*?s\.refresh/));
 
+		ThisExtension.log("Refreshing UI ...");
 		for (let command of powerBiRefreshCommands) {
+			ThisExtension.log(`Executing command '${command}' ...`);
 			vscode.commands.executeCommand(command);
 		}
+		ThisExtension.log("UI refresh finsihed!");
 	}
 
 	static cleanUp(): void {
