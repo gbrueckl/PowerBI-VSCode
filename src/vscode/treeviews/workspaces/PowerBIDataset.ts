@@ -179,7 +179,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
 		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`tmdl:/powerbi/${workspace.name}/${this.name}`))
 
-		//await TMDLFileSystemProvider.loadModel(tmdlUri.uri);
+		await TMDLFileSystemProvider.loadModel(tmdlUri);
 		await Helper.addToWorkspace(tmdlUri.uri, `PowerBI Dataset - ${this.name}`, true);
 	}
 

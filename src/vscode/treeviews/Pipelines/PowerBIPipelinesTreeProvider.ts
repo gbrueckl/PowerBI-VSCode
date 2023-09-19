@@ -51,7 +51,7 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 
 	async refresh(item: PowerBIPipelineTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
-			Helper.showTemporaryInformationMessage('Refreshing Pipelines ...');
+			Helper.showTemporaryInformationMessage('Refreshing PowerBI Pipelines ...');
 		}
 
 		this._onDidChangeTreeData.fire(null);

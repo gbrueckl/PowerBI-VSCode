@@ -34,7 +34,7 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 
 	async refresh(item: PowerBICapacityTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
-			Helper.showTemporaryInformationMessage('Refreshing Capacities ...');
+			Helper.showTemporaryInformationMessage('Refreshing PowerBI Capacities ...');
 		}
 		this._onDidChangeTreeData.fire(null);
 	}

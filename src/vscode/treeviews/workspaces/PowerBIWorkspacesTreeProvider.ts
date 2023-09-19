@@ -38,7 +38,7 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 
 	async refresh(item: PowerBIWorkspaceTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
-			Helper.showTemporaryInformationMessage('Refreshing Workspaces ...');
+			Helper.showTemporaryInformationMessage('Refreshing PowerBI Workspaces ...');
 		}
 		this._onDidChangeTreeData.fire(item);
 	}
