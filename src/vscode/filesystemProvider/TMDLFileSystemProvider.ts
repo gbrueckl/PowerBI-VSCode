@@ -13,6 +13,7 @@ import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 
 export const TMDL_SCHEME: string = "tmdl";
 export const TMDL_EXTENSION: string = ".tmdl";
+const TMLD_FILE_ENCODING: BufferEncoding = "utf8";
 
 export class TMDLFSUri {
 	uri: vscode.Uri;
@@ -46,7 +47,6 @@ export class TMDLFSUri {
 		if (tmdlUri.isVSCodeInternalURI) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
-		await TMDLFileSystemProvider.loadModel(tmdlUri, awaitModel);
 
 		return tmdlUri;
 	}
@@ -94,7 +94,7 @@ export class TMDLFSUri {
 	}
 }
 
-export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
+export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode.Disposable {
 	static loadedModels: Map<string, TMDLProxyStreamEntry[]> = new Map<string, TMDLProxyStreamEntry[]>();
 
 	constructor() { }
@@ -106,50 +106,59 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 		ThisExtension.TMDLFileSystemProvider = fsp;
 	}
 
-/*
-	public static isModelLoaded(modelId: string): boolean {
-		if (this.modelExists(modelId)) {
-			if (TMDLFileSystemProvider.loadedModels.get(modelId) != undefined) {
+	/*
+		public static isModelLoaded(modelId: string): boolean {
+			if (this.modelExists(modelId)) {
+				if (TMDLFileSystemProvider.loadedModels.get(modelId) != undefined) {
+					return true;
+				}
+			}
+			return false;
+		}
+	
+		public static modelExists(modelId: string): boolean {
+			if (TMDLFileSystemProvider.loadedModels.has(modelId)) {
 				return true;
 			}
+			return false;
 		}
-		return false;
-	}
-
-	public static modelExists(modelId: string): boolean {
-		if (TMDLFileSystemProvider.loadedModels.has(modelId)) {
-			return true;
-		}
-		return false;
-	}
-
-	public static async loadModel(tmdlUri: TMDLFSUri): Promise<void> {
-		if (this.modelExists(tmdlUri.modelId)) {
-			if (!this.isModelLoaded(tmdlUri.modelId)) {
-				ThisExtension.logDebug(`Model '${tmdlUri.modelId}' is loading in other process - waiting ... `);
-				await Helper.awaitCondition(async () => !this.isModelLoaded(tmdlUri.modelId), 60000, 200);
-				ThisExtension.logDebug(`Model '${tmdlUri.modelId}' successfully loaded in other process!`);
-			}
-		}
-		else {
-			ThisExtension.log(`Loading TMDL Model '${tmdlUri.modelId}' ... `);
-			TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, undefined);
-			// set the model to an empty array to prevent multiple requests
-			let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>("Loading TMDL model " + tmdlUri.modelId, TMDLProxy.exportStream(tmdlUri), 1000);
-			if (stream) {
-				TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, stream);
-				ThisExtension.log(`TMDL Model '${tmdlUri.modelId}' loaded!`);
+	
+		public static async loadModel(tmdlUri: TMDLFSUri): Promise<void> {
+			if (this.modelExists(tmdlUri.modelId)) {
+				if (!this.isModelLoaded(tmdlUri.modelId)) {
+					ThisExtension.logDebug(`Model '${tmdlUri.modelId}' is loading in other process - waiting ... `);
+					await Helper.awaitCondition(async () => !this.isModelLoaded(tmdlUri.modelId), 60000, 200);
+					ThisExtension.logDebug(`Model '${tmdlUri.modelId}' successfully loaded in other process!`);
+				}
 			}
 			else {
-				TMDLFileSystemProvider.loadedModels.delete(tmdlUri.modelId);
-				ThisExtension.log(`Failed to load TMDL Model '${tmdlUri.modelId}'!`);
+				ThisExtension.log(`Loading TMDL Model '${tmdlUri.modelId}' ... `);
+				TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, undefined);
+				// set the model to an empty array to prevent multiple requests
+				let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>("Loading TMDL model " + tmdlUri.modelId, TMDLProxy.exportStream(tmdlUri), 1000);
+				if (stream) {
+					TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, stream);
+					ThisExtension.log(`TMDL Model '${tmdlUri.modelId}' loaded!`);
+				}
+				else {
+					TMDLFileSystemProvider.loadedModels.delete(tmdlUri.modelId);
+					ThisExtension.log(`Failed to load TMDL Model '${tmdlUri.modelId}'!`);
+				}
 			}
 		}
+	*/
+	public static async closeOpenTMDLFiles(): Promise<void> {
+		// close all existing TMDL files
+		const tabs: vscode.Tab[] = vscode.window.tabGroups.all.map(tg => tg.tabs).flat();
+		const tmdlTabs: vscode.Tab[] = tabs.filter(tab => tab.input instanceof vscode.TabInputText && tab.input.uri.scheme === TMDL_SCHEME);
+		for (let tab of tmdlTabs) {
+			ThisExtension.log("Closing TMDL file: " + (tab.input as vscode.TabInputText).uri.toString());
+			await vscode.window.tabGroups.close(tab);
+		}
 	}
-*/
+
 	public static isModelLoaded(modelId: string): boolean {
-		if(TMDLFileSystemProvider.loadedModels.has(modelId))
-		{
+		if (TMDLFileSystemProvider.loadedModels.has(modelId)) {
 			return true;
 		}
 		return false;
@@ -157,29 +166,28 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 
 	public static async loadModel(tmdlUri: TMDLFSUri, awaitModel: boolean = false): Promise<void> {
 		if (this.isModelLoaded(tmdlUri.modelId)) {
-			if(TMDLFileSystemProvider.loadedModels.get(tmdlUri.modelId).length == 0)
-			{
-				ThisExtension.logDebug(`Model '${tmdlUri.modelId}' is loading in other process - waiting ... `);
-				if(awaitModel)
-				{
+			if (TMDLFileSystemProvider.loadedModels.get(tmdlUri.modelId).length == 0) {
+				if (awaitModel) {
+					ThisExtension.logDebug(`Model '${tmdlUri.modelId}' is loading in other process - waiting ... `);
 					await Helper.awaitCondition(async () => this.isModelLoaded(tmdlUri.modelId) && TMDLFileSystemProvider.loadedModels.get(tmdlUri.modelId).length > 0, 60000, 200);
+					ThisExtension.logDebug(`Model '${tmdlUri.modelId}' successfully loaded in other process!`);
 				}
-				ThisExtension.logDebug(`Model '${tmdlUri.modelId}' successfully loaded in other process!`);
-			}	
+			}
 		}
 		else {
-			ThisExtension.log(`Loading TMDL Model '${tmdlUri.modelId}' ... `);
+			const message: string = `Loading TMDL Model '${tmdlUri.modelId}'`;
+
 			TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, []);
 			// set the model to an empty array to prevent multiple requests
-			let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>("Loading TMDL model " + tmdlUri.modelId, TMDLProxy.exportStream(tmdlUri), 1000);
+			let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>(message, TMDLProxy.exportStream(tmdlUri), 1000);
 			if (stream) {
 				TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, stream);
-				ThisExtension.log(`TMDL Model '${tmdlUri.modelId}' loaded!`);
+				ThisExtension.log(`${message}' finished!`);
 				vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
 			}
 			else {
 				TMDLFileSystemProvider.loadedModels.delete(tmdlUri.modelId);
-				ThisExtension.log(`Failed to load TMDL Model '${tmdlUri.modelId}'!`);
+				ThisExtension.log(`${message}' FAILED!`);
 			}
 		}
 	}
@@ -237,8 +245,9 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	}
 
 	async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
-		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
+		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri, true);
 
+		await TMDLFileSystemProvider.loadModel(tmdlUri);
 		const entries: TMDLProxyStreamEntry[] = await tmdlUri.getStreamEntries();
 
 		const folders: [string, vscode.FileType][] = [];
@@ -263,7 +272,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 	// --- manage file contents
 
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
-		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri, true);
+		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
 
 		const entry = await tmdlUri.getStreamEntry();
 		if (!entry) {
@@ -272,7 +281,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
 
-		return Buffer.from(entry.content, 'latin1');
+		return Buffer.from(entry.content, TMLD_FILE_ENCODING);
 	}
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
@@ -284,7 +293,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 				if (tmdlUri.uri.path.endsWith(TMDL_EXTENSION)) {
 					let newEntry: TMDLProxyStreamEntry = {
 						logicalPath: tmdlUri.logicalPath,
-						content: Buffer.from(content).toString('latin1'),
+						content: Buffer.from(content).toString(TMLD_FILE_ENCODING),
 						size: content.length
 					};
 					(await tmdlUri.getStreamEntries()).push(newEntry);
@@ -298,7 +307,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 			}
 		}
 		else {
-			entry.content = Buffer.from(content).toString('latin1');
+			entry.content = Buffer.from(content).toString(TMLD_FILE_ENCODING);
 		}
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
@@ -368,5 +377,11 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider {
 			this._emitter.fire(this._bufferedEvents);
 			this._bufferedEvents.length = 0;
 		}, 5);
+	}
+
+	public async dispose(): Promise<void> {
+		this._emitter.dispose();
+
+		await TMDLFileSystemProvider.closeOpenTMDLFiles();
 	}
 }

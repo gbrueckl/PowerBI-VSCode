@@ -237,7 +237,7 @@ export abstract class ThisExtension {
 		ThisExtension.log("Refreshing UI ...");
 		for (let command of powerBiRefreshCommands) {
 			ThisExtension.log(`Executing command '${command}' ...`);
-			vscode.commands.executeCommand(command);
+			vscode.commands.executeCommand(command, undefined, false);
 		}
 		ThisExtension.log("UI refresh finsihed!");
 	}

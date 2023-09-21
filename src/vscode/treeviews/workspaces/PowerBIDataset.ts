@@ -95,7 +95,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	// Dataset-specific funtions
 	public async delete(): Promise<void> {
 		await PowerBIApiTreeItem.delete(this, "yesNo");
-		
+
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
@@ -177,8 +177,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	public async editTMDL(): Promise<void> {
 		const xmlaConnected = await PowerBIApiService.refreshXmlaSession();
-		if(!xmlaConnected)
-		{
+		if (!xmlaConnected) {
 			return;
 		}
 		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
@@ -186,6 +185,12 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 		await TMDLFileSystemProvider.loadModel(tmdlUri);
 		await Helper.addToWorkspace(tmdlUri.uri, `PowerBI Dataset - ${this.name}`, true);
+
+		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
+
+		vscode.workspace
+			.openTextDocument(vscode.Uri.joinPath(tmdlUri.uri, "model.tmdl"))
+			.then(vscode.window.showTextDocument);
 	}
 
 	public async updateAllParameters(): Promise<void> {

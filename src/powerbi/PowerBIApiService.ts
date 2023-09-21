@@ -106,6 +106,7 @@ export abstract class PowerBIApiService {
 		const keys = TMDLFileSystemProvider.loadedModels.keys();
 		for(const model of TMDLFileSystemProvider.loadedModels)
 		{
+			// remove models that have not been fully loaded
 			if(model[1] == undefined || model[1].length == 0)
 			{
 				TMDLFileSystemProvider.loadedModels.delete(model[0]);

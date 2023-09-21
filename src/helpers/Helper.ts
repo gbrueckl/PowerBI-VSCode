@@ -74,13 +74,20 @@ export abstract class Helper {
 
 	static async awaitWithProgress<T>(message: string, promise: Promise<any>, keepResultMessage: number = 5000): Promise<T> {
 		let ret: T = undefined;
+		
 		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
 			title: message,
 			cancellable: false
 		}, async (progress: vscode.Progress<any>) => {
 			progress.report({ message: "..." });
+			ThisExtension.log(message + "...");
+			
+			const start = new Date().getTime();
 			let result = await promise;
+			const end = new Date().getTime();
+			const duration = end - start;
+			ThisExtension.log(message + " took " + duration + "ms!");
 
 			progress.report({ increment: 100, message: "Finished!" });
 			ret = result;

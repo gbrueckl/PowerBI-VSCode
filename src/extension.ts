@@ -37,6 +37,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
 
+	TMDLFileSystemProvider.closeOpenTMDLFiles();
+
 	ThisExtension.StatusBar = vscode.window.createStatusBarItem("powerbi-vscode", vscode.StatusBarAlignment.Right);
 	ThisExtension.StatusBar.show();
 	ThisExtension.setStatusBar("Initialized!");
@@ -138,18 +140,19 @@ export async function activate(context: vscode.ExtensionContext) {
 		//vscode.commands.registerCommand('PowerBI.TMDL.test', () => TMDLProxy.test(undefined));
 		TMDLFileSystemProvider.register(context);
 
-		const workspaceFolders = vscode.workspace.workspaceFolders;
-		if (workspaceFolders) {
-			const tmdlFolders = workspaceFolders.filter(f => f.uri.scheme == TMDL_SCHEME)
-			for (const tmdlFolder of tmdlFolders) {
-				TMDLFileSystemProvider.loadModel(new TMDLFSUri(tmdlFolder.uri));
-			}
-			
-			if (tmdlFolders.length > 0) {
-				vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
-			}
-		}
+		/*
+				const workspaceFolders = vscode.workspace.workspaceFolders;
+				if (workspaceFolders) {
+					const tmdlFolders = workspaceFolders.filter(f => f.uri.scheme == TMDL_SCHEME)
+					for (const tmdlFolder of tmdlFolders) {
+						TMDLFileSystemProvider.loadModel(new TMDLFSUri(tmdlFolder.uri));
+					}
 		
+					if (tmdlFolders.length > 0) {
+						vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
+					}
+				}
+		*/
 	}
 	else {
 		ThisExtension.log("TMDL is not configured! Please use the setting `powerbi.TMDLClientId` to configure it.");
@@ -185,4 +188,5 @@ export async function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	ThisExtension.cleanUp();
 	TMDLProxy.cleanUp();
+	TMDLFileSystemProvider.closeOpenTMDLFiles();
 }
