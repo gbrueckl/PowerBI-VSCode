@@ -12,7 +12,7 @@ import { fetch, getProxyAgent, RequestInit, Response } from '@env/fetch';
 import { spawn } from 'child_process';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { Helper } from './Helper';
-import { TMDL_SCHEME, TMDLFileSystemProvider, TMDLFSUri } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
+import { TMDL_EXTENSION, TMDL_SCHEME, TMDLFileSystemProvider, TMDLFSUri } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../powerbi/CommandBuilder';
 
 export const SETTINGS_FILE = ".publishsettings.json";
@@ -339,6 +339,17 @@ export abstract class TMDLProxy {
 
 			await vscode.workspace.fs.copy(tmdlEntry.TMDLRootUri.uri, savePath, { overwrite: true });
 			vscode.workspace.fs.writeFile(vscode.Uri.joinPath(savePath, SETTINGS_FILE), Buffer.from(JSON.stringify({ "connectionString": tmdlEntry.XMLAConnectionString })));
+
+			vscode.window.showInformationMessage(`TMDL saved to ${savePath.fsPath}!`, "Add to Workspace", "Open Folder").then(
+				(value) => {
+					if (value == "Add to Workspace") {
+						Helper.addToWorkspace(savePath, `${tmdlEntry.dataset}`)
+					}
+					if(value == "Open Folder") {
+						vscode.commands.executeCommand("revealFileInOS", savePath.with({path: savePath.path + "/model" + TMDL_EXTENSION}));
+					}
+				}
+			);
 		}
 	}
 

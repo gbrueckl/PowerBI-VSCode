@@ -89,7 +89,7 @@ export abstract class Helper {
 			const duration = end - start;
 			ThisExtension.log(message + " took " + duration + "ms!");
 
-			progress.report({ increment: 100, message: "Finished!" });
+			progress.report({ increment: 100, message: `Finished after ${Math.round(duration/1000)}s!` });
 			ret = result;
 
 			const p = await new Promise<void>(resolve => {
@@ -254,13 +254,15 @@ export abstract class Helper {
 		return value[0].toUpperCase() + value.substring(1).toLowerCase();
 	}
 
-	static async addToWorkspace(uri: vscode.Uri, name: string, showMessage: boolean = true): Promise<void> {
-		if (!vscode.workspace.workspaceFolders) {
+	static async addToWorkspace(uri: vscode.Uri, name: string): Promise<boolean> {
+		if (!vscode.workspace.workspaceFile) {
 			await vscode.commands.executeCommand('vscode.openFolder', uri);
 			//vscode.window.showErrorMessage("Please save your current session as a VSCode workspace first to use this feature!");
+			return false;
 		}
 		else {
 			await vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: uri, name: name });
+			return true;
 		}
 	}
 

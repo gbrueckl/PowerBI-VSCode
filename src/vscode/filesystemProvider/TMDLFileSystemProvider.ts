@@ -179,11 +179,13 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 
 			TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, []);
 			// set the model to an empty array to prevent multiple requests
-			let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>(message, TMDLProxy.exportStream(tmdlUri), 1000);
+			let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>(message, TMDLProxy.exportStream(tmdlUri), 2000);
 			if (stream) {
 				TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, stream);
 				ThisExtension.log(`${message}' finished!`);
 				vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
+
+				vscode.commands.executeCommand('setContext', 'powerbi.tmdl.loadedModels', Array.from(TMDLFileSystemProvider.loadedModels.keys()));
 			}
 			else {
 				TMDLFileSystemProvider.loadedModels.delete(tmdlUri.modelId);
@@ -256,7 +258,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 		for (const entry of entries) {
 			if (entry.logicalPath.startsWith(tmdlUri.logicalPath)) {
 				if (entry.logicalPath.split("/").length == tmdlPathDepth + 1) {
-					files.push([entry.logicalPath.substring(tmdlPathDepth + 1) + TMDL_EXTENSION, vscode.FileType.File]);
+					files.push([entry.logicalPath.split("/")[tmdlPathDepth] + TMDL_EXTENSION, vscode.FileType.File]);
 				}
 				else {
 					const folderName = entry.logicalPath.split("/")[tmdlPathDepth];

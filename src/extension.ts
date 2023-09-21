@@ -27,7 +27,7 @@ import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPip
 import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
 import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
 import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
-import { TMDLFSUri, TMDLFileSystemProvider, TMDL_SCHEME } from './vscode/filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFSUri, TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from './vscode/filesystemProvider/TMDLFileSystemProvider';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -131,7 +131,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 	);
 
-	await vscode.commands.executeCommand('PowerBI.initialize');
+	vscode.commands.executeCommand('PowerBI.initialize');
 
 	// Workspace File System Provider
 	if (!ThisExtension.isInBrowser && PowerBIConfiguration.isTMDLConfigured) {
@@ -178,7 +178,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", uri);
 
 			vscode.workspace
-				.openTextDocument(vscode.Uri.joinPath(uri, "model.tmdl"))
+				.openTextDocument(vscode.Uri.joinPath(uri, "model" + TMDL_EXTENSION))
 				.then(vscode.window.showTextDocument);
 		}
 	});

@@ -282,7 +282,7 @@
 			},
 			{
 				"command": "PowerBI.TMDL.load",
-				"title": "Load TMDL from server",
+				"title": "(Re)Load TMDL from server",
 				"icon": "$(cloud-download)",
 				"category": "PowerBI",
 				"enablement": "powerbi.isTMDLConfigured"
@@ -609,12 +609,12 @@
 				},
 				{
 					"command": "PowerBI.TMDL.load",
-					"when": "resourceScheme == tmdl && !powerbi.isInBrowser",
+					"when": "resourceScheme == tmdl && resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ && !powerbi.isInBrowser",
 					"group": "2_workspace"
 				},
 				{
 					"command": "PowerBI.TMDL.saveLocally",
-					"when": "(resourceScheme == tmdl || resourceExtname == .tmdl) && !powerbi.isInBrowser",
+					"when": "resourceScheme == tmdl && resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ && !powerbi.isInBrowser",
 					"group": "2_workspace"
 				}
 			]
