@@ -206,13 +206,13 @@ export abstract class ThisExtension {
 
 	private static async setContext(): Promise<void> {
 		// we hide the Connections Tab as we load all information from the Databricks Extension
-		await vscode.commands.executeCommand(
+		vscode.commands.executeCommand(
 			"setContext",
 			"powerbi.isInBrowser",
 			this.isInBrowser
 		);
 
-		await vscode.commands.executeCommand(
+		vscode.commands.executeCommand(
 			"setContext",
 			"powerbi.isTMDLConfigured",
 			PowerBIConfiguration.isTMDLConfigured

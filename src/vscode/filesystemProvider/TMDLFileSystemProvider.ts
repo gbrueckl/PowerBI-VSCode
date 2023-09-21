@@ -184,13 +184,13 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 				TMDLFileSystemProvider.loadedModels.set(tmdlUri.modelId, stream);
 				ThisExtension.log(`${message}' finished!`);
 				vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
-
-				vscode.commands.executeCommand('setContext', 'powerbi.tmdl.loadedModels', Array.from(TMDLFileSystemProvider.loadedModels.keys()));
 			}
 			else {
 				TMDLFileSystemProvider.loadedModels.delete(tmdlUri.modelId);
 				ThisExtension.log(`${message}' FAILED!`);
 			}
+
+			vscode.commands.executeCommand('setContext', 'powerbi.tmdl.loadedModels', Array.from(TMDLFileSystemProvider.loadedModels.keys()).map((key) => "/powerbi/" + key));
 		}
 	}
 

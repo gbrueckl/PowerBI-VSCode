@@ -264,42 +264,42 @@
 				"title": "Edit TMDL",
 				"icon": "$(edit)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured"
+				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBI.TMDL.validate",
 				"title": "Validate TMDL",
 				"icon": "$(bracket-dot)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured"
+				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBI.TMDL.publish",
 				"title": "Publish TMDL",
 				"icon": "$(cloud-upload)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured"
+				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBI.TMDL.load",
 				"title": "(Re)Load TMDL from server",
 				"icon": "$(cloud-download)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured"
+				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBI.TMDL.saveLocally",
 				"title": "Save TMDL locally",
 				"icon": "$(cloud-download)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured"
+				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && resourcePath in powerbi.tmdl.loadedModels"
 			},
 			{
 				"command": "PowerBI.TMDL.test",
 				"title": "Test TMDL",
 				"icon": "$(symbol-class)",
 				"category": "PowerBI",
-				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBIDataset.updateAllParameters",

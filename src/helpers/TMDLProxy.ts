@@ -99,6 +99,12 @@ export abstract class TMDLProxy {
 					}
 					else {
 						TMDLProxy._tmdlProxyUri = vscode.Uri.parse(Helper.getFirstRegexGroup(/Now listening on:\s(.*)/gm, data.toString()));
+
+						vscode.commands.executeCommand(
+							"setContext",
+							"powerbi.isTMDLProxyRunning",
+							true
+						);
 					}
 				}
 				TMDLProxy.log(data.toString());
@@ -125,6 +131,10 @@ export abstract class TMDLProxy {
 			ThisExtension.log(`Communication with TMDLProxy via ${TMDLProxy._tmdlProxyUri} `);
 			TMDLProxy.log(`Communication with TMDLProxy via ${TMDLProxy._tmdlProxyUri} `);
 		}
+	}
+
+	private static isRunning(): boolean {
+		return TMDLProxy._tmdlProxyProcess != undefined;
 	}
 
 	private static generateSecret(length: number): string {
@@ -345,8 +355,8 @@ export abstract class TMDLProxy {
 					if (value == "Add to Workspace") {
 						Helper.addToWorkspace(savePath, `${tmdlEntry.dataset}`)
 					}
-					if(value == "Open Folder") {
-						vscode.commands.executeCommand("revealFileInOS", savePath.with({path: savePath.path + "/model" + TMDL_EXTENSION}));
+					if (value == "Open Folder") {
+						vscode.commands.executeCommand("revealFileInOS", savePath.with({ path: savePath.path + "/model" + TMDL_EXTENSION }));
 					}
 				}
 			);
