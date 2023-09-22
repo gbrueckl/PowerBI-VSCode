@@ -17,6 +17,8 @@ import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../powerbi/CommandB
 
 export const SETTINGS_FILE = ".publishsettings.json";
 
+const TAGS_TO_REMOVE: string[] = ["lineageTag:", "ordinal:"];
+
 interface TMDLProxyDatabase {
 	name: string;
 	id: string;
@@ -442,6 +444,12 @@ export abstract class TMDLProxy {
 
 			if (response.ok) {
 				let result = await response.json() as TMDLProxyStreamEntry[];
+				for (let entry of result) {
+					for (let replaceTag of TAGS_TO_REMOVE) {
+						const regEx: RegExp = new RegExp(`\\s*${replaceTag}.*`, "g");
+						entry.content = entry.content.replace(regEx, "");
+					}
+				}
 				return result;
 			}
 			else {

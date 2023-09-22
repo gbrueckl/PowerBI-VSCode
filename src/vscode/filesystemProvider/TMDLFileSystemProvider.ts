@@ -340,8 +340,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 
-		TMDLFileSystemProvider.loadedModels[tmdlUri.modelId] = (await tmdlUri.getStreamEntries()).filter((entry) => entry.logicalPath != tmdlUri.logicalPath);
-
+		await tmdlUri.setStreamEntries((await tmdlUri.getStreamEntries()).filter((entry) => entry.logicalPath != tmdlUri.logicalPath));
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri: Helper.parentUri(uri) }, { uri, type: vscode.FileChangeType.Deleted });
 	}
 
