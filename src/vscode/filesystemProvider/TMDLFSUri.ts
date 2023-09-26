@@ -83,7 +83,7 @@ export class TMDLFSUri {
 		const database = TMDLFSCache.getDatabase(this.server, this.database);
 		let entryPath = this.logicalPath;
 		if (entryPath.endsWith(TMDL_EXTENSION)) {
-			entryPath = entryPath.substring(0, entryPath.length - TMDL_EXTENSION.length);
+			entryPath = Helper.cutEnd(entryPath, TMDL_EXTENSION);
 		}
 		return database.getStreamEntry(entryPath);
 	}
@@ -92,7 +92,7 @@ export class TMDLFSUri {
 		const database = TMDLFSCache.getDatabase(this.server, this.database);
 		let entryPath = this.logicalPath;
 		if (entryPath.endsWith(TMDL_EXTENSION)) {
-			entryPath = entryPath.substring(0, entryPath.length - TMDL_EXTENSION.length);
+			entryPath = Helper.cutEnd(entryPath, TMDL_EXTENSION);
 		}
 		database.removeStreamEntry(entryPath);
 	}

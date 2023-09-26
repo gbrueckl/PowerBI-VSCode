@@ -147,8 +147,6 @@ export class TMDLFSCache implements vscode.Disposable {
 			await Helper.awaitCondition(async () => database.loadingState != "loading", 60000, 500);
 			ThisExtension.logDebug(`TMDL database '${database.databaseName}' successfully loaded in other process!`);
 		}
-
-		return;
 	}
 
 	public static getLoadedDatabaseURIs(): string[] {

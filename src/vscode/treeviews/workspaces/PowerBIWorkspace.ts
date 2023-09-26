@@ -194,9 +194,5 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 		}
 
 		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
-
-		vscode.workspace
-			.openTextDocument(vscode.Uri.joinPath(tmdlUri.uri, "model" + TMDL_EXTENSION))
-			.then(vscode.window.showTextDocument);
 	}
 }

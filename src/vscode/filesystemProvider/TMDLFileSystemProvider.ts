@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { ThisExtension } from '../../ThisExtension';
 import { Helper } from '../../helpers/Helper';
 import { Buffer } from '@env/buffer';
-import { TMDLProxy, TMDLProxyStreamEntry, TMDLProxyServer } from '../../helpers/TMDLProxy';
+import { TMDLProxyStreamEntry } from '../../helpers/TMDLProxy';
 import { TMDLFSUri } from './TMDLFSUri';
 import { TMDLFSCache } from './TMDLFSCache';
 
@@ -111,9 +111,13 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 	}
 
 	// --- manage file contents
-
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
 		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
+
+		// for TMDL files we want to make sure the database is loaded
+		if(tmdlUri.uri.path.endsWith(TMDL_EXTENSION)) {
+			await TMDLFSCache.loadDatabase(tmdlUri.server, tmdlUri.database);
+		}
 
 		const entry = await tmdlUri.getStreamEntry();
 		if (!entry) {

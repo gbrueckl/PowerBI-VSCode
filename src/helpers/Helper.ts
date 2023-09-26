@@ -255,7 +255,8 @@ export abstract class Helper {
 	}
 
 	static async addToWorkspace(uri: vscode.Uri, name: string): Promise<boolean> {
-		if (!vscode.workspace.workspaceFile) {
+		let x = vscode.workspace;
+		if (!vscode.workspace.workspaceFolders) {
 			await vscode.commands.executeCommand('vscode.openFolder', uri);
 			//vscode.window.showErrorMessage("Please save your current session as a VSCode workspace first to use this feature!");
 			return false;
