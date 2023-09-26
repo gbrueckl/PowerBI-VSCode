@@ -13,6 +13,9 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { Helper } from '../../../helpers/Helper';
 import { PowerBICapacity } from '../Capacities/PowerBICapacity';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
+import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
+import { TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
@@ -43,6 +46,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 		if(this.definition.isOnDedicatedCapacity)
 		{
 			actions.push("UNASSIGNCAPACITY");
+			actions.push("BROWSETMDL");
 		}
 		else
 		{
@@ -173,5 +177,26 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 
 		ThisExtension.TreeViewWorkspaces.refresh(workspace.parent, false);
 		ThisExtension.TreeViewCapacities.refresh(null, false);
+	}
+
+	public async browseTMDL(): Promise<void> {
+		const xmlaConnected = await PowerBIApiService.refreshXmlaSession();
+		if (!xmlaConnected) {
+			return;
+		}
+		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.name}`))
+
+		const existingWorkspace = await Helper.addToWorkspace(tmdlUri.uri, `TMDL - Workspace ${this.name}`);
+		// if the workspace does not exist, the folder is opened in a new workspace where the TMDL folder would be reloaded again
+		// so we only load the model if we already have a workspace
+		if (existingWorkspace) {
+			await TMDLFSCache.loadServer(tmdlUri.server);
+		}
+
+		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
+
+		vscode.workspace
+			.openTextDocument(vscode.Uri.joinPath(tmdlUri.uri, "model" + TMDL_EXTENSION))
+			.then(vscode.window.showTextDocument);
 	}
 }

@@ -99,6 +99,9 @@ The following prerequisites have to be fulfilled to use all TMDL features:
   - Consent granted for the permissions above
 - [ASP.NET Core Runtime 7.0.10](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (or higher)
 
+## Using TMDL Editor
+The TMDL Editor loads the TMDL definitions directly from a server and exposes them via the custom URI scheme `tmdl:/`. This allows you to add as many models as you want to your workspace to quickly access them. This is the very same that happens if you click `Edit TMDL` in the context menu of a Power BI dataset - it will add the folder `tmdl:/powerbi/<workspace>/<dataset>` to your VSCode workspace and load th model.
+Alternatively, you can also omit the `/<dataset>`. In this case, a list of all available databases(=datasets) within the workspace `tmdl:/powerbi/<workspace>` will be shown!
 # Building Locally
 1. Make sure you have installed [NodeJS](https://nodejs.org/en/) on your development workstation
 2. Clone this repo to your development workstation, then open the cloned folder in [VSCode](https://code.visualstudio.com/)

@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import * as vscode from 'vscode';
 import { ThisExtension } from '../ThisExtension';
 import { PowerBIDataset } from '../vscode/treeviews/workspaces/PowerBIDataset';
@@ -12,16 +7,20 @@ import { fetch, getProxyAgent, RequestInit, Response } from '@env/fetch';
 import { spawn } from 'child_process';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { Helper } from './Helper';
-import { TMDL_EXTENSION, TMDL_SCHEME, TMDLFileSystemProvider, TMDLFSUri } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
+import { TMDL_EXTENSION, TMDL_SCHEME, TMDLFileSystemProvider } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../powerbi/CommandBuilder';
+import { TMDLFSUri } from '../vscode/filesystemProvider/TMDLFSUri';
+import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 
 export const SETTINGS_FILE = ".publishsettings.json";
 
 const TAGS_TO_REMOVE: string[] = ["lineageTag:", "ordinal:"];
 
-interface TMDLProxyDatabase {
+
+export interface TMDLProxyServer {
 	name: string;
-	id: string;
+	id?: string;
+	databases: Map<string, TMDLProxyStreamEntry[]>;
 }
 interface TMDLProxyData {
 	connectionString: string;
@@ -202,11 +201,11 @@ export abstract class TMDLProxy {
 		}
 	}
 
-	static async getDatabases(resourceUri: vscode.Uri): Promise<TMDLProxyDatabase[]> {
+	static async getDatabasesXMLA(server: string): Promise<TMDLProxyServer[]> {
 		try {
 			const accessToken = (await PowerBIApiService.getXmlaSession()).accessToken;
 
-			const xmlaServer = PowerBIApiService.getXmlaServer("PPU").toString();
+			const xmlaServer = PowerBIApiService.getXmlaServer(server).toString();
 
 			const connectionString = `Data Source=${xmlaServer};`;
 
@@ -225,8 +224,11 @@ export abstract class TMDLProxy {
 			let response = await fetch(endpoint, config);
 
 			if (response.ok) {
-				let result = await response.json() as TMDLProxyDatabase[];
-				return result;
+				let result = await response.json() as TMDLProxyServer[];
+				return result.map((server) => {
+					server.databases = new Map<string, TMDLProxyStreamEntry[]>();
+					return server;
+				});
 			}
 			else {
 				let resultText = await response.text();
@@ -238,7 +240,59 @@ export abstract class TMDLProxy {
 		}
 	}
 
+	static async getServers(tmdlUri: TMDLFSUri): Promise<TMDLProxyServer[]> {
+		try {
+			const accessToken = (await PowerBIApiService.getXmlaSession()).accessToken;
 
+			const endpoint = PowerBIApiService.getFullUrl("/groups");
+
+			const config: RequestInit = {
+				method: "GET",
+				headers: {
+					"Authorization": 'Bearer ' + accessToken,
+					"Content-Type": 'application/json',
+					"Accept": 'application/json'
+				},
+				agent: getProxyAgent()
+			};
+
+			let response: Response = await fetch(endpoint, config);
+
+			let resultText = await response.text();
+			let workspaces = JSON.parse(resultText).value as any as TMDLProxyServer[];
+
+			return workspaces;
+		} catch (error) {
+			vscode.window.showErrorMessage(error);
+		}
+	}
+
+	static async getDatabases(tmdlUri: TMDLFSUri, workspaceId: string): Promise<TMDLProxyServer[]> {
+		try {
+			const accessToken = (await PowerBIApiService.getXmlaSession()).accessToken;
+
+			const endpoint = PowerBIApiService.getFullUrl("/groups/" + workspaceId + "/datasets");
+
+			const config: RequestInit = {
+				method: "GET",
+				headers: {
+					"Authorization": 'Bearer ' + accessToken,
+					"Content-Type": 'application/json',
+					"Accept": 'application/json'
+				},
+				agent: getProxyAgent()
+			};
+
+			let response: Response = await fetch(endpoint, config);
+
+			let resultText = await response.text();
+			let datasets = JSON.parse(resultText).value as any as TMDLProxyServer[];
+
+			return datasets;
+		} catch (error) {
+			vscode.window.showErrorMessage(error);
+		}
+	}
 
 	static async validate(resourceUri: vscode.Uri): Promise<boolean> {
 		await vscode.window.activeTextEditor.document.save();
@@ -304,28 +358,31 @@ export abstract class TMDLProxy {
 		}
 	}
 
-	static async load(resourceUri: vscode.Uri): Promise<boolean> {
-		await vscode.window.activeTextEditor.document.save();
-
+	static async load(resourceUri: vscode.Uri): Promise<void> {
 		if (resourceUri.scheme == TMDL_SCHEME) {
 
 			const tmdlEntry = new TMDLFSUri(resourceUri);
-			const confirm = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Do you really want to reload TMDL for ${tmdlEntry.modelId}? This will overwrite any local changes.`, undefined, undefined);
 
-			if (confirm == "yes") {
-				// we unload the model to force a reload the next time it is queried
-				let success = await TMDLFileSystemProvider.unloadModel(tmdlEntry);
+			if (TMDLFSCache.getDatabase(tmdlEntry.server, tmdlEntry.database).loadingState == "fully_loaded") {
+				const confirm = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Do you really want to reload TMDL for ${tmdlEntry.modelId}? This will overwrite any local changes.`, undefined, undefined);
 
-				vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
-
-				vscode.workspace.textDocuments.forEach((document) => {
-					if (document.uri.toString().startsWith(tmdlEntry.TMDLRootUri.uri.toString())) {
-						vscode.commands.executeCommand("workbench.action.files.revert", document.uri);
-					}
-				});
-				return success;
+				if (confirm == "yes") {
+					// we unload the model to force a reload the next time it is queried
+					await TMDLFSCache.unloadDatabase(tmdlEntry);
+				}
+				else {
+					return;
+				}
 			}
-			return false;
+			await TMDLFSCache.loadDatabase(tmdlEntry.server, tmdlEntry.database);
+
+			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
+
+			vscode.workspace.textDocuments.forEach((document) => {
+				if (document.uri.toString().startsWith(tmdlEntry.TMDLRootUri.uri.toString())) {
+					vscode.commands.executeCommand("workbench.action.files.revert", document.uri);
+				}
+			});
 		}
 	}
 

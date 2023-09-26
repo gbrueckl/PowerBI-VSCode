@@ -140,19 +140,19 @@
 		"viewsWelcome": [
 			{
 				"view": "PowerBIWorkspaces",
-				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			},
 			{
 				"view": "PowerBICapacities",
-				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			},
 			{
 				"view": "PowerBIGateways",
-				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			},
 			{
 				"view": "PowerBIPipelines",
-				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			}
 		],
 		"commands": [
@@ -201,6 +201,13 @@
 				"title": "Unassign from Capacity",
 				"icon": "$(debug-step-out)",
 				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIWorkspace.browseTMDL",
+				"title": "Browse TMDL",
+				"icon": "$(edit)",
+				"category": "PowerBI",
+				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBIWorkspace.insertPath",
@@ -271,14 +278,14 @@
 				"title": "Validate TMDL",
 				"icon": "$(bracket-dot)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
+				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
 			},
 			{
 				"command": "PowerBI.TMDL.publish",
 				"title": "Publish TMDL",
 				"icon": "$(cloud-upload)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
+				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
 			},
 			{
 				"command": "PowerBI.TMDL.load",
@@ -292,7 +299,7 @@
 				"title": "Save TMDL locally",
 				"icon": "$(cloud-download)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && resourcePath in powerbi.tmdl.loadedModels"
+				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && resourcePath in powerbi.tmdl.loadedDatabases"
 			},
 			{
 				"command": "PowerBI.TMDL.test",
@@ -484,6 +491,11 @@
 					"group": "navigation"
 				},
 				{
+					"command": "PowerBIWorkspace.browseTMDL",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,BROWSETMDL,.*/",
+					"group": "navigation"
+				},
+				{
 					"command": "PowerBIDataset.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,DELETE,.*/",
 					"group": "inline"
@@ -599,12 +611,12 @@
 			"explorer/context": [
 				{
 					"command": "PowerBI.TMDL.publish",
-					"when": "resourceScheme == tmdl && !powerbi.isInBrowser",
+					"when": "resourceScheme == tmdl && (resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ || resourceExtname == .tmdl) && !powerbi.isInBrowser",
 					"group": "2_workspace"
 				},
 				{
 					"command": "PowerBI.TMDL.validate",
-					"when": "resourceScheme == tmdl && !powerbi.isInBrowser",
+					"when": "resourceScheme == tmdl && (resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ || resourceExtname == .tmdl) &&!powerbi.isInBrowser",
 					"group": "2_workspace"
 				},
 				{

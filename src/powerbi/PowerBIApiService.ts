@@ -12,6 +12,7 @@ import { iPowerBIDataset, iPowerBIDatasetExecuteQueries, iPowerBIDatasetParamete
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
 import { TMDLFileSystemProvider } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 
 
 
@@ -103,13 +104,15 @@ export abstract class PowerBIApiService {
 			return false;
 		}
 
-		const keys = TMDLFileSystemProvider.loadedModels.keys();
-		for(const model of TMDLFileSystemProvider.loadedModels)
+		for(const server of TMDLFSCache.cachedServers)
 		{
-			// remove models that have not been fully loaded
-			if(model[1] == undefined || model[1].length == 0)
+			for(const database of server.databases)
 			{
-				TMDLFileSystemProvider.loadedModels.delete(model[0]);
+				// remove models that have not been fully loaded
+				if(database.loadingState != "fully_loaded")
+				{
+					server.removeDatabase(database.databaseName);
+				}
 			}
 		}
 		return true;
@@ -252,7 +255,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static getFullUrl(endpoint: string, params?: object): string {
+	public static getFullUrl(endpoint: string, params?: object): string {
 		if (endpoint.startsWith('/') && !endpoint.startsWith("/v1.0")) {
 			endpoint = Helper.joinPath(`v1.0/${PowerBIApiService.Org}`, endpoint);
 		}

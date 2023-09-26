@@ -80,8 +80,8 @@ export abstract class Helper {
 			title: message,
 			cancellable: false
 		}, async (progress: vscode.Progress<any>) => {
-			progress.report({ message: "..." });
-			ThisExtension.log(message + "...");
+			progress.report({ message: " ..." });
+			ThisExtension.log(message + " ...");
 			
 			const start = new Date().getTime();
 			let result = await promise;

@@ -27,7 +27,7 @@ import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPip
 import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
 import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
 import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
-import { TMDLFSUri, TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from './vscode/filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from './vscode/filesystemProvider/TMDLFileSystemProvider';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -64,7 +64,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIWorkspace.delete', (workspace: PowerBIWorkspace) => workspace.delete());
 	vscode.commands.registerCommand('PowerBIWorkspace.assignToCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.assignToCapacity(workspace));
 	vscode.commands.registerCommand('PowerBIWorkspace.unassignFromCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.unassignFromCapacity(workspace));
-
+	vscode.commands.registerCommand('PowerBIWorkspace.browseTMDL', (workspace: PowerBIWorkspace) => workspace.browseTMDL());
 	// generic commands
 	vscode.commands.registerCommand('PowerBIWorkspace.insertPath', (workspaceItem: PowerBIWorkspaceTreeItem) => workspaceItem.insertCode());
 

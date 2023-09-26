@@ -16,7 +16,9 @@ import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { PowerBIParameter } from './PowerBIParameter';
 import { TMDLProxy } from '../../../helpers/TMDLProxy';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
-import { TMDLFSUri, TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
+import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -187,7 +189,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		// if the workspace does not exist, the folder is opened in a new workspace where the TMDL folder would be reloaded again
 		// so we only load the model if we already have a workspace
 		if (existingWorkspace) {
-			await TMDLFileSystemProvider.loadModel(tmdlUri);
+			await TMDLFSCache.loadDatabase(tmdlUri.server, tmdlUri.database);
 		}
 
 		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
