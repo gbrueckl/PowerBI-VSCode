@@ -72,10 +72,71 @@ namespace TMDLVSCodeProxy.Controllers
             public TMDLProxyStreamEntry[]? streamEntries { get; set; }
         }
 
+        public class TMDLProxyDataException
+        {
+            public bool success { get; set; }
+            public string message { get; set; }
+            public string? path { get; set; }
+            public int? lineNumber { get; set; }
+            public string? lineText { get; set; }
+        }
+
         public class TMDLProxyHeader
         {
             [FromHeader(Name = "X-TMDLProxy-Secret")]
             public string secret { get; set; }
+        }
+
+        private BadRequestObjectResult handleTMDLException(Exception ex)
+        {
+            if (ex == null)
+            {
+                return BadRequest(new TMDLProxyDataException
+                {
+                    success = false,
+                    message = "NULL Exception!"
+                });
+            }
+            else if (ex is TmdlFormatException)
+            {
+                TmdlFormatException fex = (TmdlFormatException)ex;
+                return BadRequest(new TMDLProxyDataException
+                {
+                    success = false,
+                    message = fex.Message,
+                    lineNumber = fex.LineNumber,
+                    lineText = fex.LineText,
+                    path = fex.Path
+                });
+            }
+            else if (ex is TmdlAmbiguousSourceException)
+            {
+                TmdlAmbiguousSourceException asex = (TmdlAmbiguousSourceException)ex;
+                return BadRequest(new TMDLProxyDataException
+                {
+                    success = false,
+                    message = asex.ToString()
+                });
+            }
+
+            return BadRequest(new TMDLProxyDataException
+            {
+                success = false,
+                message = ex.Message
+            });
+        }
+
+        private void validateHeader(TMDLProxyHeader header)
+        {
+            if (header == null)
+            {
+                throw new Exception("No Header or Authentication provided!");
+            }
+
+            if (!header.secret.Equals(TMDLProxyController.secret))
+            {
+                throw new Exception("Invalid Secret!");
+            }
         }
 
         [HttpPost(Name = "GetDatabases")]
@@ -85,30 +146,20 @@ namespace TMDLVSCodeProxy.Controllers
             [FromHeader] TMDLProxyHeader header
         )
         {
-            if (!header.secret.Equals(TMDLProxyController.secret))
-            {
-                return BadRequest("Invalid Secret!");
-            }
+            
 
             var connectionString = requestBody.connectionString;
 
             try
             {
+                this.validateHeader(header);
+
                 using (var server = new TOM.Server())
                 {
                     server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
 
                     server.Connect(connectionString);
 
-                    /*
-                    var database = server.Databases.GetByName(datasetName);
-
-                    Console.WriteLine($"Exporting Dataset '{datasetName}' as TMDL to local folder '{localPath}' ...");
-
-                    TOM.TmdlSerializer.SerializeModelToFolder(database.Model, localPath);
-
-                    Console.WriteLine($"Export successful!");
-                    */
                     List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
 
                     foreach (TOM.Database db in server.Databases)
@@ -120,7 +171,7 @@ namespace TMDLVSCodeProxy.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return this.handleTMDLException(ex);
             }
         }
 
@@ -132,17 +183,14 @@ namespace TMDLVSCodeProxy.Controllers
             [FromHeader] TMDLProxyHeader header
         )
         {
-            if (!header.secret.Equals(TMDLProxyController.secret))
-            {
-                return BadRequest("Invalid Secret!");
-            }
-
             var connectionString = requestBody.connectionString;
             var datasetName = requestBody.datasetName;
             var localPath = requestBody.localPath;
 
             try
             {
+                this.validateHeader(header);
+
                 using (var server = new TOM.Server())
                 {
                     server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
@@ -162,7 +210,7 @@ namespace TMDLVSCodeProxy.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return this.handleTMDLException(ex);
             }
         }
 
@@ -174,31 +222,20 @@ namespace TMDLVSCodeProxy.Controllers
             [FromHeader] TMDLProxyHeader header
         )
         {
-            if (!header.secret.Equals(TMDLProxyController.secret))
-            {
-                return BadRequest("Invalid Secret!");
-            }
-
             var localPath = requestBody.localPath;
 
             try
             {
+                this.validateHeader(header);
+
                 Console.WriteLine($"Validating TMDL from local folder '{localPath}' ...");
                 var model = TOM.TmdlSerializer.DeserializeModelFromFolder(localPath);
 
-                return Ok("Validation successful!");
+                return Ok(new TMDLProxyDataException { success = true, message = "Validation successful!" });
             }
-            catch (TmdlFormatException fex)
+            catch (Exception ex) 
             {
-                return BadRequest(fex.ToString());
-            }
-            catch (TmdlAmbiguousSourceException asex)
-            {
-                return BadRequest(asex.ToString());
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
+                return this.handleTMDLException(ex);
             }
         }
 
@@ -209,17 +246,14 @@ namespace TMDLVSCodeProxy.Controllers
             [FromHeader] TMDLProxyHeader header
         )
         {
-            if (!header.secret.Equals(TMDLProxyController.secret))
-            {
-                return BadRequest("Invalid Secret!");
-            }
-
             var connectionString = requestBody.connectionString;
             var datasetName = requestBody.datasetName;
             var localPath = requestBody.localPath;
 
             try
             {
+                this.validateHeader(header);
+
                 Console.WriteLine($"Publishing TMDL from local folder '{localPath}' to Dataset '{datasetName}' ...");
                 var model = TOM.TmdlSerializer.DeserializeModelFromFolder(localPath);
 
@@ -237,17 +271,9 @@ namespace TMDLVSCodeProxy.Controllers
                     return Ok("Publish successful!");
                 }
             }
-            catch (TmdlFormatException fex)
-            {
-                return BadRequest(fex.ToString());
-            }
-            catch (TmdlAmbiguousSourceException asex)
-            {
-                return BadRequest(asex.ToString());
-            }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return this.handleTMDLException(ex);
             }
         }
 
@@ -260,16 +286,13 @@ namespace TMDLVSCodeProxy.Controllers
             [FromHeader] TMDLProxyHeader header
         )
         {
-            if (!header.secret.Equals(TMDLProxyController.secret))
-            {
-                return BadRequest("Invalid Secret!");
-            }
-
             var connectionString = requestBody.connectionString;
             var datasetName = requestBody.datasetName;
 
             try
             {
+                this.validateHeader(header);
+
                 using (var server = new TOM.Server())
                 {
                     server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
@@ -302,7 +325,7 @@ namespace TMDLVSCodeProxy.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return this.handleTMDLException(ex);
             }
         }
 
@@ -313,11 +336,6 @@ namespace TMDLVSCodeProxy.Controllers
             [FromHeader] TMDLProxyHeader header
         )
         {
-            if (!header.secret.Equals(TMDLProxyController.secret))
-            {
-                return BadRequest("Invalid Secret!");
-            }
-
             var connectionString = requestBody.connectionString;
             var datasetName = requestBody.datasetName;
             var localPath = requestBody.localPath;
@@ -325,6 +343,8 @@ namespace TMDLVSCodeProxy.Controllers
 
             try
             {
+                this.validateHeader(header);
+
                 var context = MetadataSerializationContext.Create(MetadataSerializationStyle.Tmdl);
 
                 foreach (var entry in streamEntries)
@@ -350,17 +370,9 @@ namespace TMDLVSCodeProxy.Controllers
                     return Ok("Publish Stream successful!");
                 }
             }
-            catch (TmdlFormatException fex)
-            {
-                return BadRequest(fex.ToString());
-            }
-            catch (TmdlAmbiguousSourceException asex)
-            {
-                return BadRequest(asex.ToString());
-            }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return this.handleTMDLException(ex);
             }
         }
 
@@ -371,15 +383,12 @@ namespace TMDLVSCodeProxy.Controllers
             [FromHeader] TMDLProxyHeader header
         )
         {
-            if (!header.secret.Equals(TMDLProxyController.secret))
-            {
-                return BadRequest("Invalid Secret!");
-            }
-
             var streamEntries = requestBody.streamEntries;
 
             try
             {
+                this.validateHeader(header);
+
                 var context = MetadataSerializationContext.Create(MetadataSerializationStyle.Tmdl);
 
                 foreach (var entry in streamEntries)
@@ -392,17 +401,9 @@ namespace TMDLVSCodeProxy.Controllers
 
                 return Ok("Validation successful!");
             }
-            catch (TmdlFormatException fex)
-            {
-                return BadRequest(fex.ToString());
-            }
-            catch (TmdlAmbiguousSourceException asex)
-            {
-                return BadRequest(asex.ToString());
-            }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return this.handleTMDLException(ex);
             }
         }
     }

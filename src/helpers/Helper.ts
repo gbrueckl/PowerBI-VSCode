@@ -21,8 +21,12 @@ export abstract class Helper {
 	static SEPARATOR: string = '/';
 
 
-	static async delay(ms: number) {
+	static async delay(ms: number): Promise<void> {
 		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
+	static async wait(ms: number): Promise<void> {
+		return this.delay(ms);
 	}
 
 	static async showTemporaryInformationMessage(message: string, timeout: number = 2000): Promise<void> {
@@ -56,17 +60,20 @@ export abstract class Helper {
 				progress.report({ increment: 100, message: "ERROR!" });
 				success = false;
 			}
-			else{
+			else {
 				progress.report({ increment: 100, message: "Success!" });
 				success = true;
 			}
 
-			const p = await new Promise<void>(resolve => {
-				setTimeout(() => {
-					resolve();
-				}, keepResultMessage);
-			});
-			return p;
+			if (keepResultMessage > 0) {
+				const p = await new Promise<void>(resolve => {
+					setTimeout(() => {
+						resolve();
+					}, keepResultMessage);
+				});
+
+				return p;
+			}
 		});
 
 		return success;
@@ -74,7 +81,7 @@ export abstract class Helper {
 
 	static async awaitWithProgress<T>(message: string, promise: Promise<any>, keepResultMessage: number = 5000): Promise<T> {
 		let ret: T = undefined;
-		
+
 		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
 			title: message,
@@ -82,14 +89,14 @@ export abstract class Helper {
 		}, async (progress: vscode.Progress<any>) => {
 			progress.report({ message: " ..." });
 			ThisExtension.log(message + " ...");
-			
+
 			const start = new Date().getTime();
 			let result = await promise;
 			const end = new Date().getTime();
 			const duration = end - start;
 			ThisExtension.log(message + " took " + duration + "ms!");
 
-			progress.report({ increment: 100, message: `Finished after ${Math.round(duration/1000)}s!` });
+			progress.report({ increment: 100, message: `Finished after ${Math.round(duration / 1000)}s!` });
 			ret = result;
 
 			const p = await new Promise<void>(resolve => {
@@ -97,6 +104,7 @@ export abstract class Helper {
 					resolve();
 				}, keepResultMessage);
 			});
+
 			return p;
 		});
 
@@ -169,10 +177,6 @@ export abstract class Helper {
 	static openLink(link: string): void {
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(link));
 		//vscode.env.openExternal(vscode.Uri.parse(link));
-	}
-
-	static async wait(ms: number): Promise<void> {
-		await setTimeout(() => { }, ms);
 	}
 
 	static bytesToSize(bytes: number): string {
@@ -271,8 +275,7 @@ export abstract class Helper {
 		let parentPaths = uri.path.split(this.SEPARATOR).slice(0, -1);
 		let parentPath: string = "/";
 
-		if(parentPaths.length > 1)
-		{
+		if (parentPaths.length > 1) {
 			parentPath = parentPaths.join(this.SEPARATOR)
 		}
 		return uri.with({ path: parentPath });

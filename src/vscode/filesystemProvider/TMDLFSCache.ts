@@ -181,7 +181,7 @@ export class TMDLFSCache implements vscode.Disposable {
 		if (server.loadingState == "not_loaded") {
 			ThisExtension.log(`Loading TMDL Server '${server.serverName}' ... `);
 			server.loadingState = "loading";
-			const databases = await TMDLProxy.getDatabasesXMLA(serverName);
+			const databases = await TMDLProxy.getDatabases(serverName);
 			if (databases) {
 				for (const database of databases) {
 					server.setDatabase(database.name, []);

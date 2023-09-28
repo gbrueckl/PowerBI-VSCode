@@ -118,7 +118,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 		for (let cell of cells) {
 			await this._doExecution(cell, context);
-			await Helper.wait(10); // Force some delay before executing/queueing the next cell
+			await Helper.delay(10); // Force some delay before executing/queueing the next cell
 		}
 	}
 
