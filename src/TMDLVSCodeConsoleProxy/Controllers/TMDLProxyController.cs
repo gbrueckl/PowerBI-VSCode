@@ -7,24 +7,17 @@ using System.Text;
 
 using TOM = Microsoft.AnalysisServices.Tabular;
 
-using System.Linq;
 using Microsoft.AnalysisServices.Tabular;
-using System.Text;
-using Microsoft.AnalysisServices.Tabular.Serialization;
-using Microsoft.AnalysisServices.Core;
-using System.Reflection;
-using System.Text.Json;
-using System.Drawing;
-using System.Runtime.CompilerServices;
-using System.Reflection.Metadata;
 using System.Text.Json.Nodes;
 
-namespace TMDLVSCodeProxy.Controllers
+namespace TMDLVSCodeConsoleProxy.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class TMDLProxyController : ControllerBase
     {
+        private static AccessToken accessToken;
+        private static TOM.Server server;
         private static string secret;
         private readonly ILogger<TMDLProxyController> _logger;
 
@@ -38,17 +31,23 @@ namespace TMDLVSCodeProxy.Controllers
             TMDLProxyController.secret = secret;
         }
 
+        public static void SetAccessToken(AccessToken accessToken)
+        {
+            TMDLProxyController.accessToken = accessToken;
+        }
+
+        public static void SetServer(TOM.Server server)
+        {
+            TMDLProxyController.server = server;
+        }
+
         [HttpGet(Name = "Test")]
         [Route("/tmdl/test")]
         public IActionResult Test()
         {
-            using (var server = new TOM.Server())
+            using (var server = ServerManager.GetServer("Data Source=powerbi://api.powerbi.com/v1.0/myorg/PPU"))
             {
-                //server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
-
-                server.Connect("Data Source=powerbi://api.powerbi.com/v1.0/myorg/PPU");
-
-                List <TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
+                List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
 
                 foreach (TOM.Database db in server.Databases)
                 {
@@ -160,25 +159,20 @@ namespace TMDLVSCodeProxy.Controllers
             [FromHeader] TMDLProxyHeader header
         )
         {
-            
-
             var connectionString = requestBody.connectionString;
 
             try
             {
                 this.validateHeader(header);
 
-                using (var server = new TOM.Server())
+                using (var server = ServerManager.GetServer(connectionString))
                 {
-                    server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
-
-                    server.Connect(connectionString);
 
                     List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
 
                     foreach (TOM.Database db in server.Databases)
                     {
-                        dbs.Add(new TMDLProxyDatabase{ name = db.Name, id = db.ID});
+                        dbs.Add(new TMDLProxyDatabase { name = db.Name, id = db.ID });
                     }
                     return Ok(dbs);
                 }
@@ -205,12 +199,8 @@ namespace TMDLVSCodeProxy.Controllers
             {
                 this.validateHeader(header);
 
-                using (var server = new TOM.Server())
+                using (var server = ServerManager.GetServer(connectionString))
                 {
-                    server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
-
-                    server.Connect(connectionString);
-
                     var database = server.Databases.GetByName(datasetName);
 
                     Console.WriteLine($"Exporting Dataset '{datasetName}' as TMDL to local folder '{localPath}' ...");
@@ -247,7 +237,7 @@ namespace TMDLVSCodeProxy.Controllers
 
                 return Ok(new TMDLProxyDataException { success = true, message = "Validation successful!" });
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return this.handleTMDLException(ex);
             }
@@ -271,10 +261,8 @@ namespace TMDLVSCodeProxy.Controllers
                 Console.WriteLine($"Publishing TMDL from local folder '{localPath}' to Dataset '{datasetName}' ...");
                 var model = TOM.TmdlSerializer.DeserializeModelFromFolder(localPath);
 
-                using (var server = new TOM.Server())
+                using (var server = ServerManager.GetServer(connectionString))
                 {
-                    server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
-                    server.Connect(connectionString);
 
                     using (var remoteDatabase = server.Databases[model.Database.ID])
                     {
@@ -307,12 +295,8 @@ namespace TMDLVSCodeProxy.Controllers
             {
                 this.validateHeader(header);
 
-                using (var server = new TOM.Server())
+                using (var server = ServerManager.GetServer(connectionString))
                 {
-                    server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
-
-                    server.Connect(connectionString);
-
                     var database = server.Databases.GetByName(datasetName);
 
                     var ret = new JsonArray();
@@ -370,10 +354,8 @@ namespace TMDLVSCodeProxy.Controllers
 
                 Console.WriteLine($"Publishing TMDL from Stream to Dataset '{datasetName}' ...");
 
-                using (var server = new TOM.Server())
+                using (var server = ServerManager.GetServer(connectionString))
                 {
-                    server.AccessToken = new AccessToken(requestBody.accessToken, DateTime.Now.AddHours(1));
-                    server.Connect(connectionString);
 
                     using (var remoteDatabase = server.Databases[model.Database.ID])
                     {

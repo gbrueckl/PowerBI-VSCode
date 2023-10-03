@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "TMDLVSCodeConsoleProxy": {
+      "commandName": "Project",
+      "commandLineArgs": "MySecret",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:56888"
+    }
+  }
+}

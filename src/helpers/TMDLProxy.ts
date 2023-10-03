@@ -12,6 +12,9 @@ import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../powerbi/CommandB
 import { TMDLFSUri } from '../vscode/filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 
+const DEBUG: boolean = false;
+const DEBUG_PORT: number = 59941;
+
 export const SETTINGS_FILE = ".publishsettings.json";
 
 const TAGS_TO_REMOVE: string[] = ["lineageTag:", "ordinal:"];
@@ -89,16 +92,15 @@ export abstract class TMDLProxy {
 		await this.initializeLogger(context);
 
 		this._secret = this.generateSecret(64);
-		this._secret = "ZwzCF1Zysal9NcK5lfmlDPnbtJmTw4TOltpHhjkWzDDiamOjpUVvMoblUsdQXzLw";
 
 		if (!TMDLProxy._tmdlProxyProcess) {
 
-			const proxyDllPath = vscode.Uri.joinPath(context.extensionUri, "resources", "TMDLProxy", "TMDLVSCodeProxy.dll").fsPath;
+			const proxyDllPath = vscode.Uri.joinPath(context.extensionUri, "resources", "TMDLProxy", "TMDLVSCodeConsoleProxy.dll").fsPath;
 
-			ThisExtension.log(`Starting TMDLProxy from ${proxyDllPath} with secret ${this._secret}`);
-			ThisExtension.log(`CMD> dotnet "${proxyDllPath}" ${this._secret}`);
+			ThisExtension.log(`Starting TMDLProxy from ${proxyDllPath} with secret ${this._secret.substring(0, 10)}...`);
+			ThisExtension.log(`CMD> dotnet "${proxyDllPath}" ${this._secret.substring(0, 10)}...`);
 
-			TMDLProxy._tmdlProxyProcess = spawn("dotnet", [proxyDllPath, this._secret]);
+			TMDLProxy._tmdlProxyProcess = spawn("dotnet", [proxyDllPath, this._secret], { shell: true , windowsHide: true, detached: true});
 
 			this._tmdlProxyUri = undefined;
 
@@ -106,14 +108,17 @@ export abstract class TMDLProxy {
 				if (!TMDLProxy._tmdlProxyUri) {
 
 					// for debugging purposes, if TMLDProxy is running via IIS from Visual Studio
-					if (false) {
+					if (DEBUG) {
 						TMDLProxy.log("USING DEBUG Configuration!");
-						this._secret = "MySecret";
-						this._tmdlProxyUri = vscode.Uri.parse("http://localhost:19176");
+						TMDLProxy._secret = "MySecret";
+						TMDLProxy._tmdlProxyUri = vscode.Uri.parse(`http://localhost:${DEBUG_PORT}`);
 						Helper.showTemporaryInformationMessage("DEVELOPER MODE IS ON!");
 					}
 					else {
-						TMDLProxy._tmdlProxyUri = vscode.Uri.parse(Helper.getFirstRegexGroup(/Now listening on:\s(.*)/gm, data.toString()));
+						var connectionInfo = Helper.getFirstRegexGroup(/Now listening on:\s(.*)/gm, data.toString());
+						if (connectionInfo) {
+							TMDLProxy._tmdlProxyUri = vscode.Uri.parse(connectionInfo);
+						}
 					}
 
 					vscode.commands.executeCommand(
