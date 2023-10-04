@@ -7,16 +7,13 @@ import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { iPowerBIDataset, iPowerBIDatasetGenericResponse, iPowerBIDatasetParameter } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
-import { PowerBIReport } from './PowerBIReport';
 import { PowerBIParameters } from './PowerBIParameters';
 import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
-import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { QuickPickItem } from 'vscode';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { PowerBIParameter } from './PowerBIParameter';
-import { TMDLProxy } from '../../../helpers/TMDLProxy';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
-import { TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
+import { TMDL_EXTENSION, TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
 import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
 
@@ -78,9 +75,9 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	async getXMLACConnectionString(): Promise<string> {
 		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
-		const xmlaServer = PowerBIApiService.getXmlaServer(workspace.name).toString();
+		const xmlaEndpoint = PowerBIApiService.getXmlaEndpoint(workspace.name).toString();
 
-		return `Data Source=${xmlaServer};Initial Catalog=${this.name};`;
+		return `Data Source=${xmlaEndpoint};Initial Catalog=${this.name};`;
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
@@ -178,10 +175,6 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	}
 
 	public async editTMDL(): Promise<void> {
-		const xmlaConnected = await PowerBIApiService.refreshXmlaSession();
-		if (!xmlaConnected) {
-			return;
-		}
 		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
 		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${workspace.name}/${this.name}`))
 

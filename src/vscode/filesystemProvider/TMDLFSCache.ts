@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../ThisExtension';
 import { Helper } from '../../helpers/Helper';
-import { TMDLProxy, TMDLProxyStreamEntry, TMDLProxyServer } from '../../helpers/TMDLProxy';
+import { TMDLProxyStreamEntry } from '../../TMDLVSCode/_types';
+import { TMDLProxy } from '../../TMDLVSCode/TMDLProxy';
 import { TMDLFSUri } from './TMDLFSUri';
 import { TMDL_EXTENSION, TMDL_SCHEME } from './TMDLFileSystemProvider';
 

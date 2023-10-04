@@ -27,7 +27,9 @@ const webConfig = /** @type WebpackConfig */ {
             '@env': path.join(__dirname, './src/env/web')
         },
         fallback: {
-            "path": false
+            "path": false,
+            "fs": false, // only required for portfinder for TMDL which is not enabled in web
+            "os": false // only required for portfinder for TMDL which is not enabled in web
         }
     },
     module: {

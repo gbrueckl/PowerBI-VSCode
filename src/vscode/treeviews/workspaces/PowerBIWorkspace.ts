@@ -11,10 +11,9 @@ import { PowerBIDataflows } from './PowerBIDataflows';
 import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { Helper } from '../../../helpers/Helper';
-import { PowerBICapacity } from '../Capacities/PowerBICapacity';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
-import { TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
+import { TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
 import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -180,10 +179,6 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 	}
 
 	public async browseTMDL(): Promise<void> {
-		const xmlaConnected = await PowerBIApiService.refreshXmlaSession();
-		if (!xmlaConnected) {
-			return;
-		}
 		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.name}`))
 
 		const existingWorkspace = await Helper.addToWorkspace(tmdlUri.uri, `TMDL - Workspace ${this.name}`);

@@ -309,6 +309,13 @@
 				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
 			},
 			{
+				"command": "PowerBI.TMDL.ensureProxy",
+				"title": "Ensure TMDL Proxy",
+				"icon": "$(server-environment)",
+				"category": "PowerBI",
+				"enablement": "!powerbi.isInBrowser"
+			},
+			{
 				"command": "PowerBIDataset.updateAllParameters",
 				"title": "Update Parameters",
 				"icon": "$(pencil)",
@@ -669,8 +676,8 @@
 		"@types/node": "^12.12.0",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
-		"eslint": "^8.19.0",
 		"buffer": "^6.0.3",
+		"eslint": "^8.19.0",
 		"form-data": "^4.0.0",
 		"glob": "^8.0.3",
 		"https-agent": "^1.0.0",
@@ -683,6 +690,8 @@
 		"ts-loader": "^9.3.1",
 		"typescript": "^4.7.4",
 		"webpack": "^5.74.0",
-		"webpack-cli": "^4.10.0"
+		"webpack-cli": "^4.10.0",
+		"net": "^1.0.2",
+		"portfinder": "^1.0.32"
 	}
 }

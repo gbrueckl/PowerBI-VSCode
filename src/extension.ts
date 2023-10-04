@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import { PowerBICommandBuilder } from './powerbi/CommandBuilder';
 import { ThisExtension } from './ThisExtension';
-import { TMDLProxy } from './helpers/TMDLProxy';
+import { TMDLProxy } from './TMDLVSCode/TMDLProxy';
 
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
@@ -160,10 +160,14 @@ export async function activate(context: vscode.ExtensionContext) {
 		TMDLProxy.saveLocally
 	);
 
+	vscode.commands.registerCommand('PowerBI.TMDL.ensureProxy',
+		() => TMDLProxy.ensureProxy(context)
+	);
+
 	vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
 		if (event.added[0].uri.scheme == TMDL_SCHEME) {
 			const tmdlUri = new TMDLFSUri(event.added[0].uri);
-			
+
 			await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
 
 			if (!tmdlUri.isServerLevel) {

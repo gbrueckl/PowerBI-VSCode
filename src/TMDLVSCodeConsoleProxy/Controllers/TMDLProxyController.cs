@@ -16,8 +16,6 @@ namespace TMDLVSCodeConsoleProxy.Controllers
     [Route("[controller]")]
     public class TMDLProxyController : ControllerBase
     {
-        private static AccessToken accessToken;
-        private static TOM.Server server;
         private static string secret;
         private readonly ILogger<TMDLProxyController> _logger;
 
@@ -31,15 +29,6 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             TMDLProxyController.secret = secret;
         }
 
-        public static void SetAccessToken(AccessToken accessToken)
-        {
-            TMDLProxyController.accessToken = accessToken;
-        }
-
-        public static void SetServer(TOM.Server server)
-        {
-            TMDLProxyController.server = server;
-        }
 
         [HttpGet(Name = "Test")]
         [Route("/tmdl/test")]
@@ -72,7 +61,6 @@ namespace TMDLVSCodeConsoleProxy.Controllers
         public class TMDLProxyData
         {
             public string connectionString { get; set; }
-            public string accessToken { get; set; }
             public string? datasetName { get; set; }
             public string? localPath { get; set; }
 
@@ -298,7 +286,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers
                 using (var server = ServerManager.GetServer(connectionString))
                 {
                     var database = server.Databases.GetByName(datasetName);
-
+                    
                     var ret = new JsonArray();
 
                     foreach (MetadataDocument document in database.Model.ToTmdl())

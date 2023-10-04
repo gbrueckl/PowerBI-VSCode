@@ -7,19 +7,15 @@ using TMDLVSCodeConsoleProxy;
 
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("TMDL VSCode Console Proxy starting ...");
-var server = ServerManager.GetServer("Data Source=powerbi://api.powerbi.com/v1.0/myorg/PPU");
-Console.Write(server.ConnectionInfo.ToString());
-Console.WriteLine("Finished!");
+
 var builder = WebApplication.CreateBuilder();
 
-var secret = args[0];
+var port = int.Parse(args[0]);
+var secret = args[1];
 
 TMDLProxyController.SetSecret(secret);
-//TMDLProxyController.SetAccessToken(accessToken);
-//TMDLProxyController.SetServer(server);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -34,7 +30,7 @@ builder.Services.AddCors(options =>
 });
 
 //builder.WebHost.UseUrls(hostingUrl);
-builder.WebHost.UseUrls("http://127.0.0.1:0");
+builder.WebHost.UseUrls($"http://127.0.0.1:{port}");
 
 var app = builder.Build();
 

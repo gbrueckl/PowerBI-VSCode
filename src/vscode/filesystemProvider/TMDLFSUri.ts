@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 
 import { Helper } from '../../helpers/Helper';
-import {  TMDLProxyStreamEntry} from '../../helpers/TMDLProxy';
+import { TMDLProxyStreamEntry} from '../../TMDLVSCode/_types';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
-import { TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from './TMDLFileSystemProvider';
+import { TMDL_EXTENSION, TMDL_SCHEME } from './TMDLFileSystemProvider';
 import { TMDLFSCache } from './TMDLFSCache';
 
 export class TMDLFSUri {
@@ -98,9 +98,9 @@ export class TMDLFSUri {
 	}
 
 	get XMLAConnectionString(): string {
-		const xmlaServer = PowerBIApiService.getXmlaServer(this.workspace).toString();
+		const xmlaEndpoint = PowerBIApiService.getXmlaEndpoint(this.workspace).toString();
 
-		return `Data Source=${xmlaServer};Initial Catalog=${this.dataset};`;
+		return `Data Source=${xmlaEndpoint};Initial Catalog=${this.dataset};`;
 	}
 
 	get TMDLRootUri(): TMDLFSUri {
