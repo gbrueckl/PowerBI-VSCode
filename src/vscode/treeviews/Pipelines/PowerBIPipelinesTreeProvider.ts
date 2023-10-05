@@ -53,7 +53,10 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 		if (showInfoMessage) {
 			Helper.showTemporaryInformationMessage('Refreshing PowerBI Pipelines ...');
 		}
-
+		// on leaves, we refresh the parent instead
+		if(item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
+			item = item.parent;
+		}
 		this._onDidChangeTreeData.fire(null);
 	}
 

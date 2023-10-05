@@ -43,70 +43,75 @@ export abstract class TMDLProxy {
 
 	static async ensureProxy(context: vscode.ExtensionContext): Promise<void> {
 		if (!TMDLProxy._terminal) {
-			this._secret = this.generateSecret(64);
+			try {
+				this._secret = this.generateSecret(64);
 
-			// find the next free port to start our Proxy on
-			portfinder.setBasePort(55000);
-			this._port = await portfinder.getPortPromise();
+				// find the next free port to start our Proxy on
+				portfinder.setBasePort(55000);
+				this._port = await portfinder.getPortPromise();
 
-			const proxyDllPath = vscode.Uri.joinPath(context.extensionUri, "resources", "TMDLProxy", "TMDLVSCodeConsoleProxy.dll").fsPath;
+				const proxyDllPath = vscode.Uri.joinPath(context.extensionUri, "resources", "TMDLProxy", "TMDLVSCodeConsoleProxy.dll").fsPath;
 
-			TMDLProxy.log(`Starting TMDLProxy from ${proxyDllPath} with secret ${this._secret.substring(0, 10)}...`);
-			TMDLProxy.log(`CMD> dotnet "${proxyDllPath}" ${this._secret.substring(0, 10)}...`);
+				TMDLProxy.log(`Starting TMDLProxy from ${proxyDllPath} with secret ${this._secret.substring(0, 10)}...`);
+				TMDLProxy.log(`CMD> dotnet "${proxyDllPath}" ${this._secret.substring(0, 10)}...`);
 
-			TMDLProxy._terminal = vscode.window.createTerminal("TMDLProxy", "dotnet", [proxyDllPath, this._port.toString(), this._secret]);
-			context.subscriptions.push(TMDLProxy._terminal);
+				TMDLProxy._terminal = vscode.window.createTerminal("TMDLProxy", "dotnet", [proxyDllPath, this._port.toString(), this._secret]);
+				context.subscriptions.push(TMDLProxy._terminal);
 
-			vscode.window.onDidCloseTerminal(async (terminal) => {
-				if (terminal.name == TMDLProxy._terminal.name) {
-					TMDLProxy._terminal.dispose();
-					TMDLProxy._terminal = undefined;
-					TMDLProxy._tmdlProxyUri = undefined;
+				vscode.window.onDidCloseTerminal(async (terminal) => {
+					if (terminal.name == TMDLProxy._terminal.name) {
+						TMDLProxy._terminal.dispose();
+						TMDLProxy._terminal = undefined;
+						TMDLProxy._tmdlProxyUri = undefined;
 
-					vscode.commands.executeCommand(
-						"setContext",
-						"powerbi.isTMDLProxyRunning",
-						false
-					);
-
-					const action = await vscode.window.showWarningMessage(
-						"TMDLProxy was closed! Please start a new instance to continue working with TMDL!", "Restart TMDL Proxy");
-
-					if (action == "Restart TMDL Proxy") {
 						vscode.commands.executeCommand(
-							"PowerBI.TMDL.ensureProxy"
+							"setContext",
+							"powerbi.isTMDLProxyRunning",
+							false
 						);
+
+						const action = await vscode.window.showWarningMessage(
+							"TMDLProxy was closed! Please start a new instance to continue working with TMDL!", "Restart TMDL Proxy");
+
+						if (action == "Restart TMDL Proxy") {
+							vscode.commands.executeCommand(
+								"PowerBI.TMDL.ensureProxy"
+							);
+						}
 					}
+				});
+
+				const pid = await TMDLProxy._terminal.processId;
+				// wait 1 second for the process to start
+				await Helper.delay(1000);
+
+				if (DEBUG) {
+					TMDLProxy._port = DEBUG_PORT;
+					TMDLProxy._secret = "MySecret";
 				}
-			});
 
-			const pid = await TMDLProxy._terminal.processId;
-			// wait 1 second for the process to start
-			await Helper.delay(1000);
+				TMDLProxy._tmdlProxyUri = vscode.Uri.parse(`http://localhost:${this._port}`);
+				vscode.commands.executeCommand(
+					"setContext",
+					"powerbi.isTMDLProxyRunning",
+					true
+				);
 
-			if(DEBUG)
-			{
-				TMDLProxy._port = DEBUG_PORT;
-				TMDLProxy._secret = "MySecret";
+				this._headers = {
+					"X-TMDLProxy-Secret": this._secret,
+					"Content-Type": 'application/json',
+					"Accept": 'application/json'
+				}
+
+				TMDLProxy.log(`TMDLProxy: Communication with TMDLProxy via ${TMDLProxy._tmdlProxyUri} `);
+			} catch (error) {
+				TMDLProxy._terminal.dispose();
+				TMDLProxy._terminal = undefined;
+				TMDLProxy._tmdlProxyUri = undefined;
+				vscode.window.showErrorMessage(error);
 			}
-
-			TMDLProxy._tmdlProxyUri = vscode.Uri.parse(`http://localhost:${this._port}`);
-			vscode.commands.executeCommand(
-				"setContext",
-				"powerbi.isTMDLProxyRunning",
-				true
-			);
-
-			this._headers = {
-				"X-TMDLProxy-Secret": this._secret,
-				"Content-Type": 'application/json',
-				"Accept": 'application/json'
-			}
-
-			TMDLProxy.log(`TMDLProxy: Communication with TMDLProxy via ${TMDLProxy._tmdlProxyUri} `);
 		}
-		else
-		{
+		else {
 			TMDLProxy.log(`TMDLProxy: TMDLProxy alreay running at ${TMDLProxy._tmdlProxyUri} `);
 		}
 	}
