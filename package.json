@@ -179,18 +179,6 @@
 				"category": "PowerBI"
 			},
 			{
-				"command": "PowerBIWorkspaces.add",
-				"title": "Add workspace",
-				"icon": "$(add)",
-				"category": "PowerBI"
-			},
-			{
-				"command": "PowerBIWorkspace.delete",
-				"title": "Delete",
-				"icon": "$(remove-close)",
-				"category": "PowerBI"
-			},
-			{
 				"command": "PowerBIWorkspace.assignToCapacity",
 				"title": "Assign to Capacity",
 				"icon": "$(debug-step-into)",
@@ -441,11 +429,6 @@
 					"group": "navigation"
 				},
 				{
-					"command": "PowerBIWorkspaces.add",
-					"when": "view == PowerBIWorkspaces",
-					"group": "navigation"
-				},
-				{
 					"command": "PowerBI.openNewNotebook",
 					"when": "view == PowerBIWorkspaces || view == PowerBICapacities || view == PowerBIGateways || view == PowerBIPipelines",
 					"group": "navigation"
@@ -480,11 +463,6 @@
 				{
 					"command": "PowerBIWorkspace.insertPath",
 					"when": "view == PowerBIWorkspaces",
-					"group": "inline"
-				},
-				{
-					"command": "PowerBIWorkspace.delete",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/",
 					"group": "inline"
 				},
 				{

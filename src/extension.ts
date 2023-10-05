@@ -30,6 +30,7 @@ import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguratio
 import { TMDLFileSystemProvider, TMDL_EXTENSION, TMDL_SCHEME } from './vscode/filesystemProvider/TMDLFileSystemProvider';
 import { TMDLFSUri } from './vscode/filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from './vscode/filesystemProvider/TMDLFSCache';
+import { PowerBINotebookContext } from './vscode/notebook/PowerBINotebookContext';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -62,8 +63,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (item: PowerBIWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(item, showInfoMessage));
 
-	//vscode.commands.registerCommand('PowerBIWorkspaces.add', () => pbiWorkspacesTreeProvider.add());
-	vscode.commands.registerCommand('PowerBIWorkspace.delete', (workspace: PowerBIWorkspace) => workspace.delete());
 	vscode.commands.registerCommand('PowerBIWorkspace.assignToCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.assignToCapacity(workspace));
 	vscode.commands.registerCommand('PowerBIWorkspace.unassignFromCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.unassignFromCapacity(workspace));
 	vscode.commands.registerCommand('PowerBIWorkspace.browseTMDL', (workspace: PowerBIWorkspace) => workspace.browseTMDL());
@@ -177,6 +176,14 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}
 	});
+
+	vscode.workspace.onDidOpenNotebookDocument((e) => {
+			const metadata = PowerBINotebookContext.get(e.metadata.guid.toString());
+
+			metadata.uri = e.uri;
+
+			PowerBINotebookContext.set(e.metadata.guid, metadata);
+		});
 }
 
 

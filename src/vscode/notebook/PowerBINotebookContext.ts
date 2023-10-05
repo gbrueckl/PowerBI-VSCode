@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Helper } from '../../helpers/Helper';
 
+const API_ROOT_PATH_ALIASES = ["PATH", "DATASET", "DATASET_PATH", "API_ROOT_PATH", "APIROOTPATH", "API_PATH", "APIPATH", "ROOTPATH", "ROOT_PATH"];
 export class PowerBINotebookContext {
 	apiRootPath: string;
 	uri: vscode.Uri;
@@ -11,7 +12,7 @@ export class PowerBINotebookContext {
 	}
 
 	public setVariable(name: string, value: string): void {
-		if (["DATASET", "DATASET_PATH", "API_ROOT_PATH"].includes(name.toUpperCase())) {
+		if (API_ROOT_PATH_ALIASES.includes(name.toUpperCase())) {
 			this.apiRootPath = value;
 		}
 		else {
@@ -20,7 +21,7 @@ export class PowerBINotebookContext {
 	}
 
 	public getVariable(name: string): string {
-		if (["DATASET", "DATASET_PATH", "API_ROOT_PATH"].includes(name.toUpperCase())) {
+		if (API_ROOT_PATH_ALIASES.includes(name.toUpperCase())) {
 			return this.apiRootPath;
 		}
 		return this.variables[name.toUpperCase()];
@@ -77,11 +78,22 @@ export class PowerBINotebookContext {
 	}
 
 	static set(guid: string, context: PowerBINotebookContext): void {
-		PowerBINotebookContext._context[guid] = context;
+		PowerBINotebookContext._context.set(guid, context);
 	}
 
 	static get(guid: string): PowerBINotebookContext {
-		return PowerBINotebookContext._context[guid];
+		return PowerBINotebookContext._context.get(guid);
+	}
+
+	static getForUri(uri: vscode.Uri): PowerBINotebookContext {
+		const items = PowerBINotebookContext._context;
+
+		for(let context of items.values()) {
+			if(context.uri && context.uri.path == uri.path) {
+				return context;
+			}
+		}
+		return undefined;
 	}
 	//#endregion
 }

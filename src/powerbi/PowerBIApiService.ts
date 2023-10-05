@@ -304,7 +304,9 @@ export abstract class PowerBIApiService {
 				if (!resultText || resultText == "") {
 					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				ret = JSON.parse(resultText) as T;
+				else {
+					ret = JSON.parse(resultText) as T;
+				}
 			}
 			else {
 				if (!resultText || resultText == "") {
@@ -396,7 +398,9 @@ export abstract class PowerBIApiService {
 				if (!resultText || resultText == "") {
 					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				ret = JSON.parse(resultText) as T;
+				else {
+					ret = JSON.parse(resultText) as T;
+				}
 			}
 			else {
 				if (!resultText || resultText == "") {
@@ -439,7 +443,9 @@ export abstract class PowerBIApiService {
 				if (!resultText || resultText == "") {
 					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				ret = JSON.parse(resultText) as T;
+				else {
+					ret = JSON.parse(resultText) as T;
+				}
 			}
 			else {
 				if (!resultText || resultText == "") {
@@ -482,7 +488,9 @@ export abstract class PowerBIApiService {
 				if (!resultText || resultText == "") {
 					ret = undefined;
 				}
-				ret = JSON.parse(resultText) as T;
+				else {
+					ret = JSON.parse(resultText) as T;
+				}
 			}
 			else {
 				if (!resultText || resultText == "") {

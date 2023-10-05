@@ -5,6 +5,7 @@ import { ApiEndpointDetails, PowerBIAPILanguage, SwaggerFile } from './_types';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 
 import { iPowerResponseGeneric } from '../../powerbi/_types';
+import { PowerBINotebookContext } from '../notebook/PowerBINotebookContext';
 
 
 /** Supported trigger characters */
@@ -84,8 +85,8 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 				let currentPath = currentLine.split(" ")[1];
 
 				if (currentPath.startsWith('./')) {
-					// TODO not yet working as we dont know the relative path - maybe get it from document?
-					currentPath = Helper.joinPath("", currentPath.slice(2));
+					const nbContext = PowerBINotebookContext.getForUri(document.uri);
+					currentPath = Helper.joinPath(`/v1.0/${PowerBIApiService.Org}`, nbContext.apiRootPath, currentPath.slice(2));
 				}
 				else if (currentPath.startsWith('/') && !currentPath.startsWith('/v1.0')) {
 					currentPath = Helper.joinPath(`/v1.0/${PowerBIApiService.Org}`, currentPath);

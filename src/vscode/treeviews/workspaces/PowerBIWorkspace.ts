@@ -124,17 +124,6 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 	}
 
 	// Workspace-specific functions
-	public async delete(): Promise<void> {
-		/*
-		ThisExtension.setStatusBar("Deleting workspace ...");
-		await PowerBICommandBuilder.execute<iPowerBIGroup>(this.apiPath, "DELETE", []);
-		ThisExtension.setStatusBar("Workspace deleted!");
-		
-		ThisExtension.TreeViewWorkspaces.refresh(false, this.parent);
-		*/
-		vscode.window.showWarningMessage("For safety-reasons workspaces cannot be deleted using this extension!");
-	}
-
 	public static async assignToCapacity(workspace: PowerBIWorkspace, settings: object = undefined): Promise<void> {
 		const apiUrl =  Helper.joinPath(workspace.apiPath, "AssignToCapacity");
 
