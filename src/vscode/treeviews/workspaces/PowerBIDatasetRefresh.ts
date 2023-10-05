@@ -61,7 +61,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 		let actions: string[] = []
 
-		if (this.definition.status == "Unknown") {
+		if (this.status == "Unknown" || this.status == "InProgress") {
 			actions.push("CANCEL")
 		}
 
@@ -78,6 +78,14 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 	get dataset(): PowerBIDataset {
 		return (this.parent as PowerBIDatasetRefreshes).dataset;
+	}
+
+	get status(): string {
+		if(this.definition.extendedStatus)
+		{
+			return this.definition.extendedStatus;
+		}
+		return this.definition.status;
 	}
 
 	// DatasetRefresh-specific funtions
