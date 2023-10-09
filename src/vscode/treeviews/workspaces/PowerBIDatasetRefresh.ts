@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIDataset } from './PowerBIDataset';
@@ -33,18 +33,30 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 	}
 
 	get _label(): string {
-		let dateToShow: Date = this.definition.startTime;
+		let dateToShow: Date = this.startTime;
 
 		return `${new Date(dateToShow).toISOString().substr(0, 19).replace('T', ' ')}`;
 	}
 
 	// description is show next to the label
 	get _description(): string {
-		return this.definition.status + " - " + this.definition.refreshType;
+
+		let duration: number = this.duration;
+		let durationText: string = "";
+		if(this.duration)
+		{
+			durationText = `(${Helper.secondsToHms(duration)})`;
+		}
+	
+		return `${this.status} ${durationText} - this.definition.refreshType`;
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {
 		let status: string = this.definition.status;
+
+		if (status == "NotStarted") {
+			status = "pending";
+		}
 
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, status + '.png');
 	}
@@ -61,7 +73,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 		let actions: string[] = []
 
-		if (this.status == "Unknown" || this.status == "InProgress") {
+		if (this.status == "Unknown" || this.status == "InProgress" || this.status == "NotStarted") {
 			actions.push("CANCEL")
 		}
 
@@ -86,6 +98,30 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 			return this.definition.extendedStatus;
 		}
 		return this.definition.status;
+	}
+
+	get startTime(): Date {
+		if(this.definition.startTime)
+		{
+			return new Date(this.definition.startTime);
+		}
+		return undefined;
+	}
+
+	get endTime(): Date {
+		if(this.definition.endTime)
+		{
+			return new Date(this.definition.endTime);
+		}
+		return undefined;
+	}
+
+	get duration(): number {
+		if(this.startTime && this.endTime)
+		{
+			return (this.endTime.getTime() - this.startTime.getTime()) / 1000;
+		}
+		return undefined;
 	}
 
 	// DatasetRefresh-specific funtions

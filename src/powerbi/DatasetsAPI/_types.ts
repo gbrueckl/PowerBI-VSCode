@@ -57,8 +57,8 @@ export class iPowerBIDatasetExecuteQueries {
 
 export class iPowerBIDatasetRefresh {
     refreshType: "OnDemand" | "ViaXmlaEndpoint" | "ViaEnhancedApi" | "ViaApi" | "Scheduled" | "OnDemandTraining";
-    startTime: Date;
-    endTime: Date;
+    startTime: string;
+    endTime: string;
     status: string;
     requestId: string;
 	extendedStatus?: string;
