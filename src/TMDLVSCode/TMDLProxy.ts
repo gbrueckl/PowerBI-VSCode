@@ -358,8 +358,6 @@ export abstract class TMDLProxy {
 	}
 
 	static async saveLocally(resourceUri: vscode.Uri): Promise<boolean> {
-		await vscode.window.activeTextEditor.document.save();
-
 		if (resourceUri.scheme == TMDL_SCHEME) {
 			const tmdlEntry = new TMDLFSUri(resourceUri);
 
@@ -378,7 +376,7 @@ export abstract class TMDLProxy {
 			const savePath = savePaths[0];
 
 			await vscode.workspace.fs.copy(tmdlEntry.TMDLRootUri.uri, savePath, { overwrite: true });
-			vscode.workspace.fs.writeFile(vscode.Uri.joinPath(savePath, SETTINGS_FILE), Buffer.from(JSON.stringify({ "connectionString": tmdlEntry.XMLAConnectionString })));
+			vscode.workspace.fs.writeFile(vscode.Uri.joinPath(savePath, SETTINGS_FILE), Buffer.from(JSON.stringify({ "connectionString": tmdlEntry.XMLAConnectionString }, null, 4)));
 
 			vscode.window.showInformationMessage(`TMDL saved to ${savePath.fsPath}!`, "Add to Workspace", "Open Folder").then(
 				(value) => {
@@ -509,6 +507,7 @@ export abstract class TMDLProxy {
 
 		return success;
 	}
+
 	static async publishFolder(resourceUri: vscode.Uri): Promise<boolean> {
 		try {
 			let success: boolean = false;
@@ -534,6 +533,7 @@ export abstract class TMDLProxy {
 			else {
 				body = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
 				body.localPath = localPath.fsPath;
+				body.datasetName = Helper.getFirstRegexGroup( /Initial Catalog=(.*?);/g, body.connectionString);
 			}
 
 			const config: RequestInit = {
@@ -543,7 +543,7 @@ export abstract class TMDLProxy {
 			};
 			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/publish").toString();
 
-			let response = await Helper.awaitWithProgress<Response>("Validate TMDL", fetch(endpoint, config), 0);
+			let response = await Helper.awaitWithProgress<Response>("Publish TMDL", fetch(endpoint, config), 0);
 
 			let resultText = await response.text();
 
@@ -552,7 +552,7 @@ export abstract class TMDLProxy {
 				success = false;
 			}
 			else {
-				vscode.window.showInformationMessage(resultText);
+				//vscode.window.showInformationMessage(resultText);
 				success = true;
 			}
 
@@ -562,6 +562,7 @@ export abstract class TMDLProxy {
 			return false;
 		}
 	}
+
 	static async publishStream(resourceUri: vscode.Uri): Promise<boolean> {
 		try {
 			let success: boolean = false;
@@ -581,7 +582,7 @@ export abstract class TMDLProxy {
 			};
 			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/publishStream").toString();
 
-			let response = await Helper.awaitWithProgress<Response>("Validate TMDL", fetch(endpoint, config), 0);
+			let response = await Helper.awaitWithProgress<Response>("Publish TMDL", fetch(endpoint, config), 0);
 
 			let resultText = await response.text();
 
@@ -590,7 +591,7 @@ export abstract class TMDLProxy {
 				success = false;
 			}
 			else {
-				vscode.window.showInformationMessage(resultText);
+				//vscode.window.showInformationMessage(resultText);
 				success = true;
 			}
 

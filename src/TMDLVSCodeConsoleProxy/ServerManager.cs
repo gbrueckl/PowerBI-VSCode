@@ -1,5 +1,4 @@
 using System.Data.Common;
-using System.Runtime.CompilerServices;
 using TOM = Microsoft.AnalysisServices.Tabular;
 
 namespace TMDLVSCodeConsoleProxy
@@ -10,21 +9,29 @@ namespace TMDLVSCodeConsoleProxy
 
         public static TOM.Server GetServer(string connectionString)
         {
+            TOM.Server server;
             if (!knownServers.ContainsKey(connectionString))
             {
                 lock (knownServers)
                 {
-                    TOM.Server server = new TOM.Server();
+                    Console.WriteLine("Establishing new connection to " + connectionString);
+                    server = new TOM.Server();
                     server.Connect(connectionString);
 
-                    if(server.Connected)
+                    if(server.Connected && !knownServers.ContainsKey(connectionString))
                     {
                         knownServers.Add(connectionString, server);
                     }
                 }
             }
 
-            return knownServers[connectionString];
+            server = knownServers[connectionString];
+            if(!server.Connected)
+            {
+                Console.WriteLine("Reconnecting to " + connectionString);
+                server.Reconnect();
+            }
+            return server;
         }
 
         public static string GetDataSource(string connectionString)

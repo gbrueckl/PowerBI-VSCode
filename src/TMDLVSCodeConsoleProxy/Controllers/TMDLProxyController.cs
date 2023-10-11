@@ -1,7 +1,5 @@
 using Microsoft.AnalysisServices.Tabular.Serialization;
 using Microsoft.AnalysisServices.Tabular.Tmdl;
-using Microsoft.AnalysisServices;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 
@@ -34,16 +32,15 @@ namespace TMDLVSCodeConsoleProxy.Controllers
         [Route("/tmdl/test")]
         public IActionResult Test()
         {
-            using (var server = ServerManager.GetServer("Data Source=powerbi://api.powerbi.com/v1.0/myorg/PPU"))
-            {
-                List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
+            var server = ServerManager.GetServer("Data Source=powerbi://api.powerbi.com/v1.0/myorg/PPU");
 
-                foreach (TOM.Database db in server.Databases)
-                {
-                    dbs.Add(new TMDLProxyDatabase { name = db.Name, id = db.ID });
-                }
-                return Ok(dbs);
+            List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
+
+            foreach (TOM.Database db in server.Databases)
+            {
+                dbs.Add(new TMDLProxyDatabase { name = db.Name, id = db.ID });
             }
+            return Ok(dbs);
             return Ok("Hello World!");
         }
 
@@ -153,17 +150,15 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             {
                 this.validateHeader(header);
 
-                using (var server = ServerManager.GetServer(connectionString))
+                var server = ServerManager.GetServer(connectionString);
+
+                List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
+
+                foreach (TOM.Database db in server.Databases)
                 {
-
-                    List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
-
-                    foreach (TOM.Database db in server.Databases)
-                    {
-                        dbs.Add(new TMDLProxyDatabase { name = db.Name, id = db.ID });
-                    }
-                    return Ok(dbs);
+                    dbs.Add(new TMDLProxyDatabase { name = db.Name, id = db.ID });
                 }
+                return Ok(dbs);
             }
             catch (Exception ex)
             {
@@ -187,18 +182,18 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             {
                 this.validateHeader(header);
 
-                using (var server = ServerManager.GetServer(connectionString))
-                {
-                    var database = server.Databases.GetByName(datasetName);
+                var server = ServerManager.GetServer(connectionString);
 
+                using (var database = server.Databases.GetByName(datasetName))
+                {
                     Console.WriteLine($"Exporting Dataset '{datasetName}' as TMDL to local folder '{localPath}' ...");
 
                     TOM.TmdlSerializer.SerializeModelToFolder(database.Model, localPath);
 
                     Console.WriteLine($"Export successful!");
-
-                    return Ok("Export successful!");
                 }
+
+                return Ok("Export successful!");
             }
             catch (Exception ex)
             {
@@ -223,7 +218,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers
                 Console.WriteLine($"Validating TMDL from local folder '{localPath}' ...");
                 var model = TOM.TmdlSerializer.DeserializeModelFromFolder(localPath);
 
-                return Ok(new TMDLProxyDataException { success = true, message = "Validation successful!" });
+                return Ok("Validation successful!");
             }
             catch (Exception ex)
             {
@@ -249,17 +244,16 @@ namespace TMDLVSCodeConsoleProxy.Controllers
                 Console.WriteLine($"Publishing TMDL from local folder '{localPath}' to Dataset '{datasetName}' ...");
                 var model = TOM.TmdlSerializer.DeserializeModelFromFolder(localPath);
 
-                using (var server = ServerManager.GetServer(connectionString))
+                var server = ServerManager.GetServer(connectionString);
+
+                using (var remoteDatabase = server.Databases.GetByName(datasetName))
                 {
+                    model.CopyTo(remoteDatabase.Model);
 
-                    using (var remoteDatabase = server.Databases[model.Database.ID])
-                    {
-                        model.CopyTo(remoteDatabase.Model);
-
-                        remoteDatabase.Model.SaveChanges();
-                    }
-                    return Ok("Publish successful!");
+                    remoteDatabase.Model.SaveChanges();
                 }
+                return Ok("Publish successful!");
+                
             }
             catch (Exception ex)
             {
@@ -283,12 +277,11 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             {
                 this.validateHeader(header);
 
-                using (var server = ServerManager.GetServer(connectionString))
-                {
-                    var database = server.Databases.GetByName(datasetName);
-                    
-                    var ret = new JsonArray();
+                var ret = new JsonArray();
+                var server = ServerManager.GetServer(connectionString);
 
+                using (var database = server.Databases.GetByName(datasetName))
+                {
                     foreach (MetadataDocument document in database.Model.ToTmdl())
                     {
                         StringBuilder output = new StringBuilder();
@@ -306,8 +299,10 @@ namespace TMDLVSCodeConsoleProxy.Controllers
                         ret.Add(tmdlEntry);
                     }
 
-                    return Ok(ret);
+                   
                 }
+
+                return Ok(ret);
             }
             catch (Exception ex)
             {
@@ -342,17 +337,15 @@ namespace TMDLVSCodeConsoleProxy.Controllers
 
                 Console.WriteLine($"Publishing TMDL from Stream to Dataset '{datasetName}' ...");
 
-                using (var server = ServerManager.GetServer(connectionString))
+                var server = ServerManager.GetServer(connectionString);
+
+                using (var remoteDatabase = server.Databases[model.Database.ID])
                 {
+                    model.CopyTo(remoteDatabase.Model);
 
-                    using (var remoteDatabase = server.Databases[model.Database.ID])
-                    {
-                        model.CopyTo(remoteDatabase.Model);
-
-                        remoteDatabase.Model.SaveChanges();
-                    }
-                    return Ok("Publish Stream successful!");
+                    remoteDatabase.Model.SaveChanges();
                 }
+                return Ok("Publish successful!");
             }
             catch (Exception ex)
             {

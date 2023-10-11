@@ -121,10 +121,10 @@ export class TMDLFSCache implements vscode.Disposable {
 		}
 
 		if (database.loadingState == "not_loaded") {
-			ThisExtension.log(`Loading TMDL database '${database.databaseName}' ... `);
+			ThisExtension.log(`Loading TMDL database '${database.databaseName}' from server '${server.serverName}' ... `);
 			database.loadingState = "loading";
 			let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>(
-				`Loading TMDL database '${database.databaseName}'`,
+				`Loading TMDL database '${database.databaseName} from server '${server.serverName}'`,
 				TMDLProxy.exportStream(new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${server.serverName}/${database.databaseName}`))),
 				1000);
 			if (stream) {
