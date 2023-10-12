@@ -7,28 +7,36 @@ namespace TMDLVSCodeConsoleProxy
     {
         private static Dictionary<string, TOM.Server> knownServers = new Dictionary<string, TOM.Server>();
 
-        public static TOM.Server GetServer(string connectionString)
+        public static TOM.Server GetServer(TMDLProxyData proxyData)
         {
             TOM.Server server;
-            if (!knownServers.ContainsKey(connectionString))
+            if (!knownServers.ContainsKey(proxyData.connectionString))
             {
                 lock (knownServers)
                 {
-                    Console.WriteLine("Establishing new connection to " + connectionString);
+                    Console.WriteLine("Establishing new connection to " + proxyData.connectionString);
                     server = new TOM.Server();
-                    server.Connect(connectionString);
 
-                    if(server.Connected && !knownServers.ContainsKey(connectionString))
+                    // if an access token is provided from VSCode, we use it to connect to the server
+                    if(proxyData.vscodeAccessToken != null)
                     {
-                        knownServers.Add(connectionString, server);
+                        Console.WriteLine("Using VSCode AccessToken ...");
+                        server.AccessToken = new Microsoft.AnalysisServices.AccessToken(proxyData.vscodeAccessToken, DateTime.Now.AddHours(1));
+                    }
+
+                    server.Connect(proxyData.connectionString);
+
+                    if(server.Connected && !knownServers.ContainsKey(proxyData.connectionString))
+                    {
+                        knownServers.Add(proxyData.connectionString, server);
                     }
                 }
             }
 
-            server = knownServers[connectionString];
+            server = knownServers[proxyData.connectionString];
             if(!server.Connected)
             {
-                Console.WriteLine("Reconnecting to " + connectionString);
+                Console.WriteLine("Reconnecting to " + proxyData.connectionString);
                 server.Reconnect();
             }
             return server;

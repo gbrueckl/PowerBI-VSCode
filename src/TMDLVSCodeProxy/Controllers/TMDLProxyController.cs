@@ -245,7 +245,7 @@ namespace TMDLVSCodeProxy.Controllers
                 Console.WriteLine($"Validating TMDL from local folder '{localPath}' ...");
                 var model = TOM.TmdlSerializer.DeserializeModelFromFolder(localPath);
 
-                return Ok(new TMDLProxyDataException { success = true, message = "Validation successful!" });
+                return Ok("Validation successful!");
             }
             catch (Exception ex) 
             {

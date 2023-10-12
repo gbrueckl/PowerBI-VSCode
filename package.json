@@ -65,10 +65,14 @@
 						"markdownDescription": "(Optional) A custom ClientID/AAD Application to use when interacting with Power BI REST APIs.",
 						"default": null
 					},
-					"powerbi.TMDLClientId": {
+					"powerbi.TMDL.clientId": {
 						"type": "string",
-						"markdownDescription": "(Optional) To use **TMDL features**, a custom ClientID/Application is mandatory. \n\n You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permited in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details.\n\nIf this field is not set, all TMDL features will be disabled/hidden!",
-						"default": "058487e5-bde7-4aba-a5dc-2f9ac58cb668"
+						"markdownDescription": "(Optional) To use **TMDL features**, a custom ClientID/Application can be used. \n\n You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permitted in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details.\n\nIf this is configured, VSCode will manage the authentication and also remember it!"
+					},
+					"powerbi.TMDL.enabled": {
+						"type": "boolean",
+						"markdownDescription": "Set to true to allow editing Power BI datasets using TMDL.",
+						"default": true
 					},
 					"powerbi.cloud": {
 						"type": "string",
@@ -259,35 +263,35 @@
 				"title": "Edit TMDL",
 				"icon": "$(edit)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBI.TMDL.validate",
 				"title": "Validate TMDL",
 				"icon": "$(bracket-dot)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
 			},
 			{
 				"command": "PowerBI.TMDL.publish",
 				"title": "Publish TMDL",
 				"icon": "$(cloud-upload)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
 			},
 			{
 				"command": "PowerBI.TMDL.load",
 				"title": "(Re)Load TMDL from server",
 				"icon": "$(cloud-download)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBI.TMDL.saveLocally",
 				"title": "Save TMDL locally",
 				"icon": "$(cloud-download)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && resourcePath in powerbi.tmdl.loadedDatabases"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && resourcePath in powerbi.tmdl.loadedDatabases"
 			},
 			{
 				"command": "PowerBI.TMDL.test",

@@ -11,6 +11,7 @@ import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../powerbi/CommandB
 import { TMDLFSUri } from '../vscode/filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 import { TMDLProxyData, TMDLProxyDataException, TMDLProxyDataValidation, TMDLProxyServer, TMDLProxyStreamEntry } from '../TMDLVSCode/_types'
+import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfiguration';
 
 const portfinder = require('portfinder');
 
@@ -184,6 +185,13 @@ export abstract class TMDLProxy {
 		}
 	}
 
+	static async setAccessToken(body: TMDLProxyData): Promise<void> {
+		if (PowerBIConfiguration.tmdlClientId) {
+			const accessToken = (await PowerBIApiService.getXmlaSession()).accessToken;
+			body.vscodeAccessToken = accessToken;
+		}
+	}
+
 	static async test(dataset: PowerBIDataset): Promise<string> {
 		try {
 			const config: RequestInit = {
@@ -329,67 +337,6 @@ export abstract class TMDLProxy {
 		}
 	}
 
-	static async load(resourceUri: vscode.Uri): Promise<void> {
-		if (resourceUri.scheme == TMDL_SCHEME) {
-
-			const tmdlEntry = new TMDLFSUri(resourceUri);
-
-			if (TMDLFSCache.getDatabase(tmdlEntry.server, tmdlEntry.database).loadingState == "fully_loaded") {
-				const confirm = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Do you really want to reload TMDL for ${tmdlEntry.modelId}? This will overwrite any local changes.`, undefined, undefined);
-
-				if (confirm == "yes") {
-					// we unload the model to force a reload the next time it is queried
-					await TMDLFSCache.unloadDatabase(tmdlEntry);
-				}
-				else {
-					return;
-				}
-			}
-			await TMDLFSCache.loadDatabase(tmdlEntry.server, tmdlEntry.database);
-
-			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
-
-			vscode.workspace.textDocuments.forEach((document) => {
-				if (document.uri.toString().startsWith(tmdlEntry.TMDLRootUri.uri.toString())) {
-					vscode.commands.executeCommand("workbench.action.files.revert", document.uri);
-				}
-			});
-		}
-	}
-
-	static async saveLocally(resourceUri: vscode.Uri): Promise<boolean> {
-		if (resourceUri.scheme == TMDL_SCHEME) {
-			const tmdlEntry = new TMDLFSUri(resourceUri);
-
-			const savePaths = (await vscode.window.showOpenDialog({
-				title: `Save TMDL definitions to local folder`,
-				openLabel: "Export",
-				canSelectMany: false,
-				canSelectFiles: false,
-				canSelectFolders: true
-			}));
-
-			if (!savePaths) {
-				Helper.showTemporaryInformationMessage("TMDL Export aborted!");
-				return;
-			}
-			const savePath = savePaths[0];
-
-			await vscode.workspace.fs.copy(tmdlEntry.TMDLRootUri.uri, savePath, { overwrite: true });
-			vscode.workspace.fs.writeFile(vscode.Uri.joinPath(savePath, SETTINGS_FILE), Buffer.from(JSON.stringify({ "connectionString": tmdlEntry.XMLAConnectionString }, null, 4)));
-
-			vscode.window.showInformationMessage(`TMDL saved to ${savePath.fsPath}!`, "Add to Workspace", "Open Folder").then(
-				(value) => {
-					if (value == "Add to Workspace") {
-						Helper.addToWorkspace(savePath, `${tmdlEntry.dataset}`)
-					}
-					if (value == "Open Folder") {
-						vscode.commands.executeCommand("revealFileInOS", savePath.with({ path: savePath.path + "/model" + TMDL_EXTENSION }));
-					}
-				}
-			);
-		}
-	}
 
 	// not used at the moment!!!
 	static async export(dataset: PowerBIDataset): Promise<boolean> {
@@ -416,6 +363,8 @@ export abstract class TMDLProxy {
 				"datasetName": dataset.name,
 				"localPath": localPath.fsPath,
 			};
+
+			await TMDLProxy.setAccessToken(body)
 
 			TMDLProxy._datasetTmdlPathMapping.set(dataset, localPath);
 
@@ -452,6 +401,8 @@ export abstract class TMDLProxy {
 				"connectionString": connectionString,
 				"datasetName": tmdlUri.dataset
 			};
+
+			await TMDLProxy.setAccessToken(body)
 
 			const config: RequestInit = {
 				method: "POST",
@@ -533,8 +484,10 @@ export abstract class TMDLProxy {
 			else {
 				body = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
 				body.localPath = localPath.fsPath;
-				body.datasetName = Helper.getFirstRegexGroup( /Initial Catalog=(.*?);/g, body.connectionString);
+				body.datasetName = Helper.getFirstRegexGroup(/Initial Catalog=(.*?);/g, body.connectionString);
 			}
+
+			await TMDLProxy.setAccessToken(body)
 
 			const config: RequestInit = {
 				method: "POST",
@@ -575,6 +528,8 @@ export abstract class TMDLProxy {
 				"streamEntries": await tmdlEntry.getStreamEntries()
 			};
 
+			await TMDLProxy.setAccessToken(body)
+
 			const config: RequestInit = {
 				method: "POST",
 				headers: TMDLProxy._headers,
@@ -599,6 +554,69 @@ export abstract class TMDLProxy {
 		} catch (error) {
 			vscode.window.showErrorMessage(error);
 			return false;
+		}
+	}
+
+
+	static async load(resourceUri: vscode.Uri): Promise<void> {
+		if (resourceUri.scheme == TMDL_SCHEME) {
+
+			const tmdlEntry = new TMDLFSUri(resourceUri);
+
+			if (TMDLFSCache.getDatabase(tmdlEntry.server, tmdlEntry.database).loadingState == "fully_loaded") {
+				const confirm = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Do you really want to reload TMDL for ${tmdlEntry.modelId}? This will overwrite any local changes.`, undefined, undefined);
+
+				if (confirm == "yes") {
+					// we unload the model to force a reload the next time it is queried
+					await TMDLFSCache.unloadDatabase(tmdlEntry);
+				}
+				else {
+					return;
+				}
+			}
+			await TMDLFSCache.loadDatabase(tmdlEntry.server, tmdlEntry.database);
+
+			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer");
+
+			vscode.workspace.textDocuments.forEach((document) => {
+				if (document.uri.toString().startsWith(tmdlEntry.TMDLRootUri.uri.toString())) {
+					vscode.commands.executeCommand("workbench.action.files.revert", document.uri);
+				}
+			});
+		}
+	}
+
+	static async saveLocally(resourceUri: vscode.Uri): Promise<boolean> {
+		if (resourceUri.scheme == TMDL_SCHEME) {
+			const tmdlEntry = new TMDLFSUri(resourceUri);
+
+			const savePaths = (await vscode.window.showOpenDialog({
+				title: `Save TMDL definitions to local folder`,
+				openLabel: "Export",
+				canSelectMany: false,
+				canSelectFiles: false,
+				canSelectFolders: true
+			}));
+
+			if (!savePaths) {
+				Helper.showTemporaryInformationMessage("TMDL Export aborted!");
+				return;
+			}
+			const savePath = savePaths[0];
+
+			await vscode.workspace.fs.copy(tmdlEntry.TMDLRootUri.uri, savePath, { overwrite: true });
+			vscode.workspace.fs.writeFile(vscode.Uri.joinPath(savePath, SETTINGS_FILE), Buffer.from(JSON.stringify({ "connectionString": tmdlEntry.XMLAConnectionString }, null, 4)));
+
+			vscode.window.showInformationMessage(`TMDL saved to ${savePath.fsPath}!`, "Add to Workspace", "Open Folder").then(
+				(value) => {
+					if (value == "Add to Workspace") {
+						Helper.addToWorkspace(savePath, `${tmdlEntry.dataset}`)
+					}
+					if (value == "Open Folder") {
+						vscode.commands.executeCommand("revealFileInOS", savePath.with({ path: savePath.path + "/model" + TMDL_EXTENSION }));
+					}
+				}
+			);
 		}
 	}
 

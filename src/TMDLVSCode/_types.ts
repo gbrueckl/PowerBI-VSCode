@@ -7,6 +7,7 @@ export interface TMDLProxyServer {
 export interface TMDLProxyData {
 	connectionString: string;
 	datasetName: string;
+	vscodeAccessToken?: string;
 	localPath?: string;
 	streamEntries?: TMDLProxyStreamEntry[];
 }

@@ -28,6 +28,7 @@ export abstract class PowerBIApiService {
 	private static _org: string = "myorg"
 	private static _headers;
 	private static _vscodeSession: vscode.AuthenticationSession;
+	private static _xmlaSession: vscode.AuthenticationSession;
 
 	//#region Initialization
 	static async initialize(
@@ -97,6 +98,54 @@ export abstract class PowerBIApiService {
 
 	public static getXmlaEndpoint(workspace: string): vscode.Uri {
 		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl).with({ scheme: "powerbi" }), "v1.0", this.Org, workspace);
+	}
+
+	public static async refreshXmlaSession(): Promise<boolean> {
+		this._xmlaSession = await this.getXmlaSession();
+
+		if (!this._xmlaSession) {
+			vscode.window.showInformationMessage("PowerBI / TMDL: Please log in with your Microsoft account first!");
+			return false;
+		}
+
+		for(const server of TMDLFSCache.cachedServers)
+		{
+			for(const database of server.databases)
+			{
+				// remove models that have not been fully loaded
+				if(database.loadingState != "fully_loaded")
+				{
+					server.removeDatabase(database.databaseName);
+				}
+			}
+		}
+		return true;
+	}
+
+	public static async getXmlaSession(): Promise<vscode.AuthenticationSession> {
+		if(this._xmlaSession)
+		{
+			return this._xmlaSession;
+		}
+		let scopes = [
+			//`${Helper.trimChar(this._resourceId, "/")}/.default`,
+
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.Read.All`,
+			/*
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Group.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Group.Read`,
+			*/
+		];
+
+		this._xmlaSession = await this.getAADAccessToken(scopes, this._tenantId, this._tmdlClientId);
+
+		return this._xmlaSession;
 	}
 
 	public static async getDatasetUrl(workspaceName: string, datasetName: string): Promise<vscode.Uri> {

@@ -28,11 +28,12 @@ The extension supports the following VSCode settings:
 |-------|-----------|-------------|
 |`powerbi.tenantId`|(Optional) The tenant ID of the remote tenant that you want to connect to.|A GUID, `abcd1234-1234-5678-9abcd-9d1963e4b9f5`|
 |`powerbi.clientId`|(Optional) A custom ClientID/Application of an AAD application to use when connecting to Power BI.|A GUID, `99887766-1234-5678-9abcd-e4b9f59d1963`|
-|`powerbi.TMDLClientId`|(Optional) To use **TMDL features**, a custom ClientID/Application is mandatory. \n\n You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permited in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details.\n\nIf this field is not set, all TMDL features will be disabled/hidden!|A GUID, `058487e5-bde7-4aba-a5dc-2f9ac58cb668`|
 |`powerbi.cloud`|(Optional) Only use when you want to connect to a sovereign or governmental cloud!|GlobalCloud|
+|`powerbi.TMDL.clientId`|(Optional) To use **TMDL features**, a custom ClientID/Application can be used. \n\n You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permitted in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details.\n\nIf this is configured, VSCode will manage the authentication and also remember it!|A GUID, `058487e5-bde7-4aba-a5dc-2f9ac58cb668`|
+|`powerbi.TMDL.enabled`|Set to `true` (default) to allow editing Power BI datasets using TMDL.|`true`(default)/`false`|
 
 # Notebooks
-You can open a new Power BI notebook via the UI from the header of each treeview or by running the command __Open new PowerBI Notebook__ (command `PowerBI.openNewNotebook`). Power BI notebooks have the file extension `.pbinb` and will automatically open in the notebook editor.
+You can open a new Power BI notebook via the UI from the header of each treeview or by running the command **Open new PowerBI Notebook** (command `PowerBI.openNewNotebook`). Power BI notebooks have the file extension `.pbinb` and will automatically open in the notebook editor.
 
 There are two core features of notebooks:
 - running arbitrary REST API calls
@@ -89,19 +90,55 @@ Current values of variables can be retrieved by running `SET MY_VARIABLE`.
 **Note:** you can also set/get multiple variables within the same notebook cell!
 
 # TMDL
-Using this extension you can modify your Power BI Datasets directly within VSCode using Tabular Model Definition Language (**TMDL**). For datasets that reside in a Premium Capacity, you can select `Edit TMDL` from the context menu. A pop up will ask you to select a local folder to store the TMDL definition. Once you `Export` the TMDL definition to that folder, the folder will also be added to your VSCode session/workspace from where you can now edit the dataset. When you are done with your changes, you will fined a `Validate TMDL` and a `Publish TMDL` button at the right top of your editor.
+
+Using this extension you can modify your Power BI Datasets directly within VSCode using Tabular Model Definition Language (**TMDL**). For datasets that reside in a Premium Capacity, you can select `Edit TMDL` from the context menu:
+![TMDL EditDataset](./images/TMDL-EditDataset.png)
+The TMDL definition files will be added to your current workspace and you can modify them from there.
+When you are done with your changes, you will find a `[Validate TMDL]` and a `[Publish TMDL]` button at the right top of your editor.
+![TMDL Integration](./images/TMDL-Integration.png)
+
 ## Prerequisites
 The following prerequisites have to be fulfilled to use all TMDL features:
 
-- make sure that the VSCode Setting `powerbi.TMDLClientId` is set to either `058487e5-bde7-4aba-a5dc-2f9ac58cb668` or a custom AAD Application configured as described below:
+- [ASP.NET Core Runtime 7.0.10](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (or higher)
+- make sure that the VSCode Setting `powerbi.TMDL.enabled` is set to `true` (=default)
+- the dataset must reside in a Premium Capacity
+- optionally you can also use VSCode to manage the authentication as it already happens for the rest of this extension. This has the advantage, that you will not be prompted every time you open VSCode. To use VSCode authenticaiton, make sure that the VSCode Setting `powerbi.TMDL.clientId` is set to either `058487e5-bde7-4aba-a5dc-2f9ac58cb668` or a custom AAD Application configured as described below:
   - Redirect URIs for Mobile and desktop applications: `https://vscode.dev/redirect`
   - Delegated Permissions: `Workspace.Read.All`, `Dataset.Read.All`, `Dataset.ReadWrite.All`
   - Consent granted for the permissions above
-- [ASP.NET Core Runtime 7.0.10](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (or higher)
+
+## TMDL Configuration
+The setting `powerbi.TMDL.enabled` can be ued to enable or disable all TMDL features.
+
+The setting `powerbi.TMDL.clientId` can be used to specify a custom ClientID/ApplicationID (details see above) of an Azure Active Directory Application that will be used when communicating via with the XMLA interface. By doing so, VSCode will manage the authentication for you and prompt for your credentials. Those credentials will then be remembered and stored in VSCode and you will not be prompted again every time you open VSCode.
 
 ## Using TMDL Editor
 The TMDL Editor loads the TMDL definitions directly from a server and exposes them via the custom URI scheme `tmdl:/`. This allows you to add as many models as you want to your workspace to quickly access them. This is the very same that happens if you click `Edit TMDL` in the context menu of a Power BI dataset - it will add the folder `tmdl:/powerbi/<workspace>/<dataset>` to your VSCode workspace and load th model.
-Alternatively, you can also omit the `/<dataset>`. In this case, a list of all available databases(=datasets) within the workspace `tmdl:/powerbi/<workspace>` will be shown!
+Alternatively, you can also omit the `/<dataset>`. In this case, a list of all available databases(=datasets) within the workspace `tmdl:/powerbi/<workspace>` will be shown and you can drill into the datasets from there.
+
+To reload the latest definition from the server again, you can right-click the folder of the dataset in the VSCode File Explorer and select `[(Re)Load TMDL from Server]` (see screenshot above).
+
+## Integration with other TMDL Tools
+TMDL is a standard defined by Microsoft which also means that different tools can be used to work with the TMDL files. To use all the TMDL features of this extension with files authored by other tools (e.g. Tabular Editor), you need to configure the target where the TMDL files should be deployed to. This can be done by creating a file called `.publishsettings.json` in the root of the TMDL folder structure (on the same level as `model.tmdl`). This file has to have the following content:
+
+```json
+{
+  "connectionString": "Data Source=powerbi://api.powerbi.com/v1.0/myorg/SomeWorkspace;Initial Catalog=SomeDataset"
+}
+```
+
+The value for `connectionString` can be obtained from the settings pane of the dataset in the Power BI service where you want to deploy to.
+
+## TMDL Proxy
+This extensions leverages existing libraries for TMDL which are available as .net Core package: [Microsoft.AnalysisServices.NetCore.retail.amd64](https://www.nuget.org/packages/Microsoft.AnalysisServices.NetCore.retail.amd64). However, as this package cannot be directly integrated into VSCode which uses JavaScript/TypeScript (and not .net), we implemented a .net Core application/api that acts as a proxy between VSCode and the target Tabular Server (e.g. Power BI dataset). This allows our VSCode extension to communicate with the target from within VSCode without having to implement the library in JavaScript/TypeScript.
+
+As soon as you start using TMDL features, this proxy process will be started automatically in the background within a VSCode terminal:
+
+![TMDL Proxy](./images//TMDL-Proxy.png)
+
+The terminal also serves as a log which shows all individual requests sent to the proxy.
+
 # Building Locally
 1. Make sure you have installed [NodeJS](https://nodejs.org/en/) on your development workstation
 2. Clone this repo to your development workstation, then open the cloned folder in [VSCode](https://code.visualstudio.com/)
