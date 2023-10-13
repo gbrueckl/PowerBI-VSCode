@@ -113,7 +113,7 @@ export abstract class PowerBIApiService {
 			for(const database of server.databases)
 			{
 				// remove models that have not been fully loaded
-				if(database.loadingState != "fully_loaded")
+				if(database.loadingState != "loaded")
 				{
 					server.removeDatabase(database.databaseName);
 				}

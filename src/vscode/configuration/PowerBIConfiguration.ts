@@ -114,7 +114,7 @@ export abstract class PowerBIConfiguration {
 		return this.apiUrl !== "https://api.powerbi.com/"
 	}
 
-	static get isTMDLConfigured(): boolean {
+	static get isTMDLEnabled(): boolean {
 		// If the base URL for the API is not pointed to api.powerbi.com assume 
 		// we are pointed to the sovereign tenant
 		return this.tmdlEnabled;

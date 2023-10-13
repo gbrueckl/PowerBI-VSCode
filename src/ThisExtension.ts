@@ -214,8 +214,8 @@ export abstract class ThisExtension {
 
 		vscode.commands.executeCommand(
 			"setContext",
-			"powerbi.isTMDLConfigured",
-			PowerBIConfiguration.isTMDLConfigured
+			"powerbi.isTMDLEnabled",
+			PowerBIConfiguration.isTMDLEnabled
 		);
 	}
 

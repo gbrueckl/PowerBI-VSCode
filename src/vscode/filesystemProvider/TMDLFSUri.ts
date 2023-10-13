@@ -66,7 +66,7 @@ export class TMDLFSUri {
 	}
 
 	async getStreamEntries(): Promise<TMDLProxyStreamEntry[]> {
-		const database = TMDLFSCache.getDatabase(this.server, this.database);
+		const database = await TMDLFSCache.getDatabase(this.server, this.database);
 		let entries = database.getStreamEntries()
 		if (!entries) {
 			return [];
@@ -75,12 +75,12 @@ export class TMDLFSUri {
 	}
 
 	async setStreamEntries(value: TMDLProxyStreamEntry[]) {
-		const database = TMDLFSCache.getDatabase(this.server, this.database);
+		const database = await TMDLFSCache.getDatabase(this.server, this.database);
 		database.setStreamEntries(value);
 	}
 
 	async getStreamEntry(): Promise<TMDLProxyStreamEntry> {
-		const database = TMDLFSCache.getDatabase(this.server, this.database);
+		const database = await TMDLFSCache.getDatabase(this.server, this.database);
 		let entryPath = this.logicalPath;
 		if (entryPath.endsWith(TMDL_EXTENSION)) {
 			entryPath = Helper.cutEnd(entryPath, TMDL_EXTENSION);
@@ -89,7 +89,7 @@ export class TMDLFSUri {
 	}
 
 	async removeStreamEntry(): Promise<void> {
-		const database = TMDLFSCache.getDatabase(this.server, this.database);
+		const database = await TMDLFSCache.getDatabase(this.server, this.database);
 		let entryPath = this.logicalPath;
 		if (entryPath.endsWith(TMDL_EXTENSION)) {
 			entryPath = Helper.cutEnd(entryPath, TMDL_EXTENSION);

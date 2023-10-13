@@ -9,16 +9,11 @@ import { TMDLFSCache } from './TMDLFSCache';
 
 export const TMDL_SCHEME: string = "tmdl";
 export const TMDL_EXTENSION: string = ".tmdl";
-export const TMLD_FILE_ENCODING: BufferEncoding = "utf8";
+export const TMDL_FILE_ENCODING: BufferEncoding = "utf8";
 
 
 export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode.Disposable {
-	//static loadedModels: Map<string, TMDLProxyStreamEntry[]> = new Map<string, TMDLProxyStreamEntry[]>();
-	public cachedServers: TMDLFSCache;
-
-	constructor() {
-		this.cachedServers = new TMDLFSCache();
-	}
+	constructor() {	}
 
 	public static async register(context: vscode.ExtensionContext) {
 		const fsp = new TMDLFileSystemProvider()
@@ -27,7 +22,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 		ThisExtension.TMDLFileSystemProvider = fsp;
 	}
 
-	
+
 	public static async closeOpenTMDLFiles(): Promise<void> {
 		// close all existing TMDL files
 		const tabs: vscode.Tab[] = vscode.window.tabGroups.all.map(tg => tg.tabs).flat();
@@ -36,6 +31,15 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 			ThisExtension.log("Closing TMDL file: " + (tab.input as vscode.TabInputText).uri.toString());
 			await vscode.window.tabGroups.close(tab);
 		}
+	}
+
+	public static async openModelFile(tmdlUri: TMDLFSUri): Promise<vscode.TextEditor> {
+		if (!tmdlUri.isServerLevel) {
+			const textDoc = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(tmdlUri.TMDLRootUri.uri, "model" + TMDL_EXTENSION));
+			const editor = await vscode.window.showTextDocument(textDoc);
+			return editor;
+		}
+		return undefined;
 	}
 
 	// -- manage file metadata
@@ -77,17 +81,15 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri, true);
 
 		if (tmdlUri.isServerLevel) {
-			await TMDLFSCache.loadServer(tmdlUri.server);
-
 			let dbEntries: [string, vscode.FileType][] = [];
-			for (const db of TMDLFSCache.getServer(tmdlUri.server).databases) {
+			const server = await TMDLFSCache.getServer(tmdlUri.server);
+			for (const db of server.databases) {
 				dbEntries.push([db.databaseName, vscode.FileType.Directory]);
 			}
 			return dbEntries;
 		}
 
 		else {
-			await TMDLFSCache.loadDatabase(tmdlUri.server, tmdlUri.database);
 			const entries: TMDLProxyStreamEntry[] = await tmdlUri.getStreamEntries();
 
 			let folders: [string, vscode.FileType][] = [];
@@ -114,11 +116,6 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
 		const tmdlUri: TMDLFSUri = await TMDLFSUri.getInstance(uri);
 
-		// for TMDL files we want to make sure the database is loaded
-		if(tmdlUri.uri.path.endsWith(TMDL_EXTENSION)) {
-			await TMDLFSCache.loadDatabase(tmdlUri.server, tmdlUri.database);
-		}
-
 		const entry = await tmdlUri.getStreamEntry();
 		if (!entry) {
 			throw vscode.FileSystemError.FileNotFound(uri);
@@ -126,7 +123,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
 
-		return Buffer.from(entry.content, TMLD_FILE_ENCODING);
+		return Buffer.from(entry.content, TMDL_FILE_ENCODING);
 	}
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
@@ -138,7 +135,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 				if (tmdlUri.uri.path.endsWith(TMDL_EXTENSION)) {
 					let newEntry: TMDLProxyStreamEntry = {
 						logicalPath: tmdlUri.logicalPath,
-						content: Buffer.from(content).toString(TMLD_FILE_ENCODING),
+						content: Buffer.from(content).toString(TMDL_FILE_ENCODING),
 						size: content.length
 					};
 					(await tmdlUri.getStreamEntries()).push(newEntry);
@@ -152,7 +149,7 @@ export class TMDLFileSystemProvider implements vscode.FileSystemProvider, vscode
 			}
 		}
 		else {
-			entry.content = Buffer.from(content).toString(TMLD_FILE_ENCODING);
+			entry.content = Buffer.from(content).toString(TMDL_FILE_ENCODING);
 		}
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri });

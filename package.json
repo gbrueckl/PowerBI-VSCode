@@ -199,7 +199,7 @@
 				"title": "Browse TMDL",
 				"icon": "$(edit)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
+				"enablement": "powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBIWorkspace.insertPath",
@@ -263,42 +263,42 @@
 				"title": "Edit TMDL",
 				"icon": "$(edit)",
 				"category": "PowerBI",
-				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled"
 			},
 			{
 				"command": "PowerBI.TMDL.validate",
 				"title": "Validate TMDL",
 				"icon": "$(bracket-dot)",
 				"category": "PowerBI",
-				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
 			},
 			{
 				"command": "PowerBI.TMDL.publish",
 				"title": "Publish TMDL",
 				"icon": "$(cloud-upload)",
 				"category": "PowerBI",
-				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
 			},
 			{
 				"command": "PowerBI.TMDL.load",
 				"title": "(Re)Load TMDL from server",
 				"icon": "$(cloud-download)",
 				"category": "PowerBI",
-				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBI.TMDL.saveLocally",
 				"title": "Save TMDL locally",
 				"icon": "$(cloud-download)",
 				"category": "PowerBI",
-				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning && resourcePath in powerbi.tmdl.loadedDatabases"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning && resourcePath in powerbi.tmdl.loadedDatabases"
 			},
 			{
 				"command": "PowerBI.TMDL.test",
 				"title": "Test TMDL",
 				"icon": "$(symbol-class)",
 				"category": "PowerBI",
-				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLConfigured && powerbi.isTMDLProxyRunning"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBI.TMDL.ensureProxy",

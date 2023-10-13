@@ -170,12 +170,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 	public async browseTMDL(): Promise<void> {
 		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.name}`))
 
-		const existingWorkspace = await Helper.addToWorkspace(tmdlUri.uri, `TMDL - Workspace ${this.name}`);
-		// if the workspace does not exist, the folder is opened in a new workspace where the TMDL folder would be reloaded again
-		// so we only load the model if we already have a workspace
-		if (existingWorkspace) {
-			await TMDLFSCache.loadServer(tmdlUri.server);
-		}
+		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - Workspace ${this.name}`);
 
 		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
 	}

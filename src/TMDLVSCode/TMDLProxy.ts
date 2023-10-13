@@ -28,6 +28,12 @@ const errorDecoration = vscode.window.createTextEditorDecorationType({
 	borderColor: 'red',
 });
 
+type ProxyState =
+	"stopped" // not loaded yet
+	| "starting"  // currently loading
+	| "started"	// fully loaded
+	;
+
 export abstract class TMDLProxy {
 	private static _secret: string;
 	private static _port: number;
@@ -35,6 +41,7 @@ export abstract class TMDLProxy {
 	private static _tmdlProxyUri: vscode.Uri;
 
 	private static _terminal: vscode.Terminal;
+	private static _loadingState: ProxyState = "stopped";
 
 	private static _datasetTmdlPathMapping: Map<PowerBIDataset, vscode.Uri> = new Map<PowerBIDataset, vscode.Uri>();
 
@@ -43,8 +50,12 @@ export abstract class TMDLProxy {
 	}
 
 	static async ensureProxy(context: vscode.ExtensionContext): Promise<void> {
-		if (!TMDLProxy._terminal) {
+		if (TMDLProxy._loadingState == "stopped") {
 			try {
+				TMDLProxy._loadingState = "starting";
+
+				TMDLProxy.log(`TMDLProxy is currently stopped! Starting new instance ...`);
+
 				this._secret = this.generateSecret(64);
 
 				// find the next free port to start our Proxy on
@@ -83,8 +94,10 @@ export abstract class TMDLProxy {
 				});
 
 				const pid = await TMDLProxy._terminal.processId;
-				// wait 1 second for the process to start
-				await Helper.delay(1000);
+				TMDLProxy.log(`TMDLProxy started with PID ${pid}!`);
+
+				// there is no way to wait for the process within the terminal to be ready so we simply wait 500ms
+				await Helper.delay(500);
 
 				if (DEBUG) {
 					TMDLProxy._port = DEBUG_PORT;
@@ -104,16 +117,24 @@ export abstract class TMDLProxy {
 					"Accept": 'application/json'
 				}
 
-				TMDLProxy.log(`TMDLProxy: Communication with TMDLProxy via ${TMDLProxy._tmdlProxyUri} `);
+				TMDLProxy.log(`TMDLProxy started! Communicating at ${TMDLProxy._tmdlProxyUri} `);
+
+				TMDLProxy._loadingState = "started";
 			} catch (error) {
 				TMDLProxy._terminal.dispose();
 				TMDLProxy._terminal = undefined;
 				TMDLProxy._tmdlProxyUri = undefined;
+				TMDLProxy._loadingState = "stopped";
 				vscode.window.showErrorMessage(error);
 			}
 		}
-		else {
-			TMDLProxy.log(`TMDLProxy: TMDLProxy alreay running at ${TMDLProxy._tmdlProxyUri} `);
+		else if (TMDLProxy._loadingState == "starting") {
+			TMDLProxy.log(`TMDLProxy is starting in other process - waiting ... `);
+			await Helper.awaitCondition(async () => TMDLProxy._loadingState != "starting", 5000, 100);
+			TMDLProxy.log(`TMDLProxy finished starting in other process!`);
+		}
+		else if (TMDLProxy._loadingState == "started") {
+			TMDLProxy.log(`TMDLProxy: TMDLProxy already running at ${TMDLProxy._tmdlProxyUri} `);
 		}
 	}
 
@@ -248,8 +269,14 @@ export abstract class TMDLProxy {
 		}
 	}
 
+	static async saveCurrentTMDLDocument(): Promise<void> {
+		if (vscode.window.activeTextEditor.document.uri.scheme == TMDL_SCHEME || vscode.window.activeTextEditor.document.uri.fsPath.endsWith(TMDL_EXTENSION)) {
+			await vscode.window.activeTextEditor.document.save();
+		}
+	}
+
 	static async validate(resourceUri: vscode.Uri): Promise<boolean> {
-		await vscode.window.activeTextEditor.document.save();
+		await TMDLProxy.saveCurrentTMDLDocument();
 
 		if (resourceUri.scheme == TMDL_SCHEME) {
 			return await TMDLProxy.validateStream(resourceUri);
@@ -436,7 +463,7 @@ export abstract class TMDLProxy {
 
 
 	static async publish(resourceUri: vscode.Uri): Promise<boolean> {
-		await vscode.window.activeTextEditor.document.save();
+		await TMDLProxy.saveCurrentTMDLDocument();
 
 		let success: boolean = false;
 		let link: vscode.Uri;
@@ -458,7 +485,6 @@ export abstract class TMDLProxy {
 
 		return success;
 	}
-
 	static async publishFolder(resourceUri: vscode.Uri): Promise<boolean> {
 		try {
 			let success: boolean = false;
@@ -515,7 +541,6 @@ export abstract class TMDLProxy {
 			return false;
 		}
 	}
-
 	static async publishStream(resourceUri: vscode.Uri): Promise<boolean> {
 		try {
 			let success: boolean = false;
@@ -563,7 +588,9 @@ export abstract class TMDLProxy {
 
 			const tmdlEntry = new TMDLFSUri(resourceUri);
 
-			if (TMDLFSCache.getDatabase(tmdlEntry.server, tmdlEntry.database).loadingState == "fully_loaded") {
+			const database = await TMDLFSCache.getDatabase(tmdlEntry.server, tmdlEntry.database);
+
+			if (database.loadingState == "loaded") {
 				const confirm = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Do you really want to reload TMDL for ${tmdlEntry.modelId}? This will overwrite any local changes.`, undefined, undefined);
 
 				if (confirm == "yes") {
@@ -621,6 +648,7 @@ export abstract class TMDLProxy {
 	}
 
 	static async cleanUp(): Promise<void> {
+		TMDLProxy._loadingState = "stopped";
 		if (TMDLProxy._terminal) {
 			TMDLProxy._terminal.dispose();
 		}

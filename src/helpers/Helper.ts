@@ -258,17 +258,11 @@ export abstract class Helper {
 		return value[0].toUpperCase() + value.substring(1).toLowerCase();
 	}
 
-	static async addToWorkspace(uri: vscode.Uri, name: string): Promise<boolean> {
-		let x = vscode.workspace;
-		if (!vscode.workspace.workspaceFolders) {
-			await vscode.commands.executeCommand('vscode.openFolder', uri);
-			//vscode.window.showErrorMessage("Please save your current session as a VSCode workspace first to use this feature!");
-			return false;
-		}
-		else {
-			await vscode.workspace.updateWorkspaceFolders(vscode.workspace.workspaceFolders.length, 0, { uri: uri, name: name });
-			return true;
-		}
+	static async addToWorkspace(uri: vscode.Uri, name: string): Promise<void> {
+		await vscode.workspace.updateWorkspaceFolders(
+			vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0,
+			0,
+			{ uri: uri, name: name });
 	}
 
 	static parentUri(uri: vscode.Uri): vscode.Uri {
