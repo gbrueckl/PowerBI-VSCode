@@ -20,7 +20,7 @@ const DEBUG_PORT: number = 51000;
 
 export const SETTINGS_FILE = ".publishsettings.json";
 
-const TAGS_TO_REMOVE: string[] = ["lineageTag:", "ordinal:"];
+const TAGS_TO_REMOVE: string[] = []; //["lineageTag:", "ordinal:"]; those are mandatory for the model to work so we cannot remove them atm
 
 const errorDecoration = vscode.window.createTextEditorDecorationType({
 	borderWidth: '1px',
