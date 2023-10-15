@@ -56,11 +56,12 @@ export class iPowerBIDatasetExecuteQueries {
 }
 
 export class iPowerBIDatasetRefresh {
-    refreshType: "OnDemand" | "ViaXmlaEndpoint" | "ViaEnhancedApi" | "ViaAoi";
-    startTime: Date;
-    endTime: Date;
+    refreshType: "OnDemand" | "ViaXmlaEndpoint" | "ViaEnhancedApi" | "ViaApi" | "Scheduled" | "OnDemandTraining";
+    startTime: string;
+    endTime: string;
     status: string;
     requestId: string;
+	extendedStatus?: string;
 }
 
 export class iPowerBIDatasetGenericResponse {

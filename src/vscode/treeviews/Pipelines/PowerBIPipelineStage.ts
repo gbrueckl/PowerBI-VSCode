@@ -124,6 +124,14 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 	// Pipelinestage-specific funtions
 	public static async assignWorkspace(stage: PowerBIPipelineStage, settings: object = undefined): Promise<void> {
 		const apiUrl = Helper.joinPath(stage.apiPath, "assignWorkspace");
+
+		let confirm: string = await PowerBICommandBuilder.showInputBox("", "Confirm assignment of workspace by typeing the stage name '" + stage.name + "' again.", undefined, undefined);
+		
+		if (!confirm || confirm != stage.name) {
+			ThisExtension.log("Assignment to stage aborted!")
+			return;
+		}
+
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<any>(apiUrl, "POST",
@@ -140,6 +148,13 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 
 	public static async unassignWorkspace(stage: PowerBIPipelineStage): Promise<void> {
 		const apiUrl =  Helper.joinPath(stage.apiPath, "unassignWorkspace");
+
+		let confirm: string = await PowerBICommandBuilder.showInputBox("", "Confirm ufassignment of workspace by typeing the stage name '" + stage.name + "' again.", undefined, undefined);
+		
+		if (!confirm || confirm != stage.name) {
+			ThisExtension.log("Unassignment to stage aborted!")
+			return;
+		}
 
 		PowerBIApiService.post(apiUrl, null);
 

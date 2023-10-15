@@ -7,13 +7,16 @@ import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { iPowerBIDataset, iPowerBIDatasetGenericResponse, iPowerBIDatasetParameter } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
-import { PowerBIReport } from './PowerBIReport';
 import { PowerBIParameters } from './PowerBIParameters';
 import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
-import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 import { QuickPickItem } from 'vscode';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { PowerBIParameter } from './PowerBIParameter';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { TMDL_EXTENSION, TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
+import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
+import { TMDLProxy } from '../../../TMDLVSCode/TMDLProxy';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
@@ -49,6 +52,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 		if (this.getParentByType<PowerBIWorkspace>("GROUP").definition.isOnDedicatedCapacity) {
 			actions.push("CONFIGURESCALEOUT");
+			actions.push("EDIT_TMDL");
 
 			if (this.definition.queryScaleOutSettings?.maxReadOnlyReplicas != 0) {
 				actions.push("SYNCREADONLYREPLICAS");
@@ -70,6 +74,13 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		return "" == this.definition.configuredBy;
 	}
 
+	async getXMLACConnectionString(): Promise<string> {
+		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
+		const xmlaEndpoint = PowerBIApiService.getXmlaEndpoint(workspace.name).toString();
+
+		return `Data Source=${xmlaEndpoint};Initial Catalog=${this.name};`;
+	}
+
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
 		PowerBICommandBuilder.pushQuickPickItem(this);
 
@@ -83,9 +94,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	// Dataset-specific funtions
 	public async delete(): Promise<void> {
-		ThisExtension.setStatusBar("Deleting dataset ...", true);
-		await PowerBICommandBuilder.execute<iPowerBIDataset>(this.apiPath, "DELETE", []);
-		ThisExtension.setStatusBar("Dataset deleted!");
+		await PowerBIApiTreeItem.delete(this, "yesNo");
 
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
@@ -164,6 +173,17 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
+	}
+
+	public async editTMDL(): Promise<void> {
+		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
+		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${workspace.name}/${this.name}`))
+
+		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - ${this.name}`);
+		// if the workspace does not exist, the folder is opened in a new workspace where the TMDL folder would be reloaded again
+		// so we only load the model if we already have a workspace
+
+		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
 	}
 
 	public async updateAllParameters(): Promise<void> {

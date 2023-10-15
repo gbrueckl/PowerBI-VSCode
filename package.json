@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "0.9.9",
+	"version": "1.0.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -20,7 +20,7 @@
 	},
 	"qna": "https://github.com/gbrueckl/PowerBI-VSCode",
 	"engines": {
-		"vscode": "^1.68.0"
+		"vscode": "^1.82.0"
 	},
 	"galleryBanner": {
 		"color": "#0ea5ff",
@@ -37,10 +37,16 @@
 		"API",
 		"Reporting",
 		"Management",
-		"PowerBI"
+		"PowerBI",
+		"TMDL",
+		"XMLA",
+		"TMSL",
+		"TOM"
 	],
 	"activationEvents": [
-		"onNotebook:powerbi-notebook"
+		"onNotebook:powerbi-notebook",
+		"onLanguage:tmdl",
+		"onFileSystem:tmdl"
 	],
 	"main": "./dist/node/extension.js",
 	"browser": "./dist/web/extension.js",
@@ -56,8 +62,17 @@
 					},
 					"powerbi.clientId": {
 						"type": "string",
-						"description": "(Optional) A custom ClientID/Application of an AAD application to use when connecting to Power BI.",
+						"markdownDescription": "(Optional) A custom ClientID/AAD Application to use when interacting with Power BI REST APIs.",
 						"default": null
+					},
+					"powerbi.TMDL.clientId": {
+						"type": "string",
+						"markdownDescription": "(Optional) To use **TMDL features**, a custom ClientID/Application can be used. \n\n You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permitted in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details.\n\nIf this is configured, VSCode will manage the authentication and also remember it!"
+					},
+					"powerbi.TMDL.enabled": {
+						"type": "boolean",
+						"markdownDescription": "Set to true to allow editing Power BI datasets using TMDL.",
+						"default": true
 					},
 					"powerbi.cloud": {
 						"type": "string",
@@ -82,7 +97,6 @@
 							"US Government DoD",
 							"US Government Top Secret",
 							"US Government Secret"
-							
 						],
 						"markdownEnumDescriptions": [
 							"**Public Azure Cloud**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.powerbi.com|\n|ResourceId|https://analysis.windows.net/powerbi/api|\n|AuthenticationProvider|microsoft|",
@@ -130,19 +144,19 @@
 		"viewsWelcome": [
 			{
 				"view": "PowerBIWorkspaces",
-				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			},
 			{
 				"view": "PowerBICapacities",
-				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			},
 			{
 				"view": "PowerBIGateways",
-				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			},
 			{
 				"view": "PowerBIPipelines",
-				"contents": "Please log in to VSCode with a Microsoft Account first!\n See blue badge at the bottom of the activity bar on the left"
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			}
 		],
 		"commands": [
@@ -169,18 +183,6 @@
 				"category": "PowerBI"
 			},
 			{
-				"command": "PowerBIWorkspaces.add",
-				"title": "Add workspace",
-				"icon": "$(add)",
-				"category": "PowerBI"
-			},
-			{
-				"command": "PowerBIWorkspace.delete",
-				"title": "Delete",
-				"icon": "$(remove-close)",
-				"category": "PowerBI"
-			},
-			{
 				"command": "PowerBIWorkspace.assignToCapacity",
 				"title": "Assign to Capacity",
 				"icon": "$(debug-step-into)",
@@ -191,6 +193,13 @@
 				"title": "Unassign from Capacity",
 				"icon": "$(debug-step-out)",
 				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIWorkspace.browseTMDL",
+				"title": "Browse TMDL",
+				"icon": "$(edit)",
+				"category": "PowerBI",
+				"enablement": "powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning"
 			},
 			{
 				"command": "PowerBIWorkspace.insertPath",
@@ -248,6 +257,55 @@
 					"dark": "$(repo-sync)"
 				},
 				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIDataset.editTMDL",
+				"title": "Edit TMDL",
+				"icon": "$(edit)",
+				"category": "PowerBI",
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled"
+			},
+			{
+				"command": "PowerBI.TMDL.validate",
+				"title": "Validate TMDL",
+				"icon": "$(bracket-dot)",
+				"category": "PowerBI",
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
+			},
+			{
+				"command": "PowerBI.TMDL.publish",
+				"title": "Publish TMDL",
+				"icon": "$(cloud-upload)",
+				"category": "PowerBI",
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning && (resourcePath in powerbi.tmdl.loadedDatabases || resourceExtname == .tmdl)"
+			},
+			{
+				"command": "PowerBI.TMDL.load",
+				"title": "(Re)Load TMDL from server",
+				"icon": "$(cloud-download)",
+				"category": "PowerBI",
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning"
+			},
+			{
+				"command": "PowerBI.TMDL.saveLocally",
+				"title": "Save TMDL locally",
+				"icon": "$(cloud-download)",
+				"category": "PowerBI",
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning && resourcePath in powerbi.tmdl.loadedDatabases"
+			},
+			{
+				"command": "PowerBI.TMDL.test",
+				"title": "Test TMDL",
+				"icon": "$(symbol-class)",
+				"category": "PowerBI",
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning"
+			},
+			{
+				"command": "PowerBI.TMDL.ensureProxy",
+				"title": "Ensure TMDL Proxy",
+				"icon": "$(server-environment)",
+				"category": "PowerBI",
+				"enablement": "!powerbi.isInBrowser"
 			},
 			{
 				"command": "PowerBIDataset.updateAllParameters",
@@ -353,7 +411,7 @@
 				"title": "Delete",
 				"icon": "$(remove-close)",
 				"category": "PowerBI"
-			},	
+			},
 			{
 				"command": "PowerBIPipelineStage.assignWorkspace",
 				"title": "Assign",
@@ -366,17 +424,11 @@
 				"icon": "$(debug-step-out)",
 				"category": "PowerBI"
 			}
-
 		],
 		"menus": {
 			"view/title": [
 				{
 					"command": "PowerBIWorkspaces.refresh",
-					"when": "view == PowerBIWorkspaces",
-					"group": "navigation"
-				},
-				{
-					"command": "PowerBIWorkspaces.add",
 					"when": "view == PowerBIWorkspaces",
 					"group": "navigation"
 				},
@@ -418,19 +470,19 @@
 					"group": "inline"
 				},
 				{
-					"command": "PowerBIWorkspace.delete",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/",
-					"group": "inline"
-				},
-				{
 					"command": "PowerBIWorkspace.assignToCapacity",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,ASSIGNCAPACITY,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIWorkspace.unassignFromCapacity",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,UNASSIGNCAPACITY,.*/",
-					"group": "inline"
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIWorkspace.browseTMDL",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,BROWSETMDL,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.delete",
@@ -444,19 +496,28 @@
 				},
 				{
 					"command": "PowerBIDataset.takeOver",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,TAKEOVER,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,TAKEOVER,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.configureScaleOut",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,CONFIGURESCALEOUT,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,CONFIGURESCALEOUT,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.syncReadOnlyReplicas",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,SYNCREADONLYREPLICAS,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,SYNCREADONLYREPLICAS,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDataset.editTMDL",
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,EDIT_TMDL,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.updateAllParameters",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,UPDATEDATASETPARAMETERS,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,UPDATEDATASETPARAMETERS,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDatasetRefresh.cancel",
@@ -470,7 +531,8 @@
 				},
 				{
 					"command": "PowerBIReport.takeOver",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,TAKEOVER,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,TAKEOVER,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIReport.delete",
@@ -479,15 +541,18 @@
 				},
 				{
 					"command": "PowerBIReport.clone",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,CLONE,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,CLONE,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIReport.rebind",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,REBIND,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,REBIND,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIReport.updateContent",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,UPDATECONTENT,.*/"
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,UPDATECONTENT,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataflow.delete",
@@ -507,17 +572,51 @@
 				{
 					"command": "PowerBIPipeline.delete",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINE,.*/ && viewItem =~ /.*,DELETE,.*/",
-					"group": "inline"
-				},				
+					"group": "navigation"
+				},
 				{
 					"command": "PowerBIPipelineStage.assignWorkspace",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,ASSIGN,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIPipelineStage.unassignWorkspace",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,UNASSIGN,.*/",
-					"group": "inline"
+					"group": "navigation"
+				}
+			],
+			"editor/title": [
+				{
+					"command": "PowerBI.TMDL.publish",
+					"when": "resourceExtname == .tmdl && !powerbi.isInBrowser",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBI.TMDL.validate",
+					"when": "resourceExtname == .tmdl && !powerbi.isInBrowser",
+					"group": "navigation"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "PowerBI.TMDL.publish",
+					"when": "resourceScheme == tmdl && (resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ || resourceExtname == .tmdl) && !powerbi.isInBrowser",
+					"group": "2_workspace"
+				},
+				{
+					"command": "PowerBI.TMDL.validate",
+					"when": "resourceScheme == tmdl && (resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ || resourceExtname == .tmdl) &&!powerbi.isInBrowser",
+					"group": "2_workspace"
+				},
+				{
+					"command": "PowerBI.TMDL.load",
+					"when": "resourceScheme == tmdl && resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ && !powerbi.isInBrowser",
+					"group": "2_workspace"
+				},
+				{
+					"command": "PowerBI.TMDL.saveLocally",
+					"when": "resourceScheme == tmdl && resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ && !powerbi.isInBrowser",
+					"group": "2_workspace"
 				}
 			]
 		},
@@ -559,6 +658,7 @@
 		"@types/node": "^12.12.0",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
+		"buffer": "^6.0.3",
 		"eslint": "^8.19.0",
 		"form-data": "^4.0.0",
 		"glob": "^8.0.3",
@@ -568,10 +668,12 @@
 		"native-ext-loader": "^2.3.0",
 		"node-fetch": "^3.2.10",
 		"process": "^0.11.10",
-		"swagger-typescript-api": "^9.2.0",
+		"swagger-typescript-api": "^13.0.3",
 		"ts-loader": "^9.3.1",
 		"typescript": "^4.7.4",
 		"webpack": "^5.74.0",
-		"webpack-cli": "^4.10.0"
+		"webpack-cli": "^4.10.0",
+		"net": "^1.0.2",
+		"portfinder": "^1.0.32"
 	}
 }

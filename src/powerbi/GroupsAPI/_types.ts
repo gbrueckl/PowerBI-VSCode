@@ -8,4 +8,6 @@ export class iPowerBIGroup {
 	isReadOnly: boolean;
 	isOnDedicatedCapacity: boolean;
 	dataflowStorageId?: string;
+	sku?: string;
+	capacityId?: string;
 }

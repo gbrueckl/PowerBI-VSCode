@@ -45,13 +45,22 @@ export class PowerBINotebookSerializer implements vscode.NotebookSerializer {
 			apiPath = '/' + Helper.trimChar(apiItem.apiPath.split("/").slice(2).join("/"), "/", false, true);
 		}
 
-		let firstCell = new PowerBINotebookCell(vscode.NotebookCellKind.Code, 'GET ' + apiPath, PowerBIAPILanguage);
-
-		const notebook = new PowerBINotebook([firstCell]);
+		let defaultCells = [
+			new PowerBINotebookCell(vscode.NotebookCellKind.Markup, "Set API path for relative paths (already executed in the background for you)", "markdown"),
+			new PowerBINotebookCell(vscode.NotebookCellKind.Code, '%cmd\nSET API_PATH = ' + apiPath, PowerBIAPILanguage),
+			new PowerBINotebookCell(vscode.NotebookCellKind.Markup, "Type `./` to start autocomplete from relative API path. \n\n Type `/` for absolute API paths", "markdown"),
+			new PowerBINotebookCell(vscode.NotebookCellKind.Code, 'GET ./', PowerBIAPILanguage)
+		];
+		let notebook = new PowerBINotebook(defaultCells);
+		notebook.metadata = PowerBINotebookContext.loadFromMetadata(notebook.metadata);
 
 		const doc = await vscode.workspace.openNotebookDocument(PowerBINotebookType, notebook);
+		let context: PowerBINotebookContext = new PowerBINotebookContext(apiPath);
+		context.apiRootPath = apiPath;
+		context.uri = doc.uri;
+		PowerBINotebookContext.set(notebook.metadata.guid, context)
 
-		ThisExtension.NotebookKernel.setNotebookContext(doc, new PowerBINotebookContext(apiPath));
+		ThisExtension.NotebookKernel.setNotebookContext(doc, context);
 
 		return vscode.window.showNotebookDocument(doc);
 	}

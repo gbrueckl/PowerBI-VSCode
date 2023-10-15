@@ -1,17 +1,20 @@
 import * as vscode from 'vscode';
 
+import { fetch, getProxyAgent, RequestInit, Response, File, FormData } from '@env/fetch';
+
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { iPowerBIGroup } from './GroupsAPI/_types';
 import { ApiItemType } from '../vscode/treeviews/_types';
 import { iPowerBIPipeline, iPowerBIPipelineOperation, iPowerBIPipelineStage, iPowerBIPipelineStageArtifacts } from './PipelinesAPI/_types';
 import { ApiUrlPair } from './_types';
-import { iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
+import { iPowerBIDataset, iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
+import { TMDLFileSystemProvider } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 
 
-import { fetch, getProxyAgent, RequestInit, Response, File, FormData } from '@env/fetch';
 
 export abstract class PowerBIApiService {
 	private static _isInitialized: boolean = false;
@@ -19,11 +22,13 @@ export abstract class PowerBIApiService {
 	private static _apiBaseUrl: string;
 	private static _tenantId: string;
 	private static _clientId: string;
+	private static _tmdlClientId: string;
 	private static _authenticationProvider: string;
 	private static _resourceId: string;
 	private static _org: string = "myorg"
 	private static _headers;
 	private static _vscodeSession: vscode.AuthenticationSession;
+	private static _xmlaSession: vscode.AuthenticationSession;
 
 	//#region Initialization
 	static async initialize(
@@ -31,6 +36,7 @@ export abstract class PowerBIApiService {
 		apiBaseUrl: string = "https://api.powerbi.com/",
 		tenantId: string = undefined,
 		clientId: string = undefined,
+		tmdlClientId: string = undefined,
 		authenticationProvider: string = "microsoft",
 		resourceId: string = "https://analysis.windows.net/powerbi/api"
 	): Promise<boolean> {
@@ -42,24 +48,11 @@ export abstract class PowerBIApiService {
 			this._apiBaseUrl = Helper.trimChar(apiBaseUrl, '/');
 			this._tenantId = tenantId;
 			this._clientId = clientId;
+			this._tmdlClientId = tmdlClientId;
 			this._authenticationProvider = authenticationProvider;
 			this._resourceId = resourceId;
 
-			await this.refreshHeaders();
-
-			ThisExtension.log(`Testing new PowerBI API (${apiBaseUrl}) settings for user '${this.SessionUser}' (${this.SessionUserId}) ...`);
-			this._connectionTestRunning = true;
-			let workspaceList = await this.getGroups();
-			this._connectionTestRunning = false;
-			if (workspaceList.length > 0) {
-				ThisExtension.log("Power BI API Service initialized!");
-				this._isInitialized = true;
-				return true;
-			}
-			else {
-				ThisExtension.log(JSON.stringify(workspaceList));
-				throw new Error(`Invalid Configuration for PowerBI REST API: Cannot access '${apiBaseUrl}' with given credentials'!`);
-			}
+			await this.refreshConnection();
 		} catch (error) {
 			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
@@ -68,8 +61,13 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static async refreshHeaders(): Promise<void> {
-		this._vscodeSession = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`, "profile", "email"], this._tenantId, this._clientId);
+	private static async refreshConnection(): Promise<void> {
+		this._vscodeSession = await this.getPowerBISession();
+
+		if (!this._vscodeSession || !this._vscodeSession.accessToken) {
+			vscode.window.showInformationMessage("PowerBI / API: Please log in with your Microsoft account first!");
+			return;
+		}
 
 		ThisExtension.log("Refreshing authentication headers ...");
 		this._headers = {
@@ -77,24 +75,104 @@ export abstract class PowerBIApiService {
 			"Content-Type": 'application/json',
 			"Accept": 'application/json'
 		}
+
+		ThisExtension.log(`Testing new PowerBI API (${this._apiBaseUrl}) settings for user '${this.SessionUser}' (${this.SessionUserId}) ...`);
+		this._connectionTestRunning = true;
+		let workspaceList = await this.getGroups();
+		this._connectionTestRunning = false;
+		if (workspaceList.length > 0) {
+			ThisExtension.log("Power BI API Service initialized!");
+			this._isInitialized = true;
+		}
+		else {
+			ThisExtension.log(JSON.stringify(workspaceList));
+			throw new Error(`Invalid Configuration for PowerBI REST API: Cannot access '${this._apiBaseUrl}' with given credentials'!`);
+		}
+	}
+
+	public static async getPowerBISession(): Promise<vscode.AuthenticationSession> {
+		// we dont need to specify a clientId here as VSCode is a first party app and can use impersonation by default
+		let session = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`], this._tenantId, this._clientId);
+		return session;
+	}
+
+	public static getXmlaEndpoint(workspace: string): vscode.Uri {
+		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl).with({ scheme: "powerbi" }), "v1.0", this.Org, workspace);
+	}
+
+	public static async refreshXmlaSession(): Promise<boolean> {
+		this._xmlaSession = await this.getXmlaSession();
+
+		if (!this._xmlaSession) {
+			vscode.window.showInformationMessage("PowerBI / TMDL: Please log in with your Microsoft account first!");
+			return false;
+		}
+
+		for(const server of TMDLFSCache.cachedServers)
+		{
+			for(const database of server.databases)
+			{
+				// remove models that have not been fully loaded
+				if(database.loadingState != "loaded")
+				{
+					server.removeDatabase(database.databaseName);
+				}
+			}
+		}
+		return true;
+	}
+
+	public static async getXmlaSession(): Promise<vscode.AuthenticationSession> {
+		if(this._xmlaSession)
+		{
+			return this._xmlaSession;
+		}
+		let scopes = [
+			//`${Helper.trimChar(this._resourceId, "/")}/.default`,
+
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.Read.All`,
+			/*
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Workspace.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Dataset.ReadWrite.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Group.Read.All`,
+			`${Helper.trimChar(this._resourceId, "/")}/Group.Read`,
+			*/
+		];
+
+		this._xmlaSession = await this.getAADAccessToken(scopes, this._tenantId, this._tmdlClientId);
+
+		return this._xmlaSession;
+	}
+
+	public static async getDatasetUrl(workspaceName: string, datasetName: string): Promise<vscode.Uri> {
+		//https://app.powerbi.com/groups/ccce57d1-10af-1234-1234-665f8bbd8458/datasets/7cdff921-9999-8888-b0c8-34be20567742
+
+		const workspaces = await PowerBIApiService.getGroups();
+		const workspace = workspaces.find((workspace) => workspace.name == workspaceName);
+		const datasets = await PowerBIApiService.getItemList<iPowerBIDataset>(`/groups/${workspace.id}/datasets`);
+		const dataset = datasets.find((dataset) => dataset.name == datasetName);
+		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl.replace("api.", "app.")), "groups", workspace.id.toString(), "datasets", dataset.id.toString());
 	}
 
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
 		if (event.provider.id === this._authenticationProvider) {
-			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing headers! ");
+			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing connections! ");
 
-			await this.refreshHeaders();
+			await this.refreshConnection();
 			ThisExtension.refreshUI();
 		}
 	}
 
-	private static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
+	public static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
 		//https://www.eliostruyf.com/microsoft-authentication-provider-visual-studio-code/
 
 		if (!scopes.includes("offline_access")) {
 			scopes.push("offline_access") // Required for the refresh token.
 		}
-
 		if (tenantId) {
 			scopes.push("VSCODE_TENANT:" + tenantId);
 		}
@@ -103,25 +181,46 @@ export abstract class PowerBIApiService {
 			scopes.push("VSCODE_CLIENT_ID:" + clientId);
 		}
 
-		let session: vscode.AuthenticationSession = await vscode.authentication.getSession(this._authenticationProvider, scopes);
+		let session: vscode.AuthenticationSession = await vscode.authentication.getSession(this._authenticationProvider, scopes, { createIfNone: true });
 
 		return session;
 	}
 
 	public static get SessionUserEmail(): string {
-		return Helper.trimChar(this._vscodeSession.account.label.split("-")[1], " ");
+		if (this._vscodeSession) {
+			return Helper.trimChar(this._vscodeSession.account.label.split("-")[1], " ");
+		}
+		return "UNAUTHENTICATED";
 	}
 
 	public static get SessionUser(): string {
-		return this._vscodeSession.account.label;
+		if (this._vscodeSession) {
+			return this._vscodeSession.account.label;
+		}
+		return "UNAUTHENTICATED";
 	}
 
 	public static get SessionUserId(): string {
-		return this._vscodeSession.account.id;
+		if (this._vscodeSession) {
+			return this._vscodeSession.account.id;
+		}
+		return "UNAUTHENTICATED";
 	}
 
 	public static get Org(): string {
 		return this._org;
+	}
+
+	public static get TenantId(): string {
+		return this._tenantId;
+	}
+
+	public static get ClientId(): string {
+		return this._clientId;
+	}
+
+	public static get TmdlClientId(): string {
+		return this._tmdlClientId;
 	}
 
 	public static get isInitialized(): boolean {
@@ -155,7 +254,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static getFullUrl(endpoint: string, params?: object): string {
+	public static getFullUrl(endpoint: string, params?: object): string {
 		if (endpoint.startsWith('/') && !endpoint.startsWith("/v1.0")) {
 			endpoint = Helper.joinPath(`v1.0/${PowerBIApiService.Org}`, endpoint);
 		}
@@ -198,30 +297,33 @@ export abstract class PowerBIApiService {
 				let response: Response = await fetch(endpoint, config);
 
 				let resultText = await response.text();
-				await this.logResponse(resultText);
+				let ret: T;
+
 				if (response.ok) {
 					if (!resultText || resultText == "") {
-						return { "value": { "status": response.status, "statusText": response.statusText } } as T;
+						ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 					}
 					if (raw) {
-						return resultText as any as T;
+						ret = resultText as any as T;
 					}
 					else {
-						return JSON.parse(resultText) as T;
+						ret = JSON.parse(resultText) as T;
 					}
 				}
 				else {
 					if (!resultText || resultText == "") {
-						return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+						ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
 					}
 					if (raiseError) {
 						throw new Error(resultText);
 					}
 					else {
-						return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+						ret = { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
 					}
 				}
 
+				await this.logResponse(ret);
+				return ret;
 			} catch (error) {
 				this.handleApiException(error, false, raiseError);
 
@@ -244,24 +346,31 @@ export abstract class PowerBIApiService {
 			let response: Response = await fetch(endpoint, config);
 
 			let resultText = await response.text();
-			await this.logResponse(resultText);
+			let ret: T;
+
+
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return { "value": { "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				return JSON.parse(resultText) as T;
+				else {
+					ret = JSON.parse(resultText) as T;
+				}
 			}
 			else {
 				if (!resultText || resultText == "") {
-					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				if (raiseError) {
 					throw new Error(resultText);
 				}
 				else {
-					return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
 				}
 			}
+
+			await this.logResponse(ret);
+			return ret;
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);
 
@@ -332,24 +441,30 @@ export abstract class PowerBIApiService {
 			let response: Response = await fetch(endpoint, config);
 
 			let resultText = await response.text();
-			await this.logResponse(resultText);
+			let ret: T;
+
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return { "value": { "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				return JSON.parse(resultText) as T;
+				else {
+					ret = JSON.parse(resultText) as T;
+				}
 			}
 			else {
 				if (!resultText || resultText == "") {
-					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				if (raiseError) {
 					throw new Error(resultText);
 				}
 				else {
-					return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
 				}
 			}
+
+			await this.logResponse(ret);
+			return ret;
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);
 
@@ -371,24 +486,30 @@ export abstract class PowerBIApiService {
 			let response: Response = await fetch(endpoint, config);
 
 			let resultText = await response.text();
-			await this.logResponse(resultText);
+			let ret: T;
+
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return { "value": { "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				return JSON.parse(resultText) as T;
+				else {
+					ret = JSON.parse(resultText) as T;
+				}
 			}
 			else {
 				if (!resultText || resultText == "") {
-					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				if (raiseError) {
 					throw new Error(resultText);
 				}
 				else {
-					return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
 				}
 			}
+
+			await this.logResponse(ret);
+			return ret;
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);
 
@@ -410,24 +531,30 @@ export abstract class PowerBIApiService {
 			let response: Response = await fetch(endpoint, config);
 
 			let resultText = await response.text();
-			await this.logResponse(resultText);
+			let ret: T;
+
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return undefined;
+					ret = undefined;
 				}
-				return JSON.parse(resultText) as T;
+				else {
+					ret = JSON.parse(resultText) as T;
+				}
 			}
 			else {
 				if (!resultText || resultText == "") {
-					return { "error": { "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				if (raiseError) {
 					throw new Error(resultText);
 				}
 				else {
-					return { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+					ret = { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
 				}
 			}
+
+			await this.logResponse(ret);
+			return ret;
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);
 

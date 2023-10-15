@@ -4,6 +4,8 @@ import * as vscode from 'vscode';
 
 import { PowerBICommandBuilder } from './powerbi/CommandBuilder';
 import { ThisExtension } from './ThisExtension';
+import { TMDLProxy } from './TMDLVSCode/TMDLProxy';
+
 import { PowerBICapacitiesTreeProvider } from './vscode/treeviews/Capacities/PowerBICapacitesTreeProvider';
 import { PowerBIGatewaysTreeProvider } from './vscode/treeviews/Gateways/PowerBIGatewaysTreeProvider';
 import { PowerBIPipelinesTreeProvider } from './vscode/treeviews/Pipelines/PowerBIPipelinesTreeProvider';
@@ -24,10 +26,16 @@ import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatew
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
 import { PowerBIPipelineStage } from './vscode/treeviews/Pipelines/PowerBIPipelineStage';
 import { PowerBIPipeline } from './vscode/treeviews/Pipelines/PowerBIPipeline';
-import { PowerBIPipelineStageArtifacts } from './vscode/treeviews/Pipelines/PowerBIPipelineStageArtifacts';
-import { PowerBIPipelineStageArtifact } from './vscode/treeviews/Pipelines/PowerBIPipelineStageArtifact';
+import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
+import { TMDL_SCHEME, TMDLFileSystemProvider } from './vscode/filesystemProvider/TMDLFileSystemProvider';
+import { TMDLFSUri } from './vscode/filesystemProvider/TMDLFSUri';
+import { EventHandlers } from './EventHandlers';
+import { TMDLFSCache } from './vscode/filesystemProvider/TMDLFSCache';
+
 
 export async function activate(context: vscode.ExtensionContext) {
+
+	await ThisExtension.initializeLogger(context);
 
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
@@ -53,11 +61,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (item: PowerBIWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(item, showInfoMessage));
 
-	//vscode.commands.registerCommand('PowerBIWorkspaces.add', () => pbiWorkspacesTreeProvider.add());
-	vscode.commands.registerCommand('PowerBIWorkspace.delete', (workspace: PowerBIWorkspace) => workspace.delete());
-	vscode.commands.registerCommand('PowerBIWorkspace.PowerBIWorkspace.assignToCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.assignToCapacity(workspace));
-	vscode.commands.registerCommand('PowerBIWorkspace.PowerBIWorkspace.unassignFromCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.unassignFromCapacity(workspace));
-
+	vscode.commands.registerCommand('PowerBIWorkspace.assignToCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.assignToCapacity(workspace));
+	vscode.commands.registerCommand('PowerBIWorkspace.unassignFromCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.unassignFromCapacity(workspace));
+	vscode.commands.registerCommand('PowerBIWorkspace.browseTMDL', (workspace: PowerBIWorkspace) => workspace.browseTMDL());
 	// generic commands
 	vscode.commands.registerCommand('PowerBIWorkspace.insertPath', (workspaceItem: PowerBIWorkspaceTreeItem) => workspaceItem.insertCode());
 
@@ -70,8 +76,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIDataset.updateAllParameters', (dataset: PowerBIDataset) => dataset.updateAllParameters());
 	vscode.commands.registerCommand('PowerBIDataset.configureScaleOut', (dataset: PowerBIDataset) => dataset.configureScaleOut());
 	vscode.commands.registerCommand('PowerBIDataset.syncReadOnlyReplicas', (dataset: PowerBIDataset) => dataset.syncReadOnlyReplicas());
+	vscode.commands.registerCommand('PowerBIDataset.editTMDL', (dataset: PowerBIDataset) => dataset.editTMDL());
 	// DatasetParameter commands
 	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
+
+
 
 	// Report commands
 	vscode.commands.registerCommand('PowerBIReport.takeOver', (report: PowerBIReport) => report.takeOver());
@@ -122,9 +131,58 @@ export async function activate(context: vscode.ExtensionContext) {
 	);
 
 	vscode.commands.executeCommand('PowerBI.initialize');
+
+	// Workspace File System Provider
+	if (!ThisExtension.isInBrowser && PowerBIConfiguration.isTMDLEnabled) {
+		// if there is exactly one workspace folder with the TMDL scheme, preload the associated database and open the model-file
+		let tmdlUri: TMDLFSUri;
+		let openModelFile: boolean = false;
+
+		if (vscode.workspace.workspaceFolders) {
+			let firstTmdlFolder = vscode.workspace.workspaceFolders.find((folder) => folder.uri.scheme == TMDL_SCHEME);
+
+			if (firstTmdlFolder && vscode.workspace.workspaceFolders.length == 1) {
+				tmdlUri = new TMDLFSUri(firstTmdlFolder.uri);
+				await TMDLFSCache.loadDatabase(tmdlUri.server, tmdlUri.database); // also calls ensureProxy()
+				openModelFile = true;
+			}
+		}
+
+		//vscode.commands.registerCommand('PowerBI.TMDL.test', () => TMDLProxy.test(undefined));
+		TMDLFileSystemProvider.register(context);
+
+		if (openModelFile && tmdlUri) {
+			TMDLFileSystemProvider.openModelFile(tmdlUri);
+		}
+	}
+	else {
+		ThisExtension.log("TMDL is not enabled! Please use the setting `powerbi.TMDL.enabled` to configure it and use TMDL features");
+	}
+
+	// new editor commands for TMDL files
+	vscode.commands.registerCommand('PowerBI.TMDL.validate',
+		TMDLProxy.validate
+	);
+	vscode.commands.registerCommand('PowerBI.TMDL.publish',
+		TMDLProxy.publish
+	);
+	vscode.commands.registerCommand('PowerBI.TMDL.load',
+		TMDLProxy.load
+	);
+	vscode.commands.registerCommand('PowerBI.TMDL.saveLocally',
+		TMDLProxy.saveLocally
+	);
+
+	vscode.commands.registerCommand('PowerBI.TMDL.ensureProxy',
+		() => TMDLProxy.ensureProxy(context)
+	);
+
+	EventHandlers.init(context);
 }
 
 
 export function deactivate() {
 	ThisExtension.cleanUp();
+	TMDLProxy.cleanUp();
+	TMDLFileSystemProvider.closeOpenTMDLFiles();
 }

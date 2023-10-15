@@ -28,8 +28,5 @@ export class PowerBIGateway extends PowerBIGatewayTreeItem {
 		return "gateways/" + this.uid;
 	}
 
-	// Dashboard-specific funtions
-	public async delete(): Promise<void> {
-		//PowerBICommandBuilder.execute<iPowerBIGatewayItem>(this.apiPath, "DELETE", []);
-	}
+	// Gateway-specific funtions
 }

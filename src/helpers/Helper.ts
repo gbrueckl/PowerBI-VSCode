@@ -21,8 +21,12 @@ export abstract class Helper {
 	static SEPARATOR: string = '/';
 
 
-	static async delay(ms: number) {
+	static async delay(ms: number): Promise<void> {
 		return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
+	static async wait(ms: number): Promise<void> {
+		return this.delay(ms);
 	}
 
 	static async showTemporaryInformationMessage(message: string, timeout: number = 2000): Promise<void> {
@@ -39,6 +43,74 @@ export abstract class Helper {
 		});
 	}
 
+	static async fetchWithProgress(message: string, fetchPromise: Promise<any>, keepResultMessage: number = 5000): Promise<boolean> {
+		let success: boolean = false;
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: message,
+			cancellable: false
+		}, async (progress: vscode.Progress<any>) => {
+			progress.report({ message: "running ..." });
+			let response = await fetchPromise;
+
+			let resultText = await response.text();
+
+			if (!response.ok) {
+				vscode.window.showErrorMessage(resultText);
+				progress.report({ increment: 100, message: "ERROR!" });
+				success = false;
+			}
+			else {
+				progress.report({ increment: 100, message: "Success!" });
+				success = true;
+			}
+
+			if (keepResultMessage > 0) {
+				const p = await new Promise<void>(resolve => {
+					setTimeout(() => {
+						resolve();
+					}, keepResultMessage);
+				});
+
+				return p;
+			}
+		});
+
+		return success;
+	}
+
+	static async awaitWithProgress<T>(message: string, promise: Promise<any>, keepResultMessage: number = 5000): Promise<T> {
+		let ret: T = undefined;
+
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: message,
+			cancellable: false
+		}, async (progress: vscode.Progress<any>) => {
+			progress.report({ message: " ..." });
+			ThisExtension.log(message + " ...");
+
+			const start = new Date().getTime();
+			let result = await promise;
+			const end = new Date().getTime();
+			const duration = end - start;
+			ThisExtension.log(message + " took " + duration + "ms!");
+
+			progress.report({ increment: 100, message: `Finished after ${Math.round(duration / 1000)}s!` });
+			ret = result;
+
+			const p = await new Promise<void>(resolve => {
+				setTimeout(() => {
+					resolve();
+				}, keepResultMessage);
+			});
+
+			return p;
+		});
+
+		return ret;
+	}
+
 	static mapToObject<T>(map: Map<string, any>): T {
 		const obj = {};
 		for (let [key, value] of map) {
@@ -51,8 +123,7 @@ export abstract class Helper {
 		let direction_num: number = (direction == "ASC" ? 1 : -1);
 
 		unsortedArray.sort((t1, t2) => {
-			if(!t1.hasOwnProperty(property) || !t2.hasOwnProperty(property))
-			{
+			if (!t1.hasOwnProperty(property) || !t2.hasOwnProperty(property)) {
 				ThisExtension.log("WARNING: sortArrayByProperty: property '" + property + "' does not exist on one of the items.\n" + JSON.stringify(t1) + "\n" + JSON.stringify(t2));
 				return 0;
 			}
@@ -102,13 +173,10 @@ export abstract class Helper {
 		vscode.commands.executeCommand("vscode.diff", localFileUri, onlnieFileUri, "Online <-> Local", options);
 	}
 
-	
+
 	static openLink(link: string): void {
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(link));
-	}
-
-	static async wait(ms: number): Promise<void> {
-		await setTimeout(() => { }, ms);
+		//vscode.env.openExternal(vscode.Uri.parse(link));
 	}
 
 	static bytesToSize(bytes: number): string {
@@ -166,13 +234,12 @@ export abstract class Helper {
 		var mDisplay = m > 0 ? `${m.toString().length > 1 ? `${m}` : `0${m}`}` : '00';
 		var sDisplay = s > 0 ? `${s.toString().length > 1 ? `${s}` : `0${s}`}` : '00';
 
-		return `${hDisplay}:${mDisplay}:${sDisplay}`; 
+		return `${hDisplay}:${mDisplay}:${sDisplay}`;
 	}
 
 	static getFirstRegexGroup(regexp: RegExp, text: string): string {
 		const array = [...text.matchAll(regexp)];
-		if(array.length >= 1)
-		{
+		if (array.length >= 1) {
 			return array[0][1];
 		}
 		return null;
@@ -191,4 +258,53 @@ export abstract class Helper {
 		return value[0].toUpperCase() + value.substring(1).toLowerCase();
 	}
 
+	static async addToWorkspace(uri: vscode.Uri, name: string): Promise<void> {
+		await vscode.workspace.updateWorkspaceFolders(
+			vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0,
+			0,
+			{ uri: uri, name: name });
+	}
+
+	static parentUri(uri: vscode.Uri): vscode.Uri {
+		let parentPaths = uri.path.split(this.SEPARATOR).slice(0, -1);
+		let parentPath: string = "/";
+
+		if (parentPaths.length > 1) {
+			parentPath = parentPaths.join(this.SEPARATOR)
+		}
+		return uri.with({ path: parentPath });
+	}
+
+	static cutEnd(text: string, cutOffText: string): string {
+		if (text.endsWith(cutOffText)) {
+			return text.substring(0, text.length - cutOffText.length);
+		}
+		return text;
+	}
+
+	static async awaitCondition(
+		condition: () => Promise<boolean>,
+		timeout: number,
+		interval: number
+	): Promise<boolean> {
+		// Set a timer that will resolve with null
+		return new Promise<boolean>((resolve) => {
+			let finish: (result: boolean) => void;
+			const timer = setTimeout(() => finish(false), timeout);
+			const intervalId = setInterval(() => {
+				condition()
+					.then((r) => {
+						if (r) {
+							finish(true);
+						}
+					})
+					.catch((_e) => finish(false));
+			}, interval);
+			finish = (result: boolean) => {
+				clearTimeout(timer);
+				clearInterval(intervalId);
+				resolve(result);
+			};
+		});
+	}
 }

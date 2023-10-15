@@ -39,7 +39,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 	}
 
 	static async getInstance(): Promise<PowerBINotebookKernel> {
-		if(PowerBINotebookKernel._instance) {
+		if (PowerBINotebookKernel._instance) {
 			return PowerBINotebookKernel._instance;
 		}
 
@@ -118,7 +118,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 		for (let cell of cells) {
 			await this._doExecution(cell, context);
-			await Helper.wait(10); // Force some delay before executing/queueing the next cell
+			await Helper.delay(10); // Force some delay before executing/queueing the next cell
 		}
 	}
 
@@ -132,7 +132,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 		if (cmd[0] == "%") {
 			let lines = cmd.split('\n');
-			magicText = lines[0].split(" ")[0].slice(1).trim();
+			magicText = lines[0].split(" ")[0].slice(1).trim().toLowerCase();
 			commandText = lines.slice(1).join('\n');
 			if (["dax"].includes(magicText)) {
 				language = magicText as QueryLanguage;
@@ -144,8 +144,18 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 				language = magicText as QueryLanguage;
 			}
 			else {
-				language = "API";
-				commandText = cmd;
+				throw new Error("Invalid magic! only %dax, %api and %cmd are supported");
+			}
+		}
+		else {
+			const cmdCompare = cmd.toUpperCase().trim();
+			if (cmdCompare.startsWith("EVALUATE") || cmdCompare.startsWith("DEFINE")) {
+				magicText = "dax";
+				language = "DAX";
+			}
+			if (cmdCompare.startsWith("SET")) {
+				magicText = "cmd";
+				language = "CMD";
 			}
 		}
 
@@ -241,8 +251,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 							return;
 						}
 						const varName = match.groups.variable.trim().toUpperCase();
-						if(match.groups.variable && match.groups.value)
-						{
+						if (match.groups.variable && match.groups.value) {
 							const varValue = match.groups.value.trim();
 							context.setVariable(varName, varValue);
 
@@ -250,8 +259,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 								vscode.NotebookCellOutputItem.text(`Set variable ${varName} to '${varValue}'`),
 							]));
 						}
-						else
-						{
+						else {
 							const value = context.getVariable(varName);
 
 							execution.appendOutput(new vscode.NotebookCellOutput([

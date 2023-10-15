@@ -7,6 +7,7 @@ import { iPowerBIPipeline } from '../../../powerbi/PipelinesAPI/_types';
 import { PowerBIPipelineOperations } from './PowerBIPipelineOperations';
 import { Helper } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
+import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIPipeline extends PowerBIPipelineTreeItem {
@@ -56,15 +57,8 @@ export class PowerBIPipeline extends PowerBIPipelineTreeItem {
 
 	// Pipeline-specific funtions
 	public async delete(): Promise<void> {
-		let confirm: string = await PowerBICommandBuilder.showInputBox("", "Confirm deletion by typeing the Pipeline name '" + this.name + "' again.", undefined, undefined);
+		await PowerBIApiTreeItem.delete(this, "name");
 		
-		if (!confirm || confirm != this.name) {
-			ThisExtension.log("Deletion of Pipeline '" + this.name + "' aborted!")
-			return;
-		}
-
-		await PowerBICommandBuilder.execute(this.apiPath, "DELETE", []);
-
-		setTimeout(() => vscode.commands.executeCommand("PowerBIPipelines.refresh", undefined, false), 1000);
+		ThisExtension.TreeViewPipelines.refresh(this.parent, false);
 	}
 }

@@ -71,8 +71,5 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 		return children;
 	}
 
-	// Dashboard-specific funtions
-	public async delete(): Promise<void> {
-		//PowerBICommandBuilder.execute<iPowerBIDashboard>(this.apiPath, "DELETE", []);
-	}
+	// Capacity-specific funtions
 }

@@ -94,6 +94,12 @@ export abstract class PowerBIConfiguration {
 	static get clientId(): string { return this.getValue("clientId"); }
 	static set clientId(value: string) { this.setValue("clientId", value); }
 
+	static get tmdlClientId(): string { return this.getValue("TMDL.clientId"); }
+	static set tmdlClientId(value: string) { this.setValue("TMDL.clientId", value); }
+
+	static get tmdlEnabled(): boolean { return this.getValue("TMDL.enabled"); }
+	static set tmdlEnabled(value: boolean) { this.setValue("TMDL.enabled", value); }
+
 	static get apiUrl(): string { return CLOUD_CONFIGS[this.cloud].apiEndpoint; }
 
 	static get authenticationProvider(): string { return CLOUD_CONFIGS[this.cloud].authenticationProvider; }
@@ -108,15 +114,21 @@ export abstract class PowerBIConfiguration {
 		return this.apiUrl !== "https://api.powerbi.com/"
 	}
 
+	static get isTMDLEnabled(): boolean {
+		// If the base URL for the API is not pointed to api.powerbi.com assume 
+		// we are pointed to the sovereign tenant
+		return this.tmdlEnabled;
+	}
+
 	static get config(): vscode.WorkspaceConfiguration {
 		return vscode.workspace.getConfiguration("powerbi");
 	}
 
-	static getValue(key: string): any {
-		return this.config.get(key);
+	static getValue<T>(key: string): T {
+		return this.config.get(key) as T;
 	}
 
-	static setValue(key: string, value: any, target: boolean | vscode.ConfigurationTarget = null): void {
+	static setValue<T>(key: string, value: T, target: boolean | vscode.ConfigurationTarget = null): void {
 		this.config.update(key, value, target);
 	}
 

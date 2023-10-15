@@ -35,7 +35,11 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 
 	async refresh(item: PowerBIGatewayTreeItem = null, showInfoMessage: boolean = false): Promise<void> {
 		if (showInfoMessage) {
-			Helper.showTemporaryInformationMessage('Refreshing Gateways ...');
+			Helper.showTemporaryInformationMessage('Refreshing PowerBI Gateways ...');
+		}
+		// on leaves, we refresh the parent instead
+		if(item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
+			item = item.parent;
 		}
 		this._onDidChangeTreeData.fire(null);
 	}
