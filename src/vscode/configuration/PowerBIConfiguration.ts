@@ -111,7 +111,7 @@ export abstract class PowerBIConfiguration {
 	static get isSovereignCloud(): boolean {
 		// If the base URL for the API is not pointed to api.powerbi.com assume 
 		// we are pointed to the sovereign tenant
-		return this.apiUrl !== "https://api.powerbi.com/"
+		return this.apiUrl !== "https://api.powerbi.com"
 	}
 
 	static get isTMDLEnabled(): boolean {
@@ -139,7 +139,7 @@ export abstract class PowerBIConfiguration {
 	static applySettings(): void {
 		if(this.isSovereignCloud)
 		{
-			vscode.workspace.getConfiguration().update("microsoft-sovereign-cloud.endpoint", this.authenticationEndpoint)
+			vscode.workspace.getConfiguration().update("microsoft-sovereign-cloud.endpoint", this.authenticationEndpoint, vscode.ConfigurationTarget.Workspace)
 		}
 	}
 }

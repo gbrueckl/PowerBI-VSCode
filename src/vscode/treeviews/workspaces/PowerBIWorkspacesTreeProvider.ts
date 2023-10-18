@@ -65,7 +65,7 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 		}
 		else {
 			let children: PowerBIWorkspaceTreeItem[] = [];
-			let items: iPowerBIGroup[] = await PowerBIApiService.getGroups();
+			let items: iPowerBIGroup[] = await PowerBIApiService.getItemList<iPowerBIGroup>("/groups");
 
 			children.push(new PowerBIWorkspacePersonal())
 

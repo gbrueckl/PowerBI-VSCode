@@ -12,6 +12,7 @@ import { TMDLFSUri } from '../vscode/filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 import { TMDLProxyData, TMDLProxyDataException, TMDLProxyDataValidation, TMDLProxyServer, TMDLProxyStreamEntry } from '../TMDLVSCode/_types'
 import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfiguration';
+import { iPowerBIGroup } from '../powerbi/GroupsAPI/_types';
 
 const portfinder = require('portfinder');
 
@@ -465,21 +466,46 @@ export abstract class TMDLProxy {
 	static async publish(resourceUri: vscode.Uri): Promise<boolean> {
 		await TMDLProxy.saveCurrentTMDLDocument();
 
+		let workspaceName: string;
+		let datasetName: string;
+
 		let success: boolean = false;
 		let link: vscode.Uri;
 		if (resourceUri.scheme == TMDL_SCHEME) {
 			success = await TMDLProxy.publishStream(resourceUri);
-			const tmdlUri: TMDLFSUri = new TMDLFSUri(resourceUri);
-			link = await PowerBIApiService.getDatasetUrl(tmdlUri.workspace, tmdlUri.dataset);
+
+			if (success) {
+				const tmdlUri: TMDLFSUri = new TMDLFSUri(resourceUri);
+				workspaceName = tmdlUri.workspace;
+				datasetName = tmdlUri.dataset;
+			}
 		}
 		else {
 			success = await TMDLProxy.publishFolder(resourceUri);
+
+			if (success) {
+				const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
+				const publishConfig: TMDLProxyData = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
+
+				workspaceName = Helper.getFirstRegexGroup(/\/v1.0\/.*?\/(.*?)[;\"]/g, publishConfig.connectionString);
+				datasetName = Helper.getFirstRegexGroup(/Initial Catalog=(.*?)[;\"]/g, publishConfig.connectionString);
+			}
 		}
 
+		link = await PowerBIApiService.getDatasetUrl(workspaceName, datasetName);
+
 		if (success) {
-			const action = await vscode.window.showInformationMessage("TMDL published successfully!", "Open in PowerBI")
+			const action = await vscode.window.showInformationMessage("TMDL published successfully!", "Process", "Open in PowerBI")
 			if (action == "Open in PowerBI") {
 				Helper.openLink(link.toString());
+			}
+			if (action == "Process") {
+				const workspace = (await PowerBIApiService.getItemList<iPowerBIGroup>("/groups")).find((workspace) => workspace.name == workspaceName);
+				const workspaceId = workspace.id.toString();
+				const datasetId = (await PowerBIApiService.getItemList<iPowerBIGroup>(`/groups/${workspaceId}/datasets`)).find((dataset) => dataset.name == datasetName).id.toString();
+
+				// we can only publish to a premium workspace
+				await PowerBIDataset.refreshById(workspaceId, datasetId, true)
 			}
 		}
 

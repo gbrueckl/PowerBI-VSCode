@@ -178,7 +178,7 @@
 			},
 			{
 				"command": "PowerBIWorkspaces.refresh",
-				"title": "Refresh",
+				"title": "Refresh View",
 				"icon": "$(refresh)",
 				"category": "PowerBI"
 			},
@@ -378,19 +378,19 @@
 			},
 			{
 				"command": "PowerBICapacities.refresh",
-				"title": "Refresh",
+				"title": "Refresh View",
 				"icon": "$(refresh)",
 				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIGateways.refresh",
-				"title": "Refresh",
+				"title": "Refresh View",
 				"icon": "$(refresh)",
 				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIPipelines.refresh",
-				"title": "Refresh",
+				"title": "Refresh View",
 				"icon": "$(refresh)",
 				"category": "PowerBI"
 			},
@@ -487,12 +487,12 @@
 				{
 					"command": "PowerBIDataset.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,DELETE,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.refresh",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,REFRESH,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.takeOver",
@@ -537,7 +537,7 @@
 				{
 					"command": "PowerBIReport.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIReport.clone",
@@ -557,17 +557,17 @@
 				{
 					"command": "PowerBIDataflow.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATAFLOW,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataflow.refresh",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATAFLOW,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDashboard.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DASHBOARD,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIPipeline.delete",

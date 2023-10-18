@@ -99,14 +99,14 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
-	public async refresh(): Promise<void> {
+	public static async refreshById(workspaceId: string, datasetId: string, isOnDedicatedCapacity: boolean): Promise<void> {
 		ThisExtension.setStatusBar("Triggering dataset-refresh ...", true);
-		const apiUrl = Helper.joinPath(this.apiPath, "refreshes");
+		const apiUrl = Helper.joinPath("groups", workspaceId, "datasets", datasetId, "refreshes");
 
 		let body = null;
 
 		// if we are on premium, we can use the Enhanced Refresh API
-		if (this.getParentByType<PowerBIWorkspace>("GROUP").definition.isOnDedicatedCapacity) {
+		if (isOnDedicatedCapacity) {
 			const processType: QuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
 				//placeHolder: toolTip,
 				ignoreFocusOut: true
@@ -121,8 +121,15 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 				"type": processType.label
 			}
 		}
+
 		PowerBIApiService.post(apiUrl, body);
 		ThisExtension.setStatusBar("Dataset-refresh triggered!");
+		Helper.showTemporaryInformationMessage("Dataset-refresh triggered!", 3000);
+	}
+
+	public async refresh(): Promise<void> {
+		const isOnDedicatedCapacity = this.getParentByType<PowerBIWorkspace>("GROUP").definition.isOnDedicatedCapacity;
+		await PowerBIDataset.refreshById(this.groupId.toString(), this.id, isOnDedicatedCapacity);
 
 		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this, false);
