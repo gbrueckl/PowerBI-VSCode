@@ -7,7 +7,7 @@ import { fetch, RequestInit, Response } from '@env/fetch';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { Helper } from '../helpers/Helper';
 import { TMDL_EXTENSION, TMDL_SCHEME, TMDLFileSystemProvider } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
-import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../powerbi/CommandBuilder';
 import { TMDLFSUri } from '../vscode/filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 import { TMDLProxyData, TMDLProxyDataException, TMDLProxyDataValidation, TMDLProxyServer, TMDLProxyStreamEntry } from '../TMDLVSCode/_types'
@@ -518,6 +518,7 @@ export abstract class TMDLProxy {
 			TMDLProxy.log("Publishing TMDL from " + resourceUri.fsPath + " ...");
 			const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
 			if (!localPath) {
+				//const x = new PowerBICommandInput("Target Dataset", "DATASET_SELECTOR", "Please select the dataset you want to publish to.", undefined);
 				vscode.window.showErrorMessage("Could not publish settings for " + resourceUri.fsPath + "!");
 				return;
 			}

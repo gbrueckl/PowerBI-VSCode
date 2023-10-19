@@ -1,12 +1,11 @@
-import { stringify } from 'querystring';
 import * as vscode from 'vscode';
-import { Helper } from '../helpers/Helper';
+
 import { ThisExtension } from '../ThisExtension';
 import { PowerBIApiTreeItem } from '../vscode/treeviews/PowerBIApiTreeItem';
-import { PowerBIWorkspaceTreeItem } from '../vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
 import { ApiItemType } from '../vscode/treeviews/_types';
 import { PowerBIApiService } from './PowerBIApiService';
 import { ApiMethod } from './_types';
+import { PowerBIDataset } from '../vscode/treeviews/workspaces/PowerBIDataset';
 
 
 
@@ -140,7 +139,7 @@ export class PowerBIQuickPickItem {
 		return `${this.name}${PowerBIQuickPickItem.SEPARATOR}${this.value}`;
 	}
 
-	get picked(): boolean { 
+	get picked(): boolean {
 		return this._picked ?? false;
 	}
 
@@ -193,11 +192,11 @@ export abstract class PowerBICommandBuilder {
 
 			case "DELETE":
 				return PowerBIApiService.delete(apiUrl, body) as Promise<T>;
-		
+
 			default:
 				break;
 		}
-		
+
 	}
 
 	static addProperty(body: object, key: string, inputValue: string): object {
@@ -225,7 +224,7 @@ export abstract class PowerBICommandBuilder {
 		items: PowerBIQuickPickItem[],
 		title: string,
 		description: string,
-		currentValue: string		
+		currentValue: string
 	): Promise<string> {
 
 		const result = await vscode.window.showQuickPick(items, {
@@ -268,6 +267,14 @@ export abstract class PowerBICommandBuilder {
 	}
 
 	static pushQuickPickItem(item: PowerBIApiTreeItem): void {
+		/* also support DATASET_XMLA
+		if (item.itemType == "DATASET") {
+			if (!this._quickPickLists.has("DATASET_XMLA")) {
+				ThisExtension.log(`Adding item 'DATASET_XMLA' to QuickPickLists ...`);
+				this._quickPickLists.set("DATASET_XMLA", []);
+			}
+		}
+		*/
 		if (this._quickPickLists == undefined) {
 			ThisExtension.log(`Initializing QuickPickList ...`);
 			this._quickPickLists = new Map<ApiItemType, PowerBIQuickPickItem[]>();

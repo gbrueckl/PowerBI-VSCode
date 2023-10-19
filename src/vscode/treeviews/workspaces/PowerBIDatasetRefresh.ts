@@ -48,7 +48,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 			durationText = `(${Helper.secondsToHms(duration)})`;
 		}
 	
-		return `${this.status} ${durationText} - this.definition.refreshType`;
+		return `${this.status} ${durationText} - ${this.definition.refreshType}`;
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {

@@ -20,7 +20,7 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 		group: UniqueId,
 		parent: PowerBIDataflowTransactions
 	) {
-		super(definition.id, group, "TRANSACTION", definition.id, parent, vscode.TreeItemCollapsibleState.None);
+		super(definition.id, group, "DATAFLOWTRANSACTION", definition.id, parent, vscode.TreeItemCollapsibleState.None);
 
 		this.definition = definition;
 
@@ -36,14 +36,22 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 	}
 
 	get _label(): string {
-		let dateToShow: Date = this.definition.startTime;
+		let dateToShow: Date = this.startTime;
 
 		return `${new Date(dateToShow).toISOString().substr(0, 19).replace('T', ' ')}`;
 	}
 
 	// description is show next to the label
 	get _description(): string {
-		return this.definition.status + " - " + this.definition.refreshType;
+
+		let duration: number = this.duration;
+		let durationText: string = "";
+		if(this.duration)
+		{
+			durationText = `(${Helper.secondsToHms(duration)})`;
+		}
+	
+		return `${this.definition.status} ${durationText} - ${this.definition.refreshType}`;
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {
@@ -75,6 +83,30 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 
 	get dataflow(): PowerBIDataflow {
 		return (this.parent as PowerBIDataflowTransactions).dataflow;
+	}
+
+	get startTime(): Date {
+		if(this.definition.startTime)
+		{
+			return new Date(this.definition.startTime);
+		}
+		return undefined;
+	}
+
+	get endTime(): Date {
+		if(this.definition.endTime)
+		{
+			return new Date(this.definition.endTime);
+		}
+		return undefined;
+	}
+
+	get duration(): number {
+		if(this.startTime && this.endTime)
+		{
+			return (this.endTime.getTime() - this.startTime.getTime()) / 1000;
+		}
+		return undefined;
 	}
 
 	// Parameter-specific funtions

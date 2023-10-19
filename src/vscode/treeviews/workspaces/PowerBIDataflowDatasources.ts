@@ -1,22 +1,22 @@
 import * as vscode from 'vscode';
 
-import {  UniqueId } from '../../../helpers/Helper';
+import { UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIDataflow } from './PowerBIDataflow';
-import { PowerBIDataflowTransaction } from './PowerBIDataflowTransaction';
-import { iPowerBIDataflowTransaction } from '../../../powerbi/DataflowsAPI/_types';
+import { PowerBIDataflowDatasource } from './PowerBIDataflowDatasource';
+import { iPowerBIDataflowDatasource } from '../../../powerbi/DataflowsAPI/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIDataflowTransactions extends PowerBIWorkspaceTreeItem {
+export class PowerBIDataflowDatasources extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		groupId: UniqueId,
 		parent: PowerBIWorkspaceTreeItem
 	) {
-		super("Transactions", groupId, "DATAFLOWTRANSACTIONS", groupId, parent);
+		super("Datasources", groupId, "DATAFLOWDATASOURCES", groupId, parent);
 
 		// the groupId is not unique for logical folders hence we make it unique
 		super.id = groupId + "/" + this.parent.uid + "/" + this.itemType.toString();
@@ -33,7 +33,7 @@ export class PowerBIDataflowTransactions extends PowerBIWorkspaceTreeItem {
 	}
 
 	get apiUrlPart(): string {
-		return "transactions";
+		return "datasources";
 	}
 
 	get dataflow(): PowerBIDataflow {
@@ -49,13 +49,15 @@ export class PowerBIDataflowTransactions extends PowerBIWorkspaceTreeItem {
 			return element.getChildren();
 		}
 		else {
-			let children: PowerBIDataflowTransaction[] = [];
-			let items: iPowerBIDataflowTransaction[] = await PowerBIApiService.getItemList<iPowerBIDataflowTransaction>(this.apiPath, undefined, null);
+			let children: PowerBIDataflowDatasource[] = [];
+			let items: iPowerBIDataflowDatasource[] = await PowerBIApiService.getItemList<iPowerBIDataflowDatasource>(this.apiPath, undefined, null);
 
 			for (let item of items) {
-				let treeItem = new PowerBIDataflowTransaction(item, this.groupId, this);
-				children.push(treeItem);
-				PowerBICommandBuilder.pushQuickPickItem(treeItem);
+				if (children.find(x => x.id == item.datasourceId) == undefined) { // there can be duplicate datasources for whatever reaon
+					let treeItem = new PowerBIDataflowDatasource(item, this.groupId, this);
+					children.push(treeItem);
+					PowerBICommandBuilder.pushQuickPickItem(treeItem);
+				}
 			}
 
 			return children;

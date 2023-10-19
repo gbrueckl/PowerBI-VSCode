@@ -3,6 +3,7 @@ export type ApiItemType =
 |	"GROUPS" 
 |	"DATASETS" // container for datasets within workspace
 | 	"DATASET"
+| 	"DATASET_XMLA" // only used for QuickPick items to allow to store XMLA information for datasets
 |	"REPORTS" // container for reports within workspace
 | 	"REPORT"
 |	"DATAFLOWS" // container for dataflows within workspace
@@ -37,6 +38,8 @@ export type ApiItemType =
 |	"DATASETPARAMETER"
 |	"DATASETREFRESHES"			// container for Dataset refreshes
 |	"DATASETREFRESH"			// single Dataset refresh
-|	"TRANSACTIONS"		// container for Dataflow refreshes
-|	"TRANSACTION"		// single Dataflow refresh
+|	"DATAFLOWTRANSACTIONS"		// container for Dataflow refreshes
+|	"DATAFLOWTRANSACTION"		// single Dataflow refresh
+|	"DATAFLOWDATASOURCES"
+|	"DATAFLOWDATASOURCE"
 ;

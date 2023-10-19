@@ -17,8 +17,15 @@ export class iPowerBIDataflow {
 
 export class iPowerBIDataflowTransaction {
     refreshType: string;
-    startTime: Date;
-    endTime: Date;
+    startTime: string;
+    endTime: string;
     status: string;
     id: string;
+}
+
+export class iPowerBIDataflowDatasource {
+    datasourceType: string;
+    datasourceId: string;
+    gatewayId: string;
+    connectionDetails: any;
 }

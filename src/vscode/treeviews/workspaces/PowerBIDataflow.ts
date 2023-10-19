@@ -7,6 +7,8 @@ import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { PowerBIDataflowTransactions } from './PowerBIDataflowTransactions';
+import { PowerBIDataflowDatasources } from './PowerBIDataflowDatasources';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
@@ -16,7 +18,7 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 		group: UniqueId,
 		parent: PowerBIWorkspaceTreeItem
 	) {
-		super(definition.name, group, "DATAFLOW", definition.objectId, parent, vscode.TreeItemCollapsibleState.None);
+		super(definition.name, group, "DATAFLOW", definition.objectId, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this.id = definition.objectId;
 		this.definition = definition;
@@ -32,6 +34,18 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 	private set definition(value: iPowerBIDataflow) {
 		super.definition = value;
 	}
+
+	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
+		PowerBICommandBuilder.pushQuickPickItem(this);
+
+		let children: PowerBIWorkspaceTreeItem[] = [];
+
+		children.push(new PowerBIDataflowTransactions(this.groupId, this));
+		children.push(new PowerBIDataflowDatasources(this.groupId, this));
+
+		return children;
+	}
+
 	// Dataflow-specific funtions
 	public async delete(): Promise<void> {
 		await PowerBIApiTreeItem.delete(this, "yesNo");
