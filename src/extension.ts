@@ -31,6 +31,7 @@ import { TMDL_SCHEME, TMDLFileSystemProvider } from './vscode/filesystemProvider
 import { TMDLFSUri } from './vscode/filesystemProvider/TMDLFSUri';
 import { EventHandlers } from './EventHandlers';
 import { TMDLFSCache } from './vscode/filesystemProvider/TMDLFSCache';
+import { PowerBIDataflowTransaction } from './vscode/treeviews/workspaces/PowerBIDataflowTransaction';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -92,6 +93,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Dataflow commands
 	vscode.commands.registerCommand('PowerBIDataflow.delete', (dataflow: PowerBIDataflow) => dataflow.delete());
 	vscode.commands.registerCommand('PowerBIDataflow.refresh', (dataflow: PowerBIDataflow) => dataflow.refresh());
+	vscode.commands.registerCommand('PowerBIDataflowTransaction.cancel', (transaction: PowerBIDataflowTransaction) => transaction.cancel());
 
 	// Dashboard commands
 	vscode.commands.registerCommand('PowerBIDashboard.delete', (dashboard: PowerBIDashboard) => dashboard.delete());

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { iPowerBIDataflow } from '../../../powerbi/DataflowsAPI/_types';
-import { UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { ThisExtension } from '../../../ThisExtension';
@@ -61,6 +61,10 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 		}
 		PowerBIApiService.post(this.apiPath + "refreshes", body);
 		ThisExtension.setStatusBar("Dataflow-refresh triggered");
+		Helper.showTemporaryInformationMessage("Dataflow-refresh triggered!", 3000);
+
+		await Helper.delay(500);
+		ThisExtension.TreeViewWorkspaces.refresh(this, false);
 	}
 
 }

@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { Helper, UniqueId } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
-import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { iPowerBIDataflowDatasource } from '../../../powerbi/DataflowsAPI/_types';
 import { PowerBIDataflowDatasources } from './PowerBIDataflowDatasources';
 import { PowerBIDataflow } from './PowerBIDataflow';
@@ -20,7 +19,7 @@ export class PowerBIDataflowDatasource extends PowerBIWorkspaceTreeItem {
 
 		this.definition = definition;
 
-		super.id = definition.datasourceId;
+		super.id = parent.parent.id + "/" + definition.datasourceId;
 		super.label = this._label;
 		super.description = this._description;
 		super.tooltip = this._tooltip;

@@ -57,6 +57,11 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 	protected getIconPath(theme: string): vscode.Uri {
 		let status: string = this.definition.status;
 
+		if(status && status.startsWith("Cancelled"))
+		{
+			status = "failed";
+		}
+
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, status + '.png');
 	}
 
@@ -66,7 +71,7 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 
 		let actions: string[] = []
 
-		if(this.definition.status == "Unknown")
+		if(this.definition.status == "InProgress")
 		{
 			actions.push("CANCEL")
 		}
@@ -109,10 +114,20 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 		return undefined;
 	}
 
+	get apiUrlPart(): string {
+		return this.definition.id;
+	}
+
 	// Parameter-specific funtions
 	public async cancel(): Promise<void> {
 		ThisExtension.setStatusBar("Cancelling dataflow-refresh ...", true);
-		PowerBIApiService.post(this.apiPath + "/cancel", null);
+		// dataflows work slightly different and the transaction is not linked to the dataflow
+		const apiPath = this.apiPath.replace(`/${this.getPathItemByType<PowerBIDataflow>("DATAFLOW").id}`, "");
+		PowerBIApiService.post(apiPath + "cancel", null);
 		ThisExtension.setStatusBar("Dataflow-refresh cancelled!");
+		Helper.showTemporaryInformationMessage("Dataflow-refresh cancelled!", 3000);
+
+		await Helper.delay(1000);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 }

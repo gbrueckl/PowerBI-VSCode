@@ -21,6 +21,10 @@ export abstract class EventHandlers {
 
 	static init(context: vscode.ExtensionContext): void {
 		vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
+			if(event.added.length == 0)
+			{
+				return;
+			}
 			if (event.added[0].uri.scheme == TMDL_SCHEME) {
 				const tmdlUri = new TMDLFSUri(event.added[0].uri);
 

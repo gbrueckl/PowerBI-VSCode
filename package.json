@@ -371,6 +371,12 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIDataflowTransaction.cancel",
+				"title": "Cancel",
+				"icon": "$(stop)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIDashboard.delete",
 				"title": "Delete",
 				"icon": "$(remove-close)",
@@ -562,6 +568,11 @@
 				{
 					"command": "PowerBIDataflow.refresh",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATAFLOW,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDataflowTransaction.cancel",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATAFLOWTRANSACTION,.*/ && viewItem =~ /.*,CANCEL,.*/",
 					"group": "navigation"
 				},
 				{
