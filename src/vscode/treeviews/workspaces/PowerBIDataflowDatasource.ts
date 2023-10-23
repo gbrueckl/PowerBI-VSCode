@@ -19,6 +19,7 @@ export class PowerBIDataflowDatasource extends PowerBIWorkspaceTreeItem {
 
 		this.definition = definition;
 
+		// datasourceId can be used by multiple dataflows hence we make it unique
 		super.id = parent.parent.id + "/" + definition.datasourceId;
 		super.label = this._label;
 		super.description = this._description;

@@ -50,7 +50,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		};
 	}
 
-	protected getIconPath(theme: string): vscode.Uri {
+	protected getIconPath(theme: string): string | vscode.Uri {
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + '.png');
 	}
 

@@ -188,7 +188,11 @@ export abstract class PowerBIApiService {
 
 	public static get SessionUserEmail(): string {
 		if (this._vscodeSession) {
-			return Helper.trimChar(this._vscodeSession.account.label.split("-")[1], " ");
+			const email = Helper.getFirstRegexGroup(/([\w\.]+@[\w-]+\.+[\w-]{2,5})/gm, this._vscodeSession.account.label);
+			if(email)
+			{
+				return email;
+			}
 		}
 		return "UNAUTHENTICATED";
 	}

@@ -32,6 +32,7 @@ import { TMDLFSUri } from './vscode/filesystemProvider/TMDLFSUri';
 import { EventHandlers } from './EventHandlers';
 import { TMDLFSCache } from './vscode/filesystemProvider/TMDLFSCache';
 import { PowerBIDataflowTransaction } from './vscode/treeviews/workspaces/PowerBIDataflowTransaction';
+import { PowerBICapacityWorkload } from './vscode/treeviews/Capacities/PowerBICapacityWorkload';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -103,7 +104,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiCapacitiesTreeProvider = new PowerBICapacitiesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBICapacities', pbiCapacitiesTreeProvider); // done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBICapacities.refresh', (item: PowerBICapacityTreeItem = undefined, showInfoMessage: boolean = true) => pbiCapacitiesTreeProvider.refresh(item, showInfoMessage));
-
+	
+	vscode.commands.registerCommand('PowerBICapacityWorkload.update', (workload: PowerBICapacityWorkload) => workload.update());
+	
 
 	// register PowerBIGatewaysTreeProvider
 	let pbiGatewaysTreeProvider = new PowerBIGatewaysTreeProvider(context);

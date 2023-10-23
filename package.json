@@ -389,6 +389,12 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBICapacityWorkload.update",
+				"title": "Update",
+				"icon": "$(pencil)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIGateways.refresh",
 				"title": "Refresh View",
 				"icon": "$(refresh)",
@@ -579,6 +585,11 @@
 					"command": "PowerBIDashboard.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DASHBOARD,.*/",
 					"group": "navigation"
+				},
+				{
+					"command": "PowerBICapacityWorkload.update",
+					"when": "view == PowerBICapacities && viewItem =~ /.*,UPDATE,.*/",
+					"group": "inline"
 				},
 				{
 					"command": "PowerBIPipeline.delete",

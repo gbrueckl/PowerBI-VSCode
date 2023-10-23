@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 
 import { PowerBICapacityTreeItem } from './PowerBICapacityTreeItem';
-import { iPowerBICapacityItem } from './iPowerBICapacityItem';
-import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
-import { iPowerBICapacity, iPowerBICapacityRefreshable, iPowerBICapacityWorkload } from '../../../powerbi/CapacityAPI/_types';
+import { iPowerBICapacityWorkload } from '../../../powerbi/CapacityAPI/_types';
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
+import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
+import { iPowerBIDatasetGenericResponse } from '../../../powerbi/DatasetsAPI/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBICapacityWorkload extends PowerBICapacityTreeItem {
@@ -21,17 +21,30 @@ export class PowerBICapacityWorkload extends PowerBICapacityTreeItem {
 		
 		super.tooltip = this._tooltip;
 		super.description = this._description;
-		super.iconPath = {
-			light: this.getIconPath("light"),
-			dark: this.getIconPath("dark")
-		};
+		super.contextValue = this._contextValue;
+		super.iconPath = this.getIcon();
 	}
 
-	protected getIconPath(theme: string): vscode.Uri {
-		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, 'workload' + '.png');
+	getIcon(): vscode.ThemeIcon {
+		if(this.definition.state == "Enabled")
+		{
+			return new vscode.ThemeIcon("pass-filled");
+		}
+		return new vscode.ThemeIcon("circle-large-outline");
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = [];
+
+		if (this.definition.state != "Unsupported") {
+			actions.push("UPDATE");
+		}
+
+		return orig + actions.join(",") + ",";
+	}
 	get definition(): iPowerBICapacityWorkload {
 		return super.definition as iPowerBICapacityWorkload;
 	}
@@ -43,5 +56,38 @@ export class PowerBICapacityWorkload extends PowerBICapacityTreeItem {
 	// description is show next to the label
 	get _description(): string {
 		return this.definition.state + " - MaxMem %: " + this.definition.maxMemoryPercentageSetByUser;
+	}
+
+	// Workload-specific funtions
+	public async update(): Promise<void> {
+		const apiUrl = this.apiPath;
+
+		let response = await PowerBICommandBuilder.execute<iPowerBIDatasetGenericResponse>(apiUrl, "PATCH",
+			[
+				new PowerBICommandInput(
+					"Enabled", 
+					"CUSTOM_SELECTOR", 
+					"state", 
+					false, 
+					"The capacity workload state.", 
+					this.definition.state,
+					[new PowerBIQuickPickItem("Enabled"), new PowerBIQuickPickItem("Disabled")]),
+				new PowerBICommandInput(
+					"Maximum Memory", 
+					"FREE_TEXT", 
+					"maxMemoryPercentageSetByUser", 
+					true, 
+					"Whether the dataset automatically syncs read-only replicas.", 
+					this.definition.maxMemoryPercentageSetByUser.toString())
+			]);
+
+		if (response.error) {
+			vscode.window.showErrorMessage(JSON.stringify(response));
+		}
+
+		ThisExtension.setStatusBar("Workload configured!");
+
+		await Helper.delay(1000);
+		ThisExtension.TreeViewCapacities.refresh(this.parent, false);
 	}
 }

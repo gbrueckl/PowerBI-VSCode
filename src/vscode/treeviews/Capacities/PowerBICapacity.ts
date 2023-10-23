@@ -62,9 +62,12 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 		PowerBICommandBuilder.pushQuickPickItem(this);
 
 		let children: PowerBICapacityTreeItem[] = [];
+		const currentUser = PowerBIApiService.SessionUserEmail
 
 		children.push(new PowerBICapacityRefreshables(this));
-		if (this.admins.includes(PowerBIApiService.SessionUserEmail)) {
+
+		// Workloads can only updated in Gen2 so it does not make a lot of sense to even show this option
+		if (false && this.admins.includes(currentUser)) {
 			children.push(new PowerBICapacityWorkloads(this));
 		}
 
