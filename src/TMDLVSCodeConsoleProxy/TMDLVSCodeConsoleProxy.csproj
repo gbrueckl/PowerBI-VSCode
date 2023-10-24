@@ -13,7 +13,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="xcopy &quot;$(ProjectDir)$(OutDir)&quot; &quot;$(ProjectDir)..\..\resources\TMDLProxy&quot; /Y" />
+		<Exec Command="xcopy &quot;$(ProjectDir)$(OutDir)&quot; &quot;$(ProjectDir)..\..\resources\TMDLProxy&quot; /C /Y" />
 	</Target>
 
 </Project>

@@ -100,6 +100,16 @@ export abstract class PowerBIApiService {
 		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl).with({ scheme: "powerbi" }), "v1.0", this.Org, workspace);
 	}
 
+	public static getXmlaConnectionString(workspace: string, database: string = undefined): string {
+		let connectionString: string = `Data Source=${this.getXmlaEndpoint(workspace)};`;
+
+		if(database)
+		{
+			connectionString += `Initial Catalog=${database};`;
+		}
+		return connectionString;
+	}
+
 	public static async refreshXmlaSession(): Promise<boolean> {
 		this._xmlaSession = await this.getXmlaSession();
 

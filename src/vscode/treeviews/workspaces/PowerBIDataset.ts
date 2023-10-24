@@ -76,9 +76,8 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 
 	async getXMLACConnectionString(): Promise<string> {
 		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
-		const xmlaEndpoint = PowerBIApiService.getXmlaEndpoint(workspace.name).toString();
 
-		return `Data Source=${xmlaEndpoint};Initial Catalog=${this.name};`;
+		return PowerBIApiService.getXmlaConnectionString(workspace.name, this.name);
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {

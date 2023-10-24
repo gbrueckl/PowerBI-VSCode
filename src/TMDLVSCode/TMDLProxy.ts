@@ -236,9 +236,7 @@ export abstract class TMDLProxy {
 
 	static async getDatabases(server: string): Promise<TMDLProxyServer[]> {
 		try {
-			const xmlaEndpoint = PowerBIApiService.getXmlaEndpoint(server).toString();
-
-			const connectionString = `Data Source=${xmlaEndpoint};`;
+			const connectionString = PowerBIApiService.getXmlaConnectionString(server);
 
 			let body = {
 				"connectionString": connectionString
@@ -388,7 +386,6 @@ export abstract class TMDLProxy {
 
 			let body: TMDLProxyData = {
 				"connectionString": await dataset.getXMLACConnectionString(),
-				"datasetName": dataset.name,
 				"localPath": localPath.fsPath,
 			};
 
@@ -421,13 +418,10 @@ export abstract class TMDLProxy {
 		try {
 			TMDLProxy.log("Exporting TMDL Stream from '" + tmdlUri.dataset + "' ...");
 
-			const xmlaEndpoint = PowerBIApiService.getXmlaEndpoint(tmdlUri.workspace).toString();
-
-			const connectionString = `Data Source=${xmlaEndpoint};Initial Catalog=${tmdlUri.dataset};`;
+			const connectionString = PowerBIApiService.getXmlaConnectionString(tmdlUri.workspace) + `Initial Catalog=${tmdlUri.dataset};`;
 
 			let body: TMDLProxyData = {
-				"connectionString": connectionString,
-				"datasetName": tmdlUri.dataset
+				"connectionString": connectionString
 			};
 
 			await TMDLProxy.setAccessToken(body)
@@ -487,8 +481,8 @@ export abstract class TMDLProxy {
 				const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
 				const publishConfig: TMDLProxyData = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
 
-				workspaceName = Helper.getFirstRegexGroup(/\/v1.0\/.*?\/(.*?)[;\"]/g, publishConfig.connectionString);
-				datasetName = Helper.getFirstRegexGroup(/Initial Catalog=(.*?)[;\"]/g, publishConfig.connectionString);
+				workspaceName = decodeURI(Helper.getFirstRegexGroup(/\/v1.0\/.*?\/(.*?)[;\"]/gi, publishConfig.connectionString));
+				datasetName = decodeURI(Helper.getFirstRegexGroup(/Initial Catalog=(.*?)(;|$)/gi, publishConfig.connectionString));
 			}
 		}
 
@@ -518,8 +512,8 @@ export abstract class TMDLProxy {
 			TMDLProxy.log("Publishing TMDL from " + resourceUri.fsPath + " ...");
 			const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
 			if (!localPath) {
-				//const x = new PowerBICommandInput("Target Dataset", "DATASET_SELECTOR", "Please select the dataset you want to publish to.", undefined);
-				vscode.window.showErrorMessage("Could not publish settings for " + resourceUri.fsPath + "!");
+				// this should never happen as we also check for model.tmdl
+				vscode.window.showErrorMessage("Could not find .publishsettings.json for " + resourceUri.fsPath + "!");
 				return;
 			}
 			let body: TMDLProxyData;
@@ -530,14 +524,13 @@ export abstract class TMDLProxy {
 			if (dataset) {
 				body = {
 					"connectionString": await dataset.getXMLACConnectionString(),
-					"datasetName": dataset.name,
 					"localPath": localPath.fsPath,
 				};
 			}
 			else {
 				body = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
 				body.localPath = localPath.fsPath;
-				body.datasetName = Helper.getFirstRegexGroup(/Initial Catalog=(.*?);/g, body.connectionString);
+				body.connectionString = decodeURI(body.connectionString);
 			}
 
 			await TMDLProxy.setAccessToken(body)
@@ -575,8 +568,7 @@ export abstract class TMDLProxy {
 			const tmdlEntry = new TMDLFSUri(resourceUri);
 
 			let body: TMDLProxyData = {
-				"connectionString": PowerBIApiService.getXmlaEndpoint(tmdlEntry.workspace).toString(),
-				"datasetName": tmdlEntry.dataset,
+				"connectionString": PowerBIApiService.getXmlaConnectionString(tmdlEntry.workspace, tmdlEntry.dataset),
 				"streamEntries": await tmdlEntry.getStreamEntries()
 			};
 
@@ -640,7 +632,7 @@ export abstract class TMDLProxy {
 		}
 	}
 
-	static async saveLocally(resourceUri: vscode.Uri): Promise<boolean> {
+	static async saveLocally(resourceUri: vscode.Uri): Promise<void> {
 		if (resourceUri.scheme == TMDL_SCHEME) {
 			const tmdlEntry = new TMDLFSUri(resourceUri);
 
@@ -659,7 +651,9 @@ export abstract class TMDLProxy {
 			const savePath = savePaths[0];
 
 			await vscode.workspace.fs.copy(tmdlEntry.TMDLRootUri.uri, savePath, { overwrite: true });
-			vscode.workspace.fs.writeFile(vscode.Uri.joinPath(savePath, SETTINGS_FILE), Buffer.from(JSON.stringify({ "connectionString": tmdlEntry.XMLAConnectionString }, null, 4)));
+			vscode.workspace.fs.writeFile(
+				vscode.Uri.joinPath(savePath, SETTINGS_FILE), 
+				Buffer.from(JSON.stringify({ "connectionString": tmdlEntry.XMLAConnectionString }, null, 4)));
 
 			vscode.window.showInformationMessage(`TMDL saved to ${savePath.fsPath}!`, "Add to Workspace", "Open Folder").then(
 				(value) => {

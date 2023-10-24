@@ -16,7 +16,6 @@ namespace TMDLVSCodeConsoleProxy
     public class TMDLProxyData
     {
         public string connectionString { get; set; }
-        public string? datasetName { get; set; }
         public string? localPath { get; set; }
 
         public TMDLProxyStreamEntry[]? streamEntries { get; set; }

@@ -98,9 +98,9 @@ export class TMDLFSUri {
 	}
 
 	get XMLAConnectionString(): string {
-		const xmlaEndpoint = PowerBIApiService.getXmlaEndpoint(this.workspace).toString();
+		const connectionString = PowerBIApiService.getXmlaConnectionString(this.workspace, this.database).toString();
 
-		return `Data Source=${xmlaEndpoint};Initial Catalog=${this.dataset};`;
+		return connectionString;
 	}
 
 	get TMDLRootUri(): TMDLFSUri {
