@@ -173,17 +173,20 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		let treeViewtoRefresh: TreeProviderId = target.TreeProvider;
 
 		if (source.itemType == "GROUP") {
+			// dropping a Group/Workspace on a Capacity --> assign to that capacity
 			if (["CAPACITY"].includes(target.itemType)) {
 				const assignCapacity = async () => PowerBIWorkspace.assignToCapacity((source as PowerBIWorkspace), { capacityId: (target as PowerBICapacity).uid });
 				actions.set("assign to capacity", assignCapacity);
 				treeViewtoRefresh = source.TreeProvider;
 			}
+			// dropping a Group/Workspace on a Capacity --> assign to that pipeline stage
 			if (["PIPELINESTAGE"].includes(target.itemType)) {
 				const assignStage = async () => PowerBIPipelineStage.assignWorkspace(target as PowerBIPipelineStage, { workspaceId: source.uid });
 				actions.set("assign to stage", assignStage);
 			}
 		}
 		else if (source.itemType == "REPORT") {
+			// dropping a Report on a Group/Workspace or the Reports folder underneath --> create a copy of the report
 			if (["GROUP", "REPORTS"].includes(target.itemType)) {
 				const targetGroup = (target as PowerBIWorkspace).groupId;
 				const clone = async () => PowerBIReport.clone(source as PowerBIReport, {
@@ -192,6 +195,7 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 				});
 				actions.set("clone", clone);
 			}
+			// dropping a Report on Dataset --> rebind or clone with connection to new dataset
 			if (target.itemType == "DATASET") {
 				const rebind = async () => PowerBIReport.rebind(source as PowerBIReport, { datasetId: target.uid });
 				actions.set("rebind", rebind);
@@ -203,6 +207,7 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 				});
 				actions.set("clone", clone);
 			}
+			// dropping a Report on Report --> update content
 			else if (target.itemType == "REPORT") {
 				const updateContent = async () => PowerBIReport.updateContent(target as PowerBIReport, {
 					sourceReport: {

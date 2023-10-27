@@ -107,6 +107,7 @@ The following prerequisites have to be fulfilled to use all TMDL features:
   - Redirect URIs for Mobile and desktop applications: `https://vscode.dev/redirect`
   - Delegated Permissions: `Workspace.Read.All`, `Dataset.Read.All`, `Dataset.ReadWrite.All`
   - Consent granted for the permissions above
+- technically you can also use the same ClientID also for `powerbi.clientId`. In that case please make sure that you also provide additional permissions to e.g. read reports (`Report.Read.All`), etc.
 
 ## TMDL Configuration
 The setting `powerbi.TMDL.enabled` can be ued to enable or disable all TMDL features.
@@ -124,11 +125,11 @@ TMDL is a standard defined by Microsoft which also means that different tools ca
 
 ```json
 {
-  "connectionString": "Data Source=powerbi://api.powerbi.com/v1.0/myorg/SomeWorkspace;Initial Catalog=SomeDataset"
+  "connectionString": "Data Source=powerbi://api.powerbi.com/v1.0/myorg/SomeWorkspace;Initial Catalog=SomeDataset;"
 }
 ```
 
-The value for `connectionString` can be obtained from the settings pane of the dataset in the Power BI service where you want to deploy to.
+The value for `connectionString` can be obtained from the settings pane of the dataset in the Power BI service where you want to deploy to. If the dataset does not yet exist (e.g. if you have modified the exported `connectionString` in the file), the dataset will be created for you. This can be very useful to copy datasets between workspaces without down-/uploading `.pbix` files or if you have modified the dataset via the XMLA endpoint with an other tool (e.g. Tabular Editor) before.
 
 ## TMDL Proxy
 This extensions leverages existing libraries for TMDL which are available as .net Core package: [Microsoft.AnalysisServices.NetCore.retail.amd64](https://www.nuget.org/packages/Microsoft.AnalysisServices.NetCore.retail.amd64). However, as this package cannot be directly integrated into VSCode which uses JavaScript/TypeScript (and not .net), we implemented a .net Core application/api that acts as a proxy between VSCode and the target Tabular Server (e.g. Power BI dataset). This allows our VSCode extension to communicate with the target from within VSCode without having to implement the library in JavaScript/TypeScript.
@@ -149,3 +150,25 @@ The terminal also serves as a log which shows all individual requests sent to th
 
 # VSCode Extension Development Details
 Please refer to the [official docs and samples](https://github.com/microsoft/vscode-extension-samples#prerequisites)
+
+# FAQ
+
+**Q: I have a guest account in a remote client, can I still use this extension?**
+
+**A:** Yes! The only thing you need to do is to specify the TenantID of the remote tenant in the setting `powerbi.tenantId`. I would recommend to create a separate VSCode workspace in this scenario and change the setting there.
+
+**Q: I tried to query the [Admin-APIs](https://learn.microsoft.com/en-us/rest/api/power-bi/admin) in a notebook but its not working, any ideas why?**
+
+**A:** By default, this is not supported as the VSCode built-in authentication does not have the necessary permissions/scopes to read these APIs (`Tenant.Read.All` or `Tenant.ReadWrite.All`). To be able to query the Admin APIs you need to use a custom ClientID (settig `powerbi.clientId`) and add those permissions to your custom AAD application (also see [Prerequisites](#prerequisites) on how to configure a custom AAD application to be used with this extension).
+
+**Q: I tried to run a command from the context menue but the dropdown that appears does not contain the values I want to use. What can I do?**
+
+**A:** Unfortunately VSCode is quite limited in the way how users can enter data (e.g. a dropdown box) and we simply display the last 10 items that the user selected or expanded. So if you e.g. want to do a rebind of a report and the target dataset does not show up, please make sure to select/click it the Workspace Browser just before you run the rebind.
+
+**Q: I am using the TMDL features and VSCode keeps prompting me for credentials over and over again. What can I do?**
+
+**A:** This is by design, basically the very same way how also other tools like Tabular Editor or DAX Studio work. This authentication process happens within the [TMDL Proxy](#tmdl-proxy). However, you can also hand over the authentication to VSCode which would then also store your credentials in the system's key chain. All you need to do is to create a custom AAD application and specify the ClientID/ApplicationID in `powerbi.TMDL.clientId` (also see [Prerequisites](#prerequisites)).
+
+**Q: Something went wrong or the extension is stuck, what can I do?**
+
+**A:** Unfortunately this can happen, sorry! Please try to restart VSCode or run the command `PowerBI.initialize` from the command menu. If the problem persists, please open an [issue](https://github.com/gbrueckl/PowerBI-VSCode/issues) at our Git Repository.

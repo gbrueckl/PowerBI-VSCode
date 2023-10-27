@@ -8,6 +8,9 @@
 	"author": {
 		"name": "Gerhard Brueckl"
 	},
+	"contributors": [
+		"Gerhard Brueckl"
+	],
 	"license": "MIT",
 	"homepage": "https://github.com/gbrueckl/PowerBI-VSCode/blob/master/README.md",
 	"repository": {
@@ -19,6 +22,9 @@
 		"email": "powerbi-vscode@gbrueckl.at"
 	},
 	"qna": "https://github.com/gbrueckl/PowerBI-VSCode",
+	"sponsor": {
+		"url": "https://github.com/sponsors/gbrueckl"
+	},
 	"engines": {
 		"vscode": "^1.82.0"
 	},
@@ -128,16 +134,16 @@
 					"name": "Workspaces"
 				},
 				{
+					"id": "PowerBIPipelines",
+					"name": "Pipelines"
+				},
+				{
 					"id": "PowerBICapacities",
 					"name": "Capacities"
 				},
 				{
 					"id": "PowerBIGateways",
 					"name": "Gateways"
-				},
-				{
-					"id": "PowerBIPipelines",
-					"name": "Pipelines"
 				}
 			]
 		},
