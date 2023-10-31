@@ -165,7 +165,7 @@ export abstract class PowerBIApiService {
 		const workspace = workspaces.find((workspace) => workspace.name == workspaceName);
 		const datasets = await PowerBIApiService.getItemList<iPowerBIDataset>(`/groups/${workspace.id}/datasets`);
 		const dataset = datasets.find((dataset) => dataset.name == datasetName);
-		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl.replace("api.", "app.")), "groups", workspace.id.toString(), "datasets", dataset.id.toString());
+		return vscode.Uri.joinPath(vscode.Uri.parse(this.BrowserBaseUrl), "groups", workspace.id.toString(), "datasets", dataset.id.toString());
 	}
 
 	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
@@ -239,6 +239,10 @@ export abstract class PowerBIApiService {
 
 	public static get isInitialized(): boolean {
 		return this._isInitialized;
+	}
+
+	public static get BrowserBaseUrl(): string {
+		return this._apiBaseUrl.replace("api.", "app.");
 	}
 	//#endregion
 

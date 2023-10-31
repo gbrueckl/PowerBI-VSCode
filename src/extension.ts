@@ -58,6 +58,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBI.updateQuickPickList', (treeItem: PowerBIApiTreeItem) => PowerBICommandBuilder.pushQuickPickItem(treeItem));
 	vscode.commands.registerCommand('PowerBI.openNewNotebook', (treeItem: PowerBIApiTreeItem) => PowerBINotebookSerializer.openNewNotebook(treeItem));
 
+	// generic commands all Treeviews
+	vscode.commands.registerCommand('PowerBIItem.openInBrowser', (treeItem: PowerBIApiTreeItem) => treeItem.openInBrowser());
+	vscode.commands.registerCommand('PowerBIItem.copyIdToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyIdToClipboard());
+	vscode.commands.registerCommand('PowerBIItem.copyNameToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyNameToClipboard());
+	vscode.commands.registerCommand('PowerBIItem.copyPathToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyPathToClipboard());
+
 	// register PowerBIWorkspacesTreeProvider
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller

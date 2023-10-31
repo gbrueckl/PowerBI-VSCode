@@ -5,6 +5,7 @@ import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBIGateway } from '../../../powerbi/GatewayAPI/_types';
 import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
 import { TreeProviderId } from '../../../ThisExtension';
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPowerBIGatewayItem {
 	protected _definition: iPowerBIGateway;
@@ -65,6 +66,12 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 
 	get parent(): PowerBIGatewayTreeItem {
 		return this._parent as PowerBIGatewayTreeItem;
+	}
+
+	public getBrowserLink(): vscode.Uri {
+		//https://app.powerbi.com/groups/me/gateways
+
+		return vscode.Uri.joinPath(vscode.Uri.parse(PowerBIApiService.BrowserBaseUrl), 'groups', 'me', 'gateways');
 	}
 
 	/* iPowerBIGatewayItem implementation */

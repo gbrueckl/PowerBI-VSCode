@@ -6,6 +6,7 @@ import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 import { TreeProviderId } from '../../../ThisExtension';
 import { UniqueId } from '../../../helpers/Helper';
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowerBICapacityItem {
 	protected _capacity: iPowerBICapacity;
@@ -39,6 +40,12 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 	public async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
 		await vscode.window.showErrorMessage("getChildren is not implemented! Please overwrite in derived class!");
 		return undefined;
+	}
+
+	public getBrowserLink(): vscode.Uri {
+		//https://app.powerbi.com/admin-portal/capacities
+
+		return vscode.Uri.joinPath(vscode.Uri.parse(PowerBIApiService.BrowserBaseUrl), 'admin-portal', 'capacities');
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

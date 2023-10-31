@@ -74,5 +74,11 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 		return children;
 	}
 
+	public getBrowserLink(): vscode.Uri {
+		//https://app.powerbi.com/admin-portal/capacities
+
+		return vscode.Uri.joinPath(vscode.Uri.parse(PowerBIApiService.BrowserBaseUrl), 'admin-portal', 'capacities', this.id);
+	}
+
 	// Capacity-specific funtions
 }

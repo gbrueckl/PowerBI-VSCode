@@ -145,8 +145,26 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		throw new Error("Method not implemented.");
 	}
 
-	public CopyPathToClipboard(): void {
+	public copyIdToClipboard(): void {
+		vscode.env.clipboard.writeText(this._id.toString());
+	}
+
+	public copyNameToClipboard(): void {
 		vscode.env.clipboard.writeText(this._name);
+	}
+
+	public copyPathToClipboard(): void {
+		vscode.env.clipboard.writeText(this.apiPath);
+	}
+
+	public getBrowserLink(): vscode.Uri {
+		//https://app.powerbi.com/groups/ccce57d1-10af-1234-1234-665f8bbd8458/datasets/7cdff921-9999-8888-b0c8-34be20567742
+
+		return vscode.Uri.joinPath(vscode.Uri.parse(PowerBIApiService.BrowserBaseUrl), this.itemPath);
+	}
+
+	public openInBrowser(): void {
+		Helper.openLink(this.getBrowserLink());
 	}
 
 	get apiUrlPart(): string {
@@ -159,8 +177,21 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		return this.id;
 	}
 
-	get apiUrlPair(): ApiUrlPair {
-		return { itemType: this.itemType, itemId: this.id };
+	get itemPath(): string {
+
+		let urlParts: string[] = [];
+
+		let apiItem: PowerBIApiTreeItem = this;
+
+		while (apiItem) {
+			if (apiItem.apiUrlPart) {
+				urlParts.push(apiItem.apiUrlPart)
+			}
+			apiItem = apiItem.parent;
+		}
+		urlParts = urlParts.filter(x => x.length > 0);
+
+		return `${urlParts.reverse().join("/")}`;
 	}
 
 	get apiPath(): string {
@@ -178,6 +209,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		urlParts.push(PowerBIApiService.Org)
 		urlParts = urlParts.filter(x => x.length > 0)
 
+		return `v1.0/${PowerBIApiService.Org}/${this.itemPath}/`;
 		return `v1.0/${urlParts.reverse().join("/")}/`;
 	}
 

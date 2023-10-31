@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -21,7 +21,7 @@
 		"url": "https://github.com/gbrueckl/PowerBI-VSCode/issues",
 		"email": "powerbi-vscode@gbrueckl.at"
 	},
-	"qna": "https://github.com/gbrueckl/PowerBI-VSCode",
+	"qna": "https://github.com/gbrueckl/PowerBI-VSCode/issues",
 	"sponsor": {
 		"url": "https://github.com/sponsors/gbrueckl"
 	},
@@ -180,6 +180,30 @@
 				"command": "PowerBI.openNewNotebook",
 				"title": "Open new Power BI Notebook",
 				"icon": "$(notebook)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIItem.openInBrowser",
+				"title": "Open in Power BI Service",
+				"icon": "$(globe)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIItem.copyIdToClipboard",
+				"title": "Copy ID to Clibpoard",
+				"icon": "$(clippy)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIItem.copyNameToClipboard",
+				"title": "Copy Name to Clibpoard",
+				"icon": "$(clippy)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIItem.copyPathToClipboard",
+				"title": "Copy API Path to Clibpoard",
+				"icon": "$(clippy)",
 				"category": "PowerBI"
 			},
 			{
@@ -452,7 +476,7 @@
 				},
 				{
 					"command": "PowerBI.openNewNotebook",
-					"when": "view == PowerBIWorkspaces || view == PowerBICapacities || view == PowerBIGateways || view == PowerBIPipelines",
+					"when": "view =~ /(PowerBIWorkspaces)|(PowerBIPipelines)|(PowerBIGateways)|(PowerBICapacities)/",
 					"group": "navigation"
 				},
 				{
@@ -483,6 +507,26 @@
 			],
 			"view/item/context": [
 				{
+					"command": "PowerBIItem.openInBrowser",
+					"when": "view =~ /(PowerBIWorkspaces)|(PowerBIPipelines)|(PowerBIGateways)|(PowerBICapacities)/",
+					"group": "7_open"
+				},
+				{
+					"command": "PowerBIItem.copyIdToClipboard",
+					"when": "view =~ /(PowerBIWorkspaces)|(PowerBIPipelines)|(PowerBIGateways)|(PowerBICapacities)/",
+					"group": "6_copypath"
+				},
+				{
+					"command": "PowerBIItem.copyNameToClipboard",
+					"when": "view =~ /(PowerBIWorkspaces)|(PowerBIPipelines)|(PowerBIGateways)|(PowerBICapacities)/",
+					"group": "6_copypath"
+				},
+				{
+					"command": "PowerBIItem.copyPathToClipboard",
+					"when": "view =~ /(PowerBIWorkspaces)|(PowerBIPipelines)|(PowerBIGateways)|(PowerBICapacities)/",
+					"group": "6_copypath"
+				},
+				{
 					"command": "PowerBIWorkspace.insertPath",
 					"when": "view == PowerBIWorkspaces",
 					"group": "inline"
@@ -505,7 +549,7 @@
 				{
 					"command": "PowerBIDataset.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,DELETE,.*/",
-					"group": "navigation"
+					"group": "3_delete"
 				},
 				{
 					"command": "PowerBIDataset.refresh",
@@ -555,7 +599,7 @@
 				{
 					"command": "PowerBIReport.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/",
-					"group": "navigation"
+					"group": "3_delete"
 				},
 				{
 					"command": "PowerBIReport.clone",
@@ -575,7 +619,7 @@
 				{
 					"command": "PowerBIDataflow.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATAFLOW,.*/",
-					"group": "navigation"
+					"group": "3_delete"
 				},
 				{
 					"command": "PowerBIDataflow.refresh",
@@ -590,7 +634,7 @@
 				{
 					"command": "PowerBIDashboard.delete",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DASHBOARD,.*/",
-					"group": "navigation"
+					"group": "3_delete"
 				},
 				{
 					"command": "PowerBICapacityWorkload.update",
@@ -600,7 +644,7 @@
 				{
 					"command": "PowerBIPipeline.delete",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,PIPELINE,.*/ && viewItem =~ /.*,DELETE,.*/",
-					"group": "navigation"
+					"group": "3_delete"
 				},
 				{
 					"command": "PowerBIPipelineStage.assignWorkspace",
