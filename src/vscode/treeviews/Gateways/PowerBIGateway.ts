@@ -2,15 +2,18 @@ import * as vscode from 'vscode';
 
 import { PowerBIGatewayTreeItem } from './PowerBIGatewayTreeItem';
 import { iPowerBIGateway } from '../../../powerbi/GatewayAPI/_types';
+import { PowerBIGatewayDatasources } from './PowerBIGatewayDatasources';
+import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIGateway extends PowerBIGatewayTreeItem {
 
 	constructor(
-		definition: iPowerBIGateway
+		definition: iPowerBIGateway,
+		parent: PowerBIGatewayTreeItem
 	) {
-		super(definition, undefined, vscode.TreeItemCollapsibleState.None);
-		this.definition = definition;
+		super(definition.name, "GATEWAY", definition.id, parent, vscode.TreeItemCollapsibleState.Collapsed);
+		super.definition = definition;
 		
 		super.tooltip = this._tooltip;
 	}
@@ -26,6 +29,16 @@ export class PowerBIGateway extends PowerBIGatewayTreeItem {
 
 	get apiUrlPart(): string {
 		return "gateways/" + this.uid;
+	}
+
+	async getChildren(element?: PowerBIGatewayTreeItem): Promise<PowerBIGatewayTreeItem[]> {
+		PowerBICommandBuilder.pushQuickPickItem(this);
+
+		let children: PowerBIGatewayTreeItem[] = [];
+		
+		children.push(new PowerBIGatewayDatasources(this));
+
+		return children;
 	}
 
 	// Gateway-specific funtions

@@ -65,7 +65,7 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 			let items: iPowerBIGateway[] = await PowerBIApiService.getGateways();
 
 			for (let item of items) {
-				let treeItem = new PowerBIGateway(item);
+				let treeItem = new PowerBIGateway(item, undefined);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}

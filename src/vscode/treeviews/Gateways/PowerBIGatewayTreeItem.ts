@@ -6,19 +6,26 @@ import { iPowerBIGateway } from '../../../powerbi/GatewayAPI/_types';
 import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
 import { TreeProviderId } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { UniqueId } from '../../../helpers/Helper';
 
 export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPowerBIGatewayItem {
-	protected _definition: iPowerBIGateway;
+	protected _definition: iPowerBIGatewayItem;
 	protected _itemType: ApiItemType;
 
 	constructor(
-		definition: iPowerBIGateway,
-		parent: PowerBIApiTreeItem,
+		name: string,
+		itemType: ApiItemType,
+		id: UniqueId,
+		parent: PowerBIGatewayTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(definition.id, definition.name, "GATEWAY", parent, collapsibleState);
+		super(id, name, itemType, parent, collapsibleState);
 
-		this._definition = definition;
+		super.definition = {
+			name: name,
+			itemType: itemType,
+			id: id
+		};
 
 		super.id = this.uid as string;
 		super.tooltip = this._tooltip;
@@ -56,11 +63,11 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-	get definition(): iPowerBIGateway {
-		return super.definition as iPowerBIGateway;
+	get definition(): iPowerBIGatewayItem {
+		return super.definition as iPowerBIGatewayItem;
 	}
 
-	set definition(value: iPowerBIGateway) {
+	set definition(value: iPowerBIGatewayItem) {
 		this._definition = value;
 	}
 
@@ -75,11 +82,4 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 	}
 
 	/* iPowerBIGatewayItem implementation */
-	get type(): string {
-		return this.definition.type;
-	}
-
-	get publicKey(): object {
-		return this.definition.publicKey;
-	}
 }
