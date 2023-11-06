@@ -190,19 +190,19 @@
 			},
 			{
 				"command": "PowerBIItem.copyIdToClipboard",
-				"title": "Copy ID to Clibpoard",
+				"title": "Copy ID to Clipboard",
 				"icon": "$(clippy)",
 				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIItem.copyNameToClipboard",
-				"title": "Copy Name to Clibpoard",
+				"title": "Copy Name to Clipboard",
 				"icon": "$(clippy)",
 				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIItem.copyPathToClipboard",
-				"title": "Copy API Path to Clibpoard",
+				"title": "Copy API Path to Clipboard",
 				"icon": "$(clippy)",
 				"category": "PowerBI"
 			},
