@@ -4,6 +4,7 @@ import { PowerBIDataset } from '../vscode/treeviews/workspaces/PowerBIDataset';
 
 import { fetch, RequestInit, Response } from '@env/fetch';
 import * as portfinder from '@env/portfinder';
+import { Buffer } from '@env/buffer';
 
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { Helper } from '../helpers/Helper';

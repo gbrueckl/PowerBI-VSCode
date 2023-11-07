@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -54,6 +54,12 @@
 		"onLanguage:tmdl",
 		"onFileSystem:tmdl"
 	],
+	"capabilities": {
+		"virtualWorkspaces": {
+			"supported": "limited",
+			"description": "TMDL/TOM Features are not supported in web/virtual workspaces"
+		}
+	},
 	"main": "./dist/node/extension.js",
 	"browser": "./dist/web/extension.js",
 	"contributes": {

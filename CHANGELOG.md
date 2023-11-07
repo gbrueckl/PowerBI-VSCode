@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.0.2**:
+- Fixed issue with Buffer in web extension
+
 **v1.0.1**:
 - Remove Fabric internal dataflows without a name ([#13](/../../issues/13))
 - Added `Copy ... to Clibpoard` commands to the context menu ([#14](/../../issues/14))

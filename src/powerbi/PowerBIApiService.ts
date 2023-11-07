@@ -11,7 +11,6 @@ import { ApiUrlPair } from './_types';
 import { iPowerBIDataset, iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
-import { TMDLFileSystemProvider } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 
 
@@ -53,6 +52,8 @@ export abstract class PowerBIApiService {
 			this._resourceId = resourceId;
 
 			await this.refreshConnection();
+
+			//this.postFile("/v1.0/myorg/imports", vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', 'PBIX', 'EmptyPBIX.pbix'), true);
 		} catch (error) {
 			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
@@ -103,8 +104,7 @@ export abstract class PowerBIApiService {
 	public static getXmlaConnectionString(workspace: string, database: string = undefined): string {
 		let connectionString: string = `Data Source=${this.getXmlaEndpoint(workspace)};`;
 
-		if(database)
-		{
+		if (database) {
 			connectionString += `Initial Catalog=${database};`;
 		}
 		return connectionString;
@@ -118,13 +118,10 @@ export abstract class PowerBIApiService {
 			return false;
 		}
 
-		for(const server of TMDLFSCache.cachedServers)
-		{
-			for(const database of server.databases)
-			{
+		for (const server of TMDLFSCache.cachedServers) {
+			for (const database of server.databases) {
 				// remove models that have not been fully loaded
-				if(database.loadingState != "loaded")
-				{
+				if (database.loadingState != "loaded") {
 					server.removeDatabase(database.databaseName);
 				}
 			}
@@ -133,8 +130,7 @@ export abstract class PowerBIApiService {
 	}
 
 	public static async getXmlaSession(): Promise<vscode.AuthenticationSession> {
-		if(this._xmlaSession)
-		{
+		if (this._xmlaSession) {
 			return this._xmlaSession;
 		}
 		let scopes = [
@@ -199,8 +195,7 @@ export abstract class PowerBIApiService {
 	public static get SessionUserEmail(): string {
 		if (this._vscodeSession) {
 			const email = Helper.getFirstRegexGroup(/([\w\.]+@[\w-]+\.+[\w-]{2,5})/gm, this._vscodeSession.account.label);
-			if(email)
-			{
+			if (email) {
 				return email;
 			}
 		}
@@ -396,21 +391,16 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-
 	static async postFile(endpoint: string, uri: vscode.Uri, raiseError: boolean = false): Promise<any> {
-		/*
 		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("POST " + endpoint + " --> (File)" + uri);
 
 		try {
 			let data: FormData = new FormData();
-			data.append('file', uri.fsPath, uri.path.split('/').pop());
 
-			const formData = new FormData()
-			const binary = await vscode.workspace.fs.readFile(uri);
-			const uploadFile = new File([binary], uri.path.split('/').pop(), { type: "multipart/form-data" })
-
-			//formData.append('file-upload', uploadFile, uploadFile.name);
+			const arr = await vscode.workspace.fs.readFile(uri);
+			const blob = new Blob([arr]);
+			data.append('file', blob, uri.path.split('/').pop());
 
 			let headers = this._headers;
 			delete headers["Content-Type"];
@@ -442,7 +432,6 @@ export abstract class PowerBIApiService {
 
 			return undefined;
 		}
-		*/
 	}
 
 	static async put<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {

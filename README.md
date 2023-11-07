@@ -29,7 +29,7 @@ The extension supports the following VSCode settings:
 |`powerbi.tenantId`|(Optional) The tenant ID of the remote tenant that you want to connect to.|A GUID, `abcd1234-1234-5678-9abcd-9d1963e4b9f5`|
 |`powerbi.clientId`|(Optional) A custom ClientID/Application of an AAD application to use when connecting to Power BI.|A GUID, `99887766-1234-5678-9abcd-e4b9f59d1963`|
 |`powerbi.cloud`|(Optional) Only use when you want to connect to a sovereign or governmental cloud!|GlobalCloud|
-|`powerbi.TMDL.clientId`|(Optional) To use **TMDL features**, a custom ClientID/Application can be used. \n\n You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permitted in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details.\n\nIf this is configured, VSCode will manage the authentication and also remember it!|A GUID, `058487e5-bde7-4aba-a5dc-2f9ac58cb668`|
+|`powerbi.TMDL.clientId`|(Optional) To use **TMDL features**, a custom ClientID/Application can be used. You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permitted in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details. If this is configured, VSCode will manage the authentication and also remember it!|A GUID, `058487e5-bde7-4aba-a5dc-2f9ac58cb668`|
 |`powerbi.TMDL.enabled`|Set to `true` (default) to allow editing Power BI datasets using TMDL.|`true`(default)/`false`|
 
 # Notebooks

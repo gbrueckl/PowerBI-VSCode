@@ -1,4 +1,7 @@
 import * as vscode from 'vscode';
+
+import { Buffer } from '@env/buffer';
+
 import { ThisExtension } from '../../ThisExtension';
 import { Helper } from '../../helpers/Helper';
 import { ApiEndpointDetails, PowerBIAPILanguage, SwaggerFile } from './_types';
