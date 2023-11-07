@@ -61,13 +61,17 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 			return element.getChildren();
 		}
 		else {
-			let children: PowerBIGateway[] = [];
+			let children: PowerBIGatewayTreeItem[] = [];
 			let items: iPowerBIGateway[] = await PowerBIApiService.getGateways();
 
 			for (let item of items) {
 				let treeItem = new PowerBIGateway(item, undefined);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
+			}
+
+			if(children.length == 0) {
+				children.push(new PowerBIGatewayTreeItem("No Gateways found!", "GATEWAY", "NO_GATEWAYS_FOUND", undefined, vscode.TreeItemCollapsibleState.None))
 			}
 
 			return children;

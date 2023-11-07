@@ -81,13 +81,17 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 			return element.getChildren();
 		}
 		else {
-			let children: PowerBIPipeline[] = [];
+			let children: PowerBIPipelineTreeItem[] = [];
 			let items: iPowerBIPipeline[] = await PowerBIApiService.getPipelines();
 
 			for (let item of items) {
 				let treeItem = new PowerBIPipeline(item);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
+			}
+
+			if(children.length == 0) {
+				children.push(new PowerBIPipelineTreeItem("No pipelines found!", "PIPELINE", "NO_PIPELINES_FOUND", undefined, vscode.TreeItemCollapsibleState.None))
 			}
 
 			return children;

@@ -60,13 +60,17 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 			return element.getChildren();
 		}
 		else {
-			let children: PowerBICapacity[] = [];
+			let children: PowerBICapacityTreeItem[] = [];
 			let items: iPowerBICapacity[] = await PowerBIApiService.getCapacities();
 
 			for (let item of items) {
 				let treeItem = new PowerBICapacity(item, undefined);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
+			}
+
+			if(children.length == 0) {
+				children.push(new PowerBICapacityTreeItem("NO_CAPACITIES_FOUND", "No Capacities found!", "CAPACITY", undefined, undefined, vscode.TreeItemCollapsibleState.None))
 			}
 
 			return children;
