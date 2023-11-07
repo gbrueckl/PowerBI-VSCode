@@ -5,6 +5,7 @@
 - Added `Copy ... to Clibpoard` commands to the context menu ([#14](/../../issues/14))
 - Added `Open in Power BI Service` command to the context menu
 - Added Gateway Data Sources to Gateway treeview
+- Fix issue with Web Extension and TMDLProxy
 
 **v1.0.0**:
 - added support for TMDL (see [TMDL requirements](/README.md#tmdl-requirements))

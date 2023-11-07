@@ -3,6 +3,7 @@ import { ThisExtension } from '../ThisExtension';
 import { PowerBIDataset } from '../vscode/treeviews/workspaces/PowerBIDataset';
 
 import { fetch, RequestInit, Response } from '@env/fetch';
+import * as portfinder from '@env/portfinder';
 
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { Helper } from '../helpers/Helper';
@@ -13,8 +14,6 @@ import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 import { TMDLProxyData, TMDLProxyDataException, TMDLProxyDataValidation, TMDLProxyServer, TMDLProxyStreamEntry } from '../TMDLVSCode/_types'
 import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfiguration';
 import { iPowerBIGroup } from '../powerbi/GroupsAPI/_types';
-
-const portfinder = require('portfinder');
 
 const DEBUG: boolean = false;
 const DEBUG_PORT: number = 51000;
@@ -60,8 +59,7 @@ export abstract class TMDLProxy {
 				this._secret = this.generateSecret(64);
 
 				// find the next free port to start our Proxy on
-				portfinder.setBasePort(55000);
-				this._port = await portfinder.getPortPromise();
+				this._port = await portfinder.getPort(55000);
 
 				const proxyDllPath = vscode.Uri.joinPath(context.extensionUri, "resources", "TMDLProxy", "TMDLVSCodeConsoleProxy.dll").fsPath;
 
