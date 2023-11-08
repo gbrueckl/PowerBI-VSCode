@@ -8,15 +8,17 @@ import { Buffer } from '@env/buffer';
 
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { Helper } from '../helpers/Helper';
-import { TMDL_EXTENSION, TMDL_SCHEME, TMDLFileSystemProvider } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
-import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../powerbi/CommandBuilder';
+import { TMDL_EXTENSION, TMDL_SCHEME } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
+import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../powerbi/CommandBuilder';
 import { TMDLFSUri } from '../vscode/filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
-import { TMDLProxyData, TMDLProxyDataException, TMDLProxyDataValidation, TMDLProxyServer, TMDLProxyStreamEntry } from '../TMDLVSCode/_types'
+import { TMDLProxyData, TMDLProxyDataException, TMDLProxyDataValidation, TMDLProxyServer, TMDLProxyStreamEntry } from '../TMDLVSCode/_typesTMDL'
 import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfiguration';
 import { iPowerBIGroup } from '../powerbi/GroupsAPI/_types';
+import { TOMProxyBackupRequest, TOMProxyRestoreRequest } from './_typesTOM';
+import { PowerBIWorkspace } from '../vscode/treeviews/workspaces/PowerBIWorkspace';
 
-const DEBUG: boolean = false;
+const DEBUG: boolean = true;
 const DEBUG_PORT: number = 51000;
 
 export const SETTINGS_FILE = ".publishsettings.json";
@@ -112,7 +114,7 @@ export abstract class TMDLProxy {
 				);
 
 				this._headers = {
-					"X-TMDLProxy-Secret": this._secret,
+					"X-Proxy-Secret": this._secret,
 					"Content-Type": 'application/json',
 					"Accept": 'application/json'
 				}
@@ -597,6 +599,81 @@ export abstract class TMDLProxy {
 		} catch (error) {
 			vscode.window.showErrorMessage(error);
 			return false;
+		}
+	}
+
+	static async backup(serverName: string, databaseName: string, backupFileName: string, allowOverwrite: boolean = false): Promise<void> {
+		try {
+			let success: boolean = false;
+			TMDLProxy.log("Starting backup of Database " + databaseName + " ...");
+
+			let body: TOMProxyBackupRequest = {
+				"connectionString": PowerBIApiService.getXmlaConnectionString(serverName, databaseName),
+				"fileName": backupFileName,
+				"allowOverwrite": allowOverwrite,
+			};
+
+			await TMDLProxy.setAccessToken(body)
+
+			const config: RequestInit = {
+				method: "POST",
+				headers: TMDLProxy._headers,
+				body: JSON.stringify(body),
+			};
+			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tom/backup").toString();
+
+			let response = await Helper.awaitWithProgress<Response>("Backup Dataset", fetch(endpoint, config), 0);
+
+			let resultText = await response.text();
+
+			if (!response.ok) {
+				this.handleException(resultText, vscode.Uri.parse("https://error"));
+				success = false;
+			}
+			else {
+				//vscode.window.showInformationMessage(resultText);
+				success = true;
+			}
+		} catch (error) {
+			vscode.window.showErrorMessage(error);
+		}
+	}
+
+	static async restore(backupFileName: string, targetServerName: string, targetDatabaseName: string, allowOverwrite: boolean = false): Promise<void> {
+		try {
+			let success: boolean = false;
+			TMDLProxy.log("Starting Database restore from " + backupFileName + " ...");
+
+			let body: TOMProxyRestoreRequest = {
+				"connectionString": PowerBIApiService.getXmlaConnectionString(targetServerName, targetDatabaseName),
+				"databaseName": targetDatabaseName,
+				"fileName": backupFileName,
+				"allowOverwrite": allowOverwrite
+				};
+
+			await TMDLProxy.setAccessToken(body)
+
+			const config: RequestInit = {
+				method: "POST",
+				headers: TMDLProxy._headers,
+				body: JSON.stringify(body),
+			};
+			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tom/restore").toString();
+
+			let response = await Helper.awaitWithProgress<Response>("Restoring Database", fetch(endpoint, config), 0);
+
+			let resultText = await response.text();
+
+			if (!response.ok) {
+				this.handleException(resultText, vscode.Uri.parse("https://error"));
+				success = false;
+			}
+			else {
+				//vscode.window.showInformationMessage(resultText);
+				success = true;
+			}
+		} catch (error) {
+			vscode.window.showErrorMessage(error);
 		}
 	}
 

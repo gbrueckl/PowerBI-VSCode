@@ -9,13 +9,16 @@ namespace TMDLVSCodeConsoleProxy
     {
         private static Dictionary<string, TOM.Server> knownServers = new Dictionary<string, TOM.Server>();
 
-        public static TOM.Server GetServer(TMDLProxyData proxyData)
+        public static TOM.Server GetServer(ProxyRequest proxyRequest)
         {
-            return GetServer(proxyData.connectionString, proxyData.vscodeAccessToken);
+            return GetServer(proxyRequest.connectionString, proxyRequest.vscodeAccessToken);
         }
-        public static TOM.Server GetServer(string connectionString, string vscodeAccessToken = null)
+        public static TOM.Server GetServer(string connectionString, string? vscodeAccessToken = null)
         {
             TOM.Server server;
+            string databaseName; // not used but mandatory for out parameter
+            RemoveInitialCatalog(ref connectionString, out databaseName);
+
             if (!knownServers.ContainsKey(connectionString))
             {
                 lock (knownServers)
@@ -27,7 +30,7 @@ namespace TMDLVSCodeConsoleProxy
                     if(vscodeAccessToken != null)
                     {
                         Console.WriteLine("Using VSCode AccessToken ...");
-                        server.AccessToken = new Microsoft.AnalysisServices.AccessToken(vscodeAccessToken, DateTime.Now.AddHours(1));
+                        server.AccessToken = new AccessToken(vscodeAccessToken, DateTime.Now.AddHours(1));
                     }
 
                     server.Connect(connectionString);
@@ -48,26 +51,24 @@ namespace TMDLVSCodeConsoleProxy
             return server;
         }
 
-        public static TOM.Database GetDatabase(TMDLProxyData proxyData, Boolean createIfNotExists = false)
+        public static TOM.Database GetDatabase(ProxyRequest proxyRequest, bool createIfNotExists = false)
         {
-            DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
-            builder.ConnectionString = proxyData.connectionString;
+            return GetDatabase(proxyRequest.connectionString, proxyRequest.vscodeAccessToken, createIfNotExists);
+        }
 
+        public static TOM.Database GetDatabase(string connectionString, string? vscodeAccessToken = null, bool createIfNotExists = false)
+        {
             string databaseName = "";
 
-            if (builder.TryGetValue("initial catalog", out var data))
-            {
-                databaseName = data.ToString();
-            }
-            else
+            // remove database from connectionstring as it would fail if the DB does not yet exist (e.g. for a fresh deployment or restore)
+            RemoveInitialCatalog(ref connectionString, out databaseName);
+
+            if(databaseName == "")
             {
                 throw new Exception("Database not provided in connection string! Please add 'initial catalog=...;'");
             }
 
-            // remove database from connectionstring as it would fail if the DB does not yet exist (e.g. for a fresh deployment)
-            builder.Remove("initial catalog");
-
-            TOM.Server server = GetServer(builder.ConnectionString, proxyData.vscodeAccessToken);
+            TOM.Server server = GetServer(connectionString, vscodeAccessToken);
 
             TOM.Database targetDatabase = null;
             if (!server.Databases.ContainsName(databaseName))
@@ -93,7 +94,26 @@ namespace TMDLVSCodeConsoleProxy
             {
                 targetDatabase = server.Databases.GetByName(databaseName);
             }
+            targetDatabase.Refresh(true);
             return targetDatabase;
         }
+
+        public static void RemoveInitialCatalog(ref string connectionString, out string initialCatalog)
+        {
+            DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+            builder.ConnectionString = connectionString;
+
+            if (builder.TryGetValue("initial catalog", out var data))
+            {
+                initialCatalog = data.ToString();
+                builder.Remove("initial catalog");
+            }
+            else
+            {
+                initialCatalog = "";
+            }
+
+            connectionString = builder.ConnectionString;
+        }   
     }
 }

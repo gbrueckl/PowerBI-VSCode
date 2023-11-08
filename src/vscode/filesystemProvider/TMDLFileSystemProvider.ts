@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { ThisExtension } from '../../ThisExtension';
 import { Helper } from '../../helpers/Helper';
 import { Buffer } from '@env/buffer';
-import { TMDLProxyStreamEntry } from '../../TMDLVSCode/_types';
+import { TMDLProxyStreamEntry } from '../../TMDLVSCode/_typesTMDL';
 import { TMDLFSUri } from './TMDLFSUri';
 import { TMDLFSCache } from './TMDLFSCache';
 

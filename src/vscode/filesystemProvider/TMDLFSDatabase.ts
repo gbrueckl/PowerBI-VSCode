@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../ThisExtension';
 import { Helper } from '../../helpers/Helper';
-import { TMDLProxyStreamEntry } from '../../TMDLVSCode/_types';
+import { TMDLProxyStreamEntry } from '../../TMDLVSCode/_typesTMDL';
 import { TMDLProxy } from '../../TMDLVSCode/TMDLProxy';
 import { TMDLFSUri } from './TMDLFSUri';
 import { TMDL_EXTENSION, TMDL_SCHEME } from './TMDLFileSystemProvider';
@@ -55,7 +55,7 @@ export class TMDLFSDatabase {
 			ThisExtension.log(`Loading TMDL database '${this.databaseName}' from server '${this.server.serverName}' ... `);
 			
 			let stream = await Helper.awaitWithProgress<TMDLProxyStreamEntry[]>(
-				`Loading TMDL database '${this.databaseName} from server '${this.server.serverName}'`,
+				`Loading TMDL database '${this.databaseName}' from server '${this.server.serverName}'`,
 				TMDLProxy.exportStream(new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.server.serverName}/${this.databaseName}`))),
 				1000);
 			if (stream) {

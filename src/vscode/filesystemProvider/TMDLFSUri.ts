@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { Helper } from '../../helpers/Helper';
-import { TMDLProxyStreamEntry} from '../../TMDLVSCode/_types';
+import { TMDLProxyStreamEntry} from '../../TMDLVSCode/_typesTMDL';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 import { TMDL_EXTENSION, TMDL_SCHEME } from './TMDLFileSystemProvider';
 import { TMDLFSCache } from './TMDLFSCache';

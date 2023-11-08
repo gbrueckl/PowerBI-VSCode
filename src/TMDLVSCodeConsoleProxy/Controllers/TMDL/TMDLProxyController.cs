@@ -7,14 +7,14 @@ using TOM = Microsoft.AnalysisServices.Tabular;
 
 using Microsoft.AnalysisServices.Tabular;
 using System.Text.Json.Nodes;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace TMDLVSCodeConsoleProxy.Controllers
+namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
 {
     [ApiController]
     [Route("[controller]")]
     public class TMDLProxyController : ControllerBase
     {
-        private static string? secret;
         private readonly ILogger<TMDLProxyController> _logger;
 
         public TMDLProxyController(ILogger<TMDLProxyController> logger)
@@ -22,29 +22,23 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             _logger = logger;
         }
 
-        public static void SetSecret(string secret)
-        {
-            TMDLProxyController.secret = secret;
-        }
-
-
         [HttpGet(Name = "Test")]
         [Route("/tmdl/test")]
         public IActionResult Test()
         {
-            var server = ServerManager.GetServer(new TMDLProxyData { connectionString = "Data Source=powerbi://api.powerbi.com/v1.0/myorg/PPU" });
+            var server = ServerManager.GetServer(new ProxyRequest { connectionString = "Data Source=powerbi://api.powerbi.com/v1.0/myorg/PPU" } );
 
             List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
 
-            foreach (TOM.Database db in server.Databases)
+            foreach (Database db in server.Databases)
             {
-                dbs.Add(new TMDLProxyDatabase { name = db.Name, id = db.ID });
+                dbs.Add(new TMDLProxyDatabase { name = db.Name, id = db.ID } );
             }
             return Ok(dbs);
             return Ok("Hello World!");
         }
 
-        
+
 
         private BadRequestObjectResult handleTMDLException(Exception ex)
         {
@@ -85,35 +79,22 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             });
         }
 
-        private void validateHeader(TMDLProxyHeader header)
-        {
-            if (header == null)
-            {
-                throw new Exception("No Header or Authentication provided!");
-            }
-
-            if (!header.secret.Equals(TMDLProxyController.secret))
-            {
-                throw new Exception("Invalid Secret!");
-            }
-        }
-
         [HttpPost(Name = "GetDatabases")]
         [Route("/tmdl/databases")]
         public IActionResult GetDatabases(
             [FromBody] TMDLProxyData requestBody,
-            [FromHeader] TMDLProxyHeader header
+            [FromHeader] ProxyHeader header
         )
         {
             try
             {
-                this.validateHeader(header);
+                Config.validateHeader(header);
 
                 var server = ServerManager.GetServer(requestBody);
 
                 List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
 
-                foreach (TOM.Database db in server.Databases)
+                foreach (Database db in server.Databases)
                 {
                     dbs.Add(new TMDLProxyDatabase { name = db.Name, id = db.ID });
                 }
@@ -121,7 +102,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             }
             catch (Exception ex)
             {
-                return this.handleTMDLException(ex);
+                return handleTMDLException(ex);
             }
         }
 
@@ -130,20 +111,20 @@ namespace TMDLVSCodeConsoleProxy.Controllers
         [Consumes("application/json")]
         public IActionResult ExportDatasetTMDL(
             [FromBody] TMDLProxyData requestBody,
-            [FromHeader] TMDLProxyHeader header
+            [FromHeader] ProxyHeader header
         )
         {
             var localPath = requestBody.localPath;
 
             try
             {
-                this.validateHeader(header);
+                Config.validateHeader(header);
 
                 var database = ServerManager.GetDatabase(requestBody, false);
 
                 Console.WriteLine($"Exporting Dataset '{database.Name}' as TMDL to local folder '{localPath}' ...");
 
-                TOM.TmdlSerializer.SerializeModelToFolder(database.Model, localPath);
+                TmdlSerializer.SerializeModelToFolder(database.Model, localPath);
 
                 Console.WriteLine($"Export successful!");
 
@@ -151,7 +132,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             }
             catch (Exception ex)
             {
-                return this.handleTMDLException(ex);
+                return handleTMDLException(ex);
             }
         }
 
@@ -160,23 +141,23 @@ namespace TMDLVSCodeConsoleProxy.Controllers
         [Route("/tmdl/validate")]
         public IActionResult ValidateDatasetTMDL(
             [FromBody] TMDLProxyDataValidation requestBody,
-            [FromHeader] TMDLProxyHeader header
+            [FromHeader] ProxyHeader header
         )
         {
             var localPath = requestBody.localPath;
 
             try
             {
-                this.validateHeader(header);
+                Config.validateHeader(header);
 
                 Console.WriteLine($"Validating TMDL from local folder '{localPath}' ...");
-                var model = TOM.TmdlSerializer.DeserializeModelFromFolder(localPath);
+                var model = TmdlSerializer.DeserializeModelFromFolder(localPath);
 
                 return Ok("Validation successful!");
             }
             catch (Exception ex)
             {
-                return this.handleTMDLException(ex);
+                return handleTMDLException(ex);
             }
         }
 
@@ -184,19 +165,19 @@ namespace TMDLVSCodeConsoleProxy.Controllers
         [Route("/tmdl/publish")]
         public IActionResult PublishDatasetTMDL(
             [FromBody] TMDLProxyData requestBody,
-            [FromHeader] TMDLProxyHeader header
+            [FromHeader] ProxyHeader header
         )
         {
             var localPath = requestBody.localPath;
 
             try
             {
-                this.validateHeader(header);
+                Config.validateHeader(header);
 
                 Console.WriteLine($"Publishing TMDL from local folder '{localPath}' ...");
-                var model = TOM.TmdlSerializer.DeserializeModelFromFolder(localPath);
+                var model = TmdlSerializer.DeserializeModelFromFolder(localPath);
 
-                TOM.Database targetDatabase = ServerManager.GetDatabase(requestBody, true);
+                Database targetDatabase = ServerManager.GetDatabase(requestBody, true);
                 Console.WriteLine($"Target database is '{targetDatabase.Name}'");
 
                 model.CopyTo(targetDatabase.Model);
@@ -207,7 +188,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             }
             catch (Exception ex)
             {
-                return this.handleTMDLException(ex);
+                return handleTMDLException(ex);
             }
         }
 
@@ -217,12 +198,12 @@ namespace TMDLVSCodeConsoleProxy.Controllers
         [Route("/tmdl/exportStream")]
         public IActionResult ExportDatasetTMDLStream(
             [FromBody] TMDLProxyData requestBody,
-            [FromHeader] TMDLProxyHeader header
+            [FromHeader] ProxyHeader header
         )
         {
             try
             {
-                this.validateHeader(header);
+                Config.validateHeader(header);
 
                 var ret = new JsonArray();
                 var database = ServerManager.GetDatabase(requestBody, false);
@@ -248,7 +229,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             }
             catch (Exception ex)
             {
-                return this.handleTMDLException(ex);
+                return handleTMDLException(ex);
             }
         }
 
@@ -256,15 +237,14 @@ namespace TMDLVSCodeConsoleProxy.Controllers
         [Route("/tmdl/publishStream")]
         public IActionResult PublishDatasetTMDLStream(
             [FromBody] TMDLProxyData requestBody,
-            [FromHeader] TMDLProxyHeader header
+            [FromHeader] ProxyHeader header
         )
         {
-            var datasetName = requestBody.datasetName;
             var streamEntries = requestBody.streamEntries;
 
             try
             {
-                this.validateHeader(header);
+                Config.validateHeader(header);
 
                 var context = MetadataSerializationContext.Create(MetadataSerializationStyle.Tmdl);
 
@@ -277,7 +257,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers
 
                 Console.WriteLine($"Publishing TMDL from Stream ...");
 
-                TOM.Database targetDatabase = ServerManager.GetDatabase(requestBody, true);
+                Database targetDatabase = ServerManager.GetDatabase(requestBody, true);
                 Console.WriteLine($"Target database is '{targetDatabase.Name}'");
 
                 model.CopyTo(targetDatabase.Model);
@@ -287,7 +267,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             }
             catch (Exception ex)
             {
-                return this.handleTMDLException(ex);
+                return handleTMDLException(ex);
             }
         }
 
@@ -295,14 +275,14 @@ namespace TMDLVSCodeConsoleProxy.Controllers
         [Route("/tmdl/validateStream")]
         public IActionResult ValidateDatasetTMDLStream(
             [FromBody] TMDLProxyDataValidation requestBody,
-            [FromHeader] TMDLProxyHeader header
+            [FromHeader] ProxyHeader header
         )
         {
             var streamEntries = requestBody.streamEntries;
 
             try
             {
-                this.validateHeader(header);
+                Config.validateHeader(header);
 
                 var context = MetadataSerializationContext.Create(MetadataSerializationStyle.Tmdl);
 
@@ -318,7 +298,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers
             }
             catch (Exception ex)
             {
-                return this.handleTMDLException(ex);
+                return handleTMDLException(ex);
             }
         }
     }

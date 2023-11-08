@@ -13,7 +13,8 @@ var builder = WebApplication.CreateBuilder();
 var port = int.Parse(args[0]);
 var secret = args[1];
 
-TMDLProxyController.SetSecret(secret);
+Config.secret = secret;
+Config.port = port;
 
 // Add services to the container.
 builder.Services.AddControllers();
