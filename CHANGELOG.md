@@ -1,6 +1,7 @@
 # Change Log
 
 **v1.0.2**:
+- Added support for Backup and Restore of datasets ([#13](/../../issues/19))
 - Fixed issue with Buffer in web extension
 
 **v1.0.1**:

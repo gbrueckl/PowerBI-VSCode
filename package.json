@@ -279,19 +279,25 @@
 			{
 				"command": "PowerBIDataset.configureScaleOut",
 				"title": "Configure Scale Out",
-				"icon": {
-					"light": "$(repo-forked)",
-					"dark": "$(repo-forked)"
-				},
+				"icon": "$(repo-forked)",
 				"category": "PowerBI"
 			},
 			{
 				"command": "PowerBIDataset.syncReadOnlyReplicas",
 				"title": "Sync RO Replicas",
-				"icon": {
-					"light": "$(repo-sync)",
-					"dark": "$(repo-sync)"
-				},
+				"icon": "$(repo-sync)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBI.TOM.backup",
+				"title": "Backup",
+				"icon": "$(cloud-upload)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBI.TOM.restore",
+				"title": "Restore",
+				"icon": "$(cloud-download)",
 				"category": "PowerBI"
 			},
 			{
@@ -575,6 +581,21 @@
 				{
 					"command": "PowerBIDataset.syncReadOnlyReplicas",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,SYNCREADONLYREPLICAS,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBI.TOM.backup",
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,BACKUP,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBI.TOM.restore",
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,RESTORE,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBI.TOM.restore",
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,RESTORE,.*/",
 					"group": "navigation"
 				},
 				{

@@ -8,23 +8,25 @@ import { PowerBIDatasets } from './PowerBIDatasets';
 import { PowerBIReports } from './PowerBIReports';
 import { PowerBIDashboards } from './PowerBIDashboards';
 import { PowerBIDataflows } from './PowerBIDataflows';
-import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { Helper } from '../../../helpers/Helper';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
 import { TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
 import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
+import { TMDLProxy } from '../../../TMDLVSCode/TMDLProxy';
+import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
+export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMProxyRestore {
 	constructor(
 		definition: iPowerBIGroup
 	) {
 		super(definition.name, definition.id, "GROUP", definition.id, undefined);
 
 		this.definition = definition;
-		
+
 		super.tooltip = this._tooltip;
 		super.contextValue = this._contextValue;
 
@@ -42,13 +44,12 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 			"DELETE"
 		]
 
-		if(this.definition.isOnDedicatedCapacity)
-		{
+		if (this.definition.isOnDedicatedCapacity) {
 			actions.push("UNASSIGNCAPACITY");
 			actions.push("BROWSETMDL");
+			actions.push("RESTORE");
 		}
-		else
-		{
+		else {
 			actions.push("ASSIGNCAPACITY")
 		}
 
@@ -69,15 +70,14 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 
 	get isFabricCapacity(): boolean {
 		return false;
-		if(!this.isPremiumCapacity)	{
+		if (!this.isPremiumCapacity) {
 			return false;
 		}
 		return this.definition.sku.startsWith("F");
 	}
 
-	async getCapacity(): Promise<iPowerBICapacity>
-	{
-		if(!this.isPremiumCapacity)	{
+	async getCapacity(): Promise<iPowerBICapacity> {
+		if (!this.isPremiumCapacity) {
 			return undefined;
 		}
 
@@ -86,10 +86,10 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 
 	protected getIconPath(theme: string): vscode.Uri {
 		let capacityType = "";
-		if(this.isPremiumCapacity) {
+		if (this.isPremiumCapacity) {
 			capacityType = "_premium";
 		}
-		if(this.isFabricCapacity) {
+		if (this.isFabricCapacity) {
 			capacityType = "_fabric";
 		}
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + capacityType + '.png');
@@ -97,10 +97,9 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 
 	get apiUrlPart(): string {
 		return "groups/" + this.uid;
-	}	
+	}
 
-	static get MyWorkspace(): iPowerBIGroup
-	{
+	static get MyWorkspace(): iPowerBIGroup {
 		return {
 			"id": "myorg",
 			"name": "My Workspace",
@@ -114,7 +113,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 		PowerBICommandBuilder.pushQuickPickItem(this);
 
 		let children: PowerBIWorkspaceTreeItem[] = [];
-		
+
 		children.push(new PowerBIDatasets(this.uid, this));
 		children.push(new PowerBIReports(this.uid, this));
 		children.push(new PowerBIDashboards(this.uid, this));
@@ -125,10 +124,10 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 
 	// Workspace-specific functions
 	public static async assignToCapacity(workspace: PowerBIWorkspace, settings: object = undefined): Promise<void> {
-		const apiUrl =  Helper.joinPath(workspace.apiPath, "AssignToCapacity");
+		const apiUrl = Helper.joinPath(workspace.apiPath, "AssignToCapacity");
 
 		let confirm: string = await PowerBICommandBuilder.showInputBox("", "Confirm assignment to capacity by typeing the Workspace name '" + workspace.name + "' again.", undefined, undefined);
-		
+
 		if (!confirm || confirm != workspace.name) {
 			ThisExtension.log("Assignment to capacity aborted!")
 			return;
@@ -150,16 +149,16 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 	}
 
 	public static async unassignFromCapacity(workspace: PowerBIWorkspace): Promise<void> {
-		const apiUrl =  Helper.joinPath(workspace.apiPath, "AssignToCapacity");
+		const apiUrl = Helper.joinPath(workspace.apiPath, "AssignToCapacity");
 
 		let confirm: string = await PowerBICommandBuilder.showInputBox("", "Confirm unassignment from capacity by typeing the Workspace name '" + workspace.name + "' again.", undefined, undefined);
-		
+
 		if (!confirm || confirm != workspace.name) {
 			ThisExtension.log("Unassignment from capacity aborted!")
 			return;
 		}
 
-		let settings: object = {"capacityId": "00000000-0000-0000-0000-000000000000"};
+		let settings: object = { "capacityId": "00000000-0000-0000-0000-000000000000" };
 
 		PowerBIApiService.post(apiUrl, settings);
 
@@ -173,5 +172,26 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem {
 		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - Workspace ${this.name}`);
 
 		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
+	}
+
+	public async restore(): Promise<void> {
+		const backupFileName = await PowerBICommandBuilder.showInputBox(this.name + ".abf", "Enter the name of the backup file", undefined);
+		if (!backupFileName) {
+			Helper.showTemporaryInformationMessage("Restore aborted!");
+			return;
+		}
+
+		const targetDatasetName = await PowerBICommandBuilder.showInputBox(backupFileName.replace(".abf", ""), "Enter the name of the target database", undefined);
+		if (!backupFileName) {
+			Helper.showTemporaryInformationMessage("Restore aborted!");
+			return;
+		}
+
+		const allowOverwrite = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Overwrite existing database if exists?`, undefined, undefined);
+		if (!allowOverwrite) {
+			Helper.showTemporaryInformationMessage("Restore aborted!");
+			return;
+		}
+		await TMDLProxy.restore(backupFileName, this.name, targetDatasetName, allowOverwrite == "yes");
 	}
 }

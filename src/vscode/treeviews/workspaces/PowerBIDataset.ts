@@ -17,9 +17,10 @@ import { TMDL_EXTENSION, TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSy
 import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
 import { TMDLProxy } from '../../../TMDLVSCode/TMDLProxy';
+import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
+export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxyBackup, TOMProxyRestore {
 
 	constructor(
 		definition: iPowerBIDataset,
@@ -50,9 +51,11 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 			actions.push("UPDATEDATASETPARAMETERS")
 		}
 
-		if (this.getParentByType<PowerBIWorkspace>("GROUP").definition.isOnDedicatedCapacity) {
+		if (this.workspace.definition.isOnDedicatedCapacity) {
 			actions.push("CONFIGURESCALEOUT");
 			actions.push("EDIT_TMDL");
+			actions.push("BACKUP");
+			actions.push("RESTORE");
 
 			if (this.definition.queryScaleOutSettings?.maxReadOnlyReplicas != 0) {
 				actions.push("SYNCREADONLYREPLICAS");
@@ -75,9 +78,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	}
 
 	async getXMLACConnectionString(): Promise<string> {
-		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
-
-		return PowerBIApiService.getXmlaConnectionString(workspace.name, this.name);
+		return PowerBIApiService.getXmlaConnectionString(this.workspace.name, this.name);
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
@@ -92,6 +93,10 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	}
 
 	// Dataset-specific funtions
+	get workspace(): PowerBIWorkspace {
+		return this.getParentByType<PowerBIWorkspace>("GROUP");
+	}
+
 	public async delete(): Promise<void> {
 		await PowerBIApiTreeItem.delete(this, "yesNo");
 
@@ -127,7 +132,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 	}
 
 	public async refresh(): Promise<void> {
-		const isOnDedicatedCapacity = this.getParentByType<PowerBIWorkspace>("GROUP").definition.isOnDedicatedCapacity;
+		const isOnDedicatedCapacity = this.workspace.definition.isOnDedicatedCapacity;
 		await PowerBIDataset.refreshById(this.groupId.toString(), this.id, isOnDedicatedCapacity);
 
 		await Helper.delay(1000);
@@ -181,9 +186,39 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem {
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
+	public async backup(): Promise<void> {
+		const backupFileName = await PowerBICommandBuilder.showInputBox(this.name + ".abf", "Enter the name of the backup file", undefined);
+		if (!backupFileName) {
+			Helper.showTemporaryInformationMessage("Backup aborted!");
+			return;
+		}
+
+		const allowOverwrite = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Overwrite existing backup if exists?`, undefined, undefined);
+		if (!allowOverwrite) {
+			Helper.showTemporaryInformationMessage("Backup aborted!");
+			return;
+		}
+
+		await TMDLProxy.backup(this.workspace.name, this.name, backupFileName, allowOverwrite == "yes");
+	}
+
+	public async restore(): Promise<void> {
+		const backupFileName = await PowerBICommandBuilder.showInputBox(this.name + ".abf", "Enter the name of the backup file", undefined);
+		if (!backupFileName) {
+			Helper.showTemporaryInformationMessage("Restore aborted!");
+			return;
+		}
+
+		const allowOverwrite = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Overwrite existing backup if exists?`, undefined, undefined);
+		if (!allowOverwrite) {
+			Helper.showTemporaryInformationMessage("Restore aborted!");
+			return;
+		}
+		await TMDLProxy.restore(backupFileName, this.workspace.name, this.name, allowOverwrite == "yes");
+	}
+
 	public async editTMDL(): Promise<void> {
-		const workspace = this.getParentByType<PowerBIWorkspace>("GROUP");
-		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${workspace.name}/${this.name}`))
+		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.workspace.name}/${this.name}`))
 
 		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - ${this.name}`);
 		// if the workspace does not exist, the folder is opened in a new workspace where the TMDL folder would be reloaded again

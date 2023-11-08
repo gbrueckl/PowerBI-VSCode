@@ -33,6 +33,7 @@ import { EventHandlers } from './EventHandlers';
 import { TMDLFSCache } from './vscode/filesystemProvider/TMDLFSCache';
 import { PowerBIDataflowTransaction } from './vscode/treeviews/workspaces/PowerBIDataflowTransaction';
 import { PowerBICapacityWorkload } from './vscode/treeviews/Capacities/PowerBICapacityWorkload';
+import { TOMProxyBackup, TOMProxyRestore } from './TMDLVSCode/_typesTOM';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -68,6 +69,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (item: PowerBIWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(item, showInfoMessage));
+
+	vscode.commands.registerCommand('PowerBI.TOM.backup', (item:  TOMProxyBackup ) => item.backup()); 
+	vscode.commands.registerCommand('PowerBI.TOM.restore', (item: TOMProxyRestore) => item.restore()); 
 
 	vscode.commands.registerCommand('PowerBIWorkspace.assignToCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.assignToCapacity(workspace));
 	vscode.commands.registerCommand('PowerBIWorkspace.unassignFromCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.unassignFromCapacity(workspace));
