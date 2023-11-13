@@ -16,9 +16,8 @@ import { TMDLProxyData, TMDLProxyDataException, TMDLProxyDataValidation, TMDLPro
 import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfiguration';
 import { iPowerBIGroup } from '../powerbi/GroupsAPI/_types';
 import { TOMProxyBackupRequest, TOMProxyRestoreRequest } from './_typesTOM';
-import { PowerBIWorkspace } from '../vscode/treeviews/workspaces/PowerBIWorkspace';
 
-const DEBUG: boolean = true;
+const DEBUG: boolean = false;
 const DEBUG_PORT: number = 51000;
 
 export const SETTINGS_FILE = ".publishsettings.json";
@@ -183,9 +182,9 @@ export abstract class TMDLProxy {
 		}
 	}
 
-	private static async handleException(resultText: string, source: vscode.Uri): Promise<void> {
+	private static async handleException(resultText: string, source?: vscode.Uri): Promise<void> {
 		let error = JSON.parse(resultText) as TMDLProxyDataException;
-		if (error.path) {
+		if (error.path && source) {
 			let tmdlRootPath: vscode.Uri = await TMDLProxy.getLocalPathRecursive(source);
 			let errorFileUri = vscode.Uri.joinPath(tmdlRootPath, error.path + TMDL_EXTENSION);
 
@@ -203,8 +202,12 @@ export abstract class TMDLProxy {
 				editor.setDecorations(errorDecoration, [])
 			}
 		}
-		else {
+		else if(error.message)
+		{
 			vscode.window.showErrorMessage(error.message);
+		}
+		else {
+			vscode.window.showErrorMessage(error.toString());
 		}
 	}
 
@@ -215,13 +218,13 @@ export abstract class TMDLProxy {
 		}
 	}
 
-	static async test(dataset: PowerBIDataset): Promise<string> {
+	static async test(): Promise<string> {
 		try {
 			const config: RequestInit = {
 				method: "GET",
 				headers: TMDLProxy._headers,
 			};
-			const endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmdl/test").toString();
+			const endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tom/test").toString();
 
 			let response = await fetch(endpoint, config);
 
@@ -231,7 +234,7 @@ export abstract class TMDLProxy {
 			return resultText;
 
 		} catch (error) {
-			vscode.window.showErrorMessage(error);
+			await TMDLProxy.handleException(error);
 		}
 	}
 
@@ -265,7 +268,7 @@ export abstract class TMDLProxy {
 				return;
 			}
 		} catch (error) {
-			vscode.window.showErrorMessage(error);
+			await TMDLProxy.handleException(error);
 		}
 	}
 
@@ -359,7 +362,7 @@ export abstract class TMDLProxy {
 
 			return success;
 		} catch (error) {
-			vscode.window.showErrorMessage(error);
+			await TMDLProxy.handleException(error);
 			return false;
 		}
 	}
@@ -411,7 +414,7 @@ export abstract class TMDLProxy {
 
 			return success;
 		} catch (error) {
-			vscode.window.showErrorMessage(error);
+			await TMDLProxy.handleException(error);
 			return false;
 		}
 	}
@@ -452,7 +455,7 @@ export abstract class TMDLProxy {
 				return;
 			}
 		} catch (error) {
-			vscode.window.showErrorMessage(error);
+			await TMDLProxy.handleException(error);
 			return;
 		}
 	}
@@ -487,9 +490,9 @@ export abstract class TMDLProxy {
 			}
 		}
 
-		link = await PowerBIApiService.getDatasetUrl(workspaceName, datasetName);
-
 		if (success) {
+			link = await PowerBIApiService.getDatasetUrl(workspaceName, datasetName);
+
 			const action = await vscode.window.showInformationMessage("TMDL published successfully!", "Process", "Open in PowerBI")
 			if (action == "Open in PowerBI") {
 				Helper.openLink(link.toString());
@@ -558,7 +561,7 @@ export abstract class TMDLProxy {
 
 			return success;
 		} catch (error) {
-			vscode.window.showErrorMessage(error);
+			await TMDLProxy.handleException(error);
 			return false;
 		}
 	}
@@ -597,14 +600,15 @@ export abstract class TMDLProxy {
 
 			return success;
 		} catch (error) {
-			vscode.window.showErrorMessage(error);
+			await TMDLProxy.handleException(error);
 			return false;
 		}
 	}
 
 	static async backup(serverName: string, databaseName: string, backupFileName: string, allowOverwrite: boolean = false): Promise<void> {
 		try {
-			let success: boolean = false;
+			await this.ensureProxy(ThisExtension.extensionContext);
+
 			TMDLProxy.log("Starting backup of Database " + databaseName + " ...");
 
 			let body: TOMProxyBackupRequest = {
@@ -622,26 +626,22 @@ export abstract class TMDLProxy {
 			};
 			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tom/backup").toString();
 
-			let response = await Helper.awaitWithProgress<Response>("Backup Dataset", fetch(endpoint, config), 0);
+			let response = await Helper.awaitWithProgress<Response>("Backup Dataset", fetch(endpoint, config), 2000);
 
 			let resultText = await response.text();
 
 			if (!response.ok) {
 				this.handleException(resultText, vscode.Uri.parse("https://error"));
-				success = false;
-			}
-			else {
-				//vscode.window.showInformationMessage(resultText);
-				success = true;
 			}
 		} catch (error) {
-			vscode.window.showErrorMessage(error);
+			await TMDLProxy.handleException(error);
 		}
 	}
 
 	static async restore(backupFileName: string, targetServerName: string, targetDatabaseName: string, allowOverwrite: boolean = false): Promise<void> {
 		try {
-			let success: boolean = false;
+			await this.ensureProxy(ThisExtension.extensionContext);
+
 			TMDLProxy.log("Starting Database restore from " + backupFileName + " ...");
 
 			let body: TOMProxyRestoreRequest = {
@@ -660,20 +660,15 @@ export abstract class TMDLProxy {
 			};
 			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tom/restore").toString();
 
-			let response = await Helper.awaitWithProgress<Response>("Restoring Database", fetch(endpoint, config), 0);
+			let response = await Helper.awaitWithProgress<Response>("Restoring Database", fetch(endpoint, config), 2000);
 
 			let resultText = await response.text();
 
 			if (!response.ok) {
-				this.handleException(resultText, vscode.Uri.parse("https://error"));
-				success = false;
-			}
-			else {
-				//vscode.window.showInformationMessage(resultText);
-				success = true;
+				this.handleException(resultText);
 			}
 		} catch (error) {
-			vscode.window.showErrorMessage(error);
+			await TMDLProxy.handleException(error);
 		}
 	}
 

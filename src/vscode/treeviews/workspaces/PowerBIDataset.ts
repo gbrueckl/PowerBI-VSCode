@@ -193,7 +193,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			return;
 		}
 
-		const allowOverwrite = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Overwrite existing backup if exists?`, undefined, undefined);
+		const allowOverwrite = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Overwrite existing backup (if exists)?`, undefined, undefined);
 		if (!allowOverwrite) {
 			Helper.showTemporaryInformationMessage("Backup aborted!");
 			return;
@@ -209,7 +209,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			return;
 		}
 
-		const allowOverwrite = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Overwrite existing backup if exists?`, undefined, undefined);
+		const allowOverwrite = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Overwrite existing database?`, `Database ${this.name} will be overwritten with the contents of ${backupFileName}.`, undefined);
 		if (!allowOverwrite) {
 			Helper.showTemporaryInformationMessage("Restore aborted!");
 			return;

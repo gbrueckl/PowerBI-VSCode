@@ -8,41 +8,41 @@
     ".NETCoreApp,Version=v6.0": {
       "TMDLVSCodeConsoleProxy/1.0.0": {
         "dependencies": {
-          "Microsoft.AnalysisServices.Tabular.Tmdl.NetCore.retail.amd64": "19.69.2.1-TmdlPreview",
+          "Microsoft.AnalysisServices.Tabular.Tmdl.NetCore.retail.amd64": "19.69.6.2-TmdlPreview",
           "Swashbuckle.AspNetCore": "6.5.0"
         },
         "runtime": {
           "TMDLVSCodeConsoleProxy.dll": {}
         }
       },
-      "Microsoft.AnalysisServices.NetCore.retail.amd64/19.69.2.1": {
+      "Microsoft.AnalysisServices.NetCore.retail.amd64/19.69.6.2": {
         "dependencies": {
           "Microsoft.Identity.Client": "4.43.0"
         },
         "runtime": {
           "lib/netcoreapp3.0/Microsoft.AnalysisServices.Core.dll": {
-            "assemblyVersion": "19.69.2.1",
-            "fileVersion": "16.0.104.21"
+            "assemblyVersion": "19.69.6.2",
+            "fileVersion": "16.0.108.20"
           },
           "lib/netcoreapp3.0/Microsoft.AnalysisServices.Runtime.Core.dll": {
-            "assemblyVersion": "19.69.2.1",
-            "fileVersion": "16.0.104.21"
+            "assemblyVersion": "19.69.6.2",
+            "fileVersion": "16.0.108.20"
           },
           "lib/netcoreapp3.0/Microsoft.AnalysisServices.Runtime.Windows.dll": {
-            "assemblyVersion": "19.69.2.1",
-            "fileVersion": "16.0.104.21"
+            "assemblyVersion": "19.69.6.2",
+            "fileVersion": "16.0.108.20"
           },
           "lib/netcoreapp3.0/Microsoft.AnalysisServices.Tabular.Json.dll": {
-            "assemblyVersion": "19.69.2.1",
-            "fileVersion": "16.0.104.21"
+            "assemblyVersion": "19.69.6.2",
+            "fileVersion": "16.0.108.20"
           },
           "lib/netcoreapp3.0/Microsoft.AnalysisServices.Tabular.dll": {
-            "assemblyVersion": "19.69.2.1",
-            "fileVersion": "16.0.104.21"
+            "assemblyVersion": "19.69.6.2",
+            "fileVersion": "16.0.108.20"
           },
           "lib/netcoreapp3.0/Microsoft.AnalysisServices.dll": {
-            "assemblyVersion": "19.69.2.1",
-            "fileVersion": "16.0.104.21"
+            "assemblyVersion": "19.69.6.2",
+            "fileVersion": "16.0.108.20"
           }
         },
         "resources": {
@@ -564,14 +564,14 @@
           }
         }
       },
-      "Microsoft.AnalysisServices.Tabular.Tmdl.NetCore.retail.amd64/19.69.2.1-TmdlPreview": {
+      "Microsoft.AnalysisServices.Tabular.Tmdl.NetCore.retail.amd64/19.69.6.2-TmdlPreview": {
         "dependencies": {
-          "Microsoft.AnalysisServices.NetCore.retail.amd64": "19.69.2.1"
+          "Microsoft.AnalysisServices.NetCore.retail.amd64": "19.69.6.2"
         },
         "runtime": {
           "lib/netcoreapp3.0/Microsoft.AnalysisServices.Tabular.Tmdl.dll": {
-            "assemblyVersion": "19.69.2.1",
-            "fileVersion": "16.0.104.21"
+            "assemblyVersion": "19.69.6.2",
+            "fileVersion": "16.0.108.20"
           }
         }
       },
@@ -638,19 +638,19 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Microsoft.AnalysisServices.NetCore.retail.amd64/19.69.2.1": {
+    "Microsoft.AnalysisServices.NetCore.retail.amd64/19.69.6.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ufJten743UbFfs1AZoqRSTWTU0HTP8nvlihVEwzHHOOEZs+pzIqlV+PDNpGUdYZMPhiwaR0l/Yrv9vTwMeU6dA==",
-      "path": "microsoft.analysisservices.netcore.retail.amd64/19.69.2.1",
-      "hashPath": "microsoft.analysisservices.netcore.retail.amd64.19.69.2.1.nupkg.sha512"
+      "sha512": "sha512-CjFdJwA7yM67Jiw+2z2047odStnGjhLocrHIAcvgibVDBwuIe0Sj01U35fnI4Q1HzsgbJNCTp1zSY16Y5cEY7Q==",
+      "path": "microsoft.analysisservices.netcore.retail.amd64/19.69.6.2",
+      "hashPath": "microsoft.analysisservices.netcore.retail.amd64.19.69.6.2.nupkg.sha512"
     },
-    "Microsoft.AnalysisServices.Tabular.Tmdl.NetCore.retail.amd64/19.69.2.1-TmdlPreview": {
+    "Microsoft.AnalysisServices.Tabular.Tmdl.NetCore.retail.amd64/19.69.6.2-TmdlPreview": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-VyKoe2H39mp/fsUM+lFtlCeuEJzxrEWbDezwSpJqjwj0CFobrA75L2dzXlKIdITlCJ+P9FAuMjlkjuCp0gJr3w==",
-      "path": "microsoft.analysisservices.tabular.tmdl.netcore.retail.amd64/19.69.2.1-tmdlpreview",
-      "hashPath": "microsoft.analysisservices.tabular.tmdl.netcore.retail.amd64.19.69.2.1-tmdlpreview.nupkg.sha512"
+      "sha512": "sha512-U4o+GY0mWGLjlw+baditcDXLaxSbkdYiccMF6ZfKtVkmA6DULPbPbhFsHiJP6Rw7+R5hzR1IlV4Zbs8JG9Om1w==",
+      "path": "microsoft.analysisservices.tabular.tmdl.netcore.retail.amd64/19.69.6.2-tmdlpreview",
+      "hashPath": "microsoft.analysisservices.tabular.tmdl.netcore.retail.amd64.19.69.6.2-tmdlpreview.nupkg.sha512"
     },
     "Microsoft.Extensions.ApiDescription.Server/6.0.5": {
       "type": "package",

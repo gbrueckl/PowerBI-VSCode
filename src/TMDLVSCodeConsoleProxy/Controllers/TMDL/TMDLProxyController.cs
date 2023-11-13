@@ -22,24 +22,6 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
             _logger = logger;
         }
 
-        [HttpGet(Name = "Test")]
-        [Route("/tmdl/test")]
-        public IActionResult Test()
-        {
-            var server = ServerManager.GetServer(new ProxyRequest { connectionString = "Data Source=powerbi://api.powerbi.com/v1.0/myorg/PPU" } );
-
-            List<TMDLProxyDatabase> dbs = new List<TMDLProxyDatabase>();
-
-            foreach (Database db in server.Databases)
-            {
-                dbs.Add(new TMDLProxyDatabase { name = db.Name, id = db.ID } );
-            }
-            return Ok(dbs);
-            return Ok("Hello World!");
-        }
-
-
-
         private BadRequestObjectResult handleTMDLException(Exception ex)
         {
             if (ex == null)

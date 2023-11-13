@@ -1,4 +1,3 @@
-using Microsoft.AnalysisServices.Tabular.Serialization;
 using Microsoft.AnalysisServices.Tabular.Tmdl;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
@@ -6,10 +5,6 @@ using System.Text;
 using TOM = Microsoft.AnalysisServices.Tabular;
 
 using Microsoft.AnalysisServices.Tabular;
-using System.Text.Json.Nodes;
-using TMDLVSCodeConsoleProxy.Controllers.TMDL;
-using Microsoft.AnalysisServices;
-using System.Xml.Linq;
 
 namespace TMDLVSCodeConsoleProxy.Controllers.TOM
 {
@@ -45,7 +40,42 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TOM
             });
         }
 
+        [HttpGet(Name = "Test")]
+        [Route("/tom/test")]
+        public IActionResult Test()
+        {
+            try
+            {
+                Server s = new Server();
 
+                return Ok("Proxy is running!");
+            }
+            catch (Exception ex)
+            {
+                return handleTOMException(ex);
+            }
+        }
+
+        [HttpGet(Name = "TestConnection")]
+        [Route("/tom/testConnection")]
+        public IActionResult TestConnection(
+            [FromBody] TOMProxyRequest requestBody,
+            [FromHeader] ProxyHeader header
+        )
+        {
+            try
+            {
+                Config.validateHeader(header);
+
+                var server = ServerManager.GetServer(requestBody);
+
+                return Ok("Successfully connected to '" + server.Name + "'!");
+            }
+            catch (Exception ex)
+            {
+                return handleTOMException(ex);
+            }
+        }
 
         [HttpPost(Name = "BackupDatabases")]
         [Route("/tom/backup")]

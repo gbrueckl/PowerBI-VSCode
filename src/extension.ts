@@ -163,7 +163,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}
 
-		//vscode.commands.registerCommand('PowerBI.TMDL.test', () => TMDLProxy.test(undefined));
 		TMDLFileSystemProvider.register(context);
 
 		if (openModelFile && tmdlUri) {
@@ -173,6 +172,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	else {
 		ThisExtension.log("TMDL is not enabled! Please use the setting `powerbi.TMDL.enabled` to configure it and use TMDL features");
 	}
+
+	vscode.commands.registerCommand('PowerBI.TMDL.test', () => TMDLProxy.test());
 
 	// new editor commands for TMDL files
 	vscode.commands.registerCommand('PowerBI.TMDL.validate',

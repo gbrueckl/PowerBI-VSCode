@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { fetch, getProxyAgent, RequestInit, Response, File, FormData } from '@env/fetch';
+import {fetch, FormData, RequestInit, RequestInfo, File, fileFrom, Response, getProxyAgent } from '@env/fetch';
 
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
@@ -53,7 +53,7 @@ export abstract class PowerBIApiService {
 
 			await this.refreshConnection();
 
-			//this.postFile("/v1.0/myorg/imports", vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', 'PBIX', 'EmptyPBIX.pbix'), true);
+			//this.postFile("/v1.0/myorg/imports?datasetDisplayName=MyReport", vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', 'PBIX', 'EmptyPBIX.pbix'), true);
 		} catch (error) {
 			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
@@ -396,19 +396,44 @@ export abstract class PowerBIApiService {
 		ThisExtension.log("POST " + endpoint + " --> (File)" + uri);
 
 		try {
-			let data: FormData = new FormData();
+			const fileName = uri.path.split('/').pop().split(".")[0];
+			const binary: Uint8Array = await vscode.workspace.fs.readFile(uri);
 
-			const arr = await vscode.workspace.fs.readFile(uri);
-			const blob = new Blob([arr]);
-			data.append('file', blob, uri.path.split('/').pop());
+			const httpbin = 'https://httpbin.org/post'
+			const formData2 = new FormData()
+			const binary2 = new Uint8Array([ 97, 98, 99 ])
+			const abc = new File([binary2], 'abc.txt', { type: 'text/plain' })
+
+			formData2.set('greeting', 'Hello, world!')
+			formData2.set('file-upload', abc, 'new name.txt')
+
+			const response2 = await fetch(httpbin, { method: 'POST', body: formData2 })
+			const data2 = await response2.json()
+
+
+			let formData: FormData = new FormData();
+			
+
+			
+			const blob: Blob = new Blob([binary]);
+			//formData.append(fileName, blob);
+
+			let x = binary.length;
+			const file = new File([binary], fileName, { type: 'application/octet-stream' })
+			formData.append(fileName, file);
+
 
 			let headers = this._headers;
 			delete headers["Content-Type"];
+			delete headers["Content-Length"];
+			delete headers["Accept"];
+			//headers["Content-Type"] = "multipart/form-data";
+			//headers["Content-Length"] = 50000;
 
 			const config: RequestInit = {
 				method: "POST",
 				headers: headers,
-				body: data,
+				body: formData2,
 				agent: getProxyAgent()
 			};
 			let response: Response = await fetch(endpoint, config);

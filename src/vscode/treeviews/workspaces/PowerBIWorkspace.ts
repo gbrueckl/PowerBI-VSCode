@@ -187,11 +187,13 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 			return;
 		}
 
-		const allowOverwrite = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Overwrite existing database if exists?`, undefined, undefined);
+		const allowOverwrite = await PowerBICommandBuilder.showQuickPick([new PowerBIQuickPickItem("yes"), new PowerBIQuickPickItem("no")], `Overwrite existing database (if exists)?`, undefined, undefined);
 		if (!allowOverwrite) {
 			Helper.showTemporaryInformationMessage("Restore aborted!");
 			return;
 		}
 		await TMDLProxy.restore(backupFileName, this.name, targetDatasetName, allowOverwrite == "yes");
+
+		ThisExtension.TreeViewWorkspaces.refresh(this, false);
 	}
 }

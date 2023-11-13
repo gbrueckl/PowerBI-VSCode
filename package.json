@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -235,7 +235,7 @@
 				"title": "Browse TMDL",
 				"icon": "$(edit)",
 				"category": "PowerBI",
-				"enablement": "powerbi.isTMDLEnabled && powerbi.isTMDLProxyRunning"
+				"enablement": "powerbi.isTMDLEnabled"
 			},
 			{
 				"command": "PowerBIWorkspace.insertPath",
@@ -576,27 +576,27 @@
 				{
 					"command": "PowerBIDataset.configureScaleOut",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,CONFIGURESCALEOUT,.*/",
-					"group": "navigation"
+					"group": "2_operations"
 				},
 				{
 					"command": "PowerBIDataset.syncReadOnlyReplicas",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,SYNCREADONLYREPLICAS,.*/",
-					"group": "navigation"
+					"group": "2_operations"
 				},
 				{
 					"command": "PowerBI.TOM.backup",
 					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,BACKUP,.*/",
-					"group": "navigation"
+					"group": "2_operations"
 				},
 				{
 					"command": "PowerBI.TOM.restore",
 					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,RESTORE,.*/",
-					"group": "navigation"
+					"group": "2_operations"
 				},
 				{
 					"command": "PowerBI.TOM.restore",
 					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,RESTORE,.*/",
-					"group": "navigation"
+					"group": "2_operations"
 				},
 				{
 					"command": "PowerBIDataset.editTMDL",
@@ -709,7 +709,7 @@
 				},
 				{
 					"command": "PowerBI.TMDL.load",
-					"when": "resourceScheme == tmdl && resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ && !powerbi.isInBrowser",
+					"when": "resourceScheme == tmdl && resourcePath =~ /(\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$)|(\\/powerbi\\/[^\\/]*?$)/ && !powerbi.isInBrowser",
 					"group": "2_workspace"
 				},
 				{
@@ -759,20 +759,22 @@
 		"@types/vscode": "^1.68.0",
 		"buffer": "^6.0.3",
 		"eslint": "^8.19.0",
-		"form-data": "^4.0.0",
 		"glob": "^8.0.3",
 		"https-agent": "^1.0.0",
 		"https-proxy-agent": "^5.0.1",
 		"mocha": "^10.0.0",
 		"native-ext-loader": "^2.3.0",
-		"node-fetch": "^3.2.10",
+		"net": "^1.0.2",
+		"node-fetch": "^3.3.2",
+		"portfinder": "^1.0.32",
 		"process": "^0.11.10",
 		"swagger-typescript-api": "^13.0.3",
 		"ts-loader": "^9.3.1",
 		"typescript": "^4.7.4",
 		"webpack": "^5.74.0",
-		"webpack-cli": "^4.10.0",
-		"net": "^1.0.2",
-		"portfinder": "^1.0.32"
+		"webpack-cli": "^4.10.0"
+	},
+	"dependencies": {
+		"form-data": "^4.0.0"
 	}
 }
