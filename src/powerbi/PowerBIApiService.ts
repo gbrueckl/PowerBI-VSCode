@@ -53,7 +53,7 @@ export abstract class PowerBIApiService {
 
 			await this.refreshConnection();
 
-			//this.postFile("/v1.0/myorg/imports?datasetDisplayName=MyReport", vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', 'PBIX', 'EmptyPBIX.pbix'), true);
+			//this.postFile("/v1.0/myorg/imports?datasetDisplayName=MyReport", vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', 'Files', 'EmptyPBIX.pbix'), true);
 		} catch (error) {
 			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
@@ -268,14 +268,27 @@ export abstract class PowerBIApiService {
 	}
 
 	public static getFullUrl(endpoint: string, params?: object): string {
+		
+			let baseItems = this._apiBaseUrl.split("/").filter(x => x);
+			baseItems.push("v1.0");
+			baseItems.push(this.Org);
+			let pathItems = endpoint.split("/").filter(x => x);
+
+			let index = pathItems.indexOf(baseItems.slice(-1)[0]);
+
+			endpoint = (baseItems.concat(pathItems.slice(index + 1))).join("/");
+
+			let uri = vscode.Uri.parse(endpoint);
+		/*}
 		if (endpoint.startsWith('/') && !endpoint.startsWith("/v1.0")) {
 			endpoint = Helper.joinPath(`v1.0/${PowerBIApiService.Org}`, endpoint);
 		}
 
 		let uri = vscode.Uri.parse(`${this._apiBaseUrl}/${Helper.trimChar(endpoint, '/')}`);
+		
 		if (endpoint.startsWith("https://")) {
 			uri = vscode.Uri.parse(endpoint);
-		}
+		}*/
 
 		if (params) {
 			let urlParams = []
@@ -413,14 +426,14 @@ export abstract class PowerBIApiService {
 
 			let formData: FormData = new FormData();
 			
-
+			
 			
 			const blob: Blob = new Blob([binary]);
-			//formData.append(fileName, blob);
-
+			formData.append(fileName, blob);
+			let abc123 = formData.toString();
 			let x = binary.length;
-			const file = new File([binary], fileName, { type: 'application/octet-stream' })
-			formData.append(fileName, file);
+			const file = new File([binary], fileName);
+			//formData.append(fileName, file);
 
 
 			let headers = this._headers;
@@ -428,12 +441,12 @@ export abstract class PowerBIApiService {
 			delete headers["Content-Length"];
 			delete headers["Accept"];
 			//headers["Content-Type"] = "multipart/form-data";
-			//headers["Content-Length"] = 50000;
+			headers["Content-Length"] = 12649;
 
 			const config: RequestInit = {
 				method: "POST",
 				headers: headers,
-				body: formData2,
+				body: formData,
 				agent: getProxyAgent()
 			};
 			let response: Response = await fetch(endpoint, config);
@@ -567,7 +580,7 @@ export abstract class PowerBIApiService {
 
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					ret = undefined;
+					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				else {
 					ret = JSON.parse(resultText) as T;

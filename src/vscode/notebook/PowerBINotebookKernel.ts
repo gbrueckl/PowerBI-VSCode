@@ -164,7 +164,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 	private resolveRelativePath(endpoint: string, context: PowerBINotebookContext): string {
 		if (endpoint.startsWith('./')) {
-			endpoint = Helper.joinPath(context.apiRootPath, endpoint.slice(2));
+			endpoint = Helper.trimChar(Helper.joinPath(context.apiRootPath, endpoint.slice(2)), "/");
 		}
 
 		return endpoint;
@@ -187,6 +187,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 			ThisExtension.log("Executing " + language + ":\n" + commandText);
 
 			let lines = commandText.split("\n").filter(l => l.trim()[0] != "#");
+			const commandTextClean = lines.join("\n");
 
 			let result: iPowerBIDatasetExecuteQueries | iPowerResponseGeneric = undefined;
 			switch (magic) {
@@ -195,13 +196,15 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					break;
 				case "api":
 
-					let method = lines[0].split(" ")[0].trim();
-					let endpoint = lines[0].split(" ")[1].trim();
-					let bodyLines: string[] = lines.slice(1);
+					const parseRegEx = /(?<method>.+?)\s+(?<endpoint>.+?)\s*(?<body>{.*})?\s*$/s;
+					const match = commandTextClean.match(parseRegEx);
+					let method = match.groups["method"].trim().toUpperCase();
+					let endpoint = match.groups["endpoint"].trim();
+					let bodyString =  match.groups["body"];
 
 					let body = undefined;
-					if (bodyLines.length > 0) {
-						body = JSON.parse(bodyLines.join("\n"));
+					if (bodyString) {
+						body = JSON.parse(bodyString);
 					}
 
 					endpoint = this.resolveRelativePath(endpoint, context);
