@@ -54,8 +54,6 @@ export class PowerBIWorkspacePersonal extends PowerBIWorkspace {
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		PowerBICommandBuilder.pushQuickPickItem(this);
-
 		let children: PowerBIWorkspaceTreeItem[] = [];
 		
 		children.push(new PowerBIDatasets(null, this));

@@ -41,8 +41,6 @@ export class PowerBIPipeline extends PowerBIPipelineTreeItem {
 	}
 
 	async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {
-		PowerBICommandBuilder.pushQuickPickItem(this);
-
 		let children: PowerBIPipelineTreeItem[] = [];
 		
 		children.push(new PowerBIPipelineStages(this.uid, this));

@@ -32,8 +32,6 @@ export class PowerBIGateway extends PowerBIGatewayTreeItem {
 	}
 
 	async getChildren(element?: PowerBIGatewayTreeItem): Promise<PowerBIGatewayTreeItem[]> {
-		PowerBICommandBuilder.pushQuickPickItem(this);
-
 		let children: PowerBIGatewayTreeItem[] = [];
 		
 		children.push(new PowerBIGatewayDatasources(this));

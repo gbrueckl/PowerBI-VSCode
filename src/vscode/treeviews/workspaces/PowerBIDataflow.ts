@@ -36,8 +36,6 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		PowerBICommandBuilder.pushQuickPickItem(this);
-
 		let children: PowerBIWorkspaceTreeItem[] = [];
 
 		children.push(new PowerBIDataflowTransactions(this.groupId, this));

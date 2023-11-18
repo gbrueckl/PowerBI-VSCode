@@ -54,12 +54,6 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + '.png');
 	}
 
-	// command to execute when clicking the TreeItem
-	command: vscode.Command = {
-		command: 'PowerBI.updateQuickPickList', title: "Update QuickPick List", arguments: [this]
-	};
-
-
 	// tooltip shown when hovering over the item
 	get _tooltip(): string {
 		let tooltip: string = "";

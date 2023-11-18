@@ -59,8 +59,6 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 	}
 
 	async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
-		PowerBICommandBuilder.pushQuickPickItem(this);
-
 		let children: PowerBICapacityTreeItem[] = [];
 		const currentUser = PowerBIApiService.SessionUserEmail
 

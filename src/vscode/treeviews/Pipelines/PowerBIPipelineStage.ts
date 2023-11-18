@@ -77,8 +77,6 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 	}
 
 	async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {
-		PowerBICommandBuilder.pushQuickPickItem(this);
-
 		let children: PowerBIPipelineTreeItem[] = [];
 		let artifacts: iPowerBIPipelineStageArtifacts = await PowerBIApiService.getPipelineStageArtifacts(this.getParentByType<PowerBIPipeline>("PIPELINE").uid, this.definition.order);
 

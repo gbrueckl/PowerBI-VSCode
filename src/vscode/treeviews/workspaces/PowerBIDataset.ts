@@ -82,8 +82,6 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		PowerBICommandBuilder.pushQuickPickItem(this);
-
 		let children: PowerBIWorkspaceTreeItem[] = [];
 
 		children.push(new PowerBIParameters(this.groupId, this));

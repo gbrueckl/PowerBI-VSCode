@@ -1,5 +1,11 @@
 # Change Log
 
+**v1.1.2**
+- fixed issue with delete in notebooks
+- fixed issue with relative path references in notebooks
+- reworked concatination of relative URLs
+- fixed issue with automatically added QuickPick items
+
 **v1.1.1**:
 - Added support for Backup and Restore of datasets ([#19](/../../issues/19))
 - Fixed issue with Buffer in web extension
