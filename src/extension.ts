@@ -34,11 +34,14 @@ import { TMDLFSCache } from './vscode/filesystemProvider/TMDLFSCache';
 import { PowerBIDataflowTransaction } from './vscode/treeviews/workspaces/PowerBIDataflowTransaction';
 import { PowerBICapacityWorkload } from './vscode/treeviews/Capacities/PowerBICapacityWorkload';
 import { TOMProxyBackup, TOMProxyRestore } from './TMDLVSCode/_typesTOM';
+import { getLocalInstances } from '@env/netstat';
 
 
 export async function activate(context: vscode.ExtensionContext) {
 
 	await ThisExtension.initializeLogger(context);
+
+	let x = await getLocalInstances();
 
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;

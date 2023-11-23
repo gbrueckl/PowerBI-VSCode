@@ -1,1 +1,3 @@
-export const ENVIRONMENT: "node" | "web" = "web";
+import { RuntimeEnvironment } from "../_types";
+
+export const ENVIRONMENT: RuntimeEnvironment = "web";
