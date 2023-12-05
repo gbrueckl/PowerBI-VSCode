@@ -9,6 +9,8 @@ import { PowerBIPipelineStage } from './Pipelines/PowerBIPipelineStage';
 import { PowerBICapacity } from './Capacities/PowerBICapacity';
 import { PowerBIReport } from './workspaces/PowerBIReport';
 import { Helper } from '../../helpers/Helper';
+import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
+import { iPowerBIImport, iPowerBIImportDetails } from '../../powerbi/ImportsAPI/_types';
 
 
 export interface iHandleBeingDropped {
@@ -112,7 +114,19 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 
 		let uriList = await dataTransfer.get("text/uri-list");
 		if (uriList != null) {
-			ThisExtension.log(await uriList.asString());
+			if (["GROUP"].includes(target.itemType)) {
+				const uriListString = (await uriList.asString());
+				ThisExtension.log("File(s) dropped on PowerBI Group: " + uriListString.toString());
+				const fileUris = uriListString.split("\r\n").filter((x) => x.startsWith("file://") && x.endsWith(".pbix")).map((x) => vscode.Uri.parse(x.trim()));
+
+				const targetGroup: PowerBIWorkspace = (target as PowerBIWorkspace);
+
+				PowerBIWorkspace.uploadPbixFiles(targetGroup, fileUris);
+				return;
+			}
+			else {
+				ThisExtension.log("File(s) dropped on PowerBI Item but no drop-handler was defined for " + target.itemType);
+			}
 		}
 
 		const ws = dataTransfer.get("application/vnd.code.tree.powerbiworkspaces");
@@ -138,7 +152,7 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		else {
 			sourceItems = transferItem.value;
 		}
-		
+
 
 		await this.handlePowerBIAPIDrop(sourceItems, target);
 

@@ -42,7 +42,7 @@ There are two core features of notebooks:
 
 For proper visualization of the results I highly recommend to also install the [Data Table Renderers extension](https://marketplace.visualstudio.com/items?itemName=RandomFractalsInc.vscode-data-table)!
 
-## Run REST API calls
+## Run REST API calls (%api)
 To run a REST API call from the notebook you can simply write the following:
 
 ``` rest
@@ -62,7 +62,7 @@ POST /dashboards
 The JSON-body can also be omitted, e.g. for a GET request.
 Supported METHODs are `GET`, `POST`, `PUT`, `PATCH` and `DELETE`. the _endpoint_ can either be absolute (e.g. `https://api.powerbi.com/v1.0/myorg/dashboards`), relative to the root of the API (e.g. `/dashboards`) or relative to the path set via notebook variables `API_ROOT_PATH` (e.g. `./refreshes`) (see [Using Variables](#using-variables) below)
 
-## Execute DAX queries
+## Execute DAX queries (%dax)
 To run a DAX query from within the notebook, you have to use the cell magic `%dax` in the very first line of your cell. The following lines will contain the actual DAX query:
 
 ``` dax
@@ -72,7 +72,7 @@ EVALUATE MyTable
 
 For this to work, you first need to set the variable `DATASET` in your notebook before - see [Using Variables](#using-variables) below.
 
-## Using variables
+## Using variables (%cmd)
 You can also define and use variables within the notebook. To set a variable you can use
 
 ``` bash
@@ -90,6 +90,26 @@ SET DATASET = /groups/d1f70e51-1234-1234-8e4c-55f35f9fa758/datasets/028d20ca-777
 Current values of variables can be retrieved by running `SET MY_VARIABLE`.
 
 **Note:** you can also set/get multiple variables within the same notebook cell!
+
+## Executing TMSL scripts (%tmsl)
+The Tabular Model Scripting Language (TMSL) can be used to create or modify Tabular Models like Power BI datasets. Using the `%tmsl` magic you can now also run TMSL scripts against the current Tabular Server (Power BI Premium Workspace) as follows:
+
+``` json
+%tmsl
+{   
+   "alter":{   
+      "object":{   
+         "database":"AdventureWorksTabular1200",  
+         "role":"DataReader"  
+      },  
+      "role":{   
+         "name":"New Name"  
+      }  
+   }  
+}  
+```
+
+While you could technically run any TMSL script including large `createOrUpdate` scripts, its purpose is to modify individual properties of selected objects like changing the name of a role etc.
 
 # TMDL
 

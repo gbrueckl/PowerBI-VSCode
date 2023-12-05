@@ -17,6 +17,7 @@ import { TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
 import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
 import { TMDLProxy } from '../../../TMDLVSCode/TMDLProxy';
 import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
+import { iPowerBIImport, iPowerBIImportDetails } from '../../../powerbi/ImportsAPI/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMProxyRestore {
@@ -41,7 +42,8 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 		let orig: string = super._contextValue;
 
 		let actions: string[] = [
-			"DELETE"
+			"DELETE",
+			"UPLOADPBIX"
 		]
 
 		if (this.definition.isOnDedicatedCapacity) {
@@ -170,6 +172,41 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - Workspace ${this.name}`);
 
 		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
+	}
+
+	public static async uploadPbixFiles(workspace: PowerBIWorkspace, fileUris: vscode.Uri[]): Promise<iPowerBIImportDetails[]> {
+		const endpoint = Helper.joinPath(workspace.apiPath, "imports");
+
+		let importDetails: iPowerBIImportDetails[] = [];
+		for (const sourceFile of fileUris) {
+			const fileName = sourceFile.toString().split("/").pop();
+
+			const pbiImport: iPowerBIImport = await Helper.awaitWithProgress<iPowerBIImport>("Uploading " + fileName, PowerBIApiService.importFile(endpoint, sourceFile, fileName), 3000);
+			const importDetail: iPowerBIImportDetails = await PowerBIApiService.get<iPowerBIImportDetails>(Helper.joinPath(workspace.apiPath, "imports", pbiImport.id));
+
+			ThisExtension.log("Imported PBIX: " + JSON.stringify(importDetail));
+			importDetails.push(importDetail);
+		}
+
+
+		ThisExtension.TreeViewWorkspaces.refresh(undefined, false);
+		return importDetails;
+	}
+
+	public async uploadPbix(): Promise<iPowerBIImportDetails[]> {
+		const sourceFiles = await vscode.window.showOpenDialog({
+			"title": "Choose PBIX file to uploade",
+			"filters": { "Power BI Files": ["pbix"] },
+			"openLabel": "Upload",
+			"canSelectMany": true
+		});
+
+		if (!sourceFiles || sourceFiles.length == 0) {
+			Helper.showTemporaryInformationMessage("Upload aborted!");
+			return;
+		}
+
+		return await PowerBIWorkspace.uploadPbixFiles(this, sourceFiles);
 	}
 
 	public async restore(): Promise<void> {

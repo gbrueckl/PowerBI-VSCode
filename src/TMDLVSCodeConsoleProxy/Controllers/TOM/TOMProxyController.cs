@@ -10,11 +10,11 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TOM
 {
     [ApiController]
     [Route("[controller]")]
-    public class TOMProxyController : ControllerBase
+    public class TMSLProxyController : ControllerBase
     {
-        private readonly ILogger<TOMProxyController> _logger;
+        private readonly ILogger<TMSLProxyController> _logger;
 
-        public TOMProxyController(ILogger<TOMProxyController> logger)
+        public TMSLProxyController(ILogger<TMSLProxyController> logger)
         {
             _logger = logger;
         }

@@ -7,12 +7,12 @@ import { Helper } from '../../helpers/Helper';
 import { ApiEndpointDetails, PowerBIAPILanguage, SwaggerFile } from './_types';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 
-import { iPowerResponseGeneric } from '../../powerbi/_types';
+import { iPowerBIResponseGeneric } from '../../powerbi/_types';
 import { PowerBINotebookContext } from '../notebook/PowerBINotebookContext';
 
 
 /** Supported trigger characters */
-const TRIGGER_CHARS = ['/'];
+const TRIGGER_CHARS = ['/', '%'];
 
 /** sometimes the API is not consistent and Swagger-definition is different from whats returned by the API  */
 const LIST_ITEM_OVERWRITE = {
@@ -80,7 +80,50 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 	}
 
 	async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[]> {
-		if (context.triggerCharacter == "/") {
+		if (context.triggerCharacter == "%" && position.line == 0 && position.character == 1) {
+			let apiMagic: vscode.CompletionItem = {
+						label: "API",
+						insertText: "api",
+						commitCharacters: [" "],
+						detail: "Power BI REST API",
+						documentation: "Execute arbitrary Power BI REST API calls"
+					};
+
+			let daxMagic: vscode.CompletionItem = {
+						label: "DAX",
+						insertText: "dax",
+						commitCharacters: [" "],
+						detail: "Execute DAX Query",
+						documentation: "Execute DAX query against the current dataset",
+					};
+
+			let cmdMagic: vscode.CompletionItem = {
+						label: "CMD",
+						insertText: "cmd",
+						commitCharacters: [" "],
+						detail: "Notebook Commands",
+						documentation: "Set variables in the current notebook",
+					};
+
+			let tmslMagic: vscode.CompletionItem = {
+						label: "TMSL",
+						insertText: "tmsl",
+						commitCharacters: [" "],
+						detail: "Execute a TMSL command against the current dataset",
+						documentation: "Execute a TMSL command against the current dataset",
+					};
+
+			return [apiMagic, daxMagic, cmdMagic, tmslMagic];
+		}
+		else if (context.triggerCharacter == ".") {
+			// starting with . for relative path 
+			// lookup for api root path of current document
+		}
+		else if (context.triggerCharacter == " ") {
+			// starting with ' ' after specifying the method
+			// lookup only show valid endpoints
+		}
+		else if (context.triggerCharacter == "/") {
 			try {
 				ThisExtension.log("CompletionProvider started!");
 				let currentLine = document.lineAt(position.line).text;
@@ -113,7 +156,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 						ThisExtension.log("Found a placeholder: " + nextToken + " - getting available values from API ...");
 						const itemType = nextToken.slice(1, nextToken.length - 1);
 
-						const items: iPowerResponseGeneric = await PowerBIApiService.get<iPowerResponseGeneric>(currentPath);
+						const items: iPowerBIResponseGeneric = await PowerBIApiService.get<iPowerBIResponseGeneric>(currentPath);
 						for (let item of items.value) {
 							completionItems.push(await this.getCompletionItem(itemType, item));
 						}
@@ -167,14 +210,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 				ThisExtension.log("ERROR: " + error);
 			}
 		}
-		else if (context.triggerCharacter == ".") {
-			// starting with . for relative path 
-			// lookup for api root path of current document
-		}
-		else if (context.triggerCharacter == " ") {
-			// starting with ' ' after specifying the method
-			// lookup only show valid endpoints
-		}
+		
 		return [];
 	}
 

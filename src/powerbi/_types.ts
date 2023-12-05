@@ -15,7 +15,7 @@ export interface ApiUrlPair {
 	itemId?: string | UniqueId;
 }
 
-export class iPowerResponseGeneric<T = any> {
+export class iPowerBIResponseGeneric<T = any> {
     "odata.context": string;
 	value: T[];
 }

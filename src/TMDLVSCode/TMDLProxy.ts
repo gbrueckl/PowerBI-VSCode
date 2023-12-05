@@ -16,6 +16,7 @@ import { TMDLProxyData, TMDLProxyDataException, TMDLProxyDataValidation, TMDLPro
 import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfiguration';
 import { iPowerBIGroup } from '../powerbi/GroupsAPI/_types';
 import { TOMProxyBackupRequest, TOMProxyRestoreRequest } from './_typesTOM';
+import { TMSLProxyExecuteRequest, TMSLProxyExecuteResponse } from './_typesTMSL';
 
 const DEBUG: boolean = false;
 const DEBUG_PORT: number = 51000;
@@ -179,6 +180,25 @@ export abstract class TMDLProxy {
 					return localPath;
 				}
 			}
+		}
+	}
+
+	public static async getServerNameFromAPI(apiPath: string): Promise<string> {
+		const regex: RegExp = /\/groups\/(?<workspaceId>.*?)(\/|$)(?:datasets\/(?<datasetId>.*?)(\/|$))?/mi;
+		const match = apiPath.match(regex);
+		const workspaceId = match.groups["workspaceId"];
+		const datasetId = match.groups["datasetId"];
+
+		const workspace = await PowerBIApiService.get<iPowerBIGroup>(`/groups/${workspaceId}`);
+
+		return workspace.name;
+
+		if (datasetId) {
+			const dataset = await PowerBIApiService.get<iPowerBIGroup>(`/groups/${workspaceId}/datasets/${datasetId}`);
+			return PowerBIApiService.getXmlaConnectionString(workspace.name, dataset.name);
+		}
+		else {
+			return PowerBIApiService.getXmlaConnectionString(workspace.name);
 		}
 	}
 
@@ -666,6 +686,45 @@ export abstract class TMDLProxy {
 
 			if (!response.ok) {
 				this.handleException(resultText);
+			}
+		} catch (error) {
+			await TMDLProxy.handleException(error);
+		}
+	}
+
+	static async executeTMSL(serverName: string, command: string, analyzeImpactOnly: boolean = false): Promise<TMSLProxyExecuteResponse> {
+		try {
+			await this.ensureProxy(ThisExtension.extensionContext);
+
+			TMDLProxy.log("Executing TMSL command ...");
+
+			let body: TMSLProxyExecuteRequest = {
+				"connectionString": PowerBIApiService.getXmlaConnectionString(serverName),
+				"command": command,
+				"analyzeImpactOnly": analyzeImpactOnly
+				};
+
+			await TMDLProxy.setAccessToken(body)
+
+			const config: RequestInit = {
+				method: "POST",
+				headers: TMDLProxy._headers,
+				body: JSON.stringify(body),
+			};
+			let endpoint = vscode.Uri.joinPath(TMDLProxy._tmdlProxyUri, "/tmsl/execute").toString();
+
+			let response = await Helper.awaitWithProgress<Response>("Executing TMSL", fetch(endpoint, config), 2000);
+
+			let resultText = await response.text();
+
+			if (!response.ok) {
+				TMDLProxy.handleException(resultText);
+
+				return JSON.parse(resultText) as TMSLProxyExecuteResponse;
+			}
+
+			return {
+				"message": resultText,
 			}
 		} catch (error) {
 			await TMDLProxy.handleException(error);

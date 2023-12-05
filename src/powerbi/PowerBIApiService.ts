@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import {fetch, FormData, RequestInit, RequestInfo, File, fileFrom, Response, getProxyAgent } from '@env/fetch';
+import { fetch, FormData, RequestInit, RequestInfo, File, fileFrom, Response, getProxyAgent } from '@env/fetch';
 
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
@@ -52,8 +52,6 @@ export abstract class PowerBIApiService {
 			this._resourceId = resourceId;
 
 			await this.refreshConnection();
-
-			//this.postFile("/v1.0/myorg/imports?datasetDisplayName=MyReport", vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', 'Files', 'EmptyPBIX.pbix'), true);
 		} catch (error) {
 			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
@@ -268,17 +266,17 @@ export abstract class PowerBIApiService {
 	}
 
 	public static getFullUrl(endpoint: string, params?: object): string {
-		
-			let baseItems = this._apiBaseUrl.split("/").filter(x => x);
-			baseItems.push("v1.0");
-			baseItems.push(this.Org);
-			let pathItems = endpoint.split("/").filter(x => x);
 
-			let index = pathItems.indexOf(baseItems.slice(-1)[0]);
+		let baseItems = this._apiBaseUrl.split("/").filter(x => x);
+		baseItems.push("v1.0");
+		baseItems.push(this.Org);
+		let pathItems = endpoint.split("/").filter(x => x);
 
-			endpoint = (baseItems.concat(pathItems.slice(index + 1))).join("/");
+		let index = pathItems.indexOf(baseItems.slice(-1)[0]);
 
-			let uri = vscode.Uri.parse(endpoint);
+		endpoint = (baseItems.concat(pathItems.slice(index + 1))).join("/");
+
+		let uri = vscode.Uri.parse(endpoint);
 		/*}
 		if (endpoint.startsWith('/') && !endpoint.startsWith("/v1.0")) {
 			endpoint = Helper.joinPath(`v1.0/${PowerBIApiService.Org}`, endpoint);
@@ -322,15 +320,15 @@ export abstract class PowerBIApiService {
 				};
 				let response: Response = await fetch(endpoint, config);
 
+				if (raw) {
+					return response as any as T;
+				}
 				let resultText = await response.text();
 				let ret: T;
 
 				if (response.ok) {
 					if (!resultText || resultText == "") {
 						ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
-					}
-					if (raw) {
-						ret = resultText as any as T;
 					}
 					else {
 						ret = JSON.parse(resultText) as T;
@@ -358,6 +356,61 @@ export abstract class PowerBIApiService {
 		}
 	}
 
+	public static async getFile(endpoint: string, params: object = null, raiseError: boolean = true): Promise<Buffer> {
+		endpoint = this.getFullUrl(endpoint, params);
+		if (params) {
+			ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
+		}
+		else {
+			ThisExtension.log("GET " + endpoint);
+		}
+
+		try {
+			const config: RequestInit = {
+				method: "GET",
+				headers: this._headers,
+				agent: getProxyAgent()
+			};
+			let response: Response = await PowerBIApiService.get<Response>(endpoint, undefined, false, true);
+
+			let resultText = await response.text();
+
+			if (response.ok) {
+
+				const blob = await response.blob();
+				const buffer = await blob.arrayBuffer();
+				const content = Buffer.from(buffer);
+
+				return content;
+
+			}
+			else {
+				if (raiseError) {
+					throw new Error(resultText);
+				}
+			}
+		} catch (error) {
+			this.handleApiException(error, false, raiseError);
+
+			return undefined;
+		}
+	}
+
+	public static async downloadFile(endpoint: string, targetPath: vscode.Uri, params: object = null, raiseError: boolean = false): Promise<void> {
+		const content = await PowerBIApiService.getFile(endpoint, params, raiseError);
+
+		try {
+			if (content) {
+				vscode.workspace.fs.writeFile(targetPath, content);
+			}
+		}
+		catch (error) {
+			this.handleApiException(error, false, raiseError);
+
+			return undefined;
+		}
+	}
+
 	static async post<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
 		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("POST " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
@@ -373,7 +426,6 @@ export abstract class PowerBIApiService {
 
 			let resultText = await response.text();
 			let ret: T;
-
 
 			if (response.ok) {
 				if (!resultText || resultText == "") {
@@ -404,67 +456,71 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	static async postFile(endpoint: string, uri: vscode.Uri, raiseError: boolean = false): Promise<any> {
-		endpoint = this.getFullUrl(endpoint);
-		ThisExtension.log("POST " + endpoint + " --> (File)" + uri);
+	static async postImport<T = any>(endpoint: string, content: Buffer, datasetDisplayName: string, urlParams: object = {}, raiseError: boolean = false): Promise<T> {
+		urlParams["datasetDisplayName"] = datasetDisplayName;
+		
+		endpoint = this.getFullUrl(endpoint, urlParams);
+		ThisExtension.log("POST " + endpoint + " --> File: " + JSON.stringify(urlParams));
 
 		try {
-			const fileName = uri.path.split('/').pop().split(".")[0];
-			const binary: Uint8Array = await vscode.workspace.fs.readFile(uri);
+			// we manally build the formData as the node-fetch API for formData does not work with the PowerBI API
+			var boundary = "----WebKitFormBoundarykRourla9fGPRMwf6";
+			var data = "";
+			data += "--" + boundary + "\r\n";
+			data += "Content-Disposition: form-data; name=\"file\"; filename=\"" + datasetDisplayName + "\"\r\n";
+			data += "Content-Type:application/octet-stream\r\n\r\n";
+			var payload = Buffer.concat([
+				Buffer.from(data, "utf8"),
+				content,
+				Buffer.from("\r\n--" + boundary + "--\r\n", "utf8"),
+			]);
 
-			const httpbin = 'https://httpbin.org/post'
-			const formData2 = new FormData()
-			const binary2 = new Uint8Array([ 97, 98, 99 ])
-			const abc = new File([binary2], 'abc.txt', { type: 'text/plain' })
-
-			formData2.set('greeting', 'Hello, world!')
-			formData2.set('file-upload', abc, 'new name.txt')
-
-			const response2 = await fetch(httpbin, { method: 'POST', body: formData2 })
-			const data2 = await response2.json()
-
-
-			let formData: FormData = new FormData();
-			
-			
-			
-			const blob: Blob = new Blob([binary]);
-			formData.append(fileName, blob);
-			let abc123 = formData.toString();
-			let x = binary.length;
-			const file = new File([binary], fileName);
-			//formData.append(fileName, file);
-
-
-			let headers = this._headers;
-			delete headers["Content-Type"];
+			let headers = { ...this._headers };
+			headers["Content-Type"] = "multipart/form-data; boundary=" + boundary;
 			delete headers["Content-Length"];
-			delete headers["Accept"];
-			//headers["Content-Type"] = "multipart/form-data";
-			headers["Content-Length"] = 12649;
 
 			const config: RequestInit = {
 				method: "POST",
 				headers: headers,
-				body: formData,
+				body: payload,
 				agent: getProxyAgent()
 			};
 			let response: Response = await fetch(endpoint, config);
 
 			let resultText = await response.text();
+			let ret: T;
+
 			await this.logResponse(resultText);
 			if (response.ok) {
 				if (!resultText || resultText == "") {
-					return { "value": { "status": response.status, "statusText": response.statusText } };
+					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
-				return JSON.parse(resultText);
+				else {
+					ret = JSON.parse(resultText);
+				}
 			}
 			else {
 				if (!resultText || resultText == "") {
-					return { "error": { "status": response.status, "statusText": response.statusText } };
+					ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				throw new Error(resultText);
 			}
+
+			this.logResponse(ret);
+			return ret;
+		} catch (error) {
+			this.handleApiException(error, false, raiseError);
+
+			return undefined;
+		}
+	}
+
+	static async importFile<T = any>(endpoint: string, uri: vscode.Uri, fileName: string, urlParams: object = {}, raiseError: boolean = false): Promise<T> {
+		try {
+			const binary: Uint8Array = await vscode.workspace.fs.readFile(uri);
+			const buffer = Buffer.from(binary);
+
+			return await this.postImport<T>(endpoint, buffer, fileName, urlParams, raiseError);
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);
 

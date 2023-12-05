@@ -2,20 +2,20 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../ThisExtension';
 import { Helper } from '../../helpers/Helper';
-import { iPowerBIDataset, iPowerBIDatasetExecuteQueries } from '../../powerbi/DatasetsAPI/_types';
+import { iPowerBIDatasetExecuteQueries } from '../../powerbi/DatasetsAPI/_types';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 import { QueryLanguage } from './_types';
-import { PowerBIDataset } from '../treeviews/workspaces/PowerBIDataset';
-import { iPowerResponseGeneric } from '../../powerbi/_types';
-import { PowerBIApiTreeItem } from '../treeviews/PowerBIApiTreeItem';
-import { PowerBINotebook } from './PowerBINotebook';
+import { iPowerBIResponseGeneric } from '../../powerbi/_types';
 import { PowerBINotebookContext } from './PowerBINotebookContext';
+import { TMDLProxy } from '../../TMDLVSCode/TMDLProxy';
+import { TMSLProxyExecuteResponse } from '../../TMDLVSCode/_typesTMSL';
 
 
 export type NotebookMagic =
 	"dax"
 	| "api"
 	| "cmd"
+	| "tmsl"
 	;
 
 // https://code.visualstudio.com/blogs/2021/11/08/custom-notebooks
@@ -143,6 +143,9 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 			else if (["cmd"].includes(magicText)) {
 				language = magicText as QueryLanguage;
 			}
+			else if (["tmsl"].includes(magicText)) {
+				language = magicText as QueryLanguage;
+			}
 			else {
 				throw new Error("Invalid magic! only %dax, %api and %cmd are supported");
 			}
@@ -156,6 +159,10 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 			if (cmdCompare.startsWith("SET")) {
 				magicText = "cmd";
 				language = "CMD";
+			}
+			if (cmdCompare.startsWith("{") && cmdCompare.endsWith("}")) {
+				magicText = "tmsl";
+				language = "TMSL";
 			}
 		}
 
@@ -189,8 +196,11 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 			let lines = commandText.split("\n").filter(l => l.trim()[0] != "#");
 			const commandTextClean = lines.join("\n");
 
-			let result: iPowerBIDatasetExecuteQueries | iPowerResponseGeneric = undefined;
+			let result: iPowerBIDatasetExecuteQueries | iPowerBIResponseGeneric | TMSLProxyExecuteResponse = undefined;
 			switch (magic) {
+				case "tmsl":
+					result = await TMDLProxy.executeTMSL(await TMDLProxy.getServerNameFromAPI(this.resolveRelativePath(context.apiRootPath, context)), commandText);
+					break;
 				case "dax":
 					result = await PowerBIApiService.executeQueries(this.resolveRelativePath(context.apiRootPath, context), commandText);
 					break;
@@ -200,7 +210,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					const match = commandTextClean.match(parseRegEx);
 					let method = match.groups["method"].trim().toUpperCase();
 					let endpoint = match.groups["endpoint"].trim();
-					let bodyString =  match.groups["body"];
+					let bodyString = match.groups["body"];
 
 					let body = undefined;
 					if (bodyString) {
@@ -291,7 +301,25 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 				return;
 			});
 
-			if (magic == "dax") {
+			if (magic == "tmsl") {
+				result = result as TMSLProxyExecuteResponse;
+				if (result.exception) {
+					execution.appendOutput(new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text(result.exception.message, 'text/plain'),
+					]));
+
+					execution.end(false, Date.now());
+					return;
+				}
+				else if (result.message) {
+					execution.appendOutput(new vscode.NotebookCellOutput([
+						vscode.NotebookCellOutputItem.text(result.message, 'text/plain'),
+					]));
+
+					execution.end(true, Date.now());
+				}
+			}
+			else if (magic == "dax") {
 				result = result as iPowerBIDatasetExecuteQueries;
 				if (result.error) {
 					execution.appendOutput(new vscode.NotebookCellOutput([
@@ -315,7 +343,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 				}
 			}
 			else if (magic == "api") {
-				result = result as iPowerResponseGeneric;
+				result = result as iPowerBIResponseGeneric;
 
 				let output: vscode.NotebookCellOutput;
 

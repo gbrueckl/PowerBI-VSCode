@@ -7,6 +7,7 @@ import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
+import { Response } from '@env/fetch';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIReport extends PowerBIWorkspaceTreeItem {
@@ -33,8 +34,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 		]
 
 		if (this.definition.reportType == "PaginatedReport") {
-			if(!this.definition.isOwnedByMe)
-			{
+			if (!this.definition.isOwnedByMe) {
 				actions.push("TAKEOVER")
 			}
 		}
@@ -42,6 +42,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 			actions.push("CLONE")
 			actions.push("REBIND")
 			actions.push("UPDATECONTENT")
+			actions.push("DOWNLOAD")
 		}
 
 		return orig + actions.join(",") + ",";
@@ -58,7 +59,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	// Report-specific funtions
 	public async takeOver(): Promise<void> {
 		ThisExtension.setStatusBar("Taking over report ...", true);
-		const apiUrl =  Helper.joinPath(this.apiPath, "Default.TakeOver");
+		const apiUrl = Helper.joinPath(this.apiPath, "Default.TakeOver");
 
 		PowerBIApiService.post(apiUrl, null);
 		ThisExtension.setStatusBar("Report taken over!");
@@ -68,13 +69,13 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 
 	public async delete(): Promise<void> {
 		await PowerBIApiTreeItem.delete(this, "yesNo");
-		
+
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public static async clone(report: PowerBIReport, settings: object = undefined): Promise<void> {
-		const apiUrl =  Helper.joinPath(report.apiPath, "Clone");
-		
+		const apiUrl = Helper.joinPath(report.apiPath, "Clone");
+
 		if (settings == undefined) // prompt user for inputs
 		{
 			PowerBICommandBuilder.execute<iPowerBIReport>(apiUrl, "POST",
@@ -92,7 +93,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	}
 
 	public static async rebind(report: PowerBIReport, settings: object = undefined): Promise<void> {
-		const apiUrl =  Helper.joinPath(report.apiPath, "Rebind");
+		const apiUrl = Helper.joinPath(report.apiPath, "Rebind");
 
 		if (settings == undefined) // prompt user for inputs
 		{
@@ -109,7 +110,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	}
 
 	public static async updateContent(report: PowerBIReport, settings: object = undefined): Promise<void> {
-		const apiUrl =  Helper.joinPath(report.apiPath, "UpdateReportContent");
+		const apiUrl = Helper.joinPath(report.apiPath, "UpdateReportContent");
 
 		if (settings == undefined) // prompt user for inputs
 		{
@@ -125,5 +126,26 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 		}
 
 		ThisExtension.TreeViewWorkspaces.refresh(report.parent, false);
+	}
+
+	public static async download(report: PowerBIReport, settings: { targetPath: vscode.Uri } = undefined): Promise<void> {
+		const apiUrl = Helper.joinPath(report.apiPath, "Export");
+
+		let targetPath: vscode.Uri;
+		if (settings == undefined) // prompt user for inputs
+		{
+			targetPath = await vscode.window.showSaveDialog({ "title": "Save report as ...", "saveLabel": "Download", "filters": { "Power BI Report": ["pbix"] } });
+		}
+		else {
+			targetPath = settings.targetPath;
+		}
+
+		if (!targetPath) // prompt user for inputs
+		{
+			Helper.showTemporaryInformationMessage("No target path selected. Aborting download.");
+			return;
+		}
+
+		await PowerBIApiService.downloadFile(apiUrl, targetPath);
 	}
 }

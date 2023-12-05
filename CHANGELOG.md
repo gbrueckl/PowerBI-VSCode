@@ -1,6 +1,16 @@
 # Change Log
 
-**v1.1.2**
+**v1.3.0**:
+- added support for `TMSL` in PBI notebooks using `%tmsl` magic
+- fixed issue with `POST` in notebooks
+- added autocompletion for notebook magics
+
+**v1.2.0**:
+- added support to `Download` reports via the context menu
+- added support to `Upload PBIX` on a workspace
+- added support for Drag & Drop of local `.pbix` files on a workspace to upload it
+
+**v1.1.2**:
 - fixed issue with delete in notebooks
 - fixed issue with relative path references in notebooks
 - reworked concatination of relative URLs
