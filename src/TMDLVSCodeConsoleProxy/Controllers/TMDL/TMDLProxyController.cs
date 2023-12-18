@@ -3,11 +3,8 @@ using Microsoft.AnalysisServices.Tabular.Tmdl;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 
-using TOM = Microsoft.AnalysisServices.Tabular;
-
 using Microsoft.AnalysisServices.Tabular;
 using System.Text.Json.Nodes;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
 {

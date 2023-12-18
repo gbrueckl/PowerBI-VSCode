@@ -10,11 +10,11 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TOM
 {
     [ApiController]
     [Route("[controller]")]
-    public class TMSLProxyController : ControllerBase
+    public class TOMProxyController : ControllerBase
     {
-        private readonly ILogger<TMSLProxyController> _logger;
+        private readonly ILogger<TOMProxyController> _logger;
 
-        public TMSLProxyController(ILogger<TMSLProxyController> logger)
+        public TOMProxyController(ILogger<TOMProxyController> logger)
         {
             _logger = logger;
         }
@@ -46,6 +46,8 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TOM
         {
             try
             {
+                _logger.LogInformation("/tom/test");
+                _logger.LogInformation("Creating TOM Server object ...");
                 Server s = new Server();
 
                 return Ok("Proxy is running!");
@@ -56,7 +58,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TOM
             }
         }
 
-        [HttpGet(Name = "TestConnection")]
+        [HttpPost(Name = "TestConnection")]
         [Route("/tom/testConnection")]
         public IActionResult TestConnection(
             [FromBody] TOMProxyRequest requestBody,
@@ -65,8 +67,11 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TOM
         {
             try
             {
+                _logger.LogInformation("/tom/testConnection");
+                _logger.LogInformation("Validating Headers ...");
                 Config.validateHeader(header);
 
+                _logger.LogInformation("Getting Server ...");
                 var server = ServerManager.GetServer(requestBody);
 
                 return Ok("Successfully connected to '" + server.Name + "'!");

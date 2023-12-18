@@ -40,6 +40,18 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	await ThisExtension.initializeLogger(context);
 
+	const prevInstalledVersion = context.globalState.get<vscode.Extension<any>>("powerbi-vscode.extension.installed", undefined);
+	if(!prevInstalledVersion || prevInstalledVersion.packageJSON.version !== context.extension.packageJSON.version) {
+		context.globalState.update("powerbi-vscode.extension.installed", context.extension);
+		const action = vscode.window.showInformationMessage(`PowerBI VSCode Extension updated to version ${context.extension.packageJSON.version}`, "Change Log");
+
+		action.then((value) => {
+			if(value == "Change Log") {
+				vscode.env.openExternal(vscode.Uri.parse(context.extension.packageJSON.repository.url + "/blob/main/CHANGELOG.md"));
+			}
+		});
+	}
+
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
 

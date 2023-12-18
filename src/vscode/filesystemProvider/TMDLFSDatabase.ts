@@ -47,7 +47,6 @@ export class TMDLFSDatabase {
 	}
 
 	async load(): Promise<void> {
-		ThisExtension.log("TMDLFSDatabase.load()");
 		await TMDLProxy.ensureProxy(ThisExtension.extensionContext);
 
 		if (this.loadingState == "not_loaded") {

@@ -67,7 +67,7 @@ export abstract class TMDLProxy {
 				const proxyDllPath = vscode.Uri.joinPath(context.extensionUri, "resources", "TMDLProxy", "TMDLVSCodeConsoleProxy.dll").fsPath;
 
 				TMDLProxy.log(`Starting TMDLProxy from ${proxyDllPath} with secret ${this._secret.substring(0, 10)}...`);
-				TMDLProxy.log(`CMD> dotnet "${proxyDllPath}" ${this._secret.substring(0, 10)}...`);
+				TMDLProxy.log(`CMD> dotnet "${proxyDllPath}" ${this._port} "${this._secret.substring(0, 10)}..."`);
 
 				TMDLProxy._terminal = vscode.window.createTerminal("TMDLProxy", "dotnet", [proxyDllPath, this._port.toString(), this._secret]);
 				context.subscriptions.push(TMDLProxy._terminal);
@@ -77,6 +77,7 @@ export abstract class TMDLProxy {
 						TMDLProxy._terminal.dispose();
 						TMDLProxy._terminal = undefined;
 						TMDLProxy._tmdlProxyUri = undefined;
+						TMDLProxy._loadingState = "stopped";
 
 						vscode.commands.executeCommand(
 							"setContext",
@@ -85,12 +86,15 @@ export abstract class TMDLProxy {
 						);
 
 						const action = await vscode.window.showWarningMessage(
-							"TMDLProxy was closed! Please start a new instance to continue working with TMDL!", "Restart TMDL Proxy");
+							"TMDLProxy could not be started or was closed! Please make sure the TMLD prerequisites are met start a new instance to continue working with TMDL!", "Restart TMDL Proxy", "Prerequisites");
 
 						if (action == "Restart TMDL Proxy") {
 							vscode.commands.executeCommand(
 								"PowerBI.TMDL.ensureProxy"
 							);
+						}
+						if (action == "Prerequisites") {
+							Helper.openLink("https://github.com/gbrueckl/PowerBI-VSCode?tab=readme-ov-file#prerequisites");
 						}
 					}
 				});
@@ -98,8 +102,8 @@ export abstract class TMDLProxy {
 				const pid = await TMDLProxy._terminal.processId;
 				TMDLProxy.log(`TMDLProxy started with PID ${pid}!`);
 
-				// there is no way to wait for the process within the terminal to be ready so we simply wait 500ms
-				await Helper.delay(500);
+				// there is no way to wait for the process within the terminal to be ready so we simply wait 2 seconds
+				await Helper.delay(2000);
 
 				if (DEBUG) {
 					TMDLProxy._port = DEBUG_PORT;
@@ -136,7 +140,7 @@ export abstract class TMDLProxy {
 			TMDLProxy.log(`TMDLProxy finished starting in other process!`);
 		}
 		else if (TMDLProxy._loadingState == "started") {
-			TMDLProxy.log(`TMDLProxy: TMDLProxy already running at ${TMDLProxy._tmdlProxyUri} `);
+			TMDLProxy.log(`TMDLProxy already running at ${TMDLProxy._tmdlProxyUri} `);
 		}
 	}
 
@@ -222,8 +226,7 @@ export abstract class TMDLProxy {
 				editor.setDecorations(errorDecoration, [])
 			}
 		}
-		else if(error.message)
-		{
+		else if (error.message) {
 			vscode.window.showErrorMessage(error.message);
 		}
 		else {
@@ -669,7 +672,7 @@ export abstract class TMDLProxy {
 				"databaseName": targetDatabaseName,
 				"fileName": backupFileName,
 				"allowOverwrite": allowOverwrite
-				};
+			};
 
 			await TMDLProxy.setAccessToken(body)
 
@@ -702,7 +705,7 @@ export abstract class TMDLProxy {
 				"connectionString": PowerBIApiService.getXmlaConnectionString(serverName),
 				"command": command,
 				"analyzeImpactOnly": analyzeImpactOnly
-				};
+			};
 
 			await TMDLProxy.setAccessToken(body)
 
@@ -782,7 +785,7 @@ export abstract class TMDLProxy {
 
 			await vscode.workspace.fs.copy(tmdlEntry.TMDLRootUri.uri, savePath, { overwrite: true });
 			vscode.workspace.fs.writeFile(
-				vscode.Uri.joinPath(savePath, SETTINGS_FILE), 
+				vscode.Uri.joinPath(savePath, SETTINGS_FILE),
 				Buffer.from(JSON.stringify({ "connectionString": tmdlEntry.XMLAConnectionString }, null, 4)));
 
 			vscode.window.showInformationMessage(`TMDL saved to ${savePath.fsPath}!`, "Add to Workspace", "Open Folder").then(

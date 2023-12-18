@@ -122,10 +122,12 @@ When you are done with your changes, you will find a `[Validate TMDL]` and a `[P
 ## Prerequisites
 The following prerequisites have to be fulfilled to use all TMDL features:
 
-- [ASP.NET Core Runtime 7.0.10](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (or higher)
+- .NET Runtime 7 (or higher)
+  - [ASP.NET Core Runtime 7.0.14 Windows Hosting Bundle](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-7.0.14-windows-hosting-bundle-installer) (includes [.NET Runtime 7.0.14](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-7.0.14-windows-x64-installer) and [ASP.NET Core Runtime 7.0.14](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-7.0.14-windows-x64-installer) for x64 and x86)
+  - [.NET Desktop Runtime 7.0.14 x64](windowsdesktop-runtime-7.0.14-win-x64.exe) (or [x86](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-7.0.14-windows-x86-installer))
 - make sure that the VSCode Setting `powerbi.TMDL.enabled` is set to `true` (=default)
 - the dataset must reside in a Premium Capacity
-- optionally you can also use VSCode to manage the authentication as it already happens for the rest of this extension. This has the advantage, that you will not be prompted every time you open VSCode. To use VSCode authenticaiton, make sure that the VSCode Setting `powerbi.TMDL.clientId` is set to either `058487e5-bde7-4aba-a5dc-2f9ac58cb668` or a custom AAD Application configured as described below:
+- (optionally) you can also use VSCode to manage the authentication as it already happens for the rest of this extension. This has the advantage, that you will not be prompted every time you open VSCode. To use VSCode authenticaiton, make sure that the VSCode Setting `powerbi.TMDL.clientId` is set to either `058487e5-bde7-4aba-a5dc-2f9ac58cb668` or a custom AAD Application configured as described below:
   - Redirect URIs for Mobile and desktop applications: `https://vscode.dev/redirect`
   - Delegated Permissions: `Workspace.Read.All`, `Dataset.Read.All`, `Dataset.ReadWrite.All`
   - Consent granted for the permissions above
@@ -174,6 +176,10 @@ The terminal also serves as a log which shows all individual requests sent to th
 Please refer to the [official docs and samples](https://github.com/microsoft/vscode-extension-samples#prerequisites)
 
 # FAQ
+
+**Q: I have so many workspaces and its hard to find the one I need, what can I do?**
+
+**A:** Every treeview (like the Power BI Workspace Browser) in VSCode is searchable by default. Simply click into the treeview and press `CTRL + F` as you would do in any other application to start a search
 
 **Q: I have a guest account in a remote client, can I still use this extension?**
 

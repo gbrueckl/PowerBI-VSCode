@@ -37,7 +37,12 @@ namespace TMDLVSCodeConsoleProxy
 
                     if(server.Connected && !knownServers.ContainsKey(connectionString))
                     {
+                        Console.WriteLine("Connected to " + connectionString);
                         knownServers.Add(connectionString, server);
+                    }
+                    else
+                    {
+                        throw new Exception("Could not connect to " + connectionString);
                     }
                 }
             }

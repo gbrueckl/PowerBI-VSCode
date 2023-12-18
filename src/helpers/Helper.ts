@@ -175,7 +175,6 @@ export abstract class Helper {
 
 
 	static openLink(link: string | vscode.Uri): void {
-		//vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(link));
 		if(typeof link === "string")
 		{
 			vscode.env.openExternal(vscode.Uri.parse(link));

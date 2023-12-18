@@ -1,11 +1,11 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v6.0",
+    "name": ".NETCoreApp,Version=v7.0",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
-    ".NETCoreApp,Version=v6.0": {
+    ".NETCoreApp,Version=v7.0": {
       "TMDLVSCodeConsoleProxy/1.0.0": {
         "dependencies": {
           "Microsoft.AnalysisServices.Tabular.Tmdl.NetCore.retail.amd64": "19.69.6.2-TmdlPreview",
@@ -605,7 +605,7 @@
           "Microsoft.OpenApi": "1.2.3"
         },
         "runtime": {
-          "lib/net6.0/Swashbuckle.AspNetCore.Swagger.dll": {
+          "lib/net7.0/Swashbuckle.AspNetCore.Swagger.dll": {
             "assemblyVersion": "6.5.0.0",
             "fileVersion": "6.5.0.0"
           }
@@ -616,7 +616,7 @@
           "Swashbuckle.AspNetCore.Swagger": "6.5.0"
         },
         "runtime": {
-          "lib/net6.0/Swashbuckle.AspNetCore.SwaggerGen.dll": {
+          "lib/net7.0/Swashbuckle.AspNetCore.SwaggerGen.dll": {
             "assemblyVersion": "6.5.0.0",
             "fileVersion": "6.5.0.0"
           }
@@ -624,7 +624,7 @@
       },
       "Swashbuckle.AspNetCore.SwaggerUI/6.5.0": {
         "runtime": {
-          "lib/net6.0/Swashbuckle.AspNetCore.SwaggerUI.dll": {
+          "lib/net7.0/Swashbuckle.AspNetCore.SwaggerUI.dll": {
             "assemblyVersion": "6.5.0.0",
             "fileVersion": "6.5.0.0"
           }

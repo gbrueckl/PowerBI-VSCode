@@ -1,5 +1,10 @@
 # Change Log
 
+**v1.3.1**:
+- fixed issue with TMDL Proxy ([#16](/../../issues/16), [#22](/../../issues/22))
+- upgraded TMLD Proxy version to .NET Framework 7
+- updated [TMDL Prerequisites](/README.md/#prerequisites) in README
+
 **v1.3.0**:
 - added support for `TMSL` in PBI notebooks using `%tmsl` magic
 - fixed issue with `POST` in notebooks
