@@ -96,7 +96,7 @@ export abstract class PowerBIApiService {
 	}
 
 	public static getXmlaEndpoint(workspace: string): vscode.Uri {
-		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl).with({ scheme: "powerbi" }), "v1.0", this.Org, workspace);
+		return vscode.Uri.joinPath(vscode.Uri.parse(this._apiBaseUrl).with({ scheme: "powerbi" }), "v1.0", this._tenantId ?? this.Org, workspace);
 	}
 
 	public static getXmlaConnectionString(workspace: string, database: string = undefined): string {
@@ -267,7 +267,7 @@ export abstract class PowerBIApiService {
 
 	public static getFullUrl(endpoint: string, params?: object): string {
 
-		let baseItems = this._apiBaseUrl.split("/").filter(x => x);
+		let baseItems = this._apiBaseUrl.split("/");
 		baseItems.push("v1.0");
 		baseItems.push(this.Org);
 		let pathItems = endpoint.split("/").filter(x => x);

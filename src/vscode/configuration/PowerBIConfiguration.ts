@@ -125,7 +125,8 @@ export abstract class PowerBIConfiguration {
 	}
 
 	static getValue<T>(key: string): T {
-		return this.config.get(key) as T;
+		const value: T = this.config.get<T>(key);
+		return value;
 	}
 
 	static setValue<T>(key: string, value: T, target: boolean | vscode.ConfigurationTarget = null): void {

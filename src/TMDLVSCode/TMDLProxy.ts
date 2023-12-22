@@ -196,14 +196,6 @@ export abstract class TMDLProxy {
 		const workspace = await PowerBIApiService.get<iPowerBIGroup>(`/groups/${workspaceId}`);
 
 		return workspace.name;
-
-		if (datasetId) {
-			const dataset = await PowerBIApiService.get<iPowerBIGroup>(`/groups/${workspaceId}/datasets/${datasetId}`);
-			return PowerBIApiService.getXmlaConnectionString(workspace.name, dataset.name);
-		}
-		else {
-			return PowerBIApiService.getXmlaConnectionString(workspace.name);
-		}
 	}
 
 	private static async handleException(resultText: string, source?: vscode.Uri): Promise<void> {
@@ -287,8 +279,7 @@ export abstract class TMDLProxy {
 			}
 			else {
 				let resultText = await response.text();
-				vscode.window.showErrorMessage(resultText);
-				return;
+				throw new Error(resultText);
 			}
 		} catch (error) {
 			await TMDLProxy.handleException(error);
@@ -474,7 +465,7 @@ export abstract class TMDLProxy {
 			}
 			else {
 				let resultText = await response.text();
-				vscode.window.showErrorMessage(resultText);
+				TMDLProxy.handleException(resultText);
 				return;
 			}
 		} catch (error) {

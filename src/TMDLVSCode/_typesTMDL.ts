@@ -5,7 +5,6 @@ export interface TMDLProxyRequest extends ProxyRequest { }
 export interface TMDLProxyData extends TMDLProxyRequest, TMDLProxyDataValidation { }
 
 export interface TMDLProxyDataException {
-	success: boolean;
 	path?: string;
 	lineNumber?: number;
 	lineText?: string;

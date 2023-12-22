@@ -10,6 +10,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AnalysisServices.Tabular.Tmdl.NetCore.retail.amd64" Version="19.69.6.2-TmdlPreview" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
 

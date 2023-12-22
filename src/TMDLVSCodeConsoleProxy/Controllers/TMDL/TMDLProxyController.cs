@@ -25,7 +25,6 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
             {
                 return BadRequest(new TMDLProxyDataException
                 {
-                    success = false,
                     message = "NULL Exception!"
                 });
             }
@@ -34,7 +33,6 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
                 TmdlFormatException fex = (TmdlFormatException)ex;
                 return BadRequest(new TMDLProxyDataException
                 {
-                    success = false,
                     message = fex.Message,
                     lineNumber = fex.LineNumber,
                     lineText = fex.LineText,
@@ -46,14 +44,12 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
                 TmdlAmbiguousSourceException asex = (TmdlAmbiguousSourceException)ex;
                 return BadRequest(new TMDLProxyDataException
                 {
-                    success = false,
                     message = asex.ToString()
                 });
             }
 
             return BadRequest(new TMDLProxyDataException
             {
-                success = false,
                 message = ex.Message
             });
         }

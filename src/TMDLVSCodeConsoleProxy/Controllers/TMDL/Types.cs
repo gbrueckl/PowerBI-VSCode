@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
 {
@@ -32,9 +33,9 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
         public TMDLProxyStreamEntry[]? streamEntries { get; set; }
     }
 
+    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class TMDLProxyDataException
     {
-        public bool success { get; set; }
         public string message { get; set; }
         public string? path { get; set; }
         public int? lineNumber { get; set; }

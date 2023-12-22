@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.3.2**:
+- fixed issue with TMDL/TOM features and guest accounts
+
 **v1.3.1**:
 - fixed issue with TMDL Proxy ([#16](/../../issues/16), [#22](/../../issues/22))
 - upgraded TMLD Proxy version to .NET Framework 7
