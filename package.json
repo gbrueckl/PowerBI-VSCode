@@ -39,15 +39,15 @@
 	],
 	"keywords": [
 		"Power BI",
-		"Rest",
-		"API",
-		"Reporting",
-		"Management",
 		"PowerBI",
+		"Fabric",
+		"REST",
+		"API",
 		"TMDL",
 		"XMLA",
 		"TMSL",
-		"TOM"
+		"TOM",
+		"DAX"
 	],
 	"activationEvents": [
 		"onNotebook:powerbi-notebook",
@@ -238,7 +238,7 @@
 				"enablement": "powerbi.isTMDLEnabled"
 			},
 			{
-				"command": "PowerBIWorkspace.insertPath",
+				"command": "PowerBIItem.insertPath",
 				"title": "Insert Path",
 				"icon": "$(code)",
 				"category": "PowerBI"
@@ -551,8 +551,8 @@
 					"group": "6_copypath"
 				},
 				{
-					"command": "PowerBIWorkspace.insertPath",
-					"when": "view == PowerBIWorkspaces",
+					"command": "PowerBIItem.insertPath",
+					"when": "view =~ /(PowerBIWorkspaces)|(PowerBIPipelines)|(PowerBIGateways)|(PowerBICapacities)/",
 					"group": "inline"
 				},
 				{

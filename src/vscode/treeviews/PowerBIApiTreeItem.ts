@@ -202,8 +202,25 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		urlParts = urlParts.filter(x => x.length > 0)
 
 		return `v1.0/${PowerBIApiService.Org}/${this.itemPath}/`;
-		return `v1.0/${urlParts.reverse().join("/")}/`;
 	}
+
+	async insertCode(): Promise<void> {
+        const editor = vscode.window.activeTextEditor;
+        if (editor === undefined) {
+            return;
+        }
+
+        const start = editor.selection.start;
+        const end = editor.selection.end;
+        const range = new vscode.Range(start.line, start.character, end.line, end.character);
+        await editor.edit((editBuilder) => {
+            editBuilder.replace(range, this.code);
+        });
+    }
+
+	get code(): string {
+		return Helper.trimChar("/" + this.apiPath.split("/").slice(2).join("/"), "/", false);
+	}	
 
 	public static async delete(apiItem: PowerBIApiTreeItem, confirmation: "yesNo" | "name" | undefined = undefined): Promise<void> {
 		if (confirmation) {

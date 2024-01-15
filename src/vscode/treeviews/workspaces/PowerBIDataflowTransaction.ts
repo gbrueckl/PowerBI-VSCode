@@ -118,7 +118,7 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 		return this.definition.id;
 	}
 
-	// Parameter-specific funtions
+	// DataflowTransaction-specific funtions
 	public async cancel(): Promise<void> {
 		ThisExtension.setStatusBar("Cancelling dataflow-refresh ...", true);
 		// dataflows work slightly different and the transaction is not linked to the dataflow

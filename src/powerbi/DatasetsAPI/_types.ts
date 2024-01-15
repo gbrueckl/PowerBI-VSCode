@@ -81,3 +81,12 @@ export class iPowerBIDatasetRefreshableObject {
 	table: string;
 	partition?: string;
 }
+
+export class iPowerBIDatasetColumnStatistics {
+	tableName: string;
+	columnName: string;
+	minValue: string;
+	maxValue: string;
+	cardinality: number;
+	maxLength: number;
+}

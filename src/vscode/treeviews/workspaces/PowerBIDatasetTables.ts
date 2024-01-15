@@ -5,9 +5,8 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIDataset } from './PowerBIDataset';
-import { iPowerBIDataset, iPowerBIDatasetDMV, iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
+import { iPowerBIDatasetDMV } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { PowerBIDatasetRefresh } from './PowerBIDatasetRefresh';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIDatasetTable } from './PowerBIDatasetTable';
 import { PowerBIWorkspaceGenericFolder } from './PowerBIWorkspaceGenericFolder';

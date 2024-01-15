@@ -30,6 +30,22 @@ export class PowerBIDatasetTableMeasure extends PowerBIWorkspaceTreeItem {
 		this.iconPath = this.getIcon();
 	}
 
+	// tooltip shown when hovering over the item
+	get _tooltip(): string {
+		let tooltip: string = "";
+		if ("properties" in this.definition) {
+			for (const [key, value] of Object.entries(this.definition?.properties)) {
+				if (typeof value === "string") {
+					if (value.length > 100) {
+						continue;
+					}
+				}
+				tooltip += `${key}: ${JSON.stringify(value, null, 4)}\n`;
+			}
+		}
+
+		return tooltip.trim();
+	}
 
 	// description is show next to the label
 	get _description(): string {
@@ -67,7 +83,7 @@ export class PowerBIDatasetTableMeasure extends PowerBIWorkspaceTreeItem {
 	}
 
 	// DatasetTableColumn-specific funtions
-		public async showDefinition(): Promise<void> {
+	public async showDefinition(): Promise<void> {
 		let result = this.definition;
 		if (this.definition.id == "ViaEnhancedApi") {
 			result = await PowerBIApiService.get(this.apiPath);

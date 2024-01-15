@@ -76,6 +76,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIItem.copyIdToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyIdToClipboard());
 	vscode.commands.registerCommand('PowerBIItem.copyNameToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyNameToClipboard());
 	vscode.commands.registerCommand('PowerBIItem.copyPathToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyPathToClipboard());
+	vscode.commands.registerCommand('PowerBIItem.insertPath', (treeItem: PowerBIApiTreeItem) => treeItem.insertCode());
 
 	// register PowerBIWorkspacesTreeProvider
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
@@ -90,12 +91,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIWorkspace.browseTMDL', (workspace: PowerBIWorkspace) => workspace.browseTMDL());
 	vscode.commands.registerCommand('PowerBIWorkspace.uploadPbix', (workspace: PowerBIWorkspace) => workspace.uploadPbix());
 	// generic commands
-	vscode.commands.registerCommand('PowerBIWorkspace.insertPath', (workspaceItem: PowerBIWorkspaceTreeItem) => workspaceItem.insertCode());
 
 	// Dataset commands
 	vscode.commands.registerCommand('PowerBIDataset.takeOver', (dataset: PowerBIDataset) => dataset.takeOver());
 	vscode.commands.registerCommand('PowerBIDataset.delete', (dataset: PowerBIDataset) => dataset.delete());
-	vscode.commands.registerCommand('PowerBIDataset.refresh', (dataset: PowerBIDataset) => dataset.refresh());
+	vscode.commands.registerCommand('PowerBIDataset.refresh', (dataset: PowerBIDataset) => dataset.refresh()); // same for Tables and partitions, no dedicated interface yet!
 	vscode.commands.registerCommand('PowerBIDatasetRefresh.cancel', (refresh: PowerBIDatasetRefresh) => refresh.cancel());
 	vscode.commands.registerCommand('PowerBIDataset.showRefresh', async (refresh: PowerBIDatasetRefresh) => refresh.showDefinition());
 	vscode.commands.registerCommand('PowerBIDataset.updateAllParameters', (dataset: PowerBIDataset) => dataset.updateAllParameters());

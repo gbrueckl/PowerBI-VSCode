@@ -4,10 +4,8 @@ import { UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { PowerBIDataset } from './PowerBIDataset';
-import { iPowerBIDataset, iPowerBIDatasetDMV, iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
+import { iPowerBIDatasetDMV } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { PowerBIDatasetRefresh } from './PowerBIDatasetRefresh';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIDatasetTable } from './PowerBIDatasetTable';
 import { PowerBIWorkspaceGenericFolder } from './PowerBIWorkspaceGenericFolder';
@@ -15,7 +13,6 @@ import { PowerBIDatasetTableColumn } from './PowerBIDatasetTableColumn';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasetTableColumns extends PowerBIWorkspaceGenericFolder {
-
 	constructor(
 		groupId: UniqueId,
 		parent: PowerBIWorkspaceTreeItem
@@ -39,7 +36,8 @@ export class PowerBIDatasetTableColumns extends PowerBIWorkspaceGenericFolder {
 			let children: PowerBIDatasetTableColumn[] = [];
 
 			try {
-				const items: iPowerBIDatasetDMV[] = await PowerBIApiService.getDMV(this.apiPath, "COLUMNS", "[TableID] = " + this.table.tableId, "[ExplicitName]");
+				const items: iPowerBIDatasetDMV[] = await PowerBIApiService.getDMV(this.apiPath, "COLUMNS", "[TableID] = " + this.table.tableId, "ExplicitName");
+				await this.table.loadColumnStatistics();
 
 				for (let item of items) {
 					let treeItem = new PowerBIDatasetTableColumn(item, this.groupId, this);

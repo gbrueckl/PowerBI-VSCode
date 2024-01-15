@@ -5,7 +5,7 @@ import { Helper, UniqueId } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PROCESSING_TYPES, PowerBIDataset } from './PowerBIDataset';
-import { iPowerBIDatasetDMV } from '../../../powerbi/DatasetsAPI/_types';
+import { iPowerBIDatasetColumnStatistics, iPowerBIDatasetDMV } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 import { PowerBIDatasetTableColumns } from './PowerBIDatasetTableColumns';
 import { PowerBIDatasetTableMeasures } from './PowerBIDatasetTableMeasures';
@@ -30,6 +30,41 @@ export class PowerBIDatasetTableColumn extends PowerBIWorkspaceTreeItem {
 		this.iconPath = this.getIcon();
 	}
 
+	// tooltip shown when hovering over the item
+	get _tooltip(): string {
+		let tooltip: string = "";
+
+		if (this.table) {
+			const columnStats = this.table.getColumnStatistic(this.name);
+			tooltip += `Column statistics:\n`;
+			for (const [key, value] of Object.entries(columnStats)) {
+				if (key.endsWith("Name") || value == undefined) { // we dont want to expose names again
+					continue;
+				}
+				if (typeof value === "string") {
+					if (value.length > 100) {
+						continue;
+					}
+				}
+				tooltip += `${key}: ${JSON.stringify(value, null, 4)}\n`;
+			}
+			tooltip += `------------------\n`;
+		}
+
+
+		if ("properties" in this.definition) {
+			for (const [key, value] of Object.entries(this.definition?.properties)) {
+				if (typeof value === "string") {
+					if (value.length > 100) {
+						continue;
+					}
+				}
+				tooltip += `${key}: ${JSON.stringify(value, null, 4)}\n`;
+			}
+		}
+
+		return tooltip.trim();
+	}
 
 	// description is show next to the label
 	get _description(): string {
@@ -50,11 +85,21 @@ export class PowerBIDatasetTableColumn extends PowerBIWorkspaceTreeItem {
 	}
 
 	get table(): PowerBIDatasetTable {
-		return this.parent as PowerBIDatasetTable;
+		return this.parent.parent as PowerBIDatasetTable;
 	}
 
 	get dataset(): PowerBIDataset {
 		return (this.table as PowerBIDatasetTable).dataset;
+	}
+
+	get columnStatistic(): object {
+		const colStats: iPowerBIDatasetColumnStatistics = this.table.getColumnStatistic(this.name);
+
+		if (colStats) {
+			return colStats;
+		}
+
+		return {};
 	}
 
 	// DatasetTableColumn-specific funtions

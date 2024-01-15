@@ -792,12 +792,16 @@ export abstract class PowerBIApiService {
 
 	static async getDMV(
 		apiPath: string,
-		dmv: "TABLES" | "MEASURES" | "COLUMNS" | "PARTITIONS",
+		dmv: "TABLES" | "MEASURES" | "COLUMNS" | "PARTITIONS" | "COLUMNSTATISTICS",
 		filter: string = undefined,
-		nameColumn: string = "[Name]",
-		idColumn: string = "[ID]",
+		nameColumn: string = "Name",
+		idColumn: string = "ID",
 	): Promise<iPowerBIDatasetDMV[]> {
 		let query = `INFO.${dmv}()`;
+		if(dmv == "COLUMNSTATISTICS") {
+			query = `${dmv}()`;
+		}
+		
 		if (filter) {
 			query = `FILTER(${query}, ${filter})`;
 		}
@@ -808,8 +812,13 @@ export abstract class PowerBIApiService {
 		let ret: iPowerBIDatasetDMV[] = [];
 
 		for (let row of rows) {
-			const properties = row;
-			ret.push({ "id": row[idColumn], "name": row[nameColumn], properties: row });
+			const properties = {};
+
+			for (const [key, value] of Object.entries(row)) {
+				const newKey = Helper.trimChar(Helper.trimChar(key, "["), "]");
+				properties[newKey] = value;
+			}
+			ret.push({ "id": properties[idColumn], "name": properties[nameColumn], properties: properties });
 		}
 
 		return ret;

@@ -69,11 +69,19 @@ export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem {
 		return (this.table as PowerBIDatasetTable).dataset;
 	}
 
+	get code(): string {
+		return JSON.stringify(this.refreshableObject, null, 4)
+	}
+
 	// DatasetTablePartition-specific funtions
+	get refreshableObject(): iPowerBIDatasetRefreshableObject {
+		return { table: this.table.name, partition: this.name };
+	}
+
 	public async refresh(): Promise<void> {
 		const isOnDedicatedCapacity = this.dataset.workspace.isPremiumCapacity;
-		const objectToRefresh: iPowerBIDatasetRefreshableObject = { table: this.table.name, partition: this.name };
-		await PowerBIDataset.refreshById(this.groupId.toString(), this.dataset.id, isOnDedicatedCapacity,[objectToRefresh]);
+
+		await PowerBIDataset.refreshById(this.groupId.toString(), this.dataset.id, isOnDedicatedCapacity,[this.refreshableObject]);
 
 		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this.dataset, false);
