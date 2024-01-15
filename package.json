@@ -586,6 +586,16 @@
 					"group": "navigation"
 				},
 				{
+					"command": "PowerBIDataset.refresh",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETTABLE,.*/ && viewItem =~ /.*,REFRESH,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDataset.refresh",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETTABLEPARTITION,.*/ && viewItem =~ /.*,REFRESH,.*/",
+					"group": "navigation"
+				},
+				{
 					"command": "PowerBIDataset.takeOver",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,TAKEOVER,.*/",
 					"group": "navigation"

@@ -4,18 +4,16 @@ import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { iPowerBIDataset, iPowerBIDatasetGenericResponse, iPowerBIDatasetParameter } from '../../../powerbi/DatasetsAPI/_types';
+import { iPowerBIDataset, iPowerBIDatasetGenericResponse, iPowerBIDatasetParameter, iPowerBIDatasetRefreshableObject } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIParameters } from './PowerBIParameters';
 import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
-import { QuickPickItem } from 'vscode';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
 import { PowerBIParameter } from './PowerBIParameter';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
-import { TMDL_EXTENSION, TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
+import { TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
 import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
-import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
 import { TMDLProxy } from '../../../TMDLVSCode/TMDLProxy';
 import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTables } from './PowerBIDatasetTables';
@@ -103,7 +101,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
-	public static async refreshById(workspaceId: string, datasetId: string, isOnDedicatedCapacity: boolean): Promise<void> {
+	public static async refreshById(workspaceId: string, datasetId: string, isOnDedicatedCapacity: boolean, objectsToRefresh?: iPowerBIDatasetRefreshableObject[]): Promise<void> {
 		ThisExtension.setStatusBar("Triggering dataset-refresh ...", true);
 		const apiUrl = Helper.joinPath("groups", workspaceId, "datasets", datasetId, "refreshes");
 
@@ -123,6 +121,10 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			}
 			body = {
 				"type": processType.label
+			}
+
+			if (objectsToRefresh) {
+				body["objects"] = objectsToRefresh;
 			}
 		}
 

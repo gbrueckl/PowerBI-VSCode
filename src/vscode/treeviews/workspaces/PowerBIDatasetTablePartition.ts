@@ -5,7 +5,7 @@ import { Helper, UniqueId } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PROCESSING_TYPES, PowerBIDataset } from './PowerBIDataset';
-import { iPowerBIDatasetDMV } from '../../../powerbi/DatasetsAPI/_types';
+import { iPowerBIDatasetDMV, iPowerBIDatasetRefreshableObject } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 import { PowerBIDatasetTableColumns } from './PowerBIDatasetTableColumns';
 import { PowerBIDatasetTableMeasures } from './PowerBIDatasetTableMeasures';
@@ -23,7 +23,7 @@ export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem {
 
 		this.definition = definition;
 
-		this.id = definition.id;
+		this.id = this.parent.uid + "/" + definition.id;
 		this.description = this._description;
 		this.tooltip = this._tooltip;
 		this.contextValue = this._contextValue;
@@ -33,7 +33,6 @@ export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem {
 
 	// description is show next to the label
 	get _description(): string {
-
 		return this.definition.id;
 	}
 
@@ -42,6 +41,18 @@ export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem {
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = [];
+
+		if (this.dataset.workspace.isPremiumCapacity) {
+			actions.push("REFRESH");
+		}
+
+		return orig + actions.join(",") + ",";
+	}
+
 	get definition(): iPowerBIDatasetDMV {
 		return super.definition as iPowerBIDatasetDMV;
 	}
@@ -51,12 +62,20 @@ export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem {
 	}
 
 	get table(): PowerBIDatasetTable {
-		return this.parent as PowerBIDatasetTable;
+		return this.parent.parent as PowerBIDatasetTable;
 	}
 
 	get dataset(): PowerBIDataset {
 		return (this.table as PowerBIDatasetTable).dataset;
 	}
 
-	// DatasetTableColumn-specific funtions
+	// DatasetTablePartition-specific funtions
+	public async refresh(): Promise<void> {
+		const isOnDedicatedCapacity = this.dataset.workspace.isPremiumCapacity;
+		const objectToRefresh: iPowerBIDatasetRefreshableObject = { table: this.table.name, partition: this.name };
+		await PowerBIDataset.refreshById(this.groupId.toString(), this.dataset.id, isOnDedicatedCapacity,[objectToRefresh]);
+
+		await Helper.delay(1000);
+		ThisExtension.TreeViewWorkspaces.refresh(this.dataset, false);
+	}
 }

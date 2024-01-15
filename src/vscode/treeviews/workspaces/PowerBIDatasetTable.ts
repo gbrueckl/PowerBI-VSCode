@@ -5,7 +5,7 @@ import { Helper, UniqueId } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PROCESSING_TYPES, PowerBIDataset } from './PowerBIDataset';
-import { iPowerBIDatasetDMV } from '../../../powerbi/DatasetsAPI/_types';
+import { iPowerBIDatasetDMV, iPowerBIDatasetRefreshableObject } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 import { PowerBIDatasetTableColumns } from './PowerBIDatasetTableColumns';
 import { PowerBIDatasetTableMeasures } from './PowerBIDatasetTableMeasures';
@@ -16,14 +16,15 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		definition: iPowerBIDatasetDMV,
-		group: UniqueId,
+		groupId: UniqueId,
 		parent: PowerBIDatasetTables
 	) {
-		super(definition.name, group, "DATASETTABLE", definition.id, parent, vscode.TreeItemCollapsibleState.Collapsed);
+		super(definition.name, groupId, "DATASETTABLE", definition.id, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this.definition = definition;
 
-		this.id = definition.id;
+		// the groupId is not unique for logical folders hence we make it unique
+		this.id = this.parent.id + "/" + definition.id;
 		this.description = this._description;
 		this.tooltip = this._tooltip;
 		this.contextValue = this._contextValue;
@@ -33,8 +34,7 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem {
 
 	// description is show next to the label
 	get _description(): string {
-		if('properties' in this.definition)
-		{
+		if ('properties' in this.definition) {
 			return this.definition["properties"]["description"];
 		}
 		return undefined;
@@ -83,48 +83,13 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem {
 		return children;
 	}
 
-	// DatasetRefresh-specific funtions
-	public static async refreshById(workspaceId: string, datasetId: string, isOnDedicatedCapacity: boolean): Promise<void> {
-		ThisExtension.setStatusBar("Triggering dataset-refresh ...", true);
-		const apiUrl = Helper.joinPath("groups", workspaceId, "datasets", datasetId, "refreshes");
-
-		let body = null;
-
-		// if we are on premium, we can use the Enhanced Refresh API
-		if (isOnDedicatedCapacity) {
-			const processType: vscode.QuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
-				//placeHolder: toolTip,
-				ignoreFocusOut: true
-				/*,
-				onDidSelectItem: item => window.showInformationMessage(`Focus ${++i}: ${item}`)
-				*/
-			});
-			if (processType == undefined || processType == null) {
-				return;
-			}
-			body = {
-				"type": processType.label
-			}
-		}
-
-		PowerBIApiService.post(apiUrl, body);
-		ThisExtension.setStatusBar("Dataset-refresh triggered!");
-		Helper.showTemporaryInformationMessage("Dataset-refresh triggered!", 3000);
-	}
-	
+	// DatasetTable-specific funtions
 	public async refresh(): Promise<void> {
-		const isOnDedicatedCapacity = this.dataset.workspace.definition.isOnDedicatedCapacity;
-		await PowerBIDataset.refreshById(this.groupId.toString(), this.id, isOnDedicatedCapacity);
+		const isOnDedicatedCapacity = this.dataset.workspace.isPremiumCapacity;
+		const objectToRefresh: iPowerBIDatasetRefreshableObject = { table: this.name };
+		await PowerBIDataset.refreshById(this.groupId.toString(), this.dataset.id, isOnDedicatedCapacity, [objectToRefresh]);
 
 		await Helper.delay(1000);
-		ThisExtension.TreeViewWorkspaces.refresh(this, false);
-	}
-
-	public async showDefinition(): Promise<void> {
-		let result = this.definition;
-
-		vscode.workspace.openTextDocument({ language: "json", content: JSON.stringify(result, null, "\t") }).then(
-			document => vscode.window.showTextDocument(document)
-		);
+		ThisExtension.TreeViewWorkspaces.refresh(this.dataset, false);
 	}
 }

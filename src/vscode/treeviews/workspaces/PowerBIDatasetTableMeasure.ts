@@ -23,7 +23,7 @@ export class PowerBIDatasetTableMeasure extends PowerBIWorkspaceTreeItem {
 
 		this.definition = definition;
 
-		this.id = definition.id;
+		this.id = this.parent.id + "/" + definition.id;
 		this.description = this._description;
 		this.tooltip = this._tooltip;
 		this.contextValue = this._contextValue;

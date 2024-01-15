@@ -77,3 +77,7 @@ export class iPowerBIDatasetDMV {
 	properties: object;
 }
 
+export class iPowerBIDatasetRefreshableObject {
+	table: string;
+	partition?: string;
+}
