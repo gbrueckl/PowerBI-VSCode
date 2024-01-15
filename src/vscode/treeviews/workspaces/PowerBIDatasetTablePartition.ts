@@ -12,14 +12,14 @@ import { PowerBIDatasetTableMeasures } from './PowerBIDatasetTableMeasures';
 import { PowerBIDatasetTable } from './PowerBIDatasetTable';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIDatasetTableColumn extends PowerBIWorkspaceTreeItem {
+export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem {
 
 	constructor(
 		definition: iPowerBIDatasetDMV,
 		group: UniqueId,
 		parent: PowerBIDatasetTableColumns
 	) {
-		super(definition.name, group, "DATASETTABLECOLUMN", definition.id, parent, vscode.TreeItemCollapsibleState.None);
+		super(definition.name, group, "DATASETTABLEPARTITION", definition.id, parent, vscode.TreeItemCollapsibleState.None);
 
 		this.definition = definition;
 
@@ -33,11 +33,12 @@ export class PowerBIDatasetTableColumn extends PowerBIWorkspaceTreeItem {
 
 	// description is show next to the label
 	get _description(): string {
+
 		return this.definition.id;
 	}
 
 	getIcon(): vscode.ThemeIcon {
-		return new vscode.ThemeIcon("library");
+		return new vscode.ThemeIcon("extensions");
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

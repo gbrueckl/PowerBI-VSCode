@@ -23,7 +23,7 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 		this.id = definition.objectId;
 		this.definition = definition;
 		
-		super.tooltip = this._tooltip;
+		this.tooltip = this._tooltip;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

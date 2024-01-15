@@ -28,10 +28,10 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 
 		this.definition = definition;
 
-		super.tooltip = this._tooltip;
-		super.contextValue = this._contextValue;
+		this.tooltip = this._tooltip;
+		this.contextValue = this._contextValue;
 
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};

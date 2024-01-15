@@ -20,7 +20,7 @@ export class PowerBIDashboard extends PowerBIWorkspaceTreeItem {
 		this.name = definition.displayName;
 		this.definition = definition;
 		
-		super.tooltip = this._tooltip;
+		this.tooltip = this._tooltip;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

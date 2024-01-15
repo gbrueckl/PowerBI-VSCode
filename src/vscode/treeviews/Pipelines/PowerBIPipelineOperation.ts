@@ -18,14 +18,14 @@ export class PowerBIPipelineOperation extends PowerBIPipelineTreeItem {
 		super(definition.id.toString(), "PIPELINEOPERATION", pipelineId, parent, vscode.TreeItemCollapsibleState.None);
 
 		this.definition = definition;
-		super.label = this._label
-		super.id = definition.id;
+		this.label = this._label
+		this.id = definition.id;
 		
 
-		super.tooltip = this._tooltip;
-		super.description = this._description;
+		this.tooltip = this._tooltip;
+		this.description = this._description;
 
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};

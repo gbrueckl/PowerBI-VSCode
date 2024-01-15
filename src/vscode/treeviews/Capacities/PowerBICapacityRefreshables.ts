@@ -18,7 +18,7 @@ export class PowerBICapacityRefreshables extends PowerBICapacityTreeItem {
 		super("Refreshables", "Refreshables", "CAPACITYREFRESHABLES", parent.capacity, parent);
 
 		// the groupId is not unique for logical folders hence we make it unique
-		super.id = parent.id + "/" + this.itemType.toString();
+		this.id = parent.id + "/" + this.itemType.toString();
 	}
 
 	// tooltip shown when hovering over the item

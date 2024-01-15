@@ -16,9 +16,9 @@ export class PowerBICapacityRefreshable extends PowerBICapacityTreeItem {
 		super(definition.id, definition.name, "CAPACITYREFRESHABLE", parent.capacity, parent, vscode.TreeItemCollapsibleState.None);
 		this.definition = definition;
 		
-		super.tooltip = this._tooltip;
+		this.tooltip = this._tooltip;
 
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};

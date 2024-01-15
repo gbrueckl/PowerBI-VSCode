@@ -36,12 +36,12 @@ export class PowerBIPipelineStageArtifacts extends PowerBIPipelineTreeItem imple
 		this.description = null;
 
 		// the groupId is not unique for logical folders hence we make it unique
-		super.id = pipelineId + "/" + stageOrder.toString() + "/" + artifactType;
-		super.iconPath = {
+		this.id = pipelineId + "/" + stageOrder.toString() + "/" + artifactType;
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
-		super.contextValue = this._contextValue;
+		this.contextValue = this._contextValue;
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {

@@ -20,7 +20,7 @@ export class PowerBIDataflows extends PowerBIWorkspaceTreeItem {
 		super("Dataflows", groupId, "DATAFLOWS", groupId, parent);
 
 		// the groupId is not unique for logical folders hence we make it unique
-		super.id = groupId + "/" + this.itemType.toString();
+		this.id = groupId + "/" + this.itemType.toString();
 	}
 
 	// tooltip shown when hovering over the item

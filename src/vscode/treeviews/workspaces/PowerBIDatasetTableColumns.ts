@@ -39,7 +39,7 @@ export class PowerBIDatasetTableColumns extends PowerBIWorkspaceGenericFolder {
 			let children: PowerBIDatasetTableColumn[] = [];
 
 			try {
-				const items: iPowerBIDatasetDMV[] = await PowerBIApiService.getDMV(this.apiPath, "COLUMNS", "[TableID] = " + this.id);
+				const items: iPowerBIDatasetDMV[] = await PowerBIApiService.getDMV(this.apiPath, "COLUMNS", "[TableID] = " + this.table.tableId, "[ExplicitName]");
 
 				for (let item of items) {
 					let treeItem = new PowerBIDatasetTableColumn(item, this.groupId, this);

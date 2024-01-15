@@ -16,8 +16,8 @@ export class PowerBIGatewayDatasource extends PowerBIGatewayTreeItem {
 		super(definition.datasourceName, "GATEWAY", definition.id, parent, vscode.TreeItemCollapsibleState.None);
 		this.definition = definition;
 		
-		super.tooltip = this._tooltip;
-		super.iconPath = new vscode.ThemeIcon("database");
+		this.tooltip = this._tooltip;
+		this.iconPath = new vscode.ThemeIcon("database");
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

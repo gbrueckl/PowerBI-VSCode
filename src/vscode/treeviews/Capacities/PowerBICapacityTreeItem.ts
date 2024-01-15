@@ -23,11 +23,11 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 
 		this._capacity = capacity;
 		
-		super.tooltip = this._tooltip;
-		super.description = this._description;
-		super.contextValue = this._contextValue;
+		this.tooltip = this._tooltip;
+		this.description = this._description;
+		this.contextValue = this._contextValue;
 
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
@@ -50,7 +50,7 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 
 	/* Overwritten properties from PowerBIApiTreeItem */
 	get parent(): PowerBICapacityTreeItem {
-		return this._parent as PowerBICapacityTreeItem;
+		return super.parent as PowerBICapacityTreeItem;
 	}
 
 	/* iPowerBICapacityItem implementation */

@@ -32,8 +32,8 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 
 		this.definition = definition;
 
-		super.tooltip = this._tooltip;
-		super.contextValue = this._contextValue;
+		this.tooltip = this._tooltip;
+		this.contextValue = this._contextValue;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

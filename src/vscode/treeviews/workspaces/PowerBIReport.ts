@@ -21,8 +21,8 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 
 		this.definition = definition;
 
-		super.tooltip = this._tooltip;
-		super.contextValue = this._contextValue;
+		this.tooltip = this._tooltip;
+		this.contextValue = this._contextValue;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

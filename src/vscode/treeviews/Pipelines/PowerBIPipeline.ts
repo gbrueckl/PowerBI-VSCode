@@ -18,7 +18,7 @@ export class PowerBIPipeline extends PowerBIPipelineTreeItem {
 		super(definition.displayName, "PIPELINE", definition.id, undefined, vscode.TreeItemCollapsibleState.Collapsed);
 		this.definition = definition;
 		
-		super.tooltip = this._tooltip;
+		this.tooltip = this._tooltip;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

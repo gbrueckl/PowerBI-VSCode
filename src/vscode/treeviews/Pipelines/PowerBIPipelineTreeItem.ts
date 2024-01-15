@@ -18,18 +18,18 @@ export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowe
 	) {
 		super(id, name, itemType, parent, collapsibleState);
 
-		super.definition = {
+		this.definition = {
 			name: name,
 			itemType: itemType,
 			id: id
 		};
 
-		super.id = this.uid as string;
-		super.tooltip = this._tooltip;
-		super.description = this._description;
-		super.contextValue = this._contextValue;
+		this.id = this.uid as string;
+		this.tooltip = this._tooltip;
+		this.description = this._description;
+		this.contextValue = this._contextValue;
 
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
@@ -45,7 +45,7 @@ export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowe
 	}
 
 	get parent(): PowerBIPipelineTreeItem {
-		return this._parent as PowerBIPipelineTreeItem;
+		return super.parent as PowerBIPipelineTreeItem;
 	}
 
 

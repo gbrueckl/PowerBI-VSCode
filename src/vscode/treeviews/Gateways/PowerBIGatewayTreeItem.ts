@@ -21,18 +21,12 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 	) {
 		super(id, name, itemType, parent, collapsibleState);
 
-		super.definition = {
-			name: name,
-			itemType: itemType,
-			id: id
-		};
+		this.id = this.uid as string;
+		this.tooltip = this._tooltip;
+		this.description = this._description;
+		this.contextValue = this._contextValue;
 
-		super.id = this.uid as string;
-		super.tooltip = this._tooltip;
-		super.description = this._description;
-		super.contextValue = this._contextValue;
-
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
@@ -68,7 +62,7 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 	}
 
 	set definition(value: iPowerBIGatewayItem) {
-		this._definition = value;
+		super.definition = value;
 	}
 
 	get parent(): PowerBIGatewayTreeItem {

@@ -29,8 +29,8 @@ export class PowerBIWorkspaceGenericFolder extends PowerBIWorkspaceTreeItem {
 
 		this.customApiUrlPart = apiUrlPart;
 		// the groupId is not unique for logical folders hence we make it unique
-		super.id = groupId + "/" + this.parent.uid + "/" + this.itemType.toString();
-		super.iconPath = {
+		this.id = groupId + "/" + this.parent.uid + "/" + this.itemType.toString();
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
@@ -54,7 +54,7 @@ export class PowerBIWorkspaceGenericFolder extends PowerBIWorkspaceTreeItem {
 		if(this.customApiUrlPart != undefined) {
 			return this.customApiUrlPart;
 		}
-		return super.apiUrlPart;
+		return this.apiUrlPart;
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {

@@ -22,17 +22,17 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 		super(definition.order.toString(), "PIPELINESTAGE", pipelineId, parent, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this.definition = definition;
-		super.label = this._label;
-		super.id = definition.order.toString() + "/" + definition.workspaceId;
+		this.label = this._label;
+		this.id = definition.order.toString() + "/" + definition.workspaceId;
 
-		super.tooltip = this._tooltip;
-		super.description = null;
+		this.tooltip = this._tooltip;
+		this.description = null;
 
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
-		super.contextValue = this._contextValue;
+		this.contextValue = this._contextValue;
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {

@@ -25,16 +25,16 @@ export class PowerBIPipelineStageArtifact extends PowerBIPipelineTreeItem implem
 
 		this.definition = definition;
 		this._artifactType = artifactType;
-		super.id = definition.artifactId;
+		this.id = definition.artifactId;
 
-		super.tooltip = this._tooltip;
-		super.description = this.definition.artifactId;
+		this.tooltip = this._tooltip;
+		this.description = this.definition.artifactId;
 
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
-		super.contextValue = this._contextValue;
+		this.contextValue = this._contextValue;
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {

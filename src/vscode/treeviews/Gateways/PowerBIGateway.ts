@@ -13,9 +13,9 @@ export class PowerBIGateway extends PowerBIGatewayTreeItem {
 		parent: PowerBIGatewayTreeItem
 	) {
 		super(definition.name, "GATEWAY", definition.id, parent, vscode.TreeItemCollapsibleState.Collapsed);
-		super.definition = definition;
+		this.definition = definition;
 		
-		super.tooltip = this._tooltip;
+		this.tooltip = this._tooltip;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

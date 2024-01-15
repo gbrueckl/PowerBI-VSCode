@@ -17,12 +17,12 @@ export class PowerBICapacityWorkload extends PowerBICapacityTreeItem {
 		super(definition.name, definition.name, "CAPACITYWORKLOAD", parent.capacity, parent, vscode.TreeItemCollapsibleState.None);
 		this.definition = definition;
 
-		super.id = Helper.joinPath(parent.capacity.id, "workload", definition.name);
+		this.id = Helper.joinPath(parent.capacity.id, "workload", definition.name);
 		
-		super.tooltip = this._tooltip;
-		super.description = this._description;
-		super.contextValue = this._contextValue;
-		super.iconPath = this.getIcon();
+		this.tooltip = this._tooltip;
+		this.description = this._description;
+		this.contextValue = this._contextValue;
+		this.iconPath = this.getIcon();
 	}
 
 	getIcon(): vscode.ThemeIcon {
@@ -45,6 +45,7 @@ export class PowerBICapacityWorkload extends PowerBICapacityTreeItem {
 
 		return orig + actions.join(",") + ",";
 	}
+	
 	get definition(): iPowerBICapacityWorkload {
 		return super.definition as iPowerBICapacityWorkload;
 	}

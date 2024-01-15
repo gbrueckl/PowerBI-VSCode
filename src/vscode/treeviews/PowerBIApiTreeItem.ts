@@ -38,13 +38,13 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 			uid: id
 		};
 
-		super.id = (id as string);
-		super.label = this.name;
-		super.tooltip = this._tooltip;
-		super.description = this._description;
-		super.contextValue = this._contextValue;
+		this.id = (id as string);
+		this.label = this.name;
+		this.tooltip = this._tooltip;
+		this.description = this._description;
+		this.contextValue = this._contextValue;
 
-		super.iconPath = {
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
@@ -57,7 +57,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	// tooltip shown when hovering over the item
 	get _tooltip(): string {
 		let tooltip: string = "";
-		for (const [key, value] of Object.entries(this.definition)) {
+		for (const [key, value] of Object.entries(this._definition)) {
 			if (typeof value === "string") {
 				if (value.length > 100) {
 					continue;
@@ -68,8 +68,6 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 
 		return tooltip.trim();
 	}
-
-
 
 	// description is show next to the label
 	get _description(): string {

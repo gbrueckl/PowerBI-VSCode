@@ -20,16 +20,16 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 		this.definition = definition;
 
-		super.id = definition.requestId;
-		super.label = this._label;
-		super.description = this._description;
-		super.tooltip = this._tooltip;
-		super.contextValue = this._contextValue;
-		super.iconPath = {
+		this.id = definition.requestId;
+		this.label = this._label;
+		this.description = this._description;
+		this.tooltip = this._tooltip;
+		this.contextValue = this._contextValue;
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
-		super.command = this._command;
+		this.command = this._command;
 	}
 
 	get _label(): string {

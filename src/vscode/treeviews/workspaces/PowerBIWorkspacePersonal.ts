@@ -16,35 +16,14 @@ export class PowerBIWorkspacePersonal extends PowerBIWorkspace {
 	) {
 		super(PowerBIWorkspace.MyWorkspace)
 
-		super.description = null;
-		super.iconPath = {
+		this.description = null;
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
-
-	get _contextValue(): string {
-		let actions: string[] = [
-			"MYWORKSPACE"
-		]
-
-		if(this.definition.isOnDedicatedCapacity)
-		{
-			actions.push("UNASSIGNCAPACITY");
-		}
-		else
-		{
-			actions.push("ASSIGNCAPACITY")
-		}
-
-		return actions.join(",") + ",";
-	}
-	protected getIconPath(theme: string): vscode.Uri {
-		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + '.png');
-	}
-
 	get apiUrlPart(): string {
 		return null;
 	}	

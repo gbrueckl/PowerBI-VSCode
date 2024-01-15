@@ -22,11 +22,11 @@ export class PowerBIParameter extends PowerBIWorkspaceTreeItem {
 
 		this.definition = definition;
 
-		super.description = definition.currentValue;
+		this.description = definition.currentValue;
 
 		// the parameter name is not unique hence we make it unique
-		super.id = this.dataset.uid + "/" + this.itemType.toString() + "/" + definition.name;
-		super.tooltip = this._tooltip;
+		this.id = this.dataset.uid + "/" + this.itemType.toString() + "/" + definition.name;
+		this.tooltip = this._tooltip;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

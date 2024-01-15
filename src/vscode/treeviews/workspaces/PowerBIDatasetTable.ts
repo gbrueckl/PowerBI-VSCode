@@ -9,6 +9,7 @@ import { iPowerBIDatasetDMV } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 import { PowerBIDatasetTableColumns } from './PowerBIDatasetTableColumns';
 import { PowerBIDatasetTableMeasures } from './PowerBIDatasetTableMeasures';
+import { PowerBIDatasetTablePartitions } from './PowerBIDatasetTablePartitions';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem {
@@ -32,7 +33,11 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem {
 
 	// description is show next to the label
 	get _description(): string {
-		return this.definition["properties"]["description"];
+		if('properties' in this.definition)
+		{
+			return this.definition["properties"]["description"];
+		}
+		return undefined;
 	}
 
 	getIcon(): vscode.ThemeIcon {
@@ -48,12 +53,16 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem {
 		return orig + actions.join(",") + ",";
 	}
 
-	get definition(): object {
-		return (super.definition as iPowerBIDatasetDMV).properties;
+	get definition(): iPowerBIDatasetDMV {
+		return super.definition as iPowerBIDatasetDMV;
 	}
 
 	private set definition(value: iPowerBIDatasetDMV) {
 		super.definition = value;
+	}
+
+	get tableId(): number {
+		return this.definition.properties["[ID]"];
 	}
 
 	get apiUrlPart(): string {
@@ -69,6 +78,7 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem {
 
 		children.push(new PowerBIDatasetTableColumns(this.groupId, this));
 		children.push(new PowerBIDatasetTableMeasures(this.groupId, this));
+		children.push(new PowerBIDatasetTablePartitions(this.groupId, this));
 
 		return children;
 	}

@@ -18,7 +18,7 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 		super(definition.id.toString(), definition.displayName, "CAPACITY", definition, parent);
 		this.definition = definition;
 
-		super.tooltip = this._tooltip;
+		this.tooltip = this._tooltip;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */

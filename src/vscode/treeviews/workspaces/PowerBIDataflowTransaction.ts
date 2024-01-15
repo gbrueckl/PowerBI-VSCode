@@ -24,12 +24,12 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 
 		this.definition = definition;
 
-		super.id = definition.id;
-		super.label = this._label;
-		super.description = this._description;
-		super.tooltip = this._tooltip;
-		super.contextValue = this._contextValue;
-		super.iconPath = {
+		this.id = definition.id;
+		this.label = this._label;
+		this.description = this._description;
+		this.tooltip = this._tooltip;
+		this.contextValue = this._contextValue;
+		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")
 		};

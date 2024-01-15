@@ -792,7 +792,7 @@ export abstract class PowerBIApiService {
 
 	static async getDMV(
 		apiPath: string,
-		dmv: "TABLES" | "MEASURES" | "COLUMNS",
+		dmv: "TABLES" | "MEASURES" | "COLUMNS" | "PARTITIONS",
 		filter: string = undefined,
 		nameColumn: string = "[Name]",
 		idColumn: string = "[ID]",

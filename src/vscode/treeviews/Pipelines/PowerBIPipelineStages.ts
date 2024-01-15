@@ -23,7 +23,7 @@ export class PowerBIPipelineStages extends PowerBIPipelineTreeItem {
 		this._pipelineId = pipelineId;
 
 		// the groupId is not unique for logical folders hence we make it unique
-		super.id = pipelineId + "/" + this.itemType.toString();
+		this.id = pipelineId + "/" + this.itemType.toString();
 	}
 
 	// tooltip shown when hovering over the item

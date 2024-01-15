@@ -22,7 +22,7 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 
 		this._groupId = groupId;
 
-		super.definition = {
+		this.definition = {
 			name: name,
 			group: groupId,
 			itemType: itemType,
@@ -35,7 +35,7 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 	}
 	
 	get parent(): PowerBIWorkspaceTreeItem {
-		return this._parent as PowerBIWorkspaceTreeItem;
+		return super.parent as PowerBIWorkspaceTreeItem;
 	}
 
 	public async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
