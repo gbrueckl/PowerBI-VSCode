@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.4.0**:
+- added support to drill down into individual tables of a dataset from the workspace browser
+
 **v1.3.2**:
 - fixed issue with TMDL/TOM features and guest accounts
 

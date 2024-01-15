@@ -8,7 +8,7 @@ import { iPowerBIGroup } from './GroupsAPI/_types';
 import { ApiItemType } from '../vscode/treeviews/_types';
 import { iPowerBIPipeline, iPowerBIPipelineOperation, iPowerBIPipelineStage, iPowerBIPipelineStageArtifacts } from './PipelinesAPI/_types';
 import { ApiUrlPair } from './_types';
-import { iPowerBIDataset, iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
+import { iPowerBIDataset, iPowerBIDatasetDMV, iPowerBIDatasetExecuteQueries, iPowerBIDatasetParameter } from './DatasetsAPI/_types';
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
@@ -458,7 +458,7 @@ export abstract class PowerBIApiService {
 
 	static async postImport<T = any>(endpoint: string, content: Buffer, datasetDisplayName: string, urlParams: object = {}, raiseError: boolean = false): Promise<T> {
 		urlParams["datasetDisplayName"] = datasetDisplayName;
-		
+
 		endpoint = this.getFullUrl(endpoint, urlParams);
 		ThisExtension.log("POST " + endpoint + " --> File: " + JSON.stringify(urlParams));
 
@@ -788,6 +788,31 @@ export abstract class PowerBIApiService {
 
 			return undefined;
 		}
+	}
+
+	static async getDMV(
+		apiPath: string,
+		dmv: "TABLES" | "MEASURES" | "COLUMNS",
+		filter: string = undefined,
+		nameColumn: string = "[Name]",
+		idColumn: string = "[ID]",
+	): Promise<iPowerBIDatasetDMV[]> {
+		let query = `INFO.${dmv}()`;
+		if (filter) {
+			query = `FILTER(${query}, ${filter})`;
+		}
+
+		const result: iPowerBIDatasetExecuteQueries = await this.executeQueries(apiPath, `EVALUATE ${query}`);
+		const rows = result.results[0].tables[0].rows;
+
+		let ret: iPowerBIDatasetDMV[] = [];
+
+		for (let row of rows) {
+			const properties = row;
+			ret.push({ "id": row[idColumn], "name": row[nameColumn], properties: row });
+		}
+
+		return ret;
 	}
 	//#endregion
 

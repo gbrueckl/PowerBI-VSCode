@@ -40,6 +40,12 @@ export type ApiItemType =
 |	"DATASETPARAMETER"
 |	"DATASETREFRESHES"			// container for Dataset refreshes
 |	"DATASETREFRESH"			// single Dataset refresh
+|	"DATASETTABLES"				// container for Dataset tables
+|	"DATASETTABLE"				// single Dataset table
+|	"DATASETTABLECOLUMNS"		// container for Dataset table columns
+|	"DATASETTABLECOLUMN"		// single Dataset table column
+|	"DATASETTABLEMEASURES"		// container for Dataset table measures
+|	"DATASETTABLEMEASURE"		// single Dataset table measure
 |	"DATAFLOWTRANSACTIONS"		// container for Dataflow refreshes
 |	"DATAFLOWTRANSACTION"		// single Dataflow refresh
 |	"DATAFLOWDATASOURCES"

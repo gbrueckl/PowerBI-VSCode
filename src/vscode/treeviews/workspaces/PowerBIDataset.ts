@@ -18,6 +18,7 @@ import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
 import { TMDLProxy } from '../../../TMDLVSCode/TMDLProxy';
 import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
+import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxyBackup, TOMProxyRestore {
@@ -86,6 +87,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 
 		children.push(new PowerBIParameters(this.groupId, this));
 		children.push(new PowerBIDatasetRefreshes(this.groupId, this));
+		children.push(new PowerBIDatasetTables(this.groupId, this));
 
 		return children;
 	}
@@ -109,7 +111,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 
 		// if we are on premium, we can use the Enhanced Refresh API
 		if (isOnDedicatedCapacity) {
-			const processType: QuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
+			const processType: vscode.QuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
 				//placeHolder: toolTip,
 				ignoreFocusOut: true
 				/*,
@@ -250,7 +252,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 	}
 }
 
-const PROCESSING_TYPES: vscode.QuickPickItem[] = [
+export const PROCESSING_TYPES: vscode.QuickPickItem[] = [
 	{
 		"label": "full",
 		"detail": "Processes an SQL Server Analysis Services object and all the objects that it contains. When Process Full is executed against an object that has already been processed, SQL Server Analysis Services drops all data in the object, and then processes the object. This kind of processing is required when a structural change has been made to an object, for example, when an attribute hierarchy is added, deleted, or renamed."

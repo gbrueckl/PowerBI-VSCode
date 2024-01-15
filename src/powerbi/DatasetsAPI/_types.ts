@@ -70,3 +70,10 @@ export class iPowerBIDatasetGenericResponse {
 		message: string
 	};
 }
+
+export class iPowerBIDatasetDMV {
+	id: string;
+	name: string;
+	properties: object;
+}
+
