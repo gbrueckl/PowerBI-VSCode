@@ -362,6 +362,12 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIDataset.copyConnectionString",
+				"title": "Copy ConnectionString",
+				"icon": "$(debug-disconnect)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIDatasetParameter.update",
 				"title": "Update",
 				"icon": "$(pencil)",
@@ -634,6 +640,11 @@
 					"command": "PowerBIDataset.updateAllParameters",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,UPDATEDATASETPARAMETERS,.*/",
 					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDataset.copyConnectionString",
+					"when": "view == PowerBIWorkspaces  && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,COPY_CONNECTIONSTRING,.*/",
+					"group": "6_copypath"
 				},
 				{
 					"command": "PowerBIDatasetRefresh.cancel",

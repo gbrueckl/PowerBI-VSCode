@@ -55,6 +55,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			actions.push("EDIT_TMDL");
 			actions.push("BACKUP");
 			actions.push("RESTORE");
+			actions.push("COPY_CONNECTIONSTRING");
 
 			if (this.definition.queryScaleOutSettings?.maxReadOnlyReplicas != 0) {
 				actions.push("SYNCREADONLYREPLICAS");
@@ -251,6 +252,10 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		ThisExtension.setStatusBar("Parameter updated!")
 
 		await ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
+	}
+
+	public async copyConnectionString(): Promise<void> {
+		vscode.env.clipboard.writeText(await this.getXMLACConnectionString());
 	}
 }
 

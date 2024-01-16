@@ -1,7 +1,11 @@
 # Change Log
 
 **v1.4.0**:
-- added support to drill down into individual tables of a dataset from the workspace browser
+- added support to drill down into individual tables, columns, measures and partitions of a dataset from the workspace browser
+- added ability to process individual tables/partitions from the UI
+- added column statistics based on DAX [`COLUMNSTATISTICS()`](https://learn.microsoft.com/en-us/dax/columnstatistics-function-dax)
+- enabled `Insert Path` for all treeviews
+- added `Copy ConnectionString` for datasets in Premium workspaces
 
 **v1.3.2**:
 - fixed issue with TMDL/TOM features and guest accounts

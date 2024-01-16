@@ -68,6 +68,23 @@ export class PowerBIDatasetTableColumn extends PowerBIWorkspaceTreeItem {
 
 	// description is show next to the label
 	get _description(): string {
+		if (this.table) {
+			const columnStats = this.table.getColumnStatistic(this.name);
+			if (columnStats) {
+				let desc: string = "";
+				if(columnStats.cardinality) {
+					desc += `Cnt: ${columnStats.cardinality}`;
+				}
+				if(columnStats.minValue && columnStats.maxValue) {
+					desc += ` | Min: ${columnStats.minValue} | Max: ${columnStats.maxValue}`;
+				}
+				if(columnStats.maxLength) {
+					desc += ` | MaxLength: ${columnStats.maxLength}`;
+				}
+
+				return desc;
+			}
+		}
 		return this.definition.id;
 	}
 

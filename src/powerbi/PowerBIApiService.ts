@@ -818,8 +818,13 @@ export abstract class PowerBIApiService {
 				const newKey = Helper.trimChar(Helper.trimChar(key, "["), "]");
 				properties[newKey] = value;
 			}
-			ret.push({ "id": properties[idColumn], "name": properties[nameColumn], properties: properties });
+			ret.push({ 
+				"id": properties[idColumn], 
+				"name": properties[nameColumn] ?? properties["InferredName"], // sometimes InferredName is used
+				"properties": properties });
 		}
+
+		Helper.sortArrayByProperty(ret, "name");
 
 		return ret;
 	}

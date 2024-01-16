@@ -127,6 +127,9 @@ export abstract class Helper {
 				ThisExtension.log("WARNING: sortArrayByProperty: property '" + property + "' does not exist on one of the items.\n" + JSON.stringify(t1) + "\n" + JSON.stringify(t2));
 				return 0;
 			}
+			if( t1[property] == undefined ||  t2[property] == undefined){
+				return 0;
+			}
 			const name1 = t1[property].toString().toLowerCase();
 			const name2 = t2[property].toString().toLowerCase();
 			if (name1 > name2) { return 1 * direction_num; }
