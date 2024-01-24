@@ -65,7 +65,7 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem {
 	get _contextValue(): string {
 		let orig: string = super._contextValue;
 
-		let actions: string[] = ["REFRESH"]
+		let actions: string[] = ["REFRESH", "LOADSTATISTICS"];
 
 		return orig + actions.join(",") + ",";
 	}
@@ -104,19 +104,28 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem {
 	}
 
 	async loadColumnStatistics(): Promise<void> {
-		const columnStats = await PowerBIApiService.getDMV(this.apiPath, "COLUMNSTATISTICS", `[Table Name] = "${this.name}"`, "Column Name");
+		try {
+			const columnStats = await PowerBIApiService.getDMV(this.apiPath, "COLUMNSTATISTICS", `[Table Name] = "${this.name}"`, "Column Name");
 
-		this._columnStatistics = [];
+			this._columnStatistics = [];
 
-		for (let stats of columnStats) {
-			this._columnStatistics.push({
-				tableName: stats.properties["Table Name"],
-				columnName: stats.properties["Column Name"],
-				minValue: stats.properties["Min"],
-				maxValue: stats.properties["Max"],
-				cardinality: stats.properties["Cardinality"],
-				maxLength: stats.properties["Max Length"],
-			})
+			for (let stats of columnStats) {
+				this._columnStatistics.push({
+					tableName: stats.properties["Table Name"],
+					columnName: stats.properties["Column Name"],
+					minValue: stats.properties["Min"],
+					maxValue: stats.properties["Max"],
+					cardinality: stats.properties["Cardinality"],
+					maxLength: stats.properties["Max Length"],
+				})
+			}
+
+			ThisExtension.TreeViewWorkspaces.refresh(this, false);
+		}
+		catch (error) {
+			const msg = `Error loading column statistics for table ${this.name}: ${error.message}`
+			vscode.window.showErrorMessage(msg);
+			ThisExtension.log(msg);
 		}
 	}
 

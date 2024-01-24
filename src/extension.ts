@@ -34,6 +34,7 @@ import { TMDLFSCache } from './vscode/filesystemProvider/TMDLFSCache';
 import { PowerBIDataflowTransaction } from './vscode/treeviews/workspaces/PowerBIDataflowTransaction';
 import { PowerBICapacityWorkload } from './vscode/treeviews/Capacities/PowerBICapacityWorkload';
 import { TOMProxyBackup, TOMProxyRestore } from './TMDLVSCode/_typesTOM';
+import { PowerBIDatasetTable } from './vscode/treeviews/workspaces/PowerBIDatasetTable';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -106,6 +107,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	// DatasetParameter commands
 	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
 
+	// Table(s) commands
+	vscode.commands.registerCommand('PowerBIDatasetTable.loadColumnStatistics', (table: PowerBIDatasetTable) => table.loadColumnStatistics());
 
 
 	// Report commands

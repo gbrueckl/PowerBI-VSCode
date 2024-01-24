@@ -295,6 +295,12 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIDatasetTable.loadColumnStatistics",
+				"title": "Load Column Statistics",
+				"icon": "$(graph)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBI.TOM.backup",
 				"title": "Backup",
 				"icon": "$(cloud-upload)",
@@ -650,6 +656,11 @@
 					"command": "PowerBIDatasetRefresh.cancel",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESH,.*/ && viewItem =~ /.*,CANCEL,.*/",
 					"group": "inline"
+				},
+				{
+					"command": "PowerBIDatasetTable.loadColumnStatistics",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETTABLE,.*/ && viewItem =~ /.*,LOADSTATISTICS,.*/",
+					"group": "2_operations"
 				},
 				{
 					"command": "PowerBIDatasetParameter.update",

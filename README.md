@@ -72,7 +72,7 @@ POST /dashboards
 ```
 
 The JSON-body can also be omitted, e.g. for a GET request.
-Supported METHODs are `GET`, `POST`, `PUT`, `PATCH` and `DELETE`. the _endpoint_ can either be absolute (e.g. `https://api.powerbi.com/v1.0/myorg/dashboards`), relative to the root of the API (e.g. `/dashboards`) or relative to the path set via notebook variables `API_ROOT_PATH` (e.g. `./refreshes`) (see [Using Variables](#using-variables) below)
+Supported METHODs are `GET`, `POST`, `PUT`, `PATCH` and `DELETE`. the _endpoint_ can either be absolute (e.g. `https://api.powerbi.com/v1.0/myorg/dashboards`), relative to the root of the API (e.g. `/dashboards`) or relative to the path set via notebook variables `API_ROOT_PATH` (e.g. `./refreshes`) (see [Using Variables](#using-variables-cmd) below)
 
 ## Execute DAX queries (%dax)
 To run a DAX query from within the notebook, you have to use the cell magic `%dax` in the very first line of your cell. The following lines will contain the actual DAX query:
@@ -82,7 +82,7 @@ To run a DAX query from within the notebook, you have to use the cell magic `%da
 EVALUATE MyTable
 ```
 
-For this to work, you first need to set the variable `DATASET` in your notebook before - see [Using Variables](#using-variables) below.
+For this to work, you first need to set the variable `DATASET` in your notebook before - see [Using Variables](#using-variables-cmd) below.
 
 ## Using variables (%cmd)
 You can also define and use variables within the notebook. To set a variable you can use
