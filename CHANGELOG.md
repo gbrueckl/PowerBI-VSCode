@@ -6,6 +6,9 @@
 - added column statistics based on DAX [`COLUMNSTATISTICS()`](https://learn.microsoft.com/en-us/dax/columnstatistics-function-dax)
 - enabled `Insert Path` for all treeviews
 - added `Copy ConnectionString` for datasets in Premium workspaces
+- added duration for running refreshes
+- added `Insert Code` for new workspace objects (`Tables`(Refreshable Object), `Partitions`(Refreshable Object), `Columns`(DAX), `Measures`(DAX))
+- added support for custom API endpoints for every cell (`%dax /groups/....`)
 
 **v1.3.2**:
 - fixed issue with TMDL/TOM features and guest accounts

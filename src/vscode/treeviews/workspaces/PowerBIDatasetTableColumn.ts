@@ -101,6 +101,10 @@ export class PowerBIDatasetTableColumn extends PowerBIWorkspaceTreeItem {
 		super.definition = value;
 	}
 
+	get code(): string {
+		return `'${this.table.name}'[${this.name}]`;
+	}
+
 	get table(): PowerBIDatasetTable {
 		return this.parent.parent as PowerBIDatasetTable;
 	}

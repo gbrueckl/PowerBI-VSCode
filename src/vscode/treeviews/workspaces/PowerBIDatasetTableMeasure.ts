@@ -65,6 +65,10 @@ export class PowerBIDatasetTableMeasure extends PowerBIWorkspaceTreeItem {
 		super.definition = value;
 	}
 
+	get code(): string {
+		return `[${this.name}]`;
+	}
+
 	get table(): PowerBIDatasetTable {
 		return this.parent as PowerBIDatasetTable;
 	}

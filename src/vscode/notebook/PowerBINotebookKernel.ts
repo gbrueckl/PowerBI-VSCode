@@ -122,17 +122,20 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 		}
 	}
 
-	private parseCommand(cell: vscode.NotebookCell): [QueryLanguage, string, NotebookMagic] {
+	private parseCommand(cell: vscode.NotebookCell): [QueryLanguage, string, NotebookMagic, string] {
 		let cmd: string = cell.document.getText();
 		let commandText: string = cmd;
 
 		// default is API
 		let language: QueryLanguage = "API";
 		let magicText: string = "api";
+		let customApi: string = undefined;
 
 		if (cmd[0] == "%") {
 			let lines = cmd.split('\n');
-			magicText = lines[0].split(" ")[0].slice(1).trim().toLowerCase();
+			const firstLineTokens = lines[0].split(" ").map(t => t.trim()).filter(t => t != "");
+			magicText = firstLineTokens[0].slice(1).toLowerCase();
+			customApi = firstLineTokens[1];
 			commandText = lines.slice(1).join('\n');
 			if (["dax"].includes(magicText)) {
 				language = magicText as QueryLanguage;
@@ -166,12 +169,15 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 			}
 		}
 
-		return [language, commandText, magicText as NotebookMagic];
+		return [language, commandText, magicText as NotebookMagic, customApi];
 	}
 
-	private resolveRelativePath(endpoint: string, context: PowerBINotebookContext): string {
+	private resolveRelativePath(endpoint: string, apiRootPath: string): string {
+		if (!endpoint) {
+			return apiRootPath;
+		}
 		if (endpoint.startsWith('./')) {
-			endpoint = Helper.trimChar(Helper.joinPath(context.apiRootPath, endpoint.slice(2)), "/");
+			endpoint = Helper.trimChar(Helper.joinPath(apiRootPath, endpoint.slice(2)), "/");
 		}
 
 		return endpoint;
@@ -188,21 +194,23 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 			let commandText: string = cell.document.getText();
 			let magic: NotebookMagic = null;
 			let language: QueryLanguage = null;
+			let customApi: string = null;
 
-			[language, commandText, magic] = this.parseCommand(cell);
+			[language, commandText, magic, customApi] = this.parseCommand(cell);
 
 			ThisExtension.log("Executing " + language + ":\n" + commandText);
 
 			let lines = commandText.split("\n").filter(l => l.trim()[0] != "#");
 			const commandTextClean = lines.join("\n");
+			customApi = this.resolveRelativePath(customApi, context.apiRootPath);
 
 			let result: iPowerBIDatasetExecuteQueries | iPowerBIResponseGeneric | TMSLProxyExecuteResponse = undefined;
 			switch (magic) {
 				case "tmsl":
-					result = await TMDLProxy.executeTMSL(await TMDLProxy.getServerNameFromAPI(this.resolveRelativePath(context.apiRootPath, context)), commandText);
+					result = await TMDLProxy.executeTMSL(await TMDLProxy.getServerNameFromAPI(customApi), commandText);
 					break;
 				case "dax":
-					result = await PowerBIApiService.executeQueries(this.resolveRelativePath(context.apiRootPath, context), commandText);
+					result = await PowerBIApiService.executeQueries(customApi, commandText);
 					break;
 				case "api":
 
@@ -217,7 +225,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 						body = JSON.parse(bodyString);
 					}
 
-					endpoint = this.resolveRelativePath(endpoint, context);
+					endpoint = this.resolveRelativePath(endpoint, customApi);
 
 					switch (method) {
 						case "GET":

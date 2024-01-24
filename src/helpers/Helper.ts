@@ -315,4 +315,10 @@ export abstract class Helper {
 			};
 		});
 	}
+
+	static toLocalDateTime(dateTime: Date): Date {
+		const offset = new Date().getTimezoneOffset() * 60 * 1000;
+		let localDateTime = new Date(dateTime.getTime() - offset);
+		return localDateTime;
+	}
 }

@@ -43,11 +43,21 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 		let duration: number = this.duration;
 		let durationText: string = "";
-		if(this.duration)
-		{
+		if (this.duration) {
 			durationText = `(${Helper.secondsToHms(duration)})`;
 		}
-	
+		else {
+			if (this.startTime) {
+				if(this.definition.extendedStatus == "InProgress") {
+					const runningFor = (new Date().getTime() - this.startTime.getTime()) / 1000;
+					durationText = `(${Helper.secondsToHms(runningFor)} ...)`;
+				}
+				else {
+					durationText = `(${this.status})`;
+				}
+			}
+		}
+
 		return `${this.status} ${durationText} - ${this.definition.refreshType}`;
 	}
 
@@ -56,6 +66,9 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 		if (status == "NotStarted") {
 			status = "pending";
+		}
+		if (status == "Cancelled") {
+			status = "failed";
 		}
 
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, status + '.png');
@@ -93,32 +106,28 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 	}
 
 	get status(): string {
-		if(this.definition.extendedStatus)
-		{
+		if (this.definition.extendedStatus) {
 			return this.definition.extendedStatus;
 		}
 		return this.definition.status;
 	}
 
 	get startTime(): Date {
-		if(this.definition.startTime)
-		{
-			return new Date(this.definition.startTime);
+		if (this.definition.startTime) {
+			return Helper.toLocalDateTime(new Date(this.definition.startTime));
 		}
 		return undefined;
 	}
 
 	get endTime(): Date {
-		if(this.definition.endTime)
-		{
-			return new Date(this.definition.endTime);
+		if (this.definition.endTime) {
+			return Helper.toLocalDateTime(new Date(this.definition.endTime));
 		}
 		return undefined;
 	}
 
 	get duration(): number {
-		if(this.startTime && this.endTime)
-		{
+		if (this.startTime && this.endTime) {
 			return (this.endTime.getTime() - this.startTime.getTime()) / 1000;
 		}
 		return undefined;

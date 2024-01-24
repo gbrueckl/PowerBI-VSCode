@@ -35,10 +35,22 @@ The extension supports the following VSCode settings:
 # Notebooks
 You can open a new Power BI notebook via the UI from the header of each treeview or by running the command **Open new PowerBI Notebook** (command `PowerBI.openNewNotebook`). Power BI notebooks have the file extension `.pbinb` and will automatically open in the notebook editor.
 
-There are two core features of notebooks:
-- running arbitrary REST API calls
-- executing DAX queries against a dataset
-- set variables to be used in subsequent cells
+The following features are supported by notebooks and can be used using magic tags in the first line of the cell:
+- running arbitrary [REST API calls](#run-rest-api-calls-api) (magic `%api`)
+- executing [DAX](#execute-dax-queries-dax) queries against a dataset (magic `%dax`)
+- executing [TMSL](#execute-dax-queries-dax) statements against a dataset (requires [TMDL](#tmdl)) (magic `%tmsl`)
+- setting [variables](#using-variables-cmd) to be used in subsequent cells (magic `%cmd`)
+
+Next to the magic itself you can also specify a custom API endpoint for every cell right after the magic tag:
+
+``` dax
+%dax /groups/ccce57d1-10af-1234-1234-665f8bbd8458/datasets/51ba6d4b-1234-1234-8635-a7d743a5ea89
+EVALUATE INFO.TABLES()
+```
+
+This overwrites the `API_PATH` set for the notebook to run DAX queries. You can now run multiple DAX statements against different datasets from within the same notebook without changing the `API_PATH` every time. For example if you want to run the same query against `TEST` and `PROD` to compare results etc.
+
+Custom API endpoints work for all magics except `%cmd` which does not interact with the API at all.
 
 For proper visualization of the results I highly recommend to also install the [Data Table Renderers extension](https://marketplace.visualstudio.com/items?itemName=RandomFractalsInc.vscode-data-table)!
 
