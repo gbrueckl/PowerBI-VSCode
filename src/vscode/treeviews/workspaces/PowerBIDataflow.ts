@@ -61,7 +61,7 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 		ThisExtension.setStatusBar("Dataflow-refresh triggered");
 		Helper.showTemporaryInformationMessage("Dataflow-refresh triggered!", 3000);
 
-		await Helper.delay(500);
+		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this, false);
 	}
 

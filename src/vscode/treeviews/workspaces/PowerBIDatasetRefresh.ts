@@ -34,8 +34,10 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 	get _label(): string {
 		let dateToShow: Date = this.startTime;
+		const offset = dateToShow.getTimezoneOffset();
+		dateToShow = new Date(dateToShow.getTime() - (offset*60*1000));
 
-		return `${new Date(dateToShow).toISOString().substr(0, 19).replace('T', ' ')}`;
+		return `${dateToShow.toISOString().substr(0, 19).replace('T', ' ')}`;
 	}
 
 	// description is show next to the label
@@ -69,6 +71,10 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		}
 		if (status == "Cancelled") {
 			status = "failed";
+		}
+
+		if(this.definition.extendedStatus == "InProgress") {
+			status = "inprogress";
 		}
 
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, status + '.png');
@@ -114,14 +120,16 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 	get startTime(): Date {
 		if (this.definition.startTime) {
-			return Helper.toLocalDateTime(new Date(this.definition.startTime));
+			return new Date(this.definition.startTime);
+			//return Helper.toLocalDateTime(new Date(this.definition.startTime));
 		}
 		return undefined;
 	}
 
 	get endTime(): Date {
 		if (this.definition.endTime) {
-			return Helper.toLocalDateTime(new Date(this.definition.endTime));
+			return new Date(this.definition.endTime);
+			//return Helper.toLocalDateTime(new Date(this.definition.endTime));
 		}
 		return undefined;
 	}

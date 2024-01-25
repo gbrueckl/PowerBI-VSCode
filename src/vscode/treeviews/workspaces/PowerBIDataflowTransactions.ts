@@ -8,32 +8,16 @@ import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIDataflow } from './PowerBIDataflow';
 import { PowerBIDataflowTransaction } from './PowerBIDataflowTransaction';
 import { iPowerBIDataflowTransaction } from '../../../powerbi/DataflowsAPI/_types';
+import { PowerBIWorkspaceGenericFolder } from './PowerBIWorkspaceGenericFolder';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIDataflowTransactions extends PowerBIWorkspaceTreeItem {
+export class PowerBIDataflowTransactions extends PowerBIWorkspaceGenericFolder {
 
 	constructor(
 		groupId: UniqueId,
 		parent: PowerBIWorkspaceTreeItem
 	) {
-		super("Transactions", groupId, "DATAFLOWTRANSACTIONS", groupId, parent);
-
-		// the groupId is not unique for logical folders hence we make it unique
-		this.id = groupId + "/" + this.parent.uid + "/" + this.itemType.toString();
-	}
-
-	// tooltip shown when hovering over the item
-	get _tooltip(): string {
-		return undefined;
-	}
-
-	// description is show next to the label
-	get _description(): string {
-		return undefined;
-	}
-
-	get apiUrlPart(): string {
-		return "transactions";
+		super("Refreshes", "DATAFLOWTRANSACTIONS", groupId, parent, "transactions");
 	}
 
 	get dataflow(): PowerBIDataflow {

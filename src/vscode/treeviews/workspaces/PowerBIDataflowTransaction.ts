@@ -37,13 +37,34 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 
 	get _label(): string {
 		let dateToShow: Date = this.startTime;
+		const offset = dateToShow.getTimezoneOffset();
+		dateToShow = new Date(dateToShow.getTime() - (offset*60*1000));
 
-		return `${new Date(dateToShow).toISOString().substr(0, 19).replace('T', ' ')}`;
+		return `${dateToShow.toISOString().substr(0, 19).replace('T', ' ')}`;
 	}
 
 	// description is show next to the label
 	get _description(): string {
 
+		let duration: number = this.duration;
+		let durationText: string = "";
+		if (this.duration) {
+			durationText = `(${Helper.secondsToHms(duration)})`;
+		}
+		else {
+			if (this.startTime) {
+				if(this.definition.status == "InProgress") {
+					const runningFor = (new Date().getTime() - this.startTime.getTime()) / 1000;
+					durationText = `(${Helper.secondsToHms(runningFor)} ...)`;
+				}
+				else {
+					durationText = `(${this.definition.status})`;
+				}
+			}
+		}
+
+		return `${this.definition.status} ${durationText} - ${this.definition.refreshType}`;
+/*
 		let duration: number = this.duration;
 		let durationText: string = "";
 		if(this.duration)
@@ -52,6 +73,7 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 		}
 	
 		return `${this.definition.status} ${durationText} - ${this.definition.refreshType}`;
+		*/
 	}
 
 	protected getIconPath(theme: string): vscode.Uri {
