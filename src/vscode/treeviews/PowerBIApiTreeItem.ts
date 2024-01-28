@@ -205,22 +205,22 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	}
 
 	async insertCode(): Promise<void> {
-        const editor = vscode.window.activeTextEditor;
-        if (editor === undefined) {
-            return;
-        }
+		const editor = vscode.window.activeTextEditor;
+		if (editor === undefined) {
+			return;
+		}
 
-        const start = editor.selection.start;
-        const end = editor.selection.end;
-        const range = new vscode.Range(start.line, start.character, end.line, end.character);
-        await editor.edit((editBuilder) => {
-            editBuilder.replace(range, this.code);
-        });
-    }
+		const start = editor.selection.start;
+		const end = editor.selection.end;
+		const range = new vscode.Range(start.line, start.character, end.line, end.character);
+		await editor.edit((editBuilder) => {
+			editBuilder.replace(range, this.code);
+		});
+	}
 
 	get code(): string {
 		return Helper.trimChar("/" + this.apiPath.split("/").slice(2).join("/"), "/", false);
-	}	
+	}
 
 	public static async delete(apiItem: PowerBIApiTreeItem, confirmation: "yesNo" | "name" | undefined = undefined): Promise<void> {
 		if (confirmation) {
@@ -245,9 +245,20 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		}
 
 		ThisExtension.setStatusBar(`Deleting ${apiItem.itemType.toLowerCase()} '${apiItem.name}' ...`, true);
-		await PowerBICommandBuilder.execute<any>(apiItem.apiPath, "DELETE", []);
-		const successMsg = `${apiItem.itemType.toLowerCase()} '${apiItem.name}' deleted!`
-		ThisExtension.setStatusBar(successMsg);
-		Helper.showTemporaryInformationMessage(successMsg, 2000);
+		const response = await PowerBICommandBuilder.execute<any>(apiItem.apiPath, "DELETE", []);
+		if (response.error) {
+			const errorMsg = response.error.message;
+			vscode.window.showErrorMessage(errorMsg);
+			ThisExtension.setStatusBar("Deletion failed!");
+		}
+		else {
+			const successMsg = `${apiItem.itemType.toLowerCase()} '${apiItem.name}' deleted!`
+			ThisExtension.setStatusBar(successMsg);
+			Helper.showTemporaryInformationMessage(successMsg, 2000);
+
+			if (apiItem.parent) {
+				ThisExtension.refreshTreeView(apiItem.TreeProvider, apiItem.parent);
+			}
+		}
 	}
 }

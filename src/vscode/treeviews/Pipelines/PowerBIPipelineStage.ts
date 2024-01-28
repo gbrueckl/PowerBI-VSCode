@@ -80,6 +80,12 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 		let children: PowerBIPipelineTreeItem[] = [];
 		let artifacts: iPowerBIPipelineStageArtifacts = await PowerBIApiService.getPipelineStageArtifacts(this.getParentByType<PowerBIPipeline>("PIPELINE").uid, this.definition.order);
 
+		if (artifacts.datasets.length > 0) {
+			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATASETS", artifacts.datasets, this));
+		}
+		if (artifacts.reports.length > 0) {
+			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEREPORTS", artifacts.reports, this));
+		}
 		if (artifacts.dashboards.length > 0) {
 			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDASHBOARDS", artifacts.dashboards, this));
 		}
@@ -88,12 +94,6 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 		}
 		if (artifacts.datamarts.length > 0) {
 			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATAMARTS", artifacts.datamarts, this));
-		}
-		if (artifacts.datasets.length > 0) {
-			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATASETS", artifacts.datasets, this));
-		}
-		if (artifacts.reports.length > 0) {
-			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEREPORTS", artifacts.reports, this));
 		}
 
 		return children;

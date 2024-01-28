@@ -112,16 +112,18 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 	public async handleDrop?(target: PowerBIApiTreeItem, dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
 		ThisExtension.log("Dropped item on " + target.itemType + " ...");
 
+		// when a PBIX file is dropped on a Group/Workspace or its Datasets folder
 		let uriList = await dataTransfer.get("text/uri-list");
 		if (uriList != null) {
-			if (["GROUP"].includes(target.itemType)) {
+			if (["GROUP", "DATASETS"].includes(target.itemType)) {
 				const uriListString = (await uriList.asString());
 				ThisExtension.log("File(s) dropped on PowerBI Group: " + uriListString.toString());
 				const fileUris = uriListString.split("\r\n").filter((x) => x.startsWith("file://") && x.endsWith(".pbix")).map((x) => vscode.Uri.parse(x.trim()));
 
-				const targetGroup: PowerBIWorkspace = (target as PowerBIWorkspace);
+				const targetGroup: PowerBIWorkspace = target.getParentByType("GROUP");
 
 				PowerBIWorkspace.uploadPbixFiles(targetGroup, fileUris);
+				ThisExtension.refreshTreeView(target.TreeProvider, targetGroup);
 				return;
 			}
 			else {
@@ -185,41 +187,44 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 
 		// by default we refresh the treeview of the target item
 		let treeViewtoRefresh: TreeProviderId = target.TreeProvider;
+		const targetGroup = (target as PowerBIWorkspace).groupId;
+		const sourceGroup = (source as PowerBIReport).groupId;
 
 		if (source.itemType == "GROUP") {
 			// dropping a Group/Workspace on a Capacity --> assign to that capacity
 			if (["CAPACITY"].includes(target.itemType)) {
 				const assignCapacity = async () => PowerBIWorkspace.assignToCapacity((source as PowerBIWorkspace), { capacityId: (target as PowerBICapacity).uid });
-				actions.set("assign to capacity", assignCapacity);
+				actions.set("Assign to Capacity", assignCapacity);
 				treeViewtoRefresh = source.TreeProvider;
 			}
 			// dropping a Group/Workspace on a Capacity --> assign to that pipeline stage
 			if (["PIPELINESTAGE"].includes(target.itemType)) {
 				const assignStage = async () => PowerBIPipelineStage.assignWorkspace(target as PowerBIPipelineStage, { workspaceId: source.uid });
-				actions.set("assign to stage", assignStage);
+				actions.set("Assign to Stage", assignStage);
 			}
 		}
 		else if (source.itemType == "REPORT") {
+			
+			const clone = async (targetWorkspaceId, targetModelId = undefined) => {
+					const defaultName = targetGroup == sourceGroup ? source.name + " - Copy" : source.name;
+					const newReportName = await PowerBICommandBuilder.showInputBox(defaultName, "Clone Report", "Enter a name for the cloned report");
+					PowerBIReport.clone(source as PowerBIReport, {
+						name: newReportName,
+						targetModelId: targetModelId,
+						targetWorkspaceId: targetWorkspaceId
+					})
+				};
+
 			// dropping a Report on a Group/Workspace or the Reports folder underneath --> create a copy of the report
 			if (["GROUP", "REPORTS"].includes(target.itemType)) {
-				const targetGroup = (target as PowerBIWorkspace).groupId;
-				const clone = async () => PowerBIReport.clone(source as PowerBIReport, {
-					name: source.name + " - Clone",
-					targetWorkspaceId: (target as PowerBIWorkspace).groupId
-				});
-				actions.set("clone", clone);
+				actions.set("Clone", () => clone(targetGroup));
 			}
 			// dropping a Report on Dataset --> rebind or clone with connection to new dataset
 			if (target.itemType == "DATASET") {
 				const rebind = async () => PowerBIReport.rebind(source as PowerBIReport, { datasetId: target.uid });
-				actions.set("rebind", rebind);
+				actions.set("Rebind", rebind);
 
-				const clone = async () => PowerBIReport.clone(source as PowerBIReport, {
-					name: source.name + " - Clone",
-					targetModelId: target.uid,
-					targetWorkspaceId: (source as PowerBIReport).groupId
-				});
-				actions.set("clone", clone);
+				actions.set("Clone", () => clone(targetGroup, target.uid));
 			}
 			// dropping a Report on Report --> update content
 			else if (target.itemType == "REPORT") {
@@ -230,7 +235,7 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 					},
 					sourceType: "ExistingReport"
 				});
-				actions.set("update content", updateContent);
+				actions.set("Update Content", updateContent);
 			}
 		}
 

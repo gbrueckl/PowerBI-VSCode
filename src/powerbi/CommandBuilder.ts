@@ -107,16 +107,19 @@ export class PowerBIQuickPickItem {
 	private _name: string;
 	private _value?: string;
 	private _picked?: boolean;
+	private _description?: string;
 	private static SEPARATOR: string = '\t';
 
 	constructor(
 		name: string,
 		value?: string,
-		picked?: boolean
+		picked?: boolean,
+		description?: string
 	) {
 		this._name = name;
 		this._value = value;
 		this._picked = picked;
+		this._description = description;
 	}
 
 	get name(): string {

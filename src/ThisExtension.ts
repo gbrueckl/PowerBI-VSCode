@@ -11,6 +11,10 @@ import { PowerBIWorkspacesTreeProvider } from './vscode/treeviews/workspaces/Pow
 import { PowerBIApiTreeItem } from './vscode/treeviews/PowerBIApiTreeItem';
 import { PowerBIConfiguration } from './vscode/configuration/PowerBIConfiguration';
 import { TMDLFileSystemProvider } from './vscode/filesystemProvider/TMDLFileSystemProvider';
+import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIWorkspaceTreeItem';
+import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICapacityTreeItem';
+import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatewayTreeItem';
+import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
 
 
 export type TreeProviderId =
@@ -138,16 +142,16 @@ export abstract class ThisExtension {
 		}
 	}
 
-	static async refreshTreeView(id: TreeProviderId): Promise<void> {
+	static async refreshTreeView(id: TreeProviderId, item: PowerBIApiTreeItem = null, ): Promise<void> {
 		switch (id) {
 			case "application/vnd.code.tree.powerbiworkspaces":
-				await this.TreeViewWorkspaces.refresh();
+				await this.TreeViewWorkspaces.refresh(item as PowerBIWorkspaceTreeItem);
 			case "application/vnd.code.tree.powerbicapacities":
-				await this.TreeViewCapacities.refresh();
+				await this.TreeViewCapacities.refresh(item as PowerBICapacityTreeItem);
 			case "application/vnd.code.tree.powerbigateways":
-				await this.TreeViewGateways.refresh();
+				await this.TreeViewGateways.refresh(item as PowerBIGatewayTreeItem);
 			case "application/vnd.code.tree.powerbipipelines":
-				await this.TreeViewPipelines.refresh();
+				await this.TreeViewPipelines.refresh(item as PowerBIPipelineTreeItem);
 		}
 	}
 	//#endregion

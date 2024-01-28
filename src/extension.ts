@@ -42,12 +42,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	await ThisExtension.initializeLogger(context);
 
 	const prevInstalledVersion = context.globalState.get<vscode.Extension<any>>("powerbi-vscode.extension.installed", undefined);
-	if(!prevInstalledVersion || prevInstalledVersion.packageJSON.version !== context.extension.packageJSON.version) {
+	if (!prevInstalledVersion || prevInstalledVersion.packageJSON.version !== context.extension.packageJSON.version) {
 		context.globalState.update("powerbi-vscode.extension.installed", context.extension);
 		const action = vscode.window.showInformationMessage(`PowerBI VSCode Extension updated to version ${context.extension.packageJSON.version}`, "Change Log");
 
 		action.then((value) => {
-			if(value == "Change Log") {
+			if (value == "Change Log") {
 				vscode.env.openExternal(vscode.Uri.parse(context.extension.packageJSON.repository.url + "/blob/main/CHANGELOG.md"));
 			}
 		});
@@ -84,8 +84,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (item: PowerBIWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(item, showInfoMessage));
 
-	vscode.commands.registerCommand('PowerBI.TOM.backup', (item:  TOMProxyBackup ) => item.backup()); 
-	vscode.commands.registerCommand('PowerBI.TOM.restore', (item: TOMProxyRestore) => item.restore()); 
+	vscode.commands.registerCommand('PowerBI.TOM.backup', (item: TOMProxyBackup) => item.backup());
+	vscode.commands.registerCommand('PowerBI.TOM.restore', (item: TOMProxyRestore) => item.restore());
 
 	vscode.commands.registerCommand('PowerBIWorkspace.assignToCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.assignToCapacity(workspace));
 	vscode.commands.registerCommand('PowerBIWorkspace.unassignFromCapacity', (workspace: PowerBIWorkspace) => PowerBIWorkspace.unassignFromCapacity(workspace));
@@ -132,9 +132,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiCapacitiesTreeProvider = new PowerBICapacitiesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBICapacities', pbiCapacitiesTreeProvider); // done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBICapacities.refresh', (item: PowerBICapacityTreeItem = undefined, showInfoMessage: boolean = true) => pbiCapacitiesTreeProvider.refresh(item, showInfoMessage));
-	
+
 	vscode.commands.registerCommand('PowerBICapacityWorkload.update', (workload: PowerBICapacityWorkload) => workload.update());
-	
+
 
 	// register PowerBIGatewaysTreeProvider
 	let pbiGatewaysTreeProvider = new PowerBIGatewaysTreeProvider(context);

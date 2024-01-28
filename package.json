@@ -794,6 +794,16 @@
 					"light": "./resources/light/notebook.png",
 					"dark": "./resources/dark/notebook.png"
 				}
+			},
+			{
+				"id": "powerbi-desktop",
+				"extensions": [
+					".pbix"
+				],
+				"icon": {
+					"light": "./resources/light/pbi_desktop.png",
+					"dark": "./resources/dark/pbi_desktop.png"
+				}
 			}
 		]
 	},

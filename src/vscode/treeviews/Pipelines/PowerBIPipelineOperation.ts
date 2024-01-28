@@ -32,7 +32,7 @@ export class PowerBIPipelineOperation extends PowerBIPipelineTreeItem {
 	}
 
 	get _label(): string {
-		let dateToShow: Date = this.definition.executionStartTime;
+		let dateToShow: Date = this.definition.executionStartTime ?? this.definition.lastUpdatedTime;
 
 		return `${new Date(dateToShow).toISOString().substr(0, 19).replace('T', ' ')}`;
 	}

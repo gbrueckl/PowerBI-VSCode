@@ -7,7 +7,6 @@ import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { PowerBIDashboard } from './PowerBIDashboard';
 import { iPowerBIDashboard } from '../../../powerbi/DashboardsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
