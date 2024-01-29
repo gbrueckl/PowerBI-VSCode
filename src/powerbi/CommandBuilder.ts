@@ -6,6 +6,7 @@ import { ApiItemType } from '../vscode/treeviews/_types';
 import { PowerBIApiService } from './PowerBIApiService';
 import { ApiMethod } from './_types';
 import { PowerBIDataset } from '../vscode/treeviews/workspaces/PowerBIDataset';
+import { Helper } from '../helpers/Helper';
 
 
 
@@ -103,63 +104,51 @@ export class PowerBICommandInput {
 	}
 }
 
-export class PowerBIQuickPickItem {
-	private _name: string;
+export class PowerBIQuickPickItem implements vscode.QuickPickItem {
+	private _label: string;
 	private _value?: string;
 	private _picked?: boolean;
 	private _description?: string;
+	private _details?: string;
 	private static SEPARATOR: string = '\t';
 
 	constructor(
-		name: string,
+		label: string,
 		value?: string,
-		picked?: boolean,
-		description?: string
+		description?: string,
+		details?: string,
+		picked?: boolean
 	) {
-		this._name = name;
+		this._label = label;
 		this._value = value;
-		this._picked = picked;
 		this._description = description;
+		this._details = details;
+		this._picked = picked ?? false;
 	}
 
-	get name(): string {
-		return this._name;
-	}
-
-	get value(): string {
-		if (this._value == null || this._value == undefined) {
-			return this.name;
-		}
-
-		return this._value;
-	}
-
+	// A human-readable string which is rendered prominent.
 	get label(): string {
-		if (this._value == null || this._value == undefined) {
-			return this.name;
-		}
-
-		return `${this.name}${PowerBIQuickPickItem.SEPARATOR}${this.value}`;
+		return this._label
 	}
 
+	// The value used when this item is selected
+	get value(): string {
+		return this._value ?? this.label;
+	}
+
+	// A human-readable string which is rendered less prominent in the same line.
+	get description(): string {
+		return this._description;
+	}
+
+	// A human-readable string which is rendered less prominent in a separate line.
+	get detail(): string {
+		return this._details;
+	}
+
+	// Optional flag indicating if this item is picked initially.
 	get picked(): boolean {
-		return this._picked ?? false;
-	}
-
-	set picked(value: boolean) {
-		this._picked = value;
-	}
-
-	static GetValueFromLabel(label: string): string {
-		let values = label.split(PowerBIQuickPickItem.SEPARATOR);
-
-		// if we reached the last key, we assign the inputValue
-		if (values.length == 1) {
-			return values[0];
-		}
-		else {
-			return values[1];
-		}
+		return this._picked;
 	}
 }
 
@@ -288,20 +277,20 @@ export abstract class PowerBICommandBuilder {
 			this._quickPickLists.set(item.itemType, []);
 		}
 
-		let newItem: PowerBIQuickPickItem = new PowerBIQuickPickItem(item.name, item.uid.toString());
+		let newItem: PowerBIQuickPickItem = item.asQuickPickItem;
 
 		// if the item already exists, pop it and add it to the top again
-		let existingItemIndex = this._quickPickLists.get(item.itemType).findIndex(x => x.label == newItem.label);
+		let existingItemIndex = this._quickPickLists.get(item.itemType).findIndex(x => x.value == newItem.value);
 		if (existingItemIndex >= 0) {
 			this._quickPickLists.get(item.itemType).splice(existingItemIndex, 1);
 		}
 
-		ThisExtension.log(`Adding item '${item.uid}' to QuickPickList '${item.itemType}'.`);
+		ThisExtension.log(`Adding item '${newItem.label}(${newItem.value})' to QuickPickList '${item.itemType}'.`);
 		this._quickPickLists.get(item.itemType).push(newItem);
 
 		while (this._quickPickLists.get(item.itemType).length > this._maxQuickPickListItems) {
 			let removed = this._quickPickLists.get(item.itemType).shift();
-			ThisExtension.log(`Removed item '${removed.value}' from QuickPickList '${item.itemType}'.`);
+			ThisExtension.log(`Removed item '${removed.label}(${removed.value})' from QuickPickList '${item.itemType}'.`);
 		}
 	}
 
@@ -314,6 +303,8 @@ export abstract class PowerBICommandBuilder {
 		if (!this._quickPickLists.has(itemType)) {
 			ThisExtension.log(`Adding item '${itemType}' to QuickPickLists ...`);
 			this._quickPickLists.set(itemType, []);
+			Helper.showTemporaryInformationMessage(`No items of type '${itemType}' found. Please navigate to them first.`, 4000);
+			return [new PowerBIQuickPickItem("No items found!", "NO_ITEMS_FOUND", "NO_ITEMS_FOUND", "To populate this list, please navigate to/select the items in the browser first.")];
 		}
 
 		return this._quickPickLists.get(itemType);

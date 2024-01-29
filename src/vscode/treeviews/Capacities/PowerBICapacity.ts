@@ -4,7 +4,7 @@ import { PowerBICapacityTreeItem } from './PowerBICapacityTreeItem';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 import { PowerBICapacityRefreshables } from './PowerBICapacityRefreshables';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { PowerBICapacityWorkloads } from './PowerBICapacityWorkloads';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
@@ -30,28 +30,8 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 		super.definition = value;
 	}
 
-	get displayName(): string {
-		return this.definition.displayName;
-	}
-
-	get sku(): string {
-		return this.definition.sku;
-	}
-
-	get region(): string {
-		return this.definition.region;
-	}
-
-	get state(): string {
-		return this.definition.state;
-	}
-
-	get admins(): string[] {
-		return this.definition.admins;
-	}
-
-	get capacityUserAccessRight(): string {
-		return this.definition.capacityUserAccessRight;
+	get asQuickPickItem(): PowerBIQuickPickItem {
+		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `SKU: ${this.sku} | Region: ${this.region} | State: ${this.state}`);
 	}
 
 	get apiUrlPart(): string {
@@ -79,4 +59,29 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 	}
 
 	// Capacity-specific funtions
+	get displayName(): string {
+		return this.definition.displayName;
+	}
+
+	get sku(): string {
+		return this.definition.sku;
+	}
+
+	get region(): string {
+		return this.definition.region;
+	}
+
+	get state(): string {
+		return this.definition.state;
+	}
+
+	get admins(): string[] {
+		return this.definition.admins;
+	}
+
+	get capacityUserAccessRight(): string {
+		return this.definition.capacityUserAccessRight;
+	}
+
+	
 }

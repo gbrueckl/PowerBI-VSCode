@@ -8,6 +8,7 @@ import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { Response } from '@env/fetch';
+import { PowerBIWorkspace } from './PowerBIWorkspace';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIReport extends PowerBIWorkspaceTreeItem {
@@ -56,7 +57,15 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 		super.definition = value;
 	}
 
+	get asQuickPickItem(): PowerBIQuickPickItem {
+		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Workspace: ${this.workspace.name} (ID: ${this.workspace.uid})`);
+	}
+
 	// Report-specific funtions
+	get workspace(): PowerBIWorkspace {
+		return this.getParentByType<PowerBIWorkspace>("GROUP");
+	}
+
 	public async takeOver(): Promise<void> {
 		ThisExtension.setStatusBar("Taking over report ...", true);
 		const apiUrl = Helper.joinPath(this.apiPath, "Default.TakeOver");

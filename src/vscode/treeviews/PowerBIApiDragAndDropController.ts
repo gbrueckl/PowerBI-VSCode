@@ -244,7 +244,7 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 			for (const key of actions.keys()) {
 				items.push(new PowerBIQuickPickItem(key));
 			}
-			const action: string = await PowerBICommandBuilder.showQuickPick(items, "Action", null, null);
+			const action: string = await PowerBICommandBuilder.showQuickPick(items, "Action", "Which action do you want to perform?", null);
 
 			if (!action) {
 				return;

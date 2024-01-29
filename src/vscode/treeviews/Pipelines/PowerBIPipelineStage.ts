@@ -6,7 +6,7 @@ import { iPowerBIPipelineStage, iPowerBIPipelineStageArtifacts, resolveOrder, re
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIPipelineTreeItem } from './PowerBIPipelineTreeItem';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
-import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { PowerBIPipelineStageArtifacts } from './PowerBIPipelineStageArtifacts';
 import { PowerBIPipeline } from './PowerBIPipeline';
 import { iPowerBIPipelineDeployableItem } from './iPowerBIPipelineDeployableItem';
@@ -74,6 +74,10 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 
 	get apiUrlPart(): string {
 		return this.definition.order.toString();
+	}
+
+	get asQuickPickItem(): PowerBIQuickPickItem {
+		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Order: ${this.definition.order}`);
 	}
 
 	async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {

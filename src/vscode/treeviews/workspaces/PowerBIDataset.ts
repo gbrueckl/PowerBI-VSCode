@@ -81,6 +81,10 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		return PowerBIApiService.getXmlaConnectionString(this.workspace.name, this.name);
 	}
 
+	get asQuickPickItem(): PowerBIQuickPickItem {
+		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Workspace: ${this.workspace.name} (ID: ${this.workspace.uid})`);
+	}
+
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
 		let children: PowerBIWorkspaceTreeItem[] = [];
 

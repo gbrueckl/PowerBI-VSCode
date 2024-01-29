@@ -66,6 +66,37 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 		super.definition = value;
 	}
 
+	get asQuickPickItem(): PowerBIQuickPickItem {
+		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString());
+	}
+
+	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
+		let children: PowerBIWorkspaceTreeItem[] = [];
+
+		children.push(new PowerBIDatasets(this.uid, this));
+		children.push(new PowerBIReports(this.uid, this));
+		children.push(new PowerBIDashboards(this.uid, this));
+		children.push(new PowerBIDataflows(this.uid, this));
+
+		return children;
+	}
+
+	protected getIconPath(theme: string): vscode.Uri {
+		let capacityType = "";
+		if (this.isPremiumCapacity) {
+			capacityType = "_premium";
+		}
+		if (this.isFabricCapacity) {
+			capacityType = "_fabric";
+		}
+		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + capacityType + '.png');
+	}
+
+	get apiUrlPart(): string {
+		return "groups/" + this.uid;
+	}
+
+	// Workspace-specific functions
 	get isPremiumCapacity(): boolean {
 		return this.definition.isOnDedicatedCapacity
 	}
@@ -86,21 +117,6 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 		return await PowerBIApiService.get<iPowerBICapacity>(`v1.0/${PowerBIApiService.Org}/capacities${this.definition.capacityId}`);
 	}
 
-	protected getIconPath(theme: string): vscode.Uri {
-		let capacityType = "";
-		if (this.isPremiumCapacity) {
-			capacityType = "_premium";
-		}
-		if (this.isFabricCapacity) {
-			capacityType = "_fabric";
-		}
-		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + capacityType + '.png');
-	}
-
-	get apiUrlPart(): string {
-		return "groups/" + this.uid;
-	}
-
 	static get MyWorkspace(): iPowerBIGroup {
 		return {
 			"id": "myorg",
@@ -109,17 +125,6 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 			"isOnDedicatedCapacity": false,
 			"isReadOnly": false
 		}
-	}
-
-	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		let children: PowerBIWorkspaceTreeItem[] = [];
-
-		children.push(new PowerBIDatasets(this.uid, this));
-		children.push(new PowerBIReports(this.uid, this));
-		children.push(new PowerBIDashboards(this.uid, this));
-		children.push(new PowerBIDataflows(this.uid, this));
-
-		return children;
 	}
 
 	// Workspace-specific functions

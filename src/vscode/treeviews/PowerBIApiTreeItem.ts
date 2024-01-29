@@ -204,6 +204,10 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		return `v1.0/${PowerBIApiService.Org}/${this.itemPath}/`;
 	}
 
+	get asQuickPickItem(): PowerBIQuickPickItem {
+		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString());
+	}
+
 	async insertCode(): Promise<void> {
 		const editor = vscode.window.activeTextEditor;
 		if (editor === undefined) {
