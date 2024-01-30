@@ -5,9 +5,7 @@ import { PowerBIApiTreeItem } from '../vscode/treeviews/PowerBIApiTreeItem';
 import { ApiItemType } from '../vscode/treeviews/_types';
 import { PowerBIApiService } from './PowerBIApiService';
 import { ApiMethod } from './_types';
-import { PowerBIDataset } from '../vscode/treeviews/workspaces/PowerBIDataset';
 import { Helper } from '../helpers/Helper';
-
 
 
 export type CommandInputType =
@@ -110,7 +108,6 @@ export class PowerBIQuickPickItem implements vscode.QuickPickItem {
 	private _picked?: boolean;
 	private _description?: string;
 	private _details?: string;
-	private static SEPARATOR: string = '\t';
 
 	constructor(
 		label: string,
@@ -138,7 +135,7 @@ export class PowerBIQuickPickItem implements vscode.QuickPickItem {
 
 	// A human-readable string which is rendered less prominent in the same line.
 	get description(): string {
-		return this._description;
+		return this._description ?? this.value;
 	}
 
 	// A human-readable string which is rendered less prominent in a separate line.

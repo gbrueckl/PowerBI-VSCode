@@ -67,7 +67,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 	}
 
 	get asQuickPickItem(): PowerBIQuickPickItem {
-		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString());
+		return new PowerBIQuickPickItem(this.name, this.uid.toString(), `SKU: ${this.sku}`);
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
@@ -107,6 +107,10 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 			return false;
 		}
 		return this.definition.sku.startsWith("F");
+	}
+
+	get sku(): string {
+		return this.definition.sku;
 	}
 
 	async getCapacity(): Promise<iPowerBICapacity> {

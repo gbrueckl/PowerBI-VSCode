@@ -3,12 +3,13 @@ import * as vscode from 'vscode';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { iPowerBIDataflow } from '../../../powerbi/DataflowsAPI/_types';
 import { Helper, UniqueId } from '../../../helpers/Helper';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIDataflowTransactions } from './PowerBIDataflowTransactions';
 import { PowerBIDataflowDatasources } from './PowerBIDataflowDatasources';
+import { PowerBIWorkspace } from './PowerBIWorkspace';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
@@ -35,6 +36,10 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 		super.definition = value;
 	}
 
+	get asQuickPickItem(): PowerBIQuickPickItem {
+		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Workspace: ${this.workspace.name} (ID: ${this.workspace.uid})`);
+	}
+
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
 		let children: PowerBIWorkspaceTreeItem[] = [];
 
@@ -45,6 +50,10 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 	}
 
 	// Dataflow-specific funtions
+	get workspace(): PowerBIWorkspace {
+		return this.getParentByType<PowerBIWorkspace>("GROUP");
+	}
+
 	public async delete(): Promise<void> {
 		await PowerBIApiTreeItem.delete(this, "yesNo");
 		
