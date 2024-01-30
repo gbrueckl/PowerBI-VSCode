@@ -147,6 +147,10 @@ export class PowerBIQuickPickItem implements vscode.QuickPickItem {
 	get picked(): boolean {
 		return this._picked;
 	}
+
+	set picked(value: boolean) {
+		this._picked = value;
+	}
 }
 
 
@@ -215,6 +219,14 @@ export abstract class PowerBICommandBuilder {
 		description: string,
 		currentValue: string
 	): Promise<string> {
+
+		const selectedItem = items.find(x => x.value == currentValue);
+		if (selectedItem != undefined) {
+			// this would only work if MultiSelect is enabled for the QuickPick which is not the case
+			selectedItem.picked = true;
+			// so we move the selected item to the top of the list
+			items = [selectedItem].concat(items.filter(x => x.value != currentValue));
+		}
 
 		const result = await vscode.window.showQuickPick(items, {
 			title: title + (description ? (" - " + description) : ""),
@@ -304,7 +316,7 @@ export abstract class PowerBICommandBuilder {
 			return [new PowerBIQuickPickItem("No items found!", "NO_ITEMS_FOUND", "NO_ITEMS_FOUND", "To populate this list, please navigate to/select the items in the browser first.")];
 		}
 
-		return this._quickPickLists.get(itemType);
+		return this._quickPickLists.get(itemType);;
 	}
 }
 
