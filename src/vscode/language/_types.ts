@@ -17,6 +17,8 @@ export interface ApiEndpointDetails {
 	parameters: any[];
 	responses: any;
 	deprecated: boolean;
+	sortText: string;
+	methodOverwrite: string;
 }
 
 export interface ApiEndpointParameter {

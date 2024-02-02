@@ -769,7 +769,12 @@ export abstract class PowerBIApiService {
 	}
 
 	static async executeQueries(apiPath, daxQuery: string): Promise<iPowerBIDatasetExecuteQueries> {
-		let endpoint: string = apiPath + "/executeQueries";
+		const match = apiPath.match(/(?<datasetPath>.*\/datasets\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/);
+		if(!match) {
+			throw new Error(`Invalid or incomplete API path for dataset: ${apiPath}!`);
+		}
+		const datasetApiPath = match.groups["datasetPath"];;
+		let endpoint: string = datasetApiPath + "/executeQueries";
 
 		try {
 			let body: any = {

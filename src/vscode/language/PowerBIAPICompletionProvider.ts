@@ -45,7 +45,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 		PowerBIAPICompletionProvider.swagger = JSON.parse(swaggerText);
 	}
 
-	async getAvailableEndpoints(searchPath: string, method?: string): Promise<ApiEndpointDetails[]> {
+	async getAvailableEndpoints(searchPath: string, method: string = undefined, showOtherMethods: boolean = false): Promise<ApiEndpointDetails[]> {
 		if (method) {
 			method = method.toLowerCase();
 		}
@@ -53,6 +53,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 
 		const searchParts = searchPath.split("/");
 		let matches: ApiEndpointDetails[] = [];
+		let matchesDifferentMethod: ApiEndpointDetails[] = [];
 		for (let item of Object.getOwnPropertyNames(PowerBIAPICompletionProvider.swagger.paths)) {
 			
 			// within the same path as the typed path 
@@ -68,15 +69,23 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 						if (!method || m == method) {
 							let itemToAdd = PowerBIAPICompletionProvider.swagger.paths[item][m];
 							itemToAdd.path = item;
+							itemToAdd.sortText = item;
 							matches.push(itemToAdd);
+						}
+						else if(showOtherMethods) {
+							let itemToAdd = PowerBIAPICompletionProvider.swagger.paths[item][m];
+							itemToAdd.path = item;
+							itemToAdd.sortText = 'ZZZ' + item;
+							itemToAdd.methodOverwrite = m;
+							matchesDifferentMethod.push(itemToAdd);
 						}
 					}
 				}
 			}
 		}
-		ThisExtension.log("Found " + matches.length + " matches!");
+		ThisExtension.log(`Found ${matches.length} direct matches and ${matchesDifferentMethod.length} indirect matches!`);
 
-		return matches;
+		return matches.concat(matchesDifferentMethod);
 	}
 
 	async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[]> {
@@ -118,6 +127,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 		else if (context.triggerCharacter == ".") {
 			// starting with . for relative path 
 			// lookup for api root path of current document
+			// this kicks in anyway when the user types the next '/'
 		}
 		else if (context.triggerCharacter == " ") {
 			// starting with ' ' after specifying the method
@@ -127,7 +137,12 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 			try {
 				ThisExtension.log("CompletionProvider started!");
 				let currentLine = document.lineAt(position.line).text;
-				const method = currentLine.split(" ")[0];
+				let method = currentLine.split(" ")[0];
+				let showOtherMethods = false; // for future use to also display other Methods and overwrite it then
+				if(method.startsWith('%')) { //when overwriting the API for a specific magic, we only show GET methods
+					method = 'GET';
+					showOtherMethods = false;
+				}
 				let currentPath = currentLine.split(" ")[1];
 
 				if (currentPath.startsWith('./')) {
@@ -144,7 +159,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 				// replace guids with placeholders from previous path
 				let pathSearch = currentPath.replace(/\/([a-z]*?)\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/gm, "/$1/{$1XXXId}").replace(new RegExp("sXXX", "g"), "");
 
-				let matchingApis = await this.getAvailableEndpoints(pathSearch, method);
+				let matchingApis = await this.getAvailableEndpoints(pathSearch, method, showOtherMethods);
 				let completionItems: vscode.CompletionItem[] = [];
 
 				for (let api of matchingApis) {
@@ -168,7 +183,8 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 						insertText: insertText,
 						commitCharacters: TRIGGER_CHARS,
 						detail: api.summary,
-						documentation: api.description
+						documentation: api.description,
+						sortText: api.sortText
 					};
 
 					if (!completionItems.find((item) => item.label == completionItem.label) && nextToken != "/" && nextToken != "") {
@@ -212,6 +228,10 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 		}
 		
 		return [];
+	}
+
+	resolveCompletionItem(item: vscode.CompletionItem, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CompletionItem> {
+		return undefined;
 	}
 
 	async getCompletionItem(itemType: string, apiItem: any): Promise<vscode.CompletionItem> {

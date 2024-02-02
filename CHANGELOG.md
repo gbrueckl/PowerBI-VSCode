@@ -3,12 +3,15 @@
 **v1.4.0**:
 - added support to drill down into individual tables, columns, measures and partitions of a dataset from the workspace browser
 - added ability to process individual tables/partitions from the UI
+- improved usability of dropdowns when selecting items for various actions (e.g. Cloning a report, etc.)
 - added column statistics based on DAX [`COLUMNSTATISTICS()`](https://learn.microsoft.com/en-us/dax/columnstatistics-function-dax)
 - enabled `Insert Path` for all treeviews
 - added `Copy ConnectionString` for datasets in Premium workspaces
 - added duration for running refreshes
 - added `Insert Code` for new workspace objects (`Tables`(Refreshable Object), `Partitions`(Refreshable Object), `Columns`(DAX), `Measures`(DAX))
 - added support for custom API endpoints for every cell (`%dax /groups/....`)
+- improved Completion Provider for API endpoints to also start when `.` is typed
+- fixed issue so `%dax` also works with API sub-paths of a dataset
 
 **v1.3.2**:
 - fixed issue with TMDL/TOM features and guest accounts
