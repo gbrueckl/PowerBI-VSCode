@@ -12,6 +12,7 @@
 - added support for custom API endpoints for every cell (`%dax /groups/....`)
 - improved Completion Provider for API endpoints to also start when `.` is typed
 - fixed issue so `%dax` also works with API sub-paths of a dataset
+- added support for using variables in notebooks for all magics
 
 **v1.3.2**:
 - fixed issue with TMDL/TOM features and guest accounts

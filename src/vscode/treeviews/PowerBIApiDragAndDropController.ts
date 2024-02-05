@@ -120,10 +120,17 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 				ThisExtension.log("File(s) dropped on PowerBI Group: " + uriListString.toString());
 				const fileUris = uriListString.split("\r\n").filter((x) => x.startsWith("file://") && x.endsWith(".pbix")).map((x) => vscode.Uri.parse(x.trim()));
 
-				const targetGroup: PowerBIWorkspace = target.getParentByType("GROUP");
+				const targetGroup: PowerBIWorkspace = target.getPathItemByType("GROUP");
 
-				PowerBIWorkspace.uploadPbixFiles(targetGroup, fileUris);
-				ThisExtension.refreshTreeView(target.TreeProvider, targetGroup);
+				const pbixImport = await PowerBIWorkspace.uploadPbixFiles(targetGroup, fileUris);
+				if (pbixImport) {
+					ThisExtension.log("Imported PBIX: " + pbixImport[0].name + " (" + pbixImport[0].id + ")");
+					ThisExtension.refreshTreeView(target.TreeProvider, targetGroup);
+				}
+				else {
+					ThisExtension.log("ERROR importing PBIX: " + JSON.stringify(pbixImport, null, 4));
+					vscode.window.showErrorMessage("Error importing PBIX: " + JSON.stringify(pbixImport, null, 4));
+				}
 				return;
 			}
 			else {

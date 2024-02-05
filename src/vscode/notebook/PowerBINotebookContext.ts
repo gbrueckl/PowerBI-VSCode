@@ -5,7 +5,7 @@ const API_ROOT_PATH_ALIASES = ["PATH", "DATASET", "DATASET_PATH", "API_ROOT_PATH
 export class PowerBINotebookContext {
 	apiRootPath: string;
 	uri: vscode.Uri;
-	private variables: { [key: string]: string } = {};
+	variables: { [key: string]: string } = {};
 
 	constructor(apiRootPath: string) {
 		this.apiRootPath = apiRootPath;

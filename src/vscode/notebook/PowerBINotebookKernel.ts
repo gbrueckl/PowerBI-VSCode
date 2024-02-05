@@ -9,6 +9,7 @@ import { iPowerBIResponseGeneric } from '../../powerbi/_types';
 import { PowerBINotebookContext } from './PowerBINotebookContext';
 import { TMDLProxy } from '../../TMDLVSCode/TMDLProxy';
 import { TMSLProxyExecuteResponse } from '../../TMDLVSCode/_typesTMSL';
+import { parse } from 'path';
 
 
 export type NotebookMagic =
@@ -122,7 +123,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 		}
 	}
 
-	private parseCommand(cell: vscode.NotebookCell): [QueryLanguage, string, NotebookMagic, string] {
+	private parseCell(cell: vscode.NotebookCell): [QueryLanguage, string, NotebookMagic, string] {
 		let cmd: string = cell.document.getText();
 		let commandText: string = cmd;
 
@@ -183,6 +184,18 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 		return endpoint;
 	}
 
+	private parseCommandText(commandText: string, context: PowerBINotebookContext): string {
+		let lines = commandText.split("\n");
+		let linesWithoutComments = lines.filter(l => !l.trim().startsWith("#") && !l.trim().startsWith("//") && !l.trim().startsWith("--/"));
+		let commandTextClean = linesWithoutComments.join("\n");
+
+		for(let variable in context.variables){
+			commandTextClean = commandTextClean.replace(new RegExp(`\\$\\(${variable}\\)`, "gi"), context.variables[variable]);
+		}
+
+		return commandTextClean;
+	}
+
 	private async _doExecution(cell: vscode.NotebookCell, context: PowerBINotebookContext): Promise<void> {
 		const execution = this.Controller.createNotebookCellExecution(cell);
 		execution.executionOrder = ++this._executionOrder;
@@ -196,21 +209,20 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 			let language: QueryLanguage = null;
 			let customApi: string = null;
 
-			[language, commandText, magic, customApi] = this.parseCommand(cell);
+			[language, commandText, magic, customApi] = this.parseCell(cell);
 
 			ThisExtension.log("Executing " + language + ":\n" + commandText);
 
-			let lines = commandText.split("\n").filter(l => l.trim()[0] != "#");
-			const commandTextClean = lines.join("\n");
+			const commandTextClean = this.parseCommandText(commandText, context);
 			customApi = this.resolveRelativePath(customApi, context.apiRootPath);
 
 			let result: iPowerBIDatasetExecuteQueries | iPowerBIResponseGeneric | TMSLProxyExecuteResponse = undefined;
 			switch (magic) {
 				case "tmsl":
-					result = await TMDLProxy.executeTMSL(await TMDLProxy.getServerNameFromAPI(customApi), commandText);
+					result = await TMDLProxy.executeTMSL(await TMDLProxy.getServerNameFromAPI(customApi), commandTextClean);
 					break;
 				case "dax":
-					result = await PowerBIApiService.executeQueries(customApi, commandText);
+					result = await PowerBIApiService.executeQueries(customApi, commandTextClean);
 					break;
 				case "api":
 
@@ -259,7 +271,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					break;
 				case "cmd":
 					const regex = /SET\s*(?<variable>[^=]*)(\s*=\s*(?<value>.*))?/i;
-
+					let lines = commandTextClean.split("\n")
 					for (let line of lines) {
 						let match = regex.exec(line.trim());
 

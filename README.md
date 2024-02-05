@@ -92,7 +92,9 @@ You can also define and use variables within the notebook. To set a variable you
 MY_VARIABLE = my_value
 ```
 
-There are some special variables that must be set in combination with `%dax` magic to identify the dataset. The main variable that needs to be set is the `DATASET` (aliases are also `DATASET_PATH` or `API_ROOT_PATH`) to identify the dataset to which the DAX query is sent. the value has to be an API path pointing to the dataset:
+Please note that variable names are note case sensitive and are converted to UPPER when you define them. However, you reference them using any casing you want.
+
+There are some special variables that must be set in combination with `%dax` magic to identify the dataset. The main variable that needs to be set is the `DATASET` (aliases are also `DATASET_PATH`, `API_PATH`or `API_ROOT_PATH`) to identify the dataset to which the DAX query is sent. the value has to be an API path pointing to the dataset:
 
 ``` bash
 %cmd
@@ -100,6 +102,12 @@ SET DATASET = /groups/d1f70e51-1234-1234-8e4c-55f35f9fa758/datasets/028d20ca-777
 ```
 
 Current values of variables can be retrieved by running `SET MY_VARIABLE`.
+
+Variables can be used via the pattern `$(<variableName>)`. Assuming the variable `My_Variable` is set to `123`:
+
+``` dax
+EVALUATE ROW("MyVariable", $(My_Variable))
+```
 
 **Note:** you can also set/get multiple variables within the same notebook cell!
 
