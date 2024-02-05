@@ -156,7 +156,10 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	}
 
 	public openInBrowser(): void {
-		Helper.openLink(this.getBrowserLink());
+		const tenantParam = PowerBIApiService.TenantId ? `?ctid=${PowerBIApiService.TenantId}` : "";
+		const fullLink = `${this.getBrowserLink()}${tenantParam}`;
+		
+		Helper.openLink(fullLink);
 	}
 
 	get apiUrlPart(): string {

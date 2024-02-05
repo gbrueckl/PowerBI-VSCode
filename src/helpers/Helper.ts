@@ -178,6 +178,7 @@ export abstract class Helper {
 
 
 	static openLink(link: string | vscode.Uri): void {
+		ThisExtension.log(`Opening link in Brwoser: ${link.toString()}`);
 		if(typeof link === "string")
 		{
 			vscode.env.openExternal(vscode.Uri.parse(link));
