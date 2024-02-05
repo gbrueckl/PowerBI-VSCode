@@ -5,6 +5,7 @@ using System.Text;
 
 using Microsoft.AnalysisServices.Tabular;
 using System.Text.Json.Nodes;
+using Microsoft.AnalysisServices.Tabular.Extensions;
 
 namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
 {
@@ -34,12 +35,13 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
                 return BadRequest(new TMDLProxyDataException
                 {
                     message = fex.Message,
-                    lineNumber = fex.LineNumber,
+                    lineNumber = fex.Line,
                     lineText = fex.LineText,
-                    path = fex.Path
+                    path = fex.Source
                 });
             }
-            else if (ex is TmdlAmbiguousSourceException)
+            /*
+             * else if (ex is TmdlAmbiguousSourceException)
             {
                 TmdlAmbiguousSourceException asex = (TmdlAmbiguousSourceException)ex;
                 return BadRequest(new TMDLProxyDataException
@@ -47,6 +49,7 @@ namespace TMDLVSCodeConsoleProxy.Controllers.TMDL
                     message = asex.ToString()
                 });
             }
+            */
 
             return BadRequest(new TMDLProxyDataException
             {
