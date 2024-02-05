@@ -62,6 +62,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.StatusBarLeft = vscode.window.createStatusBarItem("powerbi-vscode-left", vscode.StatusBarAlignment.Left);
 	ThisExtension.StatusBarLeft.show();
+	ThisExtension.StatusBarLeft.command = "PowerBI.initialize";
 
 	context.subscriptions.push(
 		vscode.workspace.registerNotebookSerializer(
