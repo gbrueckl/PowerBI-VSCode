@@ -13,6 +13,7 @@
 - improved Completion Provider for API endpoints to also start when `.` is typed
 - fixed issue so `%dax` also works with API sub-paths of a dataset
 - added support for using variables in notebooks for all magics
+- added a Statusbar at the bottom left to show the currently logged in User (+Tenant)
 
 **v1.3.2**:
 - fixed issue with TMDL/TOM features and guest accounts
