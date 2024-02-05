@@ -61,13 +61,13 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 	}
 
 	public async refresh(): Promise<void> {
-		ThisExtension.setStatusBar("Triggering dataflow-refresh ...", true);
+		ThisExtension.setStatusBarRight("Triggering dataflow-refresh ...", true);
 		// Provide required notifyOption 
 		let body = {
 			"notifyOption": "MailOnFailure"
 		}
 		PowerBIApiService.post(this.apiPath + "refreshes", body);
-		ThisExtension.setStatusBar("Dataflow-refresh triggered");
+		ThisExtension.setStatusBarRight("Dataflow-refresh triggered");
 		Helper.showTemporaryInformationMessage("Dataflow-refresh triggered!", 3000);
 
 		await Helper.delay(1000);

@@ -86,7 +86,7 @@ export class PowerBICapacityWorkload extends PowerBICapacityTreeItem {
 			vscode.window.showErrorMessage(JSON.stringify(response));
 		}
 
-		ThisExtension.setStatusBar("Workload configured!");
+		ThisExtension.setStatusBarRight("Workload configured!");
 
 		await Helper.delay(1000);
 		ThisExtension.TreeViewCapacities.refresh(this.parent, false);

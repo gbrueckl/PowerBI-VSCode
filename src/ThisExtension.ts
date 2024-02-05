@@ -32,7 +32,8 @@ export abstract class ThisExtension {
 	private static _logger: vscode.OutputChannel;
 	private static _settingScope: ConfigSettingSource;
 	private static _isVirtualWorkspace: boolean = undefined;
-	private static _statusBar: vscode.StatusBarItem;
+	private static _statusBarRight: vscode.StatusBarItem;
+	private static _statusBarLeft: vscode.StatusBarItem;
 	private static _tmdlFileSystemProvider: TMDLFileSystemProvider;
 	private static _treeViewWorkspaces: PowerBIWorkspacesTreeProvider;
 	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
@@ -70,23 +71,36 @@ export abstract class ThisExtension {
 	}
 
 	// #region StatusBar
-	static set StatusBar(value: vscode.StatusBarItem) {
-		this._statusBar = value;
+	static set StatusBarRight(value: vscode.StatusBarItem) {
+		this._statusBarRight = value;
 	}
 
-	static get StatusBar(): vscode.StatusBarItem {
-		return this._statusBar;
+	static get StatusBarRight(): vscode.StatusBarItem {
+		return this._statusBarRight;
 	}
 
-	static setStatusBar(text: string, inProgress: boolean = false): void {
+	static setStatusBarRight(text: string, inProgress: boolean = false): void {
 		if (inProgress) {
-			this.StatusBar.text = "$(loading~spin) " + text;
+			this.StatusBarRight.text = "$(loading~spin) " + text;
 		}
 		else {
-			this.StatusBar.text = text;
+			this.StatusBarRight.text = text;
 		}
-
 	}
+
+	static set StatusBarLeft(value: vscode.StatusBarItem) {
+		this._statusBarLeft = value;
+	}
+
+	static get StatusBarLeft(): vscode.StatusBarItem {
+		return this._statusBarLeft;
+	}
+
+	static updateStatusBarLeft(): void {
+		const tenantInfo = PowerBIApiService.TenantId ? ` (Tenant: ${PowerBIApiService.TenantId})` : "";
+		this.StatusBarLeft.text = `Power BI: ${PowerBIApiService.SessionUserEmail}${tenantInfo}`;
+	}
+
 	//#endregion
 	// #region FileSystemProvider
 	static set TMDLFileSystemProvider(provider: TMDLFileSystemProvider) {
@@ -243,6 +257,7 @@ export abstract class ThisExtension {
 			ThisExtension.log(`Executing command '${command}' ...`);
 			vscode.commands.executeCommand(command, undefined, false);
 		}
+		ThisExtension.updateStatusBarLeft();
 		ThisExtension.log("UI refresh finsihed!");
 	}
 

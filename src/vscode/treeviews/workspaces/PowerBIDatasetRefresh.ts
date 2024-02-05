@@ -143,9 +143,9 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 
 	// DatasetRefresh-specific funtions
 	public async cancel(): Promise<void> {
-		ThisExtension.setStatusBar("Cancelling dataset-refresh ...", true);
+		ThisExtension.setStatusBarRight("Cancelling dataset-refresh ...", true);
 		PowerBIApiService.delete(this.apiPath, null);
-		ThisExtension.setStatusBar("Dataset-refresh cancelled!");
+		ThisExtension.setStatusBarRight("Dataset-refresh cancelled!");
 	}
 
 	public async showDefinition(): Promise<void> {

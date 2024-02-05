@@ -67,11 +67,11 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	}
 
 	public async takeOver(): Promise<void> {
-		ThisExtension.setStatusBar("Taking over report ...", true);
+		ThisExtension.setStatusBarRight("Taking over report ...", true);
 		const apiUrl = Helper.joinPath(this.apiPath, "Default.TakeOver");
 
 		await PowerBIApiService.post(apiUrl, null);
-		ThisExtension.setStatusBar("Report taken over!");
+		ThisExtension.setStatusBarRight("Report taken over!");
 
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
@@ -102,11 +102,11 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 		if (response.error) {
 			const errorMsg = response.error.message;
 			vscode.window.showErrorMessage(errorMsg);
-			ThisExtension.setStatusBar("Clone report failed!");
+			ThisExtension.setStatusBarRight("Clone report failed!");
 		}
 		else {
 			const successMsg = `Clone report succeeded!`;
-			ThisExtension.setStatusBar(successMsg);
+			ThisExtension.setStatusBarRight(successMsg);
 			Helper.showTemporaryInformationMessage(successMsg, 2000);
 
 			ThisExtension.TreeViewWorkspaces.refresh(report.parent, false);
@@ -131,11 +131,11 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 		if (response.error) {
 			const errorMsg = response.error.message;
 			vscode.window.showErrorMessage(errorMsg);
-			ThisExtension.setStatusBar("Rebind report failed!");
+			ThisExtension.setStatusBarRight("Rebind report failed!");
 		}
 		else {
 			const successMsg = `Rebind report succeeded!`;
-			ThisExtension.setStatusBar(successMsg);
+			ThisExtension.setStatusBarRight(successMsg);
 			Helper.showTemporaryInformationMessage(successMsg, 2000);
 
 			ThisExtension.TreeViewWorkspaces.refresh(report.parent, false);
@@ -162,11 +162,11 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 		if (response.error) {
 			const errorMsg = response.error.message;
 			vscode.window.showErrorMessage(errorMsg);
-			ThisExtension.setStatusBar("Update Report Content failed!");
+			ThisExtension.setStatusBarRight("Update Report Content failed!");
 		}
 		else {
 			const successMsg = `Update Report Content succeeded!`;
-			ThisExtension.setStatusBar(successMsg);
+			ThisExtension.setStatusBarRight(successMsg);
 			Helper.showTemporaryInformationMessage(successMsg, 2000);
 
 			ThisExtension.TreeViewWorkspaces.refresh(report.parent, false);

@@ -248,16 +248,16 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 			}
 		}
 
-		ThisExtension.setStatusBar(`Deleting ${apiItem.itemType.toLowerCase()} '${apiItem.name}' ...`, true);
+		ThisExtension.setStatusBarRight(`Deleting ${apiItem.itemType.toLowerCase()} '${apiItem.name}' ...`, true);
 		const response = await PowerBICommandBuilder.execute<any>(apiItem.apiPath, "DELETE", []);
 		if (response.error) {
 			const errorMsg = response.error.message;
 			vscode.window.showErrorMessage(errorMsg);
-			ThisExtension.setStatusBar("Deletion failed!");
+			ThisExtension.setStatusBarRight("Deletion failed!");
 		}
 		else {
 			const successMsg = `${apiItem.itemType.toLowerCase()} '${apiItem.name}' deleted!`
-			ThisExtension.setStatusBar(successMsg);
+			ThisExtension.setStatusBarRight(successMsg);
 			Helper.showTemporaryInformationMessage(successMsg, 2000);
 
 			if (apiItem.parent) {

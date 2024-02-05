@@ -107,7 +107,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 	}
 
 	public static async refreshById(workspaceId: string, datasetId: string, isOnDedicatedCapacity: boolean, objectsToRefresh?: iPowerBIDatasetRefreshableObject[]): Promise<void> {
-		ThisExtension.setStatusBar("Triggering dataset-refresh ...", true);
+		ThisExtension.setStatusBarRight("Triggering dataset-refresh ...", true);
 		const apiUrl = Helper.joinPath("groups", workspaceId, "datasets", datasetId, "refreshes");
 
 		let body = null;
@@ -122,6 +122,8 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 				*/
 			});
 			if (processType == undefined || processType == null) {
+				ThisExtension.setStatusBarRight("Dataset-refresh aborted!");
+				Helper.showTemporaryInformationMessage("Dataset-refresh aborted!", 3000);
 				return;
 			}
 			body = {
@@ -133,8 +135,8 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			}
 		}
 
-		PowerBIApiService.post(apiUrl, body);
-		ThisExtension.setStatusBar("Dataset-refresh triggered!");
+		await PowerBIApiService.post(apiUrl, body);
+		ThisExtension.setStatusBarRight("Dataset-refresh triggered!");
 		Helper.showTemporaryInformationMessage("Dataset-refresh triggered!", 3000);
 	}
 
@@ -147,17 +149,17 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 	}
 
 	public async takeOver(): Promise<void> {
-		ThisExtension.setStatusBar("Taking over dataset ...", true);
+		ThisExtension.setStatusBarRight("Taking over dataset ...", true);
 
 		const apiUrl = Helper.joinPath(this.apiPath, "Default.TakeOver");
 		PowerBIApiService.post(apiUrl, null);
-		ThisExtension.setStatusBar("Dataset taken over!");
+		ThisExtension.setStatusBarRight("Dataset taken over!");
 
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public async configureScaleOut(): Promise<void> {
-		ThisExtension.setStatusBar("Configuring Dataset Scale-Out ...", true);
+		ThisExtension.setStatusBarRight("Configuring Dataset Scale-Out ...", true);
 
 		const apiUrl = this.apiPath;
 
@@ -171,14 +173,14 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			vscode.window.showErrorMessage(JSON.stringify(response));
 		}
 
-		ThisExtension.setStatusBar("Dataset Scale-Out configured!");
+		ThisExtension.setStatusBarRight("Dataset Scale-Out configured!");
 
 		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public async syncReadOnlyReplicas(): Promise<void> {
-		ThisExtension.setStatusBar("Starting RO replica sync ...", true);
+		ThisExtension.setStatusBarRight("Starting RO replica sync ...", true);
 
 		const apiUrl = Helper.joinPath(this.apiPath, "queryScaleOut", "sync");
 		var response = await PowerBIApiService.post<iPowerBIDatasetGenericResponse>(apiUrl, null);
@@ -187,7 +189,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			vscode.window.showErrorMessage(JSON.stringify(response));
 		}
 
-		ThisExtension.setStatusBar("RO replica sync started!");
+		ThisExtension.setStatusBarRight("RO replica sync started!");
 
 		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
@@ -251,9 +253,9 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			"updateDetails": updateDetails
 		}
 
-		ThisExtension.setStatusBar("Updating parameter ...", true);
+		ThisExtension.setStatusBarRight("Updating parameter ...", true);
 		await PowerBIApiService.post(apiUrl, settings);
-		ThisExtension.setStatusBar("Parameter updated!")
+		ThisExtension.setStatusBarRight("Parameter updated!")
 
 		await ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}

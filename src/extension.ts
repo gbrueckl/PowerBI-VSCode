@@ -56,15 +56,19 @@ export async function activate(context: vscode.ExtensionContext) {
 	// some of the following code needs the context before the initialization already
 	ThisExtension.extensionContext = context;
 
-	ThisExtension.StatusBar = vscode.window.createStatusBarItem("powerbi-vscode", vscode.StatusBarAlignment.Right);
-	ThisExtension.StatusBar.show();
-	ThisExtension.setStatusBar("Initialized!");
+	ThisExtension.StatusBarRight = vscode.window.createStatusBarItem("powerbi-vscode-right", vscode.StatusBarAlignment.Right);
+	ThisExtension.StatusBarRight.show();
+	ThisExtension.setStatusBarRight("Initialized!");
+
+	ThisExtension.StatusBarLeft = vscode.window.createStatusBarItem("powerbi-vscode-left", vscode.StatusBarAlignment.Left);
+	ThisExtension.StatusBarLeft.show();
 
 	context.subscriptions.push(
 		vscode.workspace.registerNotebookSerializer(
 			'powerbi-notebook', new PowerBINotebookSerializer(), { transientOutputs: true }
 		)
 	);
+
 
 	const completionProvider = new PowerBIAPICompletionProvider(context);
 	completionProvider.loadSwaggerFile();

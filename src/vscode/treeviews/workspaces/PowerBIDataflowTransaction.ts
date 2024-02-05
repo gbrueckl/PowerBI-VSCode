@@ -142,11 +142,11 @@ export class PowerBIDataflowTransaction extends PowerBIWorkspaceTreeItem {
 
 	// DataflowTransaction-specific funtions
 	public async cancel(): Promise<void> {
-		ThisExtension.setStatusBar("Cancelling dataflow-refresh ...", true);
+		ThisExtension.setStatusBarRight("Cancelling dataflow-refresh ...", true);
 		// dataflows work slightly different and the transaction is not linked to the dataflow
 		const apiPath = this.apiPath.replace(`/${this.getPathItemByType<PowerBIDataflow>("DATAFLOW").id}`, "");
 		PowerBIApiService.post(apiPath + "cancel", null);
-		ThisExtension.setStatusBar("Dataflow-refresh cancelled!");
+		ThisExtension.setStatusBarRight("Dataflow-refresh cancelled!");
 		Helper.showTemporaryInformationMessage("Dataflow-refresh cancelled!", 3000);
 
 		await Helper.delay(1000);
