@@ -14,6 +14,7 @@
 - fixed issue so `%dax` also works with API sub-paths of a dataset
 - added support for using variables in notebooks for all magics
 - added a Statusbar at the bottom left to show the currently logged in User (+Tenant)
+- fixed issue with `Open in Power BI Service` and remote tenants
 
 **v1.3.2**:
 - fixed issue with TMDL/TOM features and guest accounts
