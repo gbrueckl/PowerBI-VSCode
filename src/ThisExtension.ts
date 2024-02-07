@@ -97,8 +97,9 @@ export abstract class ThisExtension {
 	}
 
 	static updateStatusBarLeft(): void {
-		const tenantInfo = PowerBIApiService.TenantId ? ` (Tenant: ${PowerBIApiService.TenantId})` : "";
-		this.StatusBarLeft.text = `Power BI: ${PowerBIApiService.SessionUserEmail}${tenantInfo}`;
+		const tenantInfo = PowerBIApiService.TenantId ? `Tenant: ${PowerBIApiService.TenantId}` : "";
+		this.StatusBarLeft.text = `Power BI: ${PowerBIApiService.SessionUserEmail}${tenantInfo ? " (GUEST)" : ""}`;
+		this.StatusBarLeft.tooltip = tenantInfo ? `${tenantInfo}` : undefined;
 	}
 
 	//#endregion

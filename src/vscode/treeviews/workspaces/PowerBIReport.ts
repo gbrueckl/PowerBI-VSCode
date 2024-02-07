@@ -193,6 +193,6 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 			return;
 		}
 
-		await PowerBIApiService.downloadFile(apiUrl, targetPath);
+		await PowerBIApiService.downloadFile(apiUrl, targetPath, true);
 	}
 }

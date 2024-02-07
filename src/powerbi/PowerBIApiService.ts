@@ -356,15 +356,9 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	public static async getFile(endpoint: string, params: object = null, raiseError: boolean = true): Promise<Buffer> {
-		endpoint = this.getFullUrl(endpoint, params);
-		if (params) {
-			ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
-		}
-		else {
-			ThisExtension.log("GET " + endpoint);
-		}
-
+	public static async getFile(endpoint: string, raiseError: boolean = true): Promise<Buffer> {
+		endpoint = this.getFullUrl(endpoint);
+		
 		try {
 			const config: RequestInit = {
 				method: "GET",
@@ -373,18 +367,15 @@ export abstract class PowerBIApiService {
 			};
 			let response: Response = await PowerBIApiService.get<Response>(endpoint, undefined, false, true);
 
-			let resultText = await response.text();
-
 			if (response.ok) {
-
 				const blob = await response.blob();
 				const buffer = await blob.arrayBuffer();
 				const content = Buffer.from(buffer);
 
 				return content;
-
 			}
 			else {
+				let resultText = await response.text();
 				if (raiseError) {
 					throw new Error(resultText);
 				}
@@ -396,8 +387,8 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	public static async downloadFile(endpoint: string, targetPath: vscode.Uri, params: object = null, raiseError: boolean = false): Promise<void> {
-		const content = await PowerBIApiService.getFile(endpoint, params, raiseError);
+	public static async downloadFile(endpoint: string, targetPath: vscode.Uri, raiseError: boolean = false): Promise<void> {
+		const content = await PowerBIApiService.getFile(endpoint, raiseError);
 
 		try {
 			if (content) {

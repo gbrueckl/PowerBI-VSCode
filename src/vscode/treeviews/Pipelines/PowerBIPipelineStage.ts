@@ -10,6 +10,7 @@ import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from
 import { PowerBIPipelineStageArtifacts } from './PowerBIPipelineStageArtifacts';
 import { PowerBIPipeline } from './PowerBIPipeline';
 import { iPowerBIPipelineDeployableItem } from './iPowerBIPipelineDeployableItem';
+import { pipeline } from 'stream';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPowerBIPipelineDeployableItem {
@@ -23,7 +24,7 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 
 		this.definition = definition;
 		this.label = this._label;
-		this.id = definition.order.toString() + "/" + definition.workspaceId;
+		this.id = `${pipelineId.toString()}/${definition.order.toString()}`;
 
 		this.tooltip = this._tooltip;
 		this.description = null;
@@ -84,20 +85,23 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 		let children: PowerBIPipelineTreeItem[] = [];
 		let artifacts: iPowerBIPipelineStageArtifacts = await PowerBIApiService.getPipelineStageArtifacts(this.getParentByType<PowerBIPipeline>("PIPELINE").uid, this.definition.order);
 
-		if (artifacts.datasets.length > 0) {
-			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATASETS", artifacts.datasets, this));
-		}
-		if (artifacts.reports.length > 0) {
-			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEREPORTS", artifacts.reports, this));
-		}
-		if (artifacts.dashboards.length > 0) {
-			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDASHBOARDS", artifacts.dashboards, this));
-		}
-		if (artifacts.dataflows.length > 0) {
-			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATAFLOWS", artifacts.dataflows, this));
-		}
-		if (artifacts.datamarts.length > 0) {
-			children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATAMARTS", artifacts.datamarts, this));
+		// if there is no stage assigned, artifacts will contain an error
+		if(!("error" in artifacts)) {
+			if (artifacts.datasets.length > 0) {
+				children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATASETS", artifacts.datasets, this));
+			}
+			if (artifacts.reports.length > 0) {
+				children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEREPORTS", artifacts.reports, this));
+			}
+			if (artifacts.dashboards.length > 0) {
+				children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDASHBOARDS", artifacts.dashboards, this));
+			}
+			if (artifacts.dataflows.length > 0) {
+				children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATAFLOWS", artifacts.dataflows, this));
+			}
+			if (artifacts.datamarts.length > 0) {
+				children.push(new PowerBIPipelineStageArtifacts(this.uid, this.definition.order, "PIPELINESTAGEDATAMARTS", artifacts.datamarts, this));
+			}
 		}
 
 		return children;
