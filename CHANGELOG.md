@@ -1,5 +1,10 @@
 # Change Log
 
+**v1.4.1**:
+- fixed issue with unassigned pipeline stages
+- fixed issue with `Download Report`
+- improved left StatusBar to show the email. The remote tenant is now only displayed in the tooltip
+
 **v1.4.0**:
 - added support to drill down into individual tables, columns, measures and partitions of a dataset from the workspace browser
 - added ability to process individual tables/partitions from the UI
