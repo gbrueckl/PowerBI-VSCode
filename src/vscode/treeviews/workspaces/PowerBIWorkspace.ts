@@ -67,7 +67,10 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 	}
 
 	get asQuickPickItem(): PowerBIQuickPickItem {
-		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `IsOnPremiumCapacity: ${this.isPremiumCapacity}`);
+		const qpItem = new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `IsOnPremiumCapacity: ${this.isPremiumCapacity}`);
+		qpItem.apiItem = this;
+
+		return qpItem;
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {

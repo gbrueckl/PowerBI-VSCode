@@ -208,7 +208,10 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	}
 
 	get asQuickPickItem(): PowerBIQuickPickItem {
-		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString());
+		let qpItem = new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString());
+		qpItem.apiItem = this;
+
+		return qpItem;
 	}
 
 	async insertCode(): Promise<void> {

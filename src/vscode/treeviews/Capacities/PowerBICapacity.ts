@@ -31,7 +31,10 @@ export class PowerBICapacity extends PowerBICapacityTreeItem {
 	}
 
 	get asQuickPickItem(): PowerBIQuickPickItem {
-		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `SKU: ${this.sku} | Region: ${this.region} | State: ${this.state}`);
+		const qpItem = new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `SKU: ${this.sku} | Region: ${this.region} | State: ${this.state}`);
+		qpItem.apiItem = this;
+
+		return qpItem;
 	}
 
 	get apiUrlPart(): string {

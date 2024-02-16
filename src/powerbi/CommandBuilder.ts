@@ -105,9 +105,10 @@ export class PowerBICommandInput {
 export class PowerBIQuickPickItem implements vscode.QuickPickItem {
 	private _label: string;
 	private _value?: string;
-	private _picked?: boolean;
 	private _description?: string;
 	private _details?: string;
+	private _picked?: boolean;
+	private _apiItem?: PowerBIApiTreeItem;
 
 	constructor(
 		label: string,
@@ -151,10 +152,17 @@ export class PowerBIQuickPickItem implements vscode.QuickPickItem {
 	set picked(value: boolean) {
 		this._picked = value;
 	}
+
+	get apiItem(): PowerBIApiTreeItem {
+		return this._apiItem;
+	}
+
+	set apiItem(value: PowerBIApiTreeItem) {
+		this._apiItem = value;
+	}
 }
 
 
-// https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export abstract class PowerBICommandBuilder {
 	private static _quickPickLists: Map<ApiItemType, PowerBIQuickPickItem[]>;
 	private static _maxQuickPickListItems: number = 10;

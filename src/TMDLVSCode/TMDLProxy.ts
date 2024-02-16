@@ -9,7 +9,7 @@ import { Buffer } from '@env/buffer';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { Helper } from '../helpers/Helper';
 import { TMDL_EXTENSION, TMDL_SCHEME } from '../vscode/filesystemProvider/TMDLFileSystemProvider';
-import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../powerbi/CommandBuilder';
+import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../powerbi/CommandBuilder';
 import { TMDLFSUri } from '../vscode/filesystemProvider/TMDLFSUri';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 import { TMDLProxyData, TMDLProxyDataException, TMDLProxyDataValidation, TMDLProxyServer, TMDLProxyStreamEntry } from '../TMDLVSCode/_typesTMDL'
@@ -17,6 +17,8 @@ import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfigurati
 import { iPowerBIGroup } from '../powerbi/GroupsAPI/_types';
 import { TOMProxyBackupRequest, TOMProxyRestoreRequest } from './_typesTOM';
 import { TMSLProxyExecuteRequest, TMSLProxyExecuteResponse } from './_typesTMSL';
+import { PowerBIWorkspace } from '../vscode/treeviews/workspaces/PowerBIWorkspace';
+import { DeploymentResult } from './_types';
 
 const DEBUG: boolean = false;
 const DEBUG_PORT: number = 51000;
@@ -481,30 +483,27 @@ export abstract class TMDLProxy {
 		let workspaceName: string;
 		let datasetName: string;
 
-		let success: boolean = false;
+		let result: DeploymentResult = { "success": false, "connectionString": undefined};
 		let link: vscode.Uri;
 		if (resourceUri.scheme == TMDL_SCHEME) {
-			success = await TMDLProxy.publishStream(resourceUri);
+			result = await TMDLProxy.publishStream(resourceUri);
 
-			if (success) {
+			if (result.success) {
 				const tmdlUri: TMDLFSUri = new TMDLFSUri(resourceUri);
 				workspaceName = tmdlUri.workspace;
 				datasetName = tmdlUri.dataset;
 			}
 		}
 		else {
-			success = await TMDLProxy.publishFolder(resourceUri);
+			result = await TMDLProxy.publishFolder(resourceUri);
 
-			if (success) {
-				const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
-				const publishConfig: TMDLProxyData = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
-
-				workspaceName = decodeURI(Helper.getFirstRegexGroup(/\/v1.0\/.*?\/(.*?)[;\"]/gi, publishConfig.connectionString));
-				datasetName = decodeURI(Helper.getFirstRegexGroup(/Initial Catalog=(.*?)(;|$)/gi, publishConfig.connectionString));
+			if (result.success) {
+				workspaceName = decodeURI(Helper.getFirstRegexGroup(/\/v1.0\/.*?\/(.*?)[;\"]/gi, result.connectionString));
+				datasetName = decodeURI(Helper.getFirstRegexGroup(/Initial Catalog=(.*?)(;|$)/gi, result.connectionString));
 			}
 		}
 
-		if (success) {
+		if (result.success) {
 			link = await PowerBIApiService.getDatasetUrl(workspaceName, datasetName);
 
 			const action = await vscode.window.showInformationMessage("TMDL published successfully!", "Process", "Open in PowerBI")
@@ -521,11 +520,11 @@ export abstract class TMDLProxy {
 			}
 		}
 
-		return success;
+		return result.success;
 	}
-	static async publishFolder(resourceUri: vscode.Uri): Promise<boolean> {
+	static async publishFolder(resourceUri: vscode.Uri): Promise<DeploymentResult> {
 		try {
-			let success: boolean = false;
+			let result: DeploymentResult = { "success": false, "connectionString": undefined};
 
 			TMDLProxy.log("Publishing TMDL from " + resourceUri.fsPath + " ...");
 			const localPath = await TMDLProxy.getLocalPathRecursive(resourceUri);
@@ -546,9 +545,54 @@ export abstract class TMDLProxy {
 				};
 			}
 			else {
-				body = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
-				body.localPath = localPath.fsPath;
-				body.connectionString = decodeURI(body.connectionString);
+				body = {
+					"connectionString": undefined, // overwritten later
+					"localPath": localPath.fsPath
+				};
+
+				// check if settings file exists
+				if (SETTINGS_FILE in (await vscode.workspace.fs.readDirectory(localPath))) {
+					body = JSON.parse((await vscode.workspace.fs.readFile(vscode.Uri.joinPath(localPath, SETTINGS_FILE))).toString());
+					body.connectionString = decodeURI(body.connectionString);
+				}
+				else {
+					const qpCreate = new PowerBIQuickPickItem("CREATE Semantic Model", "WORKSPACE_SELECTOR", "Create new semantic model in existing Workspace.");
+					const qpUpdate = new PowerBIQuickPickItem("UPDATE Semantic Model", "DATASET_SELECTOR", "Update existing new semantic model.");
+					const selector = await PowerBICommandBuilder.showQuickPick([qpCreate, qpUpdate], "Please select the action to perform", undefined, undefined);
+
+					if (selector) {
+						const targetSelector = new PowerBICommandInput("Select target for deployment", selector, "x");
+						const target = await targetSelector.getValue();
+
+						if (!target || target == "NO_ITEMS_FOUND") {
+							throw new Error("Deployment aborted!");
+						}
+
+						if (selector == "WORKSPACE_SELECTOR") {
+							const workspaces = PowerBICommandBuilder.getQuickPickItems("GROUP");
+							const workspace = workspaces.find((item) => item.value == target).apiItem as PowerBIWorkspace;
+
+							let defaultName = localPath.path.split("/").pop();
+							if (defaultName.endsWith(".Dataset")) {
+								defaultName = defaultName.substring(0, defaultName.length - 8);
+							}
+
+							const newName = await PowerBICommandBuilder.showInputBox(defaultName, "Enter the name of the new dataset", undefined, undefined);
+							if (!newName || newName == "") {
+								throw new Error("Deployment aborted!");
+							}
+
+							body.connectionString = PowerBIApiService.getXmlaConnectionString(workspace.name, newName);
+						}
+						if (selector == "DATASET_SELECTOR") {
+							const dataset = PowerBICommandBuilder.getQuickPickItems("DATASET").find((item) => item.value == target).apiItem as PowerBIDataset;
+							body.connectionString = PowerBIApiService.getXmlaConnectionString(dataset.workspace.name, dataset.name);
+						}
+					}
+					else {
+						throw new Error("Deployment aborted!");
+					}
+				}
 			}
 
 			await TMDLProxy.setAccessToken(body)
@@ -566,22 +610,23 @@ export abstract class TMDLProxy {
 
 			if (!response.ok) {
 				this.handleException(resultText, resourceUri);
-				success = false;
+				result.success = false;
 			}
 			else {
 				//vscode.window.showInformationMessage(resultText);
-				success = true;
+				result.success = true;
+				result.connectionString = body.connectionString;
 			}
 
-			return success;
+			return result;
 		} catch (error) {
 			await TMDLProxy.handleException(error);
-			return false;
+			return { "success": false, "connectionString": undefined};;
 		}
 	}
-	static async publishStream(resourceUri: vscode.Uri): Promise<boolean> {
+	static async publishStream(resourceUri: vscode.Uri): Promise<DeploymentResult> {
 		try {
-			let success: boolean = false;
+			let result: DeploymentResult = { "success": false, "connectionString": undefined};
 			TMDLProxy.log("Publishing TMDL from " + resourceUri.fsPath + " ...");
 			const tmdlEntry = new TMDLFSUri(resourceUri);
 
@@ -605,17 +650,18 @@ export abstract class TMDLProxy {
 
 			if (!response.ok) {
 				this.handleException(resultText, resourceUri);
-				success = false;
+				result.success = false;
 			}
 			else {
 				//vscode.window.showInformationMessage(resultText);
-				success = true;
+				result.success = true;
+				result.connectionString = body.connectionString
 			}
 
-			return success;
+			return result;
 		} catch (error) {
 			await TMDLProxy.handleException(error);
-			return false;
+			return { "success": false, "connectionString": undefined};;
 		}
 	}
 

@@ -37,7 +37,10 @@ export class PowerBIDataflow extends PowerBIWorkspaceTreeItem {
 	}
 
 	get asQuickPickItem(): PowerBIQuickPickItem {
-		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Workspace: ${this.workspace.name} (ID: ${this.workspace.uid})`);
+		const qpItem = new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Workspace: ${this.workspace.name} (ID: ${this.workspace.uid})`);
+		qpItem.apiItem = this;
+
+		return qpItem;
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {

@@ -78,7 +78,10 @@ export class PowerBIPipelineStage extends PowerBIPipelineTreeItem implements iPo
 	}
 
 	get asQuickPickItem(): PowerBIQuickPickItem {
-		return new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Order: ${this.definition.order}`);
+		const qpItem = new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Order: ${this.definition.order}`);
+		qpItem.apiItem = this;
+
+		return qpItem;
 	}
 
 	async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {
