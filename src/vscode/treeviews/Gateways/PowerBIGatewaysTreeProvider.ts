@@ -15,11 +15,18 @@ import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<PowerBIGatewayTreeItem> {
 
+	private _treeView: vscode.TreeView<PowerBIGatewayTreeItem>;
 	private _onDidChangeTreeData: vscode.EventEmitter<PowerBIGatewayTreeItem | undefined> = new vscode.EventEmitter<PowerBIGatewayTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<PowerBIGatewayTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBIGateways', { treeDataProvider: this, showCollapseAll: true, canSelectMany: false, dragAndDropController: new PowerBIApiDragAndDropController() });
+		const view = vscode.window.createTreeView<PowerBIGatewayTreeItem>('PowerBIGateways', {
+			treeDataProvider: this,
+			showCollapseAll: true,
+			canSelectMany: false,
+			dragAndDropController: new PowerBIApiDragAndDropController()
+		});
+		this._treeView = view;
 		context.subscriptions.push(view);
 
 		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
@@ -38,7 +45,7 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 			Helper.showTemporaryInformationMessage('Refreshing PowerBI Gateways ...');
 		}
 		// on leaves, we refresh the parent instead
-		if(item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
+		if (item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
 			item = item.parent;
 		}
 		this._onDidChangeTreeData.fire(null);
@@ -70,7 +77,7 @@ export class PowerBIGatewaysTreeProvider implements vscode.TreeDataProvider<Powe
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
 
-			if(children.length == 0) {
+			if (children.length == 0) {
 				children.push(new PowerBIGatewayTreeItem("No Gateways found!", "GATEWAY", "NO_GATEWAYS_FOUND", undefined, vscode.TreeItemCollapsibleState.None))
 			}
 

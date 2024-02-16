@@ -35,6 +35,7 @@ import { PowerBIDataflowTransaction } from './vscode/treeviews/workspaces/PowerB
 import { PowerBICapacityWorkload } from './vscode/treeviews/Capacities/PowerBICapacityWorkload';
 import { TOMProxyBackup, TOMProxyRestore } from './TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTable } from './vscode/treeviews/workspaces/PowerBIDatasetTable';
+import { PowerBIOnDropProvider } from './vscode/dropProvider/PowerBIOnDropProvider';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -68,6 +69,15 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.registerNotebookSerializer(
 			'powerbi-notebook', new PowerBINotebookSerializer(), { transientOutputs: true }
 		)
+	);
+
+	context.subscriptions.push(
+		vscode.languages.registerDocumentDropEditProvider([
+			{ language: 'powerbi-api' },
+			{ language: 'dax' },
+			{ language: 'tmsl' },
+			{ language: 'pbinb-cmd' }],
+			new PowerBIOnDropProvider())
 	);
 
 

@@ -3,16 +3,14 @@ import * as vscode from 'vscode';
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { Helper, UniqueId } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
-import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
-import { PROCESSING_TYPES, PowerBIDataset } from './PowerBIDataset';
+import {  PowerBIDataset } from './PowerBIDataset';
 import { iPowerBIDatasetDMV, iPowerBIDatasetRefreshableObject } from '../../../powerbi/DatasetsAPI/_types';
-import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 import { PowerBIDatasetTableColumns } from './PowerBIDatasetTableColumns';
-import { PowerBIDatasetTableMeasures } from './PowerBIDatasetTableMeasures';
 import { PowerBIDatasetTable } from './PowerBIDatasetTable';
+import { PowerBIApiDrop, PowerBITmslDrop } from '../../dropProvider/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem {
+export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem implements PowerBITmslDrop, PowerBIApiDrop{
 
 	constructor(
 		definition: iPowerBIDatasetDMV,
@@ -89,17 +87,30 @@ export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem {
 		return JSON.stringify(this.refreshableObject, null, 4)
 	}
 
+	// TMSL Drop
+	get tmslDrop(): string {
+		return JSON.stringify(this.refreshableObject, null, 4);
+	}
+
+	// API Drop
+	get apiDrop(): string {
+		return JSON.stringify(this.refreshableObject, null, 4);
+	}
+
 	// DatasetTablePartition-specific funtions
 	get refreshableObject(): iPowerBIDatasetRefreshableObject {
 		return { table: this.table.name, partition: this.name };
 	}
 
 	public async refresh(): Promise<void> {
+		ThisExtension.TreeViewWorkspaces.doMultiselectAction("REFRESH");
+		/*
 		const isOnDedicatedCapacity = this.dataset.workspace.isPremiumCapacity;
 
 		await PowerBIDataset.refreshById(this.groupId.toString(), this.dataset.id, isOnDedicatedCapacity,[this.refreshableObject]);
 
 		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this.dataset, false);
+		*/
 	}
 }

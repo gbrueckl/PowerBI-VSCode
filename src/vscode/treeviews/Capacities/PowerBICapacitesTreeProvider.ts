@@ -14,11 +14,18 @@ import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<PowerBICapacityTreeItem> {
 
+	private _treeView: vscode.TreeView<PowerBICapacityTreeItem>;
 	private _onDidChangeTreeData: vscode.EventEmitter<PowerBICapacityTreeItem | undefined> = new vscode.EventEmitter<PowerBICapacityTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<PowerBICapacityTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBICapacities', { treeDataProvider: this, showCollapseAll: true, canSelectMany: false, dragAndDropController: new PowerBIApiDragAndDropController() });
+		const view = vscode.window.createTreeView<PowerBICapacityTreeItem>('PowerBICapacities', {
+			treeDataProvider: this,
+			showCollapseAll: true,
+			canSelectMany: false,
+			dragAndDropController: new PowerBIApiDragAndDropController()
+		});
+		this._treeView = view;
 		context.subscriptions.push(view);
 
 		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
@@ -37,7 +44,7 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 			Helper.showTemporaryInformationMessage('Refreshing PowerBI Capacities ...');
 		}
 		// on leaves, we refresh the parent instead
-		if(item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
+		if (item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
 			item = item.parent;
 		}
 		this._onDidChangeTreeData.fire(null);
@@ -69,7 +76,7 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
 
-			if(children.length == 0) {
+			if (children.length == 0) {
 				children.push(new PowerBICapacityTreeItem("NO_CAPACITIES_FOUND", "No Capacities found!", "CAPACITY", undefined, undefined, vscode.TreeItemCollapsibleState.None))
 			}
 

@@ -10,9 +10,10 @@ import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 import { PowerBIDatasetTableColumns } from './PowerBIDatasetTableColumns';
 import { PowerBIDatasetTableMeasures } from './PowerBIDatasetTableMeasures';
 import { PowerBIDatasetTable } from './PowerBIDatasetTable';
+import { PowerBIDaxDrop } from '../../dropProvider/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIDatasetTableColumn extends PowerBIWorkspaceTreeItem {
+export class PowerBIDatasetTableColumn extends PowerBIWorkspaceTreeItem implements PowerBIDaxDrop {
 
 	constructor(
 		definition: iPowerBIDatasetDMV,
@@ -121,6 +122,11 @@ export class PowerBIDatasetTableColumn extends PowerBIWorkspaceTreeItem {
 		}
 
 		return {};
+	}
+
+	// DAX Drop
+	get daxDrop(): string {
+		return `'${this.table.name}'[${this.name}]`;
 	}
 
 	// DatasetTableColumn-specific funtions

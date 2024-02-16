@@ -1,5 +1,11 @@
 # Change Log
 
+**v1.5.0**:
+- added support for multiselect of `Tables` and `Partitions` to process multiple at the same time
+- added support to deploy local TMDL folders directly without `.publishsettings.json`
+- added Drag & Drop to Power BI notebooks supporting `DAX` (tables, columns and measures)
+- added dedicaed languages `DAX`, `TMSL` and Power BI Notebook Command (`pbinb-cmd`) to the notebooks
+
 **v1.4.1**:
 - fixed issue with unassigned pipeline stages
 - fixed issue with `Download Report`

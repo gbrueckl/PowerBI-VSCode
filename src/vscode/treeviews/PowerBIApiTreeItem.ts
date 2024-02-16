@@ -9,9 +9,10 @@ import { ApiUrlPair } from '../../powerbi/_types';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
 import { iHandleBeingDropped } from './PowerBIApiDragAndDropController';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../powerbi/CommandBuilder';
+import { PowerBIApiDrop } from '../dropProvider/_types';
 
 
-export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiItem {
+export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiItem, PowerBIApiDrop {
 	protected _itemType: ApiItemType;
 	protected _id: UniqueId;
 	protected _name: string;
@@ -229,6 +230,11 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	}
 
 	get code(): string {
+		return Helper.trimChar("/" + this.apiPath.split("/").slice(2).join("/"), "/", false);
+	}
+
+	// API Drop
+	get apiDrop(): string {
 		return Helper.trimChar("/" + this.apiPath.split("/").slice(2).join("/"), "/", false);
 	}
 

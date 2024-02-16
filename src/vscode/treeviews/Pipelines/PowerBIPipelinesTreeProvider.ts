@@ -17,13 +17,18 @@ import { iPowerBIPipelineDeployableItem } from './iPowerBIPipelineDeployableItem
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<PowerBIPipelineTreeItem> {
 
-	private _treeView: vscode.TreeView<PowerBIApiTreeItem>;;
+	private _treeView: vscode.TreeView<PowerBIPipelineTreeItem>;
 	private _previousSelection: { item: PowerBIPipelineTreeItem, time: number };
 	private _onDidChangeTreeData: vscode.EventEmitter<PowerBIPipelineTreeItem | undefined> = new vscode.EventEmitter<PowerBIPipelineTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<PowerBIPipelineTreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	constructor(context: vscode.ExtensionContext) {
-		const view = vscode.window.createTreeView('PowerBIPipelines', { treeDataProvider: this, showCollapseAll: true, canSelectMany: true, dragAndDropController: new PowerBIApiDragAndDropController() });
+		const view = vscode.window.createTreeView<PowerBIPipelineTreeItem>('PowerBIPipelines', {
+			treeDataProvider: this,
+			showCollapseAll: true,
+			canSelectMany: true,
+			dragAndDropController: new PowerBIApiDragAndDropController()
+		});
 		context.subscriptions.push(view);
 		this._treeView = view;
 
@@ -32,7 +37,7 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 		ThisExtension.TreeViewPipelines = this;
 	}
 
-	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void> {
+	private async _onDidChangeSelection(items: readonly PowerBIPipelineTreeItem[]): Promise<void> {
 		if (items.length > 0) {
 			vscode.commands.executeCommand("PowerBI.updateQuickPickList", items.slice(-1)[0]);
 		}
@@ -54,7 +59,7 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 			Helper.showTemporaryInformationMessage('Refreshing PowerBI Pipelines ...');
 		}
 		// on leaves, we refresh the parent instead
-		if(item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
+		if (item && item.collapsibleState == vscode.TreeItemCollapsibleState.None) {
 			item = item.parent;
 		}
 		this._onDidChangeTreeData.fire(null);
@@ -90,7 +95,7 @@ export class PowerBIPipelinesTreeProvider implements vscode.TreeDataProvider<Pow
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
 
-			if(children.length == 0) {
+			if (children.length == 0) {
 				children.push(new PowerBIPipelineTreeItem("No pipelines found!", "PIPELINE", "NO_PIPELINES_FOUND", undefined, vscode.TreeItemCollapsibleState.None))
 			}
 

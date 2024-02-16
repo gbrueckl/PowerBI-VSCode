@@ -165,16 +165,10 @@ Alternatively, you can also omit the `/<dataset>`. In this case, a list of all a
 
 To reload the latest definition from the server again, you can right-click the folder of the dataset in the VSCode File Explorer and select `[(Re)Load TMDL from Server]` (see screenshot above).
 
+You can also open a TMDL folder structure that resides on your local disk already and `Validate` or `Deploy` it. Please see also below.
+
 ## Integration with other TMDL Tools
-TMDL is a standard defined by Microsoft which also means that different tools can be used to work with the TMDL files. To use all the TMDL features of this extension with files authored by other tools (e.g. Tabular Editor), you need to configure the target where the TMDL files should be deployed to. This can be done by creating a file called `.publishsettings.json` in the root of the TMDL folder structure (on the same level as `model.tmdl`). This file has to have the following content:
-
-```json
-{
-  "connectionString": "Data Source=powerbi://api.powerbi.com/v1.0/myorg/SomeWorkspace;Initial Catalog=SomeDataset;"
-}
-```
-
-The value for `connectionString` can be obtained from the settings pane of the dataset in the Power BI service where you want to deploy to. If the dataset does not yet exist (e.g. if you have modified the exported `connectionString` in the file), the dataset will be created for you. This can be very useful to copy datasets between workspaces without down-/uploading `.pbix` files or if you have modified the dataset via the XMLA endpoint with an other tool (e.g. Tabular Editor) before.
+TMDL is a standard defined by Microsoft which also means that different tools can be used to work with the TMDL files. Whenever you open a `.tmdl` file, you have the option to `Validate` the whole TMDL folder structure or to `Deploy` it as a new semantic model or update/overwrite an existing one. This can be very useful to copy datasets between workspaces without down-/uploading `.pbix` files or if you have modified the dataset via the XMLA endpoint with an other tool (e.g. Tabular Editor) before.
 
 ## TMDL Proxy
 This extensions leverages existing libraries for TMDL which are available as .net Core package: [Microsoft.AnalysisServices.NetCore.retail.amd64](https://www.nuget.org/packages/Microsoft.AnalysisServices.NetCore.retail.amd64). However, as this package cannot be directly integrated into VSCode which uses JavaScript/TypeScript (and not .net), we implemented a .net Core application/api that acts as a proxy between VSCode and the target Tabular Server (e.g. Power BI dataset). This allows our VSCode extension to communicate with the target from within VSCode without having to implement the library in JavaScript/TypeScript.

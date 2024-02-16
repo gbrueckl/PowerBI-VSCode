@@ -26,7 +26,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 	readonly notebookType: string = 'powerbi-notebook';
 	readonly label: string;
-	readonly supportedLanguages = ["powerbi-api", "DAX"]; // any for now, should be DAX, M, ... in the future
+	readonly supportedLanguages = ["powerbi-api", "dax", "tmsl"]; // any for now, should be DAX, M, ... in the future
 	readonly supportsExecutionOrder: boolean = true;
 
 	private _controller: vscode.NotebookController;

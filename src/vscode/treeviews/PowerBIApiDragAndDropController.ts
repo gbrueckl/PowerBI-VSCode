@@ -9,9 +9,8 @@ import { PowerBIPipelineStage } from './Pipelines/PowerBIPipelineStage';
 import { PowerBICapacity } from './Capacities/PowerBICapacity';
 import { PowerBIReport } from './workspaces/PowerBIReport';
 import { Helper } from '../../helpers/Helper';
-import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
-import { iPowerBIImport, iPowerBIImportDetails } from '../../powerbi/ImportsAPI/_types';
 
+export const PowerBIDragMIMEType = "powerbiapidragdrop";
 
 export interface iHandleBeingDropped {
 	get canBeDropped(): boolean;
@@ -97,16 +96,16 @@ class PowerBIObjectTransferItem extends vscode.DataTransferItem {
 export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropController<PowerBIApiTreeItem> {
 
 	dropMimeTypes: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString()).concat([
-		"powerbiapidragdrop",
+		PowerBIDragMIMEType,
 		"text/uri-list" // to support drag and drop from the file explorer (not yet working)
 	]);
 	dragMimeTypes: readonly string[] = ThisExtension.TreeProviderIds.map((x) => x.toString()).concat([
-		"powerbiapidragdrop"
+		PowerBIDragMIMEType
 	]);
 
 	public async handleDrag?(source: readonly PowerBIApiTreeItem[], dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
 		dataTransfer.set(source[0].TreeProvider, new PowerBIObjectTransferItem(source));
-		dataTransfer.set("powerbiapidragdrop", new PowerBIObjectTransferItem(source));
+		dataTransfer.set(PowerBIDragMIMEType, new PowerBIObjectTransferItem(source));
 	}
 
 	public async handleDrop?(target: PowerBIApiTreeItem, dataTransfer: vscode.DataTransfer, token: vscode.CancellationToken): Promise<void> {
@@ -139,7 +138,7 @@ export class PowerBIApiDragAndDropController implements vscode.TreeDragAndDropCo
 		}
 
 		const ws = dataTransfer.get("application/vnd.code.tree.powerbiworkspaces");
-		const transferItem = dataTransfer.get('powerbiapidragdrop');
+		const transferItem = dataTransfer.get(PowerBIDragMIMEType);
 
 		if (!transferItem) {
 			ThisExtension.log("Item dropped on PowerBI Workspace Tree-View - but MimeType 'application/vnd.code.tree.powerbiworkspaces' was not found!");

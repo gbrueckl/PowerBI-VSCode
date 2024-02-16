@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.4.1",
+	"version": "1.5.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -804,6 +804,22 @@
 					"light": "./resources/light/pbi_desktop.png",
 					"dark": "./resources/dark/pbi_desktop.png"
 				}
+			},
+			{
+				"id": "dax",
+				"extensions": [
+					".dax"
+				]
+			},
+			{
+				"id": "tmsl",
+				"extensions": [
+					".bim",
+					".tmsl"
+				]
+			},
+			{
+				"id": "pbinb-cmd"
 			}
 		]
 	},
