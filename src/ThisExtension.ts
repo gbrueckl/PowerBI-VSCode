@@ -15,6 +15,7 @@ import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIW
 import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICapacityTreeItem';
 import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatewayTreeItem';
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
+import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/FabricFileSystemProvider';
 
 
 export type TreeProviderId =
@@ -35,6 +36,7 @@ export abstract class ThisExtension {
 	private static _statusBarRight: vscode.StatusBarItem;
 	private static _statusBarLeft: vscode.StatusBarItem;
 	private static _tmdlFileSystemProvider: TMDLFileSystemProvider;
+	private static _fabricFileSystemProvider: FabricFileSystemProvider;
 	private static _treeViewWorkspaces: PowerBIWorkspacesTreeProvider;
 	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
 	private static _treeViewGateways: PowerBIGatewaysTreeProvider;
@@ -109,6 +111,13 @@ export abstract class ThisExtension {
 	}
 	static get TMDLFileSystemProvider(): TMDLFileSystemProvider {
 		return this._tmdlFileSystemProvider;
+	}
+
+	static set FabricFileSystemProvider(provider: FabricFileSystemProvider) {
+		this._fabricFileSystemProvider = provider;
+	}
+	static get FabricFileSystemProvider(): FabricFileSystemProvider {
+		return this._fabricFileSystemProvider;
 	}
 	// #endregion
 	// #region TreeViews

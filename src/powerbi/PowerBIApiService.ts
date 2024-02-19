@@ -12,6 +12,7 @@ import { iPowerBIDataset, iPowerBIDatasetDMV, iPowerBIDatasetExecuteQueries, iPo
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
+import { FabricApiService } from '../fabric/FabricAPIService';
 
 
 
@@ -79,6 +80,7 @@ export abstract class PowerBIApiService {
 		this._connectionTestRunning = true;
 		let workspaceList = await this.getGroups();
 		this._connectionTestRunning = false;
+
 		if (workspaceList.length > 0) {
 			ThisExtension.log("Power BI API Service initialized!");
 			this._isInitialized = true;
@@ -272,9 +274,12 @@ export abstract class PowerBIApiService {
 		baseItems.push(this.Org);
 		let pathItems = endpoint.split("/").filter(x => x);
 
-		let index = pathItems.indexOf(baseItems.slice(-1)[0]);
+		//let index = pathItems.indexOf(baseItems.slice(-1)[0]);
+		let index = baseItems.indexOf(pathItems[0]);
+		index = index == -1 ? undefined : index; // in case the item was not found, we append it to the baseUrl
 
-		endpoint = (baseItems.concat(pathItems.slice(index + 1))).join("/");
+		//endpoint = (baseItems.concat(pathItems.slice(index + 1))).join("/");
+		endpoint = (baseItems.slice(undefined, index).concat(pathItems)).join("/");
 
 		let uri = vscode.Uri.parse(endpoint);
 		/*}

@@ -52,7 +52,8 @@
 	"activationEvents": [
 		"onNotebook:powerbi-notebook",
 		"onLanguage:tmdl",
-		"onFileSystem:tmdl"
+		"onFileSystem:tmdl",
+		"onFileSystem:fabric"
 	],
 	"capabilities": {
 		"virtualWorkspaces": {

@@ -36,6 +36,7 @@ import { PowerBICapacityWorkload } from './vscode/treeviews/Capacities/PowerBICa
 import { TOMProxyBackup, TOMProxyRestore } from './TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTable } from './vscode/treeviews/workspaces/PowerBIDatasetTable';
 import { PowerBIOnDropProvider } from './vscode/dropProvider/PowerBIOnDropProvider';
+import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/FabricFileSystemProvider';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -205,6 +206,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	else {
 		ThisExtension.log("TMDL is not enabled! Please use the setting `powerbi.TMDL.enabled` to configure it and use TMDL features");
 	}
+
+	// Fabric FileSystemProvider
+	FabricFileSystemProvider.register(context);
 
 	vscode.commands.registerCommand('PowerBI.TMDL.test', () => TMDLProxy.test());
 
