@@ -33,43 +33,18 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 
 	// -- manage file metadata
 	async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
-		const FabricUri: FabricFSUri = await FabricFSUri.getInstance(uri);
+		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(uri);
 
-		// there are only folders above the part-Level
-		if (FabricUri.uriType < FabricUriType.part) {
-			return {
-				type: vscode.FileType.Directory,
-				size: null,
-				mtime: null,
-				ctime: null
-			}
-		}
-
-		let entry = await FabricFSCache.getItemPart(FabricUri.workspaceId, FabricUri.itemId, FabricUri.part);
-		if (entry) {
-			return {
-				type: vscode.FileType.File,
-				size: null,
-				mtime: null,
-				ctime: null
-			}
-		}
-
-		if ((await FabricFSCache.getItemParts(FabricUri.workspaceId, FabricUri.itemId)).find((entry) => entry.path.startsWith(FabricUri.part))) {
-			return {
-				type: vscode.FileType.Directory,
-				size: null,
-				mtime: null,
-				ctime: null
-			}
-		}
+		return FabricFSCache.stats(fabricUri);
 
 		throw vscode.FileSystemError.FileNotFound(uri);
 	}
 
 	async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
-		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(uri, true);
+		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(uri);
 
+		return FabricFSCache.readDirectory(fabricUri);
+/*
 		if (fabricUri.uriType == FabricUriType.root) {
 			let entries: [string, vscode.FileType][] = [];
 			const workspaces = await FabricFSCache.getWorkspaces();
@@ -104,7 +79,7 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 			}
 			return entries;
 		}
-/*
+
 		else {
 			const entries: FabricProxyStreamEntry[] = await FabricUri.getStreamEntries();
 

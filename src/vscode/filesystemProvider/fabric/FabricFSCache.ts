@@ -1,123 +1,41 @@
 import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../../ThisExtension';
-import { FabricFSItem } from './FabricFSItem';
-import { FabricFSItemPart } from './FabricFSItemPart';
-import { LoadingState } from '../TMDLFSDatabase';
-import { Helper } from '../../../helpers/Helper';
-import { FabricApiService } from '../../../fabric/FabricAPIService';
-import { FabricFSItemType } from './FabricFSItemType';
-import { FabricFSWorkspace } from './FabricFSWorkspace';
+
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSUri } from './FabricFSUri';
 
 export abstract class FabricFSCache {
-	static loadingState: LoadingState = "not_loaded";
-	private static cachedWorkspaces: FabricFSWorkspace[] = [];
+	private static _cache: Map<string, FabricFSCacheItem> = new Map<string, FabricFSCacheItem>();
 
-	private static cache: Map<FabricFSUri, FabricFSCacheItem> = new Map<FabricFSUri, FabricFSCacheItem>();
-
-	private static 
-
-	public static async load(): Promise<void> {
-		if (FabricFSCache.loadingState == "not_loaded") {
-			FabricFSCache.loadingState = "loading";
-			ThisExtension.log("################### Awaiting API initialization ... ")
-			await Helper.awaitCondition(async () => FabricApiService.isInitialized, 60000, 500);
-			ThisExtension.log(`Loading Fabric Workspace Root ... `);
-			
-			const workspaces = await FabricApiService.listWorkspaces();
-			if (workspaces) {
-				for(let workspace of workspaces)
-				{
-					// let ws = new FabricFSWorkspace(workspace.id);
-					// FabricFSCache.cachedWorkspaces.push(ws);
-				}
-
-				FabricFSCache.loadingState = "loaded";
-				ThisExtension.log(`Fabric Workspace Root loaded!`);
-			}
-			else {
-				FabricFSCache.loadingState = "not_loaded";
-				ThisExtension.log(`Failed to load Fabric Workspace Root!`);
-			}
-		}
-		else if (FabricFSCache.loadingState == "loading") {
-			ThisExtension.logDebug(`Fabric Workspace Root is loading in other process - waiting ... `);
-			await Helper.awaitCondition(async () => FabricFSCache.loadingState != "loading", 60000, 500);
-			ThisExtension.logDebug(`Fabric Workspace Root successfully loaded in other process!`);
-		}
-	}
-
-	public static async getWorkspaces(autoLoad: boolean = true): Promise<FabricFSWorkspace[]> {
-		if(FabricFSCache.loadingState != "loaded" && autoLoad)
+	public static async stats(uri: FabricFSUri): Promise<vscode.FileStat | undefined> {
+		let item = FabricFSCache._cache.get(uri.getCacheItemKey());
+		if(!item)
 		{
-			await FabricFSCache.load();
+			item = FabricFSCache.addCacheItem(uri);
 		}
-
-		return FabricFSCache.cachedWorkspaces;
+		
+		return item.stats();
 	}
 
-	public static async getWorkspace(workspaceId: string, autoLoad: boolean = true): Promise<FabricFSWorkspace> {
-		let workspace = (await FabricFSCache.getWorkspaces()).find((ws) => ws.id == workspaceId);
-
-		if(!workspace)
+	public static async readDirectory(uri: FabricFSUri): Promise<[string, vscode.FileType][] | undefined> {
+		let item = FabricFSCache._cache.get(uri.getCacheItemKey());
+		if(!item)
 		{
-			workspace = new FabricFSWorkspace(workspaceId);
-			FabricFSCache.cachedWorkspaces.push(workspace);
+			item = FabricFSCache.addCacheItem(uri);
 		}
-
-		if(workspace.loadingState != "loaded" && autoLoad)
-		{
-			await workspace.load();
-		}
-
-		return workspace;
+		
+		return item.readDirectory();
 	}
 
-	public static async getItemTypes(workspaceId: string): Promise<FabricFSItemType[]> {
-		const workspace = await FabricFSCache.getWorkspace(workspaceId);
+	private static addCacheItem(uri: FabricFSUri): FabricFSCacheItem {
+		let item  = uri.getCacheItem();
+		FabricFSCache._cache.set(uri.getCacheItemKey(), item);
 
-		return await workspace.getItemTypes();
-	}
-
-	public static async getItems(workspaceId: string, itemType: FabricItemType): Promise<FabricFSItem[]> {
-		const workspace = await FabricFSCache.getWorkspace(workspaceId);
-
-		return await workspace.getItems(itemType);
-	}
-
-	public static async getItem(workspaceId: string, itemId: string): Promise<FabricFSItem> {
-		const workspace = await FabricFSCache.getWorkspace(workspaceId);
-
-		return await workspace.getItem(itemId);
-	}
-
-	public static async getItemPart(workspaceId: string, itemId: string, part: string): Promise<FabricFSItemPart> {
-		const workspace = await FabricFSCache.getWorkspace(workspaceId);
-
-		const item = await workspace.getItem(itemId);
-
-		return await item.getPart(part);
-	}
-
-	public static async getItemParts(workspaceId: string, itemId: string): Promise<FabricFSItemPart[]> {
-		const workspace = await FabricFSCache.getWorkspace(workspaceId);
-
-		const item = await workspace.getItem(itemId);
-
-		return await item.parts;
-	}
-
-
-
-	public static async loadWorkspace(workspaceId: string): Promise<FabricFSWorkspace> {
-		let ws: FabricFSWorkspace = await FabricFSCache.getWorkspace(workspaceId);
-		return ws;
-	}
-
-	public static async loadItem(workspaceId: string, itemId: string): Promise<FabricFSItem> {
-		let item = await FabricFSCache.getItem(workspaceId, itemId);
 		return item;
+	}
+
+	private static removeCacheItem(item: FabricFSCacheItem): boolean {
+		return FabricFSCache._cache.delete(item.FabricUri.getCacheItemKey());
 	}
 }

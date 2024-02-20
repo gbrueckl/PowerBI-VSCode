@@ -3,20 +3,15 @@ import * as vscode from 'vscode';
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
 import { FabricApiWorkspaceType, iFabricApiWorkspace } from '../../../fabric/_types';
-import { FABRIC_FS_ITEM_TYPES } from './_types';
+import { FABRIC_FS_ITEM_TYPES, FabricFSSupportedItemType, LoadingState } from './_types';
+import { FabricFSItemType } from './FabricFSItemType';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSUri } from './FabricFSUri';
+import { FabricApiService } from '../../../fabric/FabricApiService';
 
 
 
-export class FabricFSWorkspace extends FabricFSCacheItem implements iFabricApiWorkspace {
-	id: string;
-	displayName: string;
-	description: string;
-	type: FabricApiWorkspaceType;
-	capacityId: string;
-	capacityAssignmentProgress: string;
-
+export class FabricFSRoot extends FabricFSCacheItem {
 	constructor(uri: FabricFSUri) {
 		super(uri);
 	}
@@ -32,9 +27,10 @@ export class FabricFSWorkspace extends FabricFSCacheItem implements iFabricApiWo
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
+			const apiItems = await FabricApiService.listWorkspaces();
 			this._children = [];
-			for (let itemType of FABRIC_FS_ITEM_TYPES) {
-				this._children.push([itemType, vscode.FileType.Directory]);
+			for (let apiItem of apiItems) {
+				this._children.push([apiItem.id, vscode.FileType.Directory]);
 			}
 		}
 	}

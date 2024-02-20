@@ -2,12 +2,12 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
-import { FabricFSWorkspace } from './FabricFSWorkspace_ARRAY';
 import { FabricFSSupportedItemType, LoadingState } from './_types';
-import { FabricApiService } from '../../../fabric/FabricAPIService';
 import { FabricFSItem } from './FabricFSItem';
 import { FabricFSUri } from './FabricFSUri';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
+import { FabricFSWorkspace } from './FabricFSWorkspace';
+import { FabricApiService } from '../../../fabric/FabricApiService';
 
 export class FabricFSItemType extends FabricFSCacheItem {
 	workspace: FabricFSWorkspace;
@@ -28,7 +28,7 @@ export class FabricFSItemType extends FabricFSCacheItem {
 		return this.workspace.id;
 	}
 
-	public async loadStatsFromApi(): Promise<void> {
+	public async loadStatsFromApi<T>(): Promise<void> {
 		this._stats = {
 			type: vscode.FileType.Directory,
 			ctime: undefined,
@@ -39,7 +39,7 @@ export class FabricFSItemType extends FabricFSCacheItem {
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
-			const apiItems = await FabricApiService.getItems(this.Uri.workspaceId, this.Uri.itemType);
+			const apiItems = await FabricApiService.getItems(this.FabricUri.workspaceId, this.FabricUri.itemType);
 			this._children = [];
 			for (let item of apiItems) {
 				this._children.push([item.id, vscode.FileType.Directory]);

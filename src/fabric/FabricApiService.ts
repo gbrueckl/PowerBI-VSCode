@@ -83,7 +83,7 @@ export abstract class FabricApiService {
 	static async getItems(workspaceId: string, itemType?: FabricApiItemType): Promise<iFabricApiItem[]> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items`;
 		const itemTypeFilter = itemType ? `?type=${itemType}` : '';
-		return FabricApiService.get<iFabricApiItem[]>(endpoint + itemTypeFilter);
+		return (await FabricApiService.get<iFabricApiItem[]>(endpoint + itemTypeFilter))["value"];
 	}
 
 	static async getItem(workspaceId: string, itemId: string): Promise<iFabricApiItem> {
@@ -94,6 +94,6 @@ export abstract class FabricApiService {
 	static async getItemParts(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiItemPart[]> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}/getDefinition`;
 		const itemFormat = format ? `?format=${format}` : '';
-		return FabricApiService.get<iFabricApiItemPart[]>(endpoint + itemFormat);
+		return (await FabricApiService.post<iFabricApiItemPart[]>(endpoint + itemFormat, undefined))["definition"]["parts"];
 	}
 }

@@ -302,8 +302,8 @@ export abstract class Helper {
 			const timer = setTimeout(() => finish(false), timeout);
 			const intervalId = setInterval(() => {
 				condition()
-					.then((r) => {
-						if (r) {
+					.then((result) => {
+						if (result) {
 							finish(true);
 						}
 					})

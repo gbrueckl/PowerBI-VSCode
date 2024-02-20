@@ -1,13 +1,10 @@
 import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../../ThisExtension';
-import { FabricFSWorkspace } from './FabricFSWorkspace_ARRAY';
-import { FabricFSItem } from './FabricFSItem';
-import { FabricFSItemPart } from './FabricFSItemPart';
 import { LoadingState } from '../TMDLFSDatabase';
 import { FabricFSUri, FabricUriType } from './FabricFSUri';
-import { FabricApiService } from '../../../fabric/FabricAPIService';
 import { Helper } from '../../../helpers/Helper';
+import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 export class FabricFSCacheItem {
 	
@@ -27,8 +24,12 @@ export class FabricFSCacheItem {
 		return this._uri.uriType;
 	}
 
-	get Uri(): FabricFSUri {
+	get FabricUri(): FabricFSUri {
 		return this._uri
+	}
+
+	get uri(): vscode.Uri {
+		return this.FabricUri.uri;
 	}
 
 	get loadingStateStats(): LoadingState {
@@ -51,32 +52,36 @@ export class FabricFSCacheItem {
 		if (this.loadingStateStats == "not_loaded") {
 			this.loadingStateStats = "loading";
 			
-			ThisExtension.log(`Loading Fabric URI Stats ${this.Uri} ...`);
+			ThisExtension.log(`Loading Fabric URI Stats ${this.FabricUri.uri.toString()} ...`);
+			let result = await Helper.awaitCondition(async () => PowerBIApiService.isInitialized, 10000, 500);
 			await this.loadStatsFromApi();
-
-			return this._stats;
+			this.loadingStateStats = "loaded";
+			
 		}
 		else if (this.loadingStateStats == "loading") {
-			ThisExtension.logDebug(`Fabric URI Stats for ${this.Uri} are loading in other process - waiting ... `);
-			await Helper.awaitCondition(async () => this.loadingStateStats != "loading", 60000, 500);
-			ThisExtension.logDebug(`Fabric URI Stats for ${this.Uri} successfully loaded in other process!`);
+			ThisExtension.logDebug(`Fabric URI Stats for ${this.FabricUri.uri.toString()} are loading in other process - waiting ... `);
+			await Helper.awaitCondition(async () => this.loadingStateStats != "loading", 10000, 500);
+			ThisExtension.logDebug(`Fabric URI Stats for ${this.FabricUri.uri.toString()} successfully loaded in other process!`);
 		}
+		return this._stats;
 	}
 
 	public async readDirectory(): Promise<[string, vscode.FileType][] | undefined> {
 		if (this.loadingStateChildren == "not_loaded") {
 			this.loadingStateChildren = "loading";
 			
-			ThisExtension.log(`Loading Fabric URI Children ${this.Uri} ...`);
+			ThisExtension.log(`Loading Fabric URI Children ${this.FabricUri.uri.toString()} ...`);
+			let result = await Helper.awaitCondition(async () => PowerBIApiService.isInitialized, 10000, 500);
 			await this.loadChildrenFromApi();
-
-			return this._children;
+			this.loadingStateChildren = "loaded";
+			
 		}
 		else if (this.loadingStateChildren == "loading") {
-			ThisExtension.logDebug(`Fabric URI Chilrdren for ${this.Uri} are loading in other process - waiting ... `);
-			await Helper.awaitCondition(async () => this.loadingStateChildren != "loading", 60000, 500);
-			ThisExtension.logDebug(`Fabric URI Children for ${this.Uri} successfully loaded in other process!`);
+			ThisExtension.logDebug(`Fabric URI Chilrdren for ${this.FabricUri.uri.toString()} are loading in other process - waiting ... `);
+			await Helper.awaitCondition(async () => this.loadingStateChildren != "loading", 10000, 500);
+			ThisExtension.logDebug(`Fabric URI Children for ${this.FabricUri.uri.toString()} successfully loaded in other process!`);
 		}
+		return this._children;
 	}
 
 	public async loadChildrenFromApi<T>(): Promise<void> {

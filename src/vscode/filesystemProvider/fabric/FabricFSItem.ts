@@ -2,23 +2,22 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
-import { FabricItemFormat, FabricItemType, iFabricItem, iFabricItemPart } from '../../../fabric/_types';
 import { FabricFSItemPart } from './FabricFSItemPart';
-import { FabricFSWorkspace } from './FabricFSWorkspace_ARRAY';
 import { LoadingState } from './_types';
-import { FABRIC_SCHEME } from './FabricFileSystemProvider';
 import { FabricFSUri } from './FabricFSUri';
-import { FabricApiService } from '../../../fabric/FabricAPIService';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
+import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemPart } from '../../../fabric/_types';
+import { FabricFSWorkspace } from './FabricFSWorkspace';
+import { FabricApiService } from '../../../fabric/FabricApiService';
 
-export class FabricFSItem extends FabricFSCacheItem implements iFabricItem {
+export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	id: string;
 	displayName: string;
 	description: string;
-	type: FabricItemType;
+	type: FabricApiItemType;
 	workspace: FabricFSWorkspace;
 	parts: FabricFSItemPart[];
-	format?: FabricItemFormat;
+	format?: FabricApiItemFormat;
 
 	loadingState: LoadingState;
 	partsLoadingState: LoadingState;
@@ -31,7 +30,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricItem {
 		return this.workspace.id;
 	}
 
-	public async loadStatsFromApi(): Promise<void> {
+	public async loadStatsFromApi<T>(): Promise<void> {
 		this._stats = {
 			type: vscode.FileType.Directory,
 			ctime: undefined,
@@ -42,11 +41,25 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricItem {
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
-			const apiItems = await FabricApiService.getItemParts(this.Uri.workspaceId, this.Uri.itemType, this.Uri.itemId);
+			const apiItems = await FabricApiService.getItemParts(this.FabricUri.workspaceId, this.FabricUri.itemId);
 			this._children = [];
+
+			let folders: [string, vscode.FileType][] = [];
+			let files: [string, vscode.FileType][] = [];
+
 			for (let item of apiItems) {
-				this._children.push([item.id, vscode.FileType.Directory]);
+				const partParts = item.path.split("/");
+				if (partParts.length == 1) {
+					files.push([item.path, vscode.FileType.File]);
+				}
+				else {
+					const folderName = partParts[0];
+					if (!folders.find((folder) => folder[0] == folderName)) {
+						folders.push([folderName, vscode.FileType.Directory]);
+					}
+				}
 			}
+			this._children = folders.concat(files);
 		}
 	}
 
@@ -62,8 +75,8 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricItem {
 		if (this.loadingState == "not_loaded") {
 			this.loadingState = "loading";
 			ThisExtension.log(`Loading '${this.id}' from workspace '${this.workspace.displayName}' ... `);
-			
-			let item = await Helper.awaitWithProgress<iFabricItem>(
+
+			let item = await Helper.awaitWithProgress<iFabricApiItem>(
 				`Loading Fabric Item '${this.id}' from workspace '${this.workspace.displayName}'`,
 				FabricApiService.getItem(this.workspace.id, this.id),
 				1000);
@@ -73,15 +86,15 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricItem {
 				this.type = item.type;
 				this.format = "ipynb"; // TODO: get format from item type
 
-				let itemParts = await Helper.awaitWithProgress<iFabricItemPart[]>(
+				let itemParts = await Helper.awaitWithProgress<iFabricApiItemPart[]>(
 					`Loading Fabric Item Parts for '${this.id}' from workspace '${this.workspace.displayName}'`,
 					FabricApiService.getItemParts(this.workspace.id, this.id),
 					1000);
 				if (itemParts) {
 					this.parts = [];
-					
+
 					for (let part of itemParts) {
-						let partInstance = new FabricFSItemPart(this, part.path);
+						let partInstance = new FabricFSItemPart(await FabricFSUri.getInstance(vscode.Uri.joinPath(this.FabricUri.uri, part.path)));
 						partInstance.payload = part.payload;
 						partInstance.payloadType = part.payloadType;
 						this.parts.push(partInstance);
@@ -95,7 +108,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricItem {
 					ThisExtension.log(`Failed to load Fabric Item Parts for '${this.id}'!`);
 				}
 
-				
+
 				ThisExtension.log(`Fabric Item '${this.id}' loaded!`);
 				this.loadingState = "loaded";
 			}

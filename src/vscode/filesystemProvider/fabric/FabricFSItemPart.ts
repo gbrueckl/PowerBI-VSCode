@@ -2,12 +2,14 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
-import { iFabricItemPart } from '../../../fabric/_types';
+import { iFabricApiItemPart } from '../../../fabric/_types';
 import { FabricFSItem } from './FabricFSItem';
 import { LoadingState } from './_types';
-import { FabricApiService } from '../../../fabric/FabricAPIService';
+import { FabricApiService } from '../../../fabric/FabricApiService';
+import { FabricFSCacheItem } from './FabricFSCacheItem';
+import { FabricFSUri } from './FabricFSUri';
 
-export class FabricFSItemPart implements iFabricItemPart{
+export class FabricFSItemPart extends FabricFSCacheItem implements iFabricApiItemPart{
 	path: string;
 	payload: string;
 	payloadType: string;
@@ -16,11 +18,8 @@ export class FabricFSItemPart implements iFabricItemPart{
 
 	loadingState: LoadingState;
 
-	constructor(item: FabricFSItem, path: string) {
-		this.item = item;
-		this.path = path;
-
-		this.loadingState = "not_loaded";
+	constructor(uri: FabricFSUri) {
+		super(uri);
 	}
 
 	setPayload(payload: string, payloadType: string): void {
@@ -28,7 +27,7 @@ export class FabricFSItemPart implements iFabricItemPart{
 		this.payloadType = payloadType;
 	}
 
-	forApi(): iFabricItemPart {
+	forApi(): iFabricApiItemPart {
 		return {
 			path: this.path,
 			payload: this.payload,

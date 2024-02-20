@@ -3,10 +3,14 @@ import * as vscode from 'vscode';
 import { Helper } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { FABRIC_SCHEME } from './FabricFileSystemProvider';
-import { FabricFSCache } from './FabricFSCache_ARRAY';
-import { FabricItemType } from '../../../fabric/_types';
+import { FabricApiItemType } from '../../../fabric/_types';
 import { FabricFSItemPart } from './FabricFSItemPart';
 import { ThisExtension } from '../../../ThisExtension';
+import { FabricFSCacheItem } from './FabricFSCacheItem';
+import { FabricFSWorkspace } from './FabricFSWorkspace';
+import { FabricFSItemType } from './FabricFSItemType';
+import { FabricFSItem } from './FabricFSItem';
+import { FabricFSRoot } from './FabricFSRoot';
 
 // regex with a very basic check for valid GUIDs
 const REGEX_FABRIC_URI = /fabric:\/\/(?<workspaceId>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<ItemId>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
@@ -23,7 +27,7 @@ export class FabricFSUri {
 	uri: vscode.Uri;
 	isValid: boolean;
 	workspaceId?: string;
-	itemType?: FabricItemType;
+	itemType?: FabricApiItemType;
 	itemId?: string;
 	part: string;
 
@@ -43,7 +47,7 @@ export class FabricFSUri {
 			let paths = uriString.split("/").filter((path) => path.length > 0).slice(1);
 			this.isValid = true;
 			this.workspaceId = paths[0];
-			this.itemType = paths[1] as FabricItemType;
+			this.itemType = paths[1] as FabricApiItemType;
 			this.itemId = paths[2];
 			this.part = paths[3];
 
@@ -65,7 +69,7 @@ export class FabricFSUri {
 		if (match) {
 			this.isValid = true;
 			this.workspaceId = match.groups["workspaceId"];
-			this.itemType = match.groups["itemType"] as FabricItemType;
+			this.itemType = match.groups["itemType"] as FabricApiItemType;
 			this.itemId = match.groups["itemId"];
 			this.part = match.groups["part"];
 
@@ -77,7 +81,7 @@ export class FabricFSUri {
 		throw vscode.FileSystemError.Unavailable("Invalid Fabric URI!");
 	}
 
-	static async getInstance(uri: vscode.Uri, awaitModel: boolean = false): Promise<FabricFSUri> {
+	static async getInstance(uri: vscode.Uri): Promise<FabricFSUri> {
 		if (FabricFSUri.isVSCodeInternalURI(uri)) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
@@ -116,5 +120,24 @@ export class FabricFSUri {
 		else {
 			throw vscode.FileSystemError.Unavailable("Invalid Fabric URI!" + this.uri.toString());
 		}
+	}
+
+	getCacheItem(): FabricFSCacheItem {
+		switch (this.uriType) {
+			case FabricUriType.root:
+				return new FabricFSRoot(this);
+			case FabricUriType.workspace:
+				return new FabricFSWorkspace(this);
+			case FabricUriType.itemType:
+				return new FabricFSItemType(this);
+			case FabricUriType.item:
+				return new FabricFSItem(this);
+			case FabricUriType.part:
+				return new FabricFSItemPart(this);
+		}
+	}
+
+	getCacheItemKey(): string {
+		return this.uri.toString();
 	}
 }
