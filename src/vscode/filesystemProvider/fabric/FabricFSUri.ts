@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { Helper } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { FABRIC_SCHEME } from './FabricFileSystemProvider';
-import { FabricFSCache } from './FabricFSCache';
+import { FabricFSCache } from './FabricFSCache_ARRAY';
 import { FabricItemType } from '../../../fabric/_types';
 import { FabricFSItemPart } from './FabricFSItemPart';
 import { ThisExtension } from '../../../ThisExtension';

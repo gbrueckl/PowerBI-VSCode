@@ -1,5 +1,5 @@
 // https://learn.microsoft.com/en-us/rest/api/fabric/core/items/get-item?tabs=HTTP#itemtype
-export type FabricItemType =
+export type FabricApiItemType =
 	"Dashboard"				//	PowerBI dashboard.
 	| "DataPipeline"			//	A data pipeline.
 	| "Datamart"				//	PowerBI datamart.
@@ -20,35 +20,35 @@ export type FabricItemType =
 	| "Warehouse"				//	A warehouse item.
 	;
 
-export type FabricWorkspaceType =
+export type FabricApiWorkspaceType =
 	"Personal"		// A personal workspace
 	| "Workspace"		// A collaborative workspace
 	;
 
-export type FabricItemFormat = 
+export type FabricApiItemFormat = 
 	"ipynb"
 	| "SparkJobDefinitionV1"
 
 
-export interface iFabricWorkspace {
+export interface iFabricApiWorkspace {
 	id: string;
 	displayName: string;
 	description: string;
-	type: FabricWorkspaceType;
+	type: FabricApiWorkspaceType;
 	capacityId: string;
 	capacityAssignmentProgress: string;
 }
 
 // https://learn.microsoft.com/en-us/rest/api/fabric/core/items/get-item?tabs=HTTP#item
-export interface iFabricItem {
+export interface iFabricApiItem {
 	displayName: string;
 	description: string;
-	type: FabricItemType;
+	type: FabricApiItemType;
 	workspaceId: string;
 	id: string;
 }
 
-export interface iFabricItemPart {
+export interface iFabricApiItemPart {
 	path: string;
 	payload: string;
 	payloadType: string;

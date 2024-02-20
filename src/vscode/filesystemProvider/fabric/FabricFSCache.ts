@@ -1,17 +1,23 @@
 import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../../ThisExtension';
-import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricFSItem } from './FabricFSItem';
 import { FabricFSItemPart } from './FabricFSItemPart';
 import { LoadingState } from '../TMDLFSDatabase';
 import { Helper } from '../../../helpers/Helper';
 import { FabricApiService } from '../../../fabric/FabricAPIService';
-import { FabricItemType } from '../../../fabric/_types';
+import { FabricFSItemType } from './FabricFSItemType';
+import { FabricFSWorkspace } from './FabricFSWorkspace';
+import { FabricFSCacheItem } from './FabricFSCacheItem';
+import { FabricFSUri } from './FabricFSUri';
 
 export abstract class FabricFSCache {
 	static loadingState: LoadingState = "not_loaded";
 	private static cachedWorkspaces: FabricFSWorkspace[] = [];
+
+	private static cache: Map<FabricFSUri, FabricFSCacheItem> = new Map<FabricFSUri, FabricFSCacheItem>();
+
+	private static 
 
 	public static async load(): Promise<void> {
 		if (FabricFSCache.loadingState == "not_loaded") {
@@ -24,8 +30,8 @@ export abstract class FabricFSCache {
 			if (workspaces) {
 				for(let workspace of workspaces)
 				{
-					let ws = new FabricFSWorkspace(workspace.id);
-					FabricFSCache.cachedWorkspaces.push(ws);
+					// let ws = new FabricFSWorkspace(workspace.id);
+					// FabricFSCache.cachedWorkspaces.push(ws);
 				}
 
 				FabricFSCache.loadingState = "loaded";
@@ -67,6 +73,12 @@ export abstract class FabricFSCache {
 		}
 
 		return workspace;
+	}
+
+	public static async getItemTypes(workspaceId: string): Promise<FabricFSItemType[]> {
+		const workspace = await FabricFSCache.getWorkspace(workspaceId);
+
+		return await workspace.getItemTypes();
 	}
 
 	public static async getItems(workspaceId: string, itemType: FabricItemType): Promise<FabricFSItem[]> {

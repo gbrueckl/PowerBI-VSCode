@@ -5,7 +5,7 @@ import { fetch, FormData, RequestInit, RequestInfo, File, fileFrom, Response, ge
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
-import { FabricItemFormat, FabricItemType, iFabricItem, iFabricItemPart, iFabricWorkspace } from './_types';
+import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemPart, iFabricApiWorkspace } from './_types';
 
 export abstract class FabricApiService {
 
@@ -70,30 +70,30 @@ export abstract class FabricApiService {
 		return uri.toString(true);
 	}
 
-	static async listWorkspaces(): Promise<iFabricWorkspace[]> {
+	static async listWorkspaces(): Promise<iFabricApiWorkspace[]> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces`;
-		return (await FabricApiService.get<iFabricWorkspace[]>(endpoint))["value"];
+		return (await FabricApiService.get<iFabricApiWorkspace[]>(endpoint))["value"];
 	}
 
-	static async getWorkspace(id: string): Promise<iFabricWorkspace> {
+	static async getWorkspace(id: string): Promise<iFabricApiWorkspace> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${id}`;
-		return FabricApiService.get<iFabricWorkspace>(endpoint);
+		return FabricApiService.get<iFabricApiWorkspace>(endpoint);
 	}
 
-	static async getItems(workspaceId: string, itemType?: FabricItemType): Promise<iFabricItem[]> {
+	static async getItems(workspaceId: string, itemType?: FabricApiItemType): Promise<iFabricApiItem[]> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items`;
 		const itemTypeFilter = itemType ? `?type=${itemType}` : '';
-		return FabricApiService.get<iFabricItem[]>(endpoint + itemTypeFilter);
+		return FabricApiService.get<iFabricApiItem[]>(endpoint + itemTypeFilter);
 	}
 
-	static async getItem(workspaceId: string, itemId: string): Promise<iFabricItem> {
+	static async getItem(workspaceId: string, itemId: string): Promise<iFabricApiItem> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}`;
-		return FabricApiService.get<iFabricItem>(endpoint);
+		return FabricApiService.get<iFabricApiItem>(endpoint);
 	}
 
-	static async getItemParts(workspaceId: string, itemId: string, format?: FabricItemFormat): Promise<iFabricItemPart[]> {
+	static async getItemParts(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiItemPart[]> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}/getDefinition`;
 		const itemFormat = format ? `?format=${format}` : '';
-		return FabricApiService.get<iFabricItemPart[]>(endpoint + itemFormat);
+		return FabricApiService.get<iFabricApiItemPart[]>(endpoint + itemFormat);
 	}
 }

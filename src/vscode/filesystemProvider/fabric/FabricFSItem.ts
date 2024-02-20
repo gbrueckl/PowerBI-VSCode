@@ -4,13 +4,14 @@ import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
 import { FabricItemFormat, FabricItemType, iFabricItem, iFabricItemPart } from '../../../fabric/_types';
 import { FabricFSItemPart } from './FabricFSItemPart';
-import { FabricFSWorkspace } from './FabricFSWorkspace';
+import { FabricFSWorkspace } from './FabricFSWorkspace_ARRAY';
 import { LoadingState } from './_types';
 import { FABRIC_SCHEME } from './FabricFileSystemProvider';
 import { FabricFSUri } from './FabricFSUri';
 import { FabricApiService } from '../../../fabric/FabricAPIService';
+import { FabricFSCacheItem } from './FabricFSCacheItem';
 
-export class FabricFSItem implements iFabricItem {
+export class FabricFSItem extends FabricFSCacheItem implements iFabricItem {
 	id: string;
 	displayName: string;
 	description: string;
@@ -22,19 +23,34 @@ export class FabricFSItem implements iFabricItem {
 	loadingState: LoadingState;
 	partsLoadingState: LoadingState;
 
-	constructor(workspace: FabricFSWorkspace, itemId: string) {
-		this.workspace = workspace;
-		this.id = itemId;
-
-		this.parts = [];
-
-		this.loadingState = "not_loaded";
-		this.partsLoadingState = "not_loaded";
+	constructor(uri: FabricFSUri) {
+		super(uri);
 	}
 
 	get workspaceId(): string {
 		return this.workspace.id;
 	}
+
+	public async loadStatsFromApi(): Promise<void> {
+		this._stats = {
+			type: vscode.FileType.Directory,
+			ctime: undefined,
+			mtime: undefined,
+			size: undefined
+		};
+	}
+
+	public async loadChildrenFromApi<T>(): Promise<void> {
+		if (!this._children) {
+			const apiItems = await FabricApiService.getItemParts(this.Uri.workspaceId, this.Uri.itemType, this.Uri.itemId);
+			this._children = [];
+			for (let item of apiItems) {
+				this._children.push([item.id, vscode.FileType.Directory]);
+			}
+		}
+	}
+
+
 
 	public async getPart(path: string, autoLoad: boolean = true): Promise<FabricFSItemPart> {
 		let part = this.parts.find((part) => part.path == path);

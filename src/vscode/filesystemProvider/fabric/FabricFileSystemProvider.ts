@@ -5,7 +5,6 @@ import { Helper } from '../../../helpers/Helper';
 import { Buffer } from '@env/buffer';
 import { FabricFSUri, FabricUriType } from './FabricFSUri';
 import { FabricFSCache } from './FabricFSCache';
-import { FabricItemTypes } from './_types';
 
 export const FABRIC_SCHEME: string = "fabric";
 export const FABRIC_FILE_ENCODING: BufferEncoding = "utf8";
