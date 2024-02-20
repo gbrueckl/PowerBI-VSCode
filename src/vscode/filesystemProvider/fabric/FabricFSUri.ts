@@ -1,16 +1,16 @@
 import * as vscode from 'vscode';
 
 import { Helper } from '../../../helpers/Helper';
-import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { FABRIC_SCHEME } from './FabricFileSystemProvider';
 import { FabricApiItemType } from '../../../fabric/_types';
-import { FabricFSItemPart } from './FabricFSItemPart';
+import { FabricFSItemPartFile } from './FabricFSItemPartFile';
 import { ThisExtension } from '../../../ThisExtension';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricFSItemType } from './FabricFSItemType';
 import { FabricFSItem } from './FabricFSItem';
 import { FabricFSRoot } from './FabricFSRoot';
+import { FabricFSItemPartFolder } from './FabricFSItemPartFolder';
 
 // regex with a very basic check for valid GUIDs
 const REGEX_FABRIC_URI = /fabric:\/\/(?<workspaceId>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<ItemId>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
@@ -41,7 +41,7 @@ export class FabricFSUri {
 		this.isValid = false;
 
 		let uriString = uri.toString();
-		
+
 
 		if (uriString.startsWith(FABRIC_SCHEME + ":/")) {
 			let paths = uriString.split("/").filter((path) => path.length > 0).slice(1);
@@ -133,11 +133,22 @@ export class FabricFSUri {
 			case FabricUriType.item:
 				return new FabricFSItem(this);
 			case FabricUriType.part:
-				return new FabricFSItemPart(this);
+				const partParts = this.part.split("/");
+				if (partParts.length == 1) {
+					return new FabricFSItemPartFile(this);
+				}
+				else {
+					return new FabricFSItemPartFolder(this);
+				}
 		}
 	}
 
 	getCacheItemKey(): string {
 		return this.uri.toString();
+	}
+
+	get fabricItemUri(): FabricFSUri {
+		let uri = this.uri.with({ path: this.uri.path.split("/").filter((path) => path.length > 0).slice(undefined, 4).join("/") });
+		return new FabricFSUri(uri);
 	}
 }

@@ -13,6 +13,7 @@ export class FabricFSCacheItem {
 	protected _loadingStateChildren: LoadingState = "not_loaded";
 	protected _stats: vscode.FileStat | undefined;
 	protected _children: [string, vscode.FileType][] | undefined;
+	protected _content: Uint8Array | undefined;
 
 	constructor(uri: FabricFSUri) {
 		this._uri = uri;
@@ -82,6 +83,14 @@ export class FabricFSCacheItem {
 			ThisExtension.logDebug(`Fabric URI Children for ${this.FabricUri.uri.toString()} successfully loaded in other process!`);
 		}
 		return this._children;
+	}
+
+	public async readFile(): Promise<Uint8Array | undefined> {
+		throw new Error("Method not implemented.");
+	}
+
+	async writeFile(content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+		throw new Error("Method not implemented.");
 	}
 
 	public async loadChildrenFromApi<T>(): Promise<void> {

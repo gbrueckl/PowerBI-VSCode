@@ -2,33 +2,25 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
-import { FabricFSItemPartFile } from './FabricFSItemPartFile';
+import { iFabricApiItemPart } from '../../../fabric/_types';
+import { FabricFSItem } from './FabricFSItem';
 import { LoadingState } from './_types';
-import { FabricFSUri } from './FabricFSUri';
-import { FabricFSCacheItem } from './FabricFSCacheItem';
-import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemPart } from '../../../fabric/_types';
-import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
-import { FabricFSItemPartFolder } from './FabricFSItemPartFolder';
+import { FabricFSCacheItem } from './FabricFSCacheItem';
+import { FabricFSUri } from './FabricFSUri';
+import { FabricFSCache } from './FabricFSCache';
 
-export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
-	id: string;
-	displayName: string;
-	description: string;
-	type: FabricApiItemType;
-	workspace: FabricFSWorkspace;
-	parts: FabricFSItemPartFile[];
-	format?: FabricApiItemFormat;
+export class FabricFSItemPartFolder extends FabricFSCacheItem implements iFabricApiItemPart{
+	path: string;
+	payload: string;
+	payloadType: string;
+
+	item: FabricFSItem;
 
 	loadingState: LoadingState;
-	partsLoadingState: LoadingState;
 
 	constructor(uri: FabricFSUri) {
 		super(uri);
-	}
-
-	get workspaceId(): string {
-		return this.workspace.id;
 	}
 
 	public async loadStatsFromApi<T>(): Promise<void> {
@@ -41,21 +33,18 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	}
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
+		/*
 		if (!this._children) {
-			const apiItems = await FabricApiService.getItemParts(this.FabricUri.workspaceId, this.FabricUri.itemId);
+			const fabricItem = await FabricFSCache.readDirectory(this.FabricUri.fabricItemUri);
 			this._children = [];
-			this.parts = [];
 
 			let folders: [string, vscode.FileType][] = [];
 			let files: [string, vscode.FileType][] = [];
 
 			for (let item of apiItems) {
-				this.parts.push(new FabricFSItemPartFile(this.FabricUri, item));
-
 				const partParts = item.path.split("/");
 				if (partParts.length == 1) {
 					files.push([item.path, vscode.FileType.File]);
-					
 				}
 				else {
 					const folderName = partParts[0];
@@ -66,5 +55,6 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			}
 			this._children = folders.concat(files);
 		}
+		*/
 	}
 }

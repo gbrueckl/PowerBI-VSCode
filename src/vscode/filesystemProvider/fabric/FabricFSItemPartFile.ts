@@ -9,7 +9,7 @@ import { FabricApiService } from '../../../fabric/FabricApiService';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSUri } from './FabricFSUri';
 
-export class FabricFSItemPart extends FabricFSCacheItem implements iFabricApiItemPart{
+export class FabricFSItemPartFile extends FabricFSCacheItem implements iFabricApiItemPart{
 	path: string;
 	payload: string;
 	payloadType: string;
@@ -18,8 +18,21 @@ export class FabricFSItemPart extends FabricFSCacheItem implements iFabricApiIte
 
 	loadingState: LoadingState;
 
-	constructor(uri: FabricFSUri) {
+	constructor(uri: FabricFSUri, definition: iFabricApiItemPart) {
 		super(uri);
+
+		this.path = definition.path;
+		this.payload = definition.payload;
+		this.payloadType = definition.payloadType;
+	}
+
+	public async loadStatsFromApi<T>(): Promise<void> {
+		this._stats = {
+			type: vscode.FileType.File,
+			ctime: undefined,
+			mtime: undefined,
+			size: undefined
+		};
 	}
 
 	setPayload(payload: string, payloadType: string): void {
