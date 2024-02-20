@@ -25,7 +25,7 @@ export type FabricApiWorkspaceType =
 	| "Workspace"		// A collaborative workspace
 	;
 
-export type FabricApiItemFormat = 
+export type FabricApiItemFormat =
 	"ipynb"
 	| "SparkJobDefinitionV1"
 
@@ -48,8 +48,18 @@ export interface iFabricApiItem {
 	id: string;
 }
 
+export type FabricApiPayloadTypes = "InlineBase64";
+
 export interface iFabricApiItemPart {
 	path: string;
 	payload: string;
-	payloadType: string;
+	payloadType: FabricApiPayloadTypes;
 }
+
+export interface iFabricPollingResponse {
+	status: "Running" | "Succeeded";
+	createdTimeUtc: Date;
+	lastUpdatedTimeUtc: Date;
+	percentComplete: number;
+	error: any;
+} 

@@ -3,14 +3,12 @@ import * as vscode from 'vscode';
 import { Helper } from '../../../helpers/Helper';
 import { FABRIC_SCHEME } from './FabricFileSystemProvider';
 import { FabricApiItemType } from '../../../fabric/_types';
-import { FabricFSItemPartFile } from './FabricFSItemPartFile';
 import { ThisExtension } from '../../../ThisExtension';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricFSItemType } from './FabricFSItemType';
 import { FabricFSItem } from './FabricFSItem';
 import { FabricFSRoot } from './FabricFSRoot';
-import { FabricFSItemPartFolder } from './FabricFSItemPartFolder';
 
 // regex with a very basic check for valid GUIDs
 const REGEX_FABRIC_URI = /fabric:\/\/(?<workspaceId>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<ItemId>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
@@ -49,7 +47,7 @@ export class FabricFSUri {
 			this.workspaceId = paths[0];
 			this.itemType = paths[1] as FabricApiItemType;
 			this.itemId = paths[2];
-			this.part = paths[3];
+			this.part = paths.slice(3).join("/");
 
 			return
 		}
@@ -133,22 +131,21 @@ export class FabricFSUri {
 			case FabricUriType.item:
 				return new FabricFSItem(this);
 			case FabricUriType.part:
-				const partParts = this.part.split("/");
-				if (partParts.length == 1) {
-					return new FabricFSItemPartFile(this);
-				}
-				else {
-					return new FabricFSItemPartFolder(this);
-				}
+				return new FabricFSItem(this.fabricItemUri);
 		}
 	}
 
 	getCacheItemKey(): string {
+		if(this.uriType == FabricUriType.part)
+		{
+			return this.fabricItemUri.uri.toString();
+		}
 		return this.uri.toString();
 	}
 
 	get fabricItemUri(): FabricFSUri {
-		let uri = this.uri.with({ path: this.uri.path.split("/").filter((path) => path.length > 0).slice(undefined, 4).join("/") });
+		// fabric://<workspace-id>/<itemType>/<item-id>/<part1/part2/part3> to fabric://<workspace-id>/<itemType>/<item-id>
+		let uri = this.uri.with({ path: this.uri.path.split("/").slice(undefined, 3).join("/") });
 		return new FabricFSUri(uri);
 	}
 }

@@ -12,9 +12,6 @@ import { iPowerBIDataset, iPowerBIDatasetDMV, iPowerBIDatasetExecuteQueries, iPo
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
-import { FabricApiService } from '../fabric/FabricAPIService';
-
-
 
 export abstract class PowerBIApiService {
 	private static _isInitialized: boolean = false;
@@ -236,6 +233,11 @@ export abstract class PowerBIApiService {
 		return this._isInitialized;
 	}
 
+	public static async Initialization(): Promise<boolean> {
+		// wait 5 minutes for the service to initialize
+		return Helper.awaitCondition(async () => PowerBIApiService.isInitialized, 300000, 500);
+	}
+
 	public static get BrowserBaseUrl(): string {
 		return this._apiBaseUrl.replace("api.", "app.");
 	}
@@ -249,6 +251,10 @@ export abstract class PowerBIApiService {
 		else {
 			ThisExtension.log("Response: " + JSON.stringify(response));
 		}
+	}
+
+	public static getHeaders(): HeadersInit {
+		return this._headers;
 	}
 
 	private static handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): void {
@@ -268,30 +274,17 @@ export abstract class PowerBIApiService {
 	}
 
 	public static getFullUrl(endpoint: string, params?: object): string {
-
 		let baseItems = this._apiBaseUrl.split("/");
 		baseItems.push("v1.0");
 		baseItems.push(this.Org);
 		let pathItems = endpoint.split("/").filter(x => x);
 
-		//let index = pathItems.indexOf(baseItems.slice(-1)[0]);
 		let index = baseItems.indexOf(pathItems[0]);
 		index = index == -1 ? undefined : index; // in case the item was not found, we append it to the baseUrl
 
-		//endpoint = (baseItems.concat(pathItems.slice(index + 1))).join("/");
 		endpoint = (baseItems.slice(undefined, index).concat(pathItems)).join("/");
 
 		let uri = vscode.Uri.parse(endpoint);
-		/*}
-		if (endpoint.startsWith('/') && !endpoint.startsWith("/v1.0")) {
-			endpoint = Helper.joinPath(`v1.0/${PowerBIApiService.Org}`, endpoint);
-		}
-
-		let uri = vscode.Uri.parse(`${this._apiBaseUrl}/${Helper.trimChar(endpoint, '/')}`);
-		
-		if (endpoint.startsWith("https://")) {
-			uri = vscode.Uri.parse(endpoint);
-		}*/
 
 		if (params) {
 			let urlParams = []

@@ -43,7 +43,8 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 	async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(uri);
 
-		return FabricFSCache.readDirectory(fabricUri);
+		const results = await FabricFSCache.readDirectory(fabricUri);
+		return results;
 /*
 		if (fabricUri.uriType == FabricUriType.root) {
 			let entries: [string, vscode.FileType][] = [];
@@ -106,6 +107,9 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 
 	// --- manage file contents
 	async readFile(uri: vscode.Uri): Promise<Uint8Array> {
+		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(uri);
+
+		return FabricFSCache.readFile(fabricUri);
 		/*const FabricUri: FabricFSUri = await FabricFSUri.getInstance(uri);
 
 		const entry = await FabricUri.getStreamEntry();

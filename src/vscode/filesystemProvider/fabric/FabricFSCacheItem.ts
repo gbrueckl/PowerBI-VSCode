@@ -5,6 +5,7 @@ import { LoadingState } from '../TMDLFSDatabase';
 import { FabricFSUri, FabricUriType } from './FabricFSUri';
 import { Helper } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { FabricApiService } from '../../../fabric/FabricApiService';
 
 export class FabricFSCacheItem {
 	
@@ -14,6 +15,7 @@ export class FabricFSCacheItem {
 	protected _stats: vscode.FileStat | undefined;
 	protected _children: [string, vscode.FileType][] | undefined;
 	protected _content: Uint8Array | undefined;
+	protected _apiResponse: any;
 
 	constructor(uri: FabricFSUri) {
 		this._uri = uri;
@@ -31,6 +33,10 @@ export class FabricFSCacheItem {
 
 	get uri(): vscode.Uri {
 		return this.FabricUri.uri;
+	}
+	
+	getApiResponse<T>(): T {
+		return this._apiResponse as T;
 	}
 
 	get loadingStateStats(): LoadingState {
@@ -54,10 +60,15 @@ export class FabricFSCacheItem {
 			this.loadingStateStats = "loading";
 			
 			ThisExtension.log(`Loading Fabric URI Stats ${this.FabricUri.uri.toString()} ...`);
-			let result = await Helper.awaitCondition(async () => PowerBIApiService.isInitialized, 10000, 500);
-			await this.loadStatsFromApi();
-			this.loadingStateStats = "loaded";
-			
+			const initialized = await FabricApiService.Initialization();
+			if(initialized) {
+				await this.loadStatsFromApi();
+				this.loadingStateStats = "loaded";
+			}
+			else
+			{
+				this.loadingStateStats = "not_loaded";
+			}
 		}
 		else if (this.loadingStateStats == "loading") {
 			ThisExtension.logDebug(`Fabric URI Stats for ${this.FabricUri.uri.toString()} are loading in other process - waiting ... `);
@@ -72,10 +83,15 @@ export class FabricFSCacheItem {
 			this.loadingStateChildren = "loading";
 			
 			ThisExtension.log(`Loading Fabric URI Children ${this.FabricUri.uri.toString()} ...`);
-			let result = await Helper.awaitCondition(async () => PowerBIApiService.isInitialized, 10000, 500);
-			await this.loadChildrenFromApi();
-			this.loadingStateChildren = "loaded";
-			
+			const initialized = await FabricApiService.Initialization();
+			if(initialized) {
+				await this.loadChildrenFromApi();
+				this.loadingStateChildren = "loaded";
+			}
+			else
+			{
+				this.loadingStateChildren = "not_loaded";
+			}
 		}
 		else if (this.loadingStateChildren == "loading") {
 			ThisExtension.logDebug(`Fabric URI Chilrdren for ${this.FabricUri.uri.toString()} are loading in other process - waiting ... `);

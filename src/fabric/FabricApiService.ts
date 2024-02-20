@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 
 import { fetch, FormData, RequestInit, RequestInfo, File, fileFrom, Response, getProxyAgent } from '@env/fetch';
 
-import { Helper, UniqueId } from '../helpers/Helper';
+import { Helper } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
-import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemPart, iFabricApiWorkspace } from './_types';
+import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemPart, iFabricApiWorkspace, iFabricPollingResponse } from './_types';
 
 export abstract class FabricApiService {
 
@@ -27,6 +27,74 @@ export abstract class FabricApiService {
 	}
 
 	static async post<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+		endpoint = this.getFullUrl(endpoint);
+		ThisExtension.log("POST " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
+
+		try {
+			const config: RequestInit = {
+				method: "POST",
+				headers: PowerBIApiService.getHeaders(),
+				body: JSON.stringify(body),
+				agent: getProxyAgent()
+			};
+			let response: Response = await fetch(endpoint, config);
+
+			let resultText = await response.text();
+			let ret: T;
+
+			if (response.ok) {
+				if(response.status == 202) {
+					let pollingUri = response.headers.get("location");
+					let retryAfter = response.headers.get("retry-after");
+					while(true)
+					{
+						await Helper.wait(retryAfter ? parseInt(retryAfter) * 1000 : 1000);
+
+						response = await this.get(pollingUri, undefined, false, true);
+
+						if(response.ok && response.status == 200) {
+							resultText = await response.text(); 
+							let pollingResult = JSON.parse(resultText) as any as iFabricPollingResponse;
+
+							if(pollingResult["status"] == "Succeeded") {
+								pollingUri = response.headers.get("location");
+								response = await this.get(pollingUri, undefined, false, true);
+								return response.json() as T;
+							}
+						}
+					}
+				}
+
+				if (!resultText || resultText == "") {
+					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
+				}
+				else {
+					ret = JSON.parse(resultText) as T;
+				}
+			}
+			else {
+				if (!resultText || resultText == "") {
+					ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
+				}
+				if (raiseError) {
+					throw new Error(resultText);
+				}
+				else {
+					ret = { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+				}
+			}
+
+			await this.logResponse(ret);
+			return ret;
+		} catch (error) {
+			this.handleApiException(error, false, raiseError);
+
+			return undefined;
+		}
+		
+	}
+
+	static async postOrig<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
 		return PowerBIApiService.post<T>(endpoint, body, raiseError);
 	}
 
@@ -46,6 +114,11 @@ export abstract class FabricApiService {
 		return PowerBIApiService.isInitialized;
 	}
 
+	public static async Initialization(): Promise<boolean> {
+		// wait 5 minutes for the service to initialize
+		return Helper.awaitCondition(async () => FabricApiService.isInitialized, 300000, 500);
+	}
+
 	public static getFullUrl(endpoint: string, params?: object): string {
 
 		let baseItems = "https://api.fabric.microsoft.com".split("/");
@@ -53,9 +126,10 @@ export abstract class FabricApiService {
 		baseItems.push(PowerBIApiService.Org);
 		let pathItems = endpoint.split("/").filter(x => x);
 
-		let index = pathItems.indexOf(baseItems.slice(-1)[0]);
+		let index = baseItems.indexOf(pathItems[0]);
+		index = index == -1 ? undefined : index; // in case the item was not found, we append it to the baseUrl
 
-		endpoint = (baseItems.concat(pathItems.slice(index + 1))).join("/");
+		endpoint = (baseItems.slice(undefined, index).concat(pathItems)).join("/");
 
 		let uri = vscode.Uri.parse(endpoint);
 
@@ -68,6 +142,31 @@ export abstract class FabricApiService {
 		}
 
 		return uri.toString(true);
+	}
+
+	private static async logResponse(response: any): Promise<void> {
+		if (typeof response == "string") {
+			ThisExtension.log("Response: " + response);
+		}
+		else {
+			ThisExtension.log("Response: " + JSON.stringify(response));
+		}
+	}
+
+	private static handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): void {
+		ThisExtension.log("ERROR: " + error.name);
+		ThisExtension.log("ERROR: " + error.message);
+		if (error.stack) {
+			ThisExtension.log("ERROR: " + error.stack);
+		}
+
+		if (showErrorMessage) {
+			vscode.window.showErrorMessage(error.message);
+		}
+
+		if (raise) {
+			throw error;
+		}
 	}
 
 	static async listWorkspaces(): Promise<iFabricApiWorkspace[]> {

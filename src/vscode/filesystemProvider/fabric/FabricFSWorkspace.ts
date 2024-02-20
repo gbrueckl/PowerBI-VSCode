@@ -33,6 +33,7 @@ export class FabricFSWorkspace extends FabricFSCacheItem implements iFabricApiWo
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
 			this._children = [];
+			this._apiResponse = FABRIC_FS_ITEM_TYPES;
 			for (let itemType of FABRIC_FS_ITEM_TYPES) {
 				this._children.push([itemType, vscode.FileType.Directory]);
 			}
