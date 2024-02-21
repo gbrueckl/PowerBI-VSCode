@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 
 import { FabricFSUri } from './FabricFSUri';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
-import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemPart } from '../../../fabric/_types';
+import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart } from '../../../fabric/_types';
 import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 
@@ -20,7 +20,11 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	}
 
 	get workspaceId(): string {
-		return this.workspace.id;
+		return this.FabricUri.workspaceId;
+	}
+
+	get itemId(): string {
+		return this.FabricUri.itemId;
 	}
 
 	getApiResponse<T = iFabricApiItemPart[]>(): T {
@@ -38,7 +42,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
-			const apiItems = await FabricApiService.getItemParts(this.FabricUri.workspaceId, this.FabricUri.itemId);
+			const apiItems = await FabricApiService.getItemDefinitionParts(this.FabricUri.workspaceId, this.FabricUri.itemId);
 			this._apiResponse = apiItems;
 			this._children = [];
 
@@ -116,5 +120,29 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		}
 		vscode.window.showErrorMessage("Payload type not supported: " + item.payloadType);
 		throw vscode.FileSystemError.Unavailable("Payload type not supported: " + item.payloadType);
+	}
+
+	public async writeContentToSubpath(path: string, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+		const item = this.getApiResponse().find((item) => item.path == path);
+		if (item) {
+			if (item.payloadType == "InlineBase64") {
+				item.payload = Buffer.from(content).toString("base64");
+
+				return;
+			}
+		}
+		vscode.window.showErrorMessage("Payload type not supported: " + item.payloadType);
+		throw vscode.FileSystemError.Unavailable("Payload type not supported: " + item.payloadType);
+	}
+
+	public async getItemDefinition(): Promise<iFabricApiItemDefinition> {
+		let parts = this.getApiResponse();
+
+		return {"definition": {"parts": parts}}
+	}
+
+	public async updateItemDefinition(): Promise<void> {
+		let definition = await this.getItemDefinition();
+		await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition);
 	}
 }

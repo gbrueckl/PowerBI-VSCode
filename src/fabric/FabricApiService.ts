@@ -5,7 +5,7 @@ import { fetch, FormData, RequestInit, RequestInfo, File, fileFrom, Response, ge
 import { Helper } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
-import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemPart, iFabricApiWorkspace, iFabricPollingResponse } from './_types';
+import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart, iFabricApiWorkspace, iFabricPollingResponse } from './_types';
 
 export abstract class FabricApiService {
 
@@ -26,7 +26,7 @@ export abstract class FabricApiService {
 		return ret;
 	}
 
-	static async post<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+	static async post<T = any>(endpoint: string, body: object, raiseError: boolean = false, raw: boolean = false): Promise<T> {
 		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("POST " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
@@ -39,32 +39,42 @@ export abstract class FabricApiService {
 			};
 			let response: Response = await fetch(endpoint, config);
 
+			if (raw) {
+				return response as any as T;
+			}
+
 			let resultText = await response.text();
 			let ret: T;
 
-			if (response.ok) {
-				if(response.status == 202) {
-					let pollingUri = response.headers.get("location");
-					let retryAfter = response.headers.get("retry-after");
-					while(true)
-					{
-						await Helper.wait(retryAfter ? parseInt(retryAfter) * 1000 : 1000);
 
-						response = await this.get(pollingUri, undefined, false, true);
+			let callback = response.headers.get("location");
+			let retryAfter = response.headers.get("retry-after");
+			let requestFinished: boolean = false;
 
-						if(response.ok && response.status == 200) {
-							resultText = await response.text(); 
-							let pollingResult = JSON.parse(resultText) as any as iFabricPollingResponse;
+			while (response.ok && callback && !requestFinished) {
+				if (callback.endsWith("/result")) {
+					// next callback is the result already
+					const result = await this.get<T>(callback);
+					return result;
+				}
+				else {
+					await Helper.wait(retryAfter ? parseInt(retryAfter) / 10 * 1000 : 1000);
+					response = await this.get<Response>(callback, undefined, false, true);
 
-							if(pollingResult["status"] == "Succeeded") {
-								pollingUri = response.headers.get("location");
-								response = await this.get(pollingUri, undefined, false, true);
-								return response.json() as T;
-							}
+					callback = response.headers.get("location");
+					retryAfter = response.headers.get("retry-after");
+
+					resultText = await response.text();
+					let pollingResult = JSON.parse(resultText) as any as iFabricPollingResponse;
+
+					if (response.ok){
+						if (pollingResult["status"] == "Failed") {
+							return { "value": { "status": 999, "statusText": pollingResult.error } } as T;
 						}
 					}
 				}
-
+			}
+			if (response.ok) {
 				if (!resultText || resultText == "") {
 					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
@@ -72,7 +82,8 @@ export abstract class FabricApiService {
 					ret = JSON.parse(resultText) as T;
 				}
 			}
-			else {
+			if (!response.ok) {
+
 				if (!resultText || resultText == "") {
 					ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
@@ -91,7 +102,7 @@ export abstract class FabricApiService {
 
 			return undefined;
 		}
-		
+
 	}
 
 	static async postOrig<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
@@ -190,9 +201,21 @@ export abstract class FabricApiService {
 		return FabricApiService.get<iFabricApiItem>(endpoint);
 	}
 
-	static async getItemParts(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiItemPart[]> {
+	static async getItemDefinition(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiItemDefinition> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}/getDefinition`;
 		const itemFormat = format ? `?format=${format}` : '';
-		return (await FabricApiService.post<iFabricApiItemPart[]>(endpoint + itemFormat, undefined))["definition"]["parts"];
+		return (await FabricApiService.post<iFabricApiItemDefinition>(endpoint + itemFormat, undefined));
+		
+	}
+
+	static async getItemDefinitionParts(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiItemPart[]> {
+		return (await FabricApiService.getItemDefinition(workspaceId, itemId, format)).definition.parts;
+	}
+
+	static async updateItemDefinition(workspaceId: string, itemId: string, itemDefinition: iFabricApiItemDefinition): Promise<void> {
+		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}/updateDefinition`;
+
+		(await FabricApiService.post<iFabricApiItemDefinition>(endpoint, itemDefinition));
+
 	}
 }

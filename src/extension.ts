@@ -37,6 +37,7 @@ import { TOMProxyBackup, TOMProxyRestore } from './TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTable } from './vscode/treeviews/workspaces/PowerBIDatasetTable';
 import { PowerBIOnDropProvider } from './vscode/dropProvider/PowerBIOnDropProvider';
 import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/FabricFileSystemProvider';
+import { FabricFSCache } from './vscode/filesystemProvider/fabric/FabricFSCache';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -228,6 +229,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('PowerBI.TMDL.ensureProxy',
 		() => TMDLProxy.ensureProxy(context)
+	);
+
+	// new commands for Fabric FileSystemProvider
+	vscode.commands.registerCommand('Fabric.updateItemDefinition',
+		FabricFSCache.updateItemDefinition
 	);
 
 	EventHandlers.init(context);

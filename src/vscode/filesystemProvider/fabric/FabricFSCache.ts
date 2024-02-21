@@ -54,6 +54,32 @@ export abstract class FabricFSCache {
 		throw vscode.FileSystemError.Unavailable("Could not read File: " + uri.uri.toString());
 	}
 
+	public static async writeFile(uri: FabricFSUri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+		let item = FabricFSCache._cache.get(uri.getCacheItemKey());
+		if(!item)
+		{
+			item = FabricFSCache.addCacheItem(uri);
+		}
+		
+		if(uri.uriType == FabricUriType.part)
+		{
+			(item as FabricFSItem).writeContentToSubpath(uri.part, content, options);
+
+			return;
+		}
+
+		vscode.window.showErrorMessage("Could not read File: " + uri.uri.toString());
+		throw vscode.FileSystemError.Unavailable("Could not read File: " + uri.uri.toString());
+	}
+
+	public static async updateItemDefinition(resourceUri: vscode.Uri): Promise<void> {
+		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
+
+		let item = FabricFSCache._cache.get(fabricUri.getCacheItemKey()) as FabricFSItem;
+		
+		item.updateItemDefinition();
+	}
+
 	private static addCacheItem(uri: FabricFSUri): FabricFSCacheItem {
 		let item  = uri.getCacheItem();
 		FabricFSCache._cache.set(uri.getCacheItemKey(), item);

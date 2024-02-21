@@ -26,7 +26,8 @@ export class FabricFSRoot extends FabricFSCacheItem {
 			this._apiResponse = apiItems;
 			this._children = [];
 			for (let apiItem of apiItems) {
-				this._children.push([apiItem.id, vscode.FileType.Directory]);
+				FabricFSUri.addWorkspaceNameIdMap(apiItem.displayName, apiItem.id);
+				this._children.push([apiItem.displayName, vscode.FileType.Directory]);
 			}
 		}
 	}

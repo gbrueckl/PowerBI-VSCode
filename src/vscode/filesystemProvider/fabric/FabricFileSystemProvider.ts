@@ -125,6 +125,9 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 	}
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(uri);
+
+		FabricFSCache.writeFile(fabricUri, content, options);
 		/*const FabricUri: FabricFSUri = await FabricFSUri.getInstance(uri);
 
 		const entry = await FabricUri.getStreamEntry();

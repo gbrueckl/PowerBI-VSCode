@@ -56,8 +56,14 @@ export interface iFabricApiItemPart {
 	payloadType: FabricApiPayloadTypes;
 }
 
+export interface iFabricApiItemDefinition {
+	definition: {
+		parts: iFabricApiItemPart[];
+	}
+}
+
 export interface iFabricPollingResponse {
-	status: "Running" | "Succeeded";
+	status: "Running" | "Failed" | "Succeeded";
 	createdTimeUtc: Date;
 	lastUpdatedTimeUtc: Date;
 	percentComplete: number;

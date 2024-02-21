@@ -11,7 +11,7 @@ import { FabricFSItem } from './FabricFSItem';
 import { FabricFSRoot } from './FabricFSRoot';
 
 // regex with a very basic check for valid GUIDs
-const REGEX_FABRIC_URI = /fabric:\/\/(?<workspaceId>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<ItemId>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
+const REGEX_FABRIC_URI = /fabric:\/\/(?<workspace>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<Item>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
 
 export enum FabricUriType {
 	"root" = 1,
@@ -22,11 +22,14 @@ export enum FabricUriType {
 }
 
 export class FabricFSUri {
+	private static _workspaceNameIdMap: Map<string, string> = new Map<string, string>();
+	private static _itemNameIdMap: Map<string, string> = new Map<string, string>();
+
 	uri: vscode.Uri;
 	isValid: boolean;
-	workspaceId?: string;
+	workspace?: string;
 	itemType?: FabricApiItemType;
-	itemId?: string;
+	item?: string;
 	part: string;
 
 	/*
@@ -40,13 +43,12 @@ export class FabricFSUri {
 
 		let uriString = uri.toString();
 
-
 		if (uriString.startsWith(FABRIC_SCHEME + ":/")) {
 			let paths = uriString.split("/").filter((path) => path.length > 0).slice(1);
 			this.isValid = true;
-			this.workspaceId = paths[0];
+			this.workspace = paths[0];
 			this.itemType = paths[1] as FabricApiItemType;
-			this.itemId = paths[2];
+			this.item = paths[2];
 			this.part = paths.slice(3).join("/");
 
 			return
@@ -56,7 +58,28 @@ export class FabricFSUri {
 
 		throw vscode.FileSystemError.Unavailable("Invalid Fabric URI!");
 	}
-	constructor2(uri: vscode.Uri) {
+
+	get workspaceId(): string {
+		if(Helper.isGuid(this.workspace)) return this.workspace;
+
+		return FabricFSUri._workspaceNameIdMap.get(this.workspace);
+	}
+
+	get itemId(): string {
+		if(Helper.isGuid(this.item)) return this.item;
+
+		return FabricFSUri._itemNameIdMap.get(this.item);
+	}
+
+	public static addWorkspaceNameIdMap(workspaceName: string, workspaceId: string): void {
+		FabricFSUri._workspaceNameIdMap.set(workspaceName, workspaceId);
+	}
+
+		public static addItemNameIdMap(itemName: string, itemId: string): void {
+		FabricFSUri._itemNameIdMap.set(itemName, itemId);
+	}
+	
+	private constructor_regex(uri: vscode.Uri) {
 		let match: RegExpExecArray;
 
 		this.uri = uri;
@@ -66,9 +89,9 @@ export class FabricFSUri {
 
 		if (match) {
 			this.isValid = true;
-			this.workspaceId = match.groups["workspaceId"];
+			this.workspace = match.groups["workspace"];
 			this.itemType = match.groups["itemType"] as FabricApiItemType;
-			this.itemId = match.groups["itemId"];
+			this.item = match.groups["item"];
 			this.part = match.groups["part"];
 
 			return
@@ -100,16 +123,16 @@ export class FabricFSUri {
 	}
 
 	get uriType(): FabricUriType {
-		if (!this.workspaceId) {
+		if (!this.workspace) {
 			return FabricUriType.root;
 		}
-		else if (this.workspaceId && !this.itemType) {
+		else if (this.workspace && !this.itemType) {
 			return FabricUriType.workspace;
 		}
-		else if (this.itemType && !this.itemId) {
+		else if (this.itemType && !this.item) {
 			return FabricUriType.itemType;
 		}
-		else if (this.itemId && !this.part) {
+		else if (this.item && !this.part) {
 			return FabricUriType.item;
 		}
 		else if (this.part) {
@@ -138,14 +161,14 @@ export class FabricFSUri {
 	getCacheItemKey(): string {
 		if(this.uriType == FabricUriType.part)
 		{
-			return this.fabricItemUri.uri.toString();
+			return this.fabricItemUri.getCacheItemKey();
 		}
-		return this.uri.toString();
+		return this.uri.toString().replace("//", "/");
 	}
 
 	get fabricItemUri(): FabricFSUri {
 		// fabric://<workspace-id>/<itemType>/<item-id>/<part1/part2/part3> to fabric://<workspace-id>/<itemType>/<item-id>
-		let uri = this.uri.with({ path: this.uri.path.split("/").slice(undefined, 3).join("/") });
+		let uri = vscode.Uri.parse(this.uri.toString().split("/").filter((path) => path.length > 0).slice(undefined, 4).join("/"));
 		return new FabricFSUri(uri);
 	}
 }

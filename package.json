@@ -502,6 +502,12 @@
 				"title": "Unassign",
 				"icon": "$(debug-step-out)",
 				"category": "PowerBI"
+			},
+			{
+				"command": "Fabric.updateItemDefinition",
+				"title": "Publish",
+				"icon": "$(cloud-upload)",
+				"category": "Fabric"
 			}
 		],
 		"menus": {
@@ -770,6 +776,11 @@
 				{
 					"command": "PowerBI.TMDL.saveLocally",
 					"when": "resourceScheme == tmdl && resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ && !powerbi.isInBrowser",
+					"group": "2_workspace"
+				},
+				{
+					"command": "Fabric.updateItemDefinition",
+					"when": "resourceScheme == fabric && resource =~ /^fabric:[\\/]*[^\\/]*?\\/[^\\/]*?\\/[^\\/]*?$/",
 					"group": "2_workspace"
 				}
 			]
