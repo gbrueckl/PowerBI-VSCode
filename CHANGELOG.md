@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.5.1**:
+- fixed issue with Fabric FileSystemProvider caused by duplicate item names
+
 **v1.5.0**:
 - Support for Fabric via FileSystemProvider `fabric://<workspaceId>`
   - load all items with their definition

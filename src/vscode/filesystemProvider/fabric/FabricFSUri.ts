@@ -68,7 +68,8 @@ export class FabricFSUri {
 	get itemId(): string {
 		if(Helper.isGuid(this.item)) return this.item;
 
-		return FabricFSUri._itemNameIdMap.get(this.item);
+		const itemName = `${this.workspaceId}/${this.itemTypeText}/${this.item}`
+		return FabricFSUri._itemNameIdMap.get(itemName);
 	}
 
 	get itemTypeText(): string {
@@ -79,7 +80,7 @@ export class FabricFSUri {
 		FabricFSUri._workspaceNameIdMap.set(workspaceName, workspaceId);
 	}
 
-		public static addItemNameIdMap(itemName: string, itemId: string): void {
+	public static addItemNameIdMap(itemName: string, itemId: string): void {
 		FabricFSUri._itemNameIdMap.set(itemName, itemId);
 	}
 	
@@ -147,7 +148,7 @@ export class FabricFSUri {
 		}
 	}
 
-	getCacheItem(): FabricFSCacheItem {
+	async getCacheItem(): Promise<FabricFSCacheItem> {
 		switch (this.uriType) {
 			case FabricUriType.root:
 				return new FabricFSRoot(this);
@@ -162,10 +163,10 @@ export class FabricFSUri {
 		}
 	}
 
-	getCacheItemKey(): string {
+	get cacheItemKey(): string {
 		if(this.uriType == FabricUriType.part)
 		{
-			return this.fabricItemUri.getCacheItemKey();
+			return this.fabricItemUri.cacheItemKey;
 		}
 		return this.uri.toString().replace("//", "/");
 	}

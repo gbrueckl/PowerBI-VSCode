@@ -10,10 +10,10 @@ export abstract class FabricFSCache {
 	private static _cache: Map<string, FabricFSCacheItem> = new Map<string, FabricFSCacheItem>();
 
 	public static async stats(uri: FabricFSUri): Promise<vscode.FileStat | undefined> {
-		let item = FabricFSCache._cache.get(uri.getCacheItemKey());
+		let item = FabricFSCache._cache.get(uri.cacheItemKey);
 		if(!item)
 		{
-			item = FabricFSCache.addCacheItem(uri);
+			item = await FabricFSCache.addCacheItem(uri);
 		}
 		
 		if(uri.uriType == FabricUriType.part)
@@ -24,10 +24,10 @@ export abstract class FabricFSCache {
 	}
 
 	public static async readDirectory(uri: FabricFSUri): Promise<[string, vscode.FileType][] | undefined> {
-		let item = FabricFSCache._cache.get(uri.getCacheItemKey());
+		let item = FabricFSCache._cache.get(uri.cacheItemKey);
 		if(!item)
 		{
-			item = FabricFSCache.addCacheItem(uri);
+			item = await FabricFSCache.addCacheItem(uri);
 		}
 
 		if(uri.uriType == FabricUriType.part)
@@ -39,10 +39,10 @@ export abstract class FabricFSCache {
 	}
 
 	public static async readFile(uri: FabricFSUri): Promise<Uint8Array> {
-		let item = FabricFSCache._cache.get(uri.getCacheItemKey());
+		let item = FabricFSCache._cache.get(uri.cacheItemKey);
 		if(!item)
 		{
-			item = FabricFSCache.addCacheItem(uri);
+			item = await FabricFSCache.addCacheItem(uri);
 		}
 		
 		if(uri.uriType == FabricUriType.part)
@@ -55,10 +55,10 @@ export abstract class FabricFSCache {
 	}
 
 	public static async writeFile(uri: FabricFSUri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
-		let item = FabricFSCache._cache.get(uri.getCacheItemKey());
+		let item = FabricFSCache._cache.get(uri.cacheItemKey);
 		if(!item)
 		{
-			item = FabricFSCache.addCacheItem(uri);
+			item = await FabricFSCache.addCacheItem(uri);
 		}
 		
 		if(uri.uriType == FabricUriType.part)
@@ -75,19 +75,19 @@ export abstract class FabricFSCache {
 	public static async updateItemDefinition(resourceUri: vscode.Uri): Promise<void> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
 
-		let item = FabricFSCache._cache.get(fabricUri.getCacheItemKey()) as FabricFSItem;
+		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey) as FabricFSItem;
 		
 		item.updateItemDefinition();
 	}
 
-	private static addCacheItem(uri: FabricFSUri): FabricFSCacheItem {
-		let item  = uri.getCacheItem();
-		FabricFSCache._cache.set(uri.getCacheItemKey(), item);
+	private static async addCacheItem(uri: FabricFSUri): Promise<FabricFSCacheItem> {
+		let item  = await uri.getCacheItem();
+		FabricFSCache._cache.set(uri.cacheItemKey, item);
 
 		return item;
 	}
 
 	private static removeCacheItem(item: FabricFSCacheItem): boolean {
-		return FabricFSCache._cache.delete(item.FabricUri.getCacheItemKey());
+		return FabricFSCache._cache.delete(item.FabricUri.cacheItemKey);
 	}
 }
