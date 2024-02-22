@@ -14,11 +14,11 @@ import { FabricFSRoot } from './FabricFSRoot';
 const REGEX_FABRIC_URI = /fabric:\/\/(?<workspace>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<Item>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
 
 export enum FabricUriType {
-	"root" = 1,
-	"workspace" = 2,
-	"itemType" = 3,
-	"item" = 4,
-	"part" = 5
+	root = 1,
+	workspace = 2,
+	itemType = 3,
+	item = 4,
+	part = 5
 }
 
 export class FabricFSUri {
@@ -47,7 +47,7 @@ export class FabricFSUri {
 			let paths = uriString.split("/").filter((path) => path.length > 0).slice(1);
 			this.isValid = true;
 			this.workspace = paths[0];
-			this.itemType = paths[1] as FabricApiItemType;
+			this.itemType = FabricApiItemType.fromString(paths[1]);
 			this.item = paths[2];
 			this.part = paths.slice(3).join("/");
 
@@ -71,6 +71,10 @@ export class FabricFSUri {
 		return FabricFSUri._itemNameIdMap.get(this.item);
 	}
 
+	get itemTypeText(): string {
+		return FabricApiItemType[this.itemType];
+	}
+
 	public static addWorkspaceNameIdMap(workspaceName: string, workspaceId: string): void {
 		FabricFSUri._workspaceNameIdMap.set(workspaceName, workspaceId);
 	}
@@ -90,7 +94,7 @@ export class FabricFSUri {
 		if (match) {
 			this.isValid = true;
 			this.workspace = match.groups["workspace"];
-			this.itemType = match.groups["itemType"] as FabricApiItemType;
+			this.itemType = FabricApiItemType.fromString(match.groups["itemType"]);
 			this.item = match.groups["item"];
 			this.part = match.groups["part"];
 

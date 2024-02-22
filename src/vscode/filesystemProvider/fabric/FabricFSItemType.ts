@@ -1,16 +1,14 @@
 import * as vscode from 'vscode';
 
-import { ThisExtension } from '../../../ThisExtension';
-import { Helper } from '../../../helpers/Helper';
-import { FabricFSSupportedItemType, LoadingState } from './_types';
 import { FabricFSUri } from './FabricFSUri';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
+import { FabricApiItemType } from '../../../fabric/_types';
 
 export class FabricFSItemType extends FabricFSCacheItem {
 	workspace: FabricFSWorkspace;
-	itemType: FabricFSSupportedItemType;
+	itemType: FabricApiItemType;
 
 	constructor(uri: FabricFSUri) {
 		super(uri);

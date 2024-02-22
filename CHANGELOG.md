@@ -1,10 +1,13 @@
 # Change Log
 
 **v1.5.0**:
+- Support for Fabric via FileSystemProvider `fabric://<workspaceId>`
+  - load all items with their definition
+  - update and publish definition of existing items
 - added support for multiselect of `Tables` and `Partitions` to process multiple at the same time
 - added support to deploy local TMDL folders directly without `.publishsettings.json`
 - added Drag & Drop to Power BI notebooks supporting `DAX` (tables, columns and measures)
-- added dedicaed languages `DAX`, `TMSL` and Power BI Notebook Command (`pbinb-cmd`) to the notebooks
+- added dedicated languages `DAX`, `TMSL` and Power BI Notebook Command (`pbinb-cmd`) to the notebooks
 
 **v1.4.1**:
 - fixed issue with unassigned pipeline stages

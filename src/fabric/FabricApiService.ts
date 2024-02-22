@@ -192,7 +192,7 @@ export abstract class FabricApiService {
 
 	static async getItems(workspaceId: string, itemType?: FabricApiItemType): Promise<iFabricApiItem[]> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items`;
-		const itemTypeFilter = itemType ? `?type=${itemType}` : '';
+		const itemTypeFilter = itemType ? `?type=${FabricApiItemType[itemType]}` : '';
 		return (await FabricApiService.get<iFabricApiItem[]>(endpoint + itemTypeFilter))["value"];
 	}
 

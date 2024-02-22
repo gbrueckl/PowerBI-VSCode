@@ -1,33 +1,44 @@
 // https://learn.microsoft.com/en-us/rest/api/fabric/core/items/get-item?tabs=HTTP#itemtype
-export type FabricApiItemType =
+export enum FabricApiItemType {
 	"Dashboard"				//	PowerBI dashboard.
-	| "DataPipeline"			//	A data pipeline.
-	| "Datamart"				//	PowerBI datamart.
-	| "Eventstream"			//	An eventstream item.
-	| "KQLDataConnection"		//	A KQL data connection.
-	| "KQLDatabase"			//	A KQL database.
-	| "KQLQueryset"			//	A KQL queryset.
-	| "Lakehouse"				//	Lakehouse item.
-	| "MLExperiment"			//	A machine learning experiment.
-	| "MLModel"				//	A machine learning model.
-	| "MountedWarehouse"		//	A MountedWarehouse item.
-	| "Notebook"				//	A notebook.
-	| "PaginatedReport"		//	PowerBI paginated report.
-	| "Report"				//	PowerBI report.
-	| "SQLEndpoint"			//	An SQL endpoint.
-	| "SemanticModel"			//	PowerBI semantic model.
-	| "SparkJobDefinition"	//	A spark job definition.
-	| "Warehouse"				//	A warehouse item.
-	;
+	, "DataPipeline"			//	A data pipeline.
+	, "Datamart"				//	PowerBI datamart.
+	, "Eventstream"			//	An eventstream item.
+	, "KQLDataConnection"		//	A KQL data connection.
+	, "KQLDatabase"			//	A KQL database.
+	, "KQLQueryset"			//	A KQL queryset.
+	, "Lakehouse"				//	Lakehouse item.
+	, "MLExperiment"			//	A machine learning experiment.
+	, "MLModel"				//	A machine learning model.
+	, "MountedWarehouse"		//	A MountedWarehouse item.
+	, "Notebook"				//	A notebook.
+	, "PaginatedReport"		//	PowerBI paginated report.
+	, "Report"				//	PowerBI report.
+	, "SQLEndpoint"			//	An SQL endpoint.
+	, "SemanticModel"			//	PowerBI semantic model.
+	, "SparkJobDefinition"	//	A spark job definition.
+	, "Warehouse"				//	A warehouse item.
+};
 
-export type FabricApiWorkspaceType =
+export namespace FabricApiItemType {
+    export function toString(dir: FabricApiItemType): string {
+        return FabricApiItemType[dir];
+    }
+
+    export function fromString(dir: string): FabricApiItemType {
+        return (FabricApiItemType as any)[dir];
+    }
+}
+
+export enum FabricApiWorkspaceType {
 	"Personal"		// A personal workspace
-	| "Workspace"		// A collaborative workspace
-	;
+	, "Workspace"		// A collaborative workspace
+};
 
-export type FabricApiItemFormat =
-	"ipynb"
-	| "SparkJobDefinitionV1"
+export enum FabricApiItemFormat {
+	Notebook = "ipynb"
+	, SparkJobDefinitionV1 = "SparkJobDefinitionV1"
+}
 
 
 export interface iFabricApiWorkspace {
@@ -58,6 +69,7 @@ export interface iFabricApiItemPart {
 
 export interface iFabricApiItemDefinition {
 	definition: {
+		format: FabricApiItemFormat;
 		parts: iFabricApiItemPart[];
 	}
 }

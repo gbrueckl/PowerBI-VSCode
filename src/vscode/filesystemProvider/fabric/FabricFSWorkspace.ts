@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../../ThisExtension';
 import { Helper } from '../../../helpers/Helper';
-import { FabricApiWorkspaceType, iFabricApiWorkspace } from '../../../fabric/_types';
+import { FabricApiItemType, FabricApiWorkspaceType, iFabricApiWorkspace } from '../../../fabric/_types';
 import { FABRIC_FS_ITEM_TYPES } from './_types';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSUri } from './FabricFSUri';
@@ -35,7 +35,7 @@ export class FabricFSWorkspace extends FabricFSCacheItem implements iFabricApiWo
 			this._children = [];
 			this._apiResponse = FABRIC_FS_ITEM_TYPES;
 			for (let itemType of FABRIC_FS_ITEM_TYPES) {
-				this._children.push([itemType, vscode.FileType.Directory]);
+				this._children.push([FabricApiItemType[itemType], vscode.FileType.Directory]);
 			}
 		}
 	}

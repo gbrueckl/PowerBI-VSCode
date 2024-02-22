@@ -13,7 +13,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	description: string;
 	type: FabricApiItemType;
 	workspace: FabricFSWorkspace;
-	format?: FabricApiItemFormat;
+	private _format?: FabricApiItemFormat;
 
 	constructor(uri: FabricFSUri) {
 		super(uri);
@@ -25,6 +25,13 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 	get itemId(): string {
 		return this.FabricUri.itemId;
+	}
+
+	get format(): FabricApiItemFormat | undefined {
+		if(this.FabricUri.itemType == FabricApiItemType.Notebook) {
+			return FabricApiItemFormat.Notebook;
+		}
+		return this._format;
 	}
 
 	getApiResponse<T = iFabricApiItemPart[]>(): T {
@@ -42,7 +49,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
-			const apiItems = await FabricApiService.getItemDefinitionParts(this.FabricUri.workspaceId, this.FabricUri.itemId);
+			const apiItems = await FabricApiService.getItemDefinitionParts(this.FabricUri.workspaceId, this.FabricUri.itemId, this.format);
 			this._apiResponse = apiItems;
 			this._children = [];
 
@@ -138,7 +145,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	public async getItemDefinition(): Promise<iFabricApiItemDefinition> {
 		let parts = this.getApiResponse();
 
-		return {"definition": {"parts": parts}}
+		return {"definition": {"format": this.format, "parts": parts}}
 	}
 
 	public async updateItemDefinition(): Promise<void> {

@@ -14,6 +14,7 @@ The extensions can be installed directly from within VSCode by searching for thi
 # Features
 - GUI to browse your workspace and run operations like [rebind](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/rebind-report-in-group), [clone](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/clone-report-in-group), ...
 - Modify Power BI datasets using **TMDL** - see [TMDL](#tmdl)
+- Microsoft Fabric integration - see [Microsoft Fabric](#microsoft-fabric)
 - Supports VSCode and [vscode.dev](https://vscode.dev)
 - Connect to remote tenants where you are invited as a guest user - see [Configuration](#configuration)
 - Run DAX queries in a notebook against your Power BI Datasets using `%dax` magic
@@ -130,6 +131,25 @@ The Tabular Model Scripting Language (TMSL) can be used to create or modify Tabu
 ```
 
 While you could technically run any TMSL script including large `createOrUpdate` scripts, its purpose is to modify individual properties of selected objects like changing the name of a role etc.
+
+# Microsoft Fabric
+The extension also provides an easy way to interact with all items hosted in Microsoft Fabric. Besides the regular Power BI artifacts like Datasets and Reports this also includes Notebooks and SparkJobDefinitions (more to be added once the Fabric APIs exist!). To browse your Fabric items, you need to use [VSCode Workspace](https://code.visualstudio.com/docs/editor/workspaces) when working with VSCode. In your workspace settings file, you can add a Fabric Workspace using an URI in the format of `fabric://<workspace-guid>`:
+
+```json
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"uri": "fabric://f6fb3aea-f11f-4f06-b6fa-89bac4c0fee0",
+			"name": "My Fabric Workspace"
+		}
+	]
+}
+```
+
+Once this is set up, you can browse your Fabric items as if they were local. In fact we use the API to download them and cache them locally in memory for you. You can also modify the files and publish them back to Fabric by right-clicking on the Item-folder (e.g the Dataset, the Report, ...) and select `Publish`.
 
 # TMDL
 
