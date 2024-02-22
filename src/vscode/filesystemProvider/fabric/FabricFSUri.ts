@@ -68,7 +68,7 @@ export class FabricFSUri {
 	get itemId(): string {
 		if(Helper.isGuid(this.item)) return this.item;
 
-		const itemName = `${this.workspaceId}/${this.itemTypeText}/${this.item}`
+		const itemName = decodeURI(`${this.workspaceId}/${this.itemTypeText}/${this.item}`);
 		return FabricFSUri._itemNameIdMap.get(itemName);
 	}
 

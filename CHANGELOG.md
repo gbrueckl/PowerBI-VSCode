@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.5.2**:
+- fixed issue with Fabric FileSystemProvider caused by special characters in the name
+
 **v1.5.1**:
 - fixed issue with Fabric FileSystemProvider caused by duplicate item names
 
