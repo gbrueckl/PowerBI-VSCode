@@ -12,6 +12,7 @@ import { iPowerBIDataset, iPowerBIDatasetDMV, iPowerBIDatasetExecuteQueries, iPo
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
+import { FabricApiService } from '../fabric/FabricApiService';
 
 export abstract class PowerBIApiService {
 	private static _isInitialized: boolean = false;
@@ -48,6 +49,15 @@ export abstract class PowerBIApiService {
 			this._tmdlClientId = tmdlClientId;
 			this._authenticationProvider = authenticationProvider;
 			this._resourceId = resourceId;
+
+			await FabricApiService.initialize(
+				apiBaseUrl, 
+				tenantId,
+				clientId, 
+				tmdlClientId, 
+				authenticationProvider, 
+				resourceId
+			)
 
 			await this.refreshConnection();
 		} catch (error) {

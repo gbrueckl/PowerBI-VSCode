@@ -59,10 +59,23 @@ export class FabricFSUri {
 		throw vscode.FileSystemError.Unavailable("Invalid Fabric URI!");
 	}
 
+	static async getInstance(uri: vscode.Uri): Promise<FabricFSUri> {
+		const fabricUri = new FabricFSUri(uri);
+
+		// VSCode always checks for files in the root of the URI
+		// as we can only have workspace IDs (GUIDs) or names from our NameIdMap, we can throw a FileNotFound error for all other files in the root
+		if(fabricUri.workspace && !Helper.isGuid(fabricUri.workspace) && !this._workspaceNameIdMap.has(fabricUri.workspace)) {
+			throw vscode.FileSystemError.FileNotFound(uri);
+		}
+
+		return fabricUri;
+	}
+
 	get workspaceId(): string {
 		if(Helper.isGuid(this.workspace)) return this.workspace;
 
-		return FabricFSUri._workspaceNameIdMap.get(this.workspace);
+		const workspaceName = decodeURI(this.workspace);
+		return FabricFSUri._workspaceNameIdMap.get(workspaceName);
 	}
 
 	get itemId(): string {
@@ -105,26 +118,6 @@ export class FabricFSUri {
 		ThisExtension.log(`Fabric URI '${uri.toString()}' does not match pattern ${REGEX_FABRIC_URI}!`);
 
 		throw vscode.FileSystemError.Unavailable("Invalid Fabric URI!");
-	}
-
-	static async getInstance(uri: vscode.Uri): Promise<FabricFSUri> {
-		if (FabricFSUri.isVSCodeInternalURI(uri)) {
-			throw vscode.FileSystemError.FileNotFound(uri);
-		}
-
-		const fabricUri = new FabricFSUri(uri);
-
-		return fabricUri;
-	}
-
-	static isVSCodeInternalURI(uri: vscode.Uri = undefined): boolean {
-		if (uri.path.includes('/.') // any hidden files/folders
-			|| uri.path.endsWith("/pom.xml")
-			|| uri.path.endsWith("/node_modules")
-			|| uri.path.endsWith("AndroidManifest.xml")) {
-			return true;
-		}
-		return false;
 	}
 
 	get uriType(): FabricUriType {

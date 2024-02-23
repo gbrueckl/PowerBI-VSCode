@@ -6,9 +6,25 @@ import { Helper } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart, iFabricApiWorkspace, iFabricPollingResponse } from './_types';
+import { FabricFSCache } from '../vscode/filesystemProvider/fabric/FabricFSCache';
 
 export abstract class FabricApiService {
 
+	//#region Initialization
+	static async initialize(
+		// Default settings will be for Azure Global
+		apiBaseUrl: string = "https://api.powerbi.com/",
+		tenantId: string = undefined,
+		clientId: string = undefined,
+		tmdlClientId: string = undefined,
+		authenticationProvider: string = "microsoft",
+		resourceId: string = "https://analysis.windows.net/powerbi/api"
+	): Promise<boolean> {
+
+		FabricFSCache.initialize()
+
+		return true;
+	}
 	static async get<T = any>(endpoint: string, params: object = null, raiseError: boolean = false, raw: boolean = false): Promise<T> {
 		return PowerBIApiService.get<T>(endpoint, params, raiseError, raw);
 	}
