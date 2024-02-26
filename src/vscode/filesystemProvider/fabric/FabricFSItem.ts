@@ -6,6 +6,7 @@ import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart } from '../../../fabric/_types';
 import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
+import { ThisExtension } from '../../../ThisExtension';
 
 export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	id: string;
@@ -28,7 +29,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	}
 
 	get format(): FabricApiItemFormat | undefined {
-		if(this.FabricUri.itemType == FabricApiItemType.Notebook) {
+		if (this.FabricUri.itemType == FabricApiItemType.Notebook) {
 			return FabricApiItemFormat.Notebook;
 		}
 		return this._format;
@@ -39,24 +40,38 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	}
 
 	public async loadStatsFromApi<T>(): Promise<void> {
-		this._stats = {
-			type: vscode.FileType.Directory,
-			ctime: undefined,
-			mtime: undefined,
-			size: undefined
-		};
+		const apiItem = await FabricApiService.getItem(this.FabricUri.workspaceId, this.FabricUri.itemId);
+
+		if (apiItem) {
+			this.id = apiItem.id;
+			this.displayName = apiItem.displayName;
+			this.description = apiItem.description;
+			this.type = apiItem.type;
+
+			this._stats = {
+				type: vscode.FileType.Directory,
+				ctime: undefined,
+				mtime: undefined,
+				size: undefined
+			};
+		}
+		else {
+			this._stats = undefined;
+		}
 	}
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
-			const apiItems = await FabricApiService.getItemDefinitionParts(this.FabricUri.workspaceId, this.FabricUri.itemId, this.format);
-			this._apiResponse = apiItems;
+			if (!this._apiResponse) {
+				const apiItems = await FabricApiService.getItemDefinitionParts(this.FabricUri.workspaceId, this.FabricUri.itemId, this.format);
+				this._apiResponse = apiItems;
+			}
 			this._children = [];
 
 			let folders: [string, vscode.FileType][] = [];
 			let files: [string, vscode.FileType][] = [];
 
-			for (let item of apiItems) {
+			for (let item of this._apiResponse) {
 				const partParts = item.path.split("/");
 				if (partParts.length == 1) {
 					files.push([item.path, vscode.FileType.File]);
@@ -91,7 +106,8 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 				size: undefined
 			};
 		}
-		return undefined;
+
+		throw vscode.FileSystemError.FileNotFound(vscode.Uri.joinPath(this.FabricUri.uri, path));
 	}
 
 	public getChildrenForSubpath(path: string): [string, vscode.FileType][] | undefined {
@@ -100,15 +116,21 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		let folders: [string, vscode.FileType][] = [];
 		let files: [string, vscode.FileType][] = [];
 
-		const pathLenght = path.split("/").length;
+		const pathLength = path.split("/").length;
 		for (let item of items) {
 			const itemParts = item.path.split("/");
 			const itemLength = itemParts.length;
-			if (pathLenght == itemLength - 1) {
-				files.push([itemParts.pop(), vscode.FileType.File]);
+
+			if (pathLength == itemLength - 1) {
+				if (item.payloadType == "VSCodeFolder") {
+					folders.push([itemParts[pathLength - 1], vscode.FileType.Directory]);
+				}
+				else {
+					files.push([itemParts.pop(), vscode.FileType.File]);
+				}
 			}
 			else {
-				const folderName = itemParts[pathLenght];
+				const folderName = itemParts[pathLength];
 				if (!folders.find((folder) => folder[0] == folderName)) {
 					folders.push([folderName, vscode.FileType.Directory]);
 				}
@@ -132,9 +154,21 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	public async writeContentToSubpath(path: string, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
 		const item = this.getApiResponse().find((item) => item.path == path);
 		if (item) {
-			if (item.payloadType == "InlineBase64") {
-				item.payload = Buffer.from(content).toString("base64");
+			if(options.overwrite) {
+				if (item.payloadType == "InlineBase64") {
+					item.payload = Buffer.from(content).toString("base64");
 
+					return;
+				}
+			}
+			else {
+				throw vscode.FileSystemError.FileExists(vscode.Uri.joinPath(this.FabricUri.uri, path));
+			}
+		}
+		else {
+			if(options.create) {
+				this.addPart(path);
+				await this.writeContentToSubpath(path, content, { create: false, overwrite: true });
 				return;
 			}
 		}
@@ -145,11 +179,59 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	public async getItemDefinition(): Promise<iFabricApiItemDefinition> {
 		let parts = this.getApiResponse();
 
-		return {"definition": {"format": this.format, "parts": parts}}
+		parts = parts.filter((part) => part.payloadType != "VSCodeFolder");
+
+		return { "definition": { "format": this.format, "parts": parts } }
 	}
 
 	public async updateItemDefinition(): Promise<void> {
 		let definition = await this.getItemDefinition();
-		await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition);
+		const response = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition);
+
+		if (response.message) {
+			vscode.window.showErrorMessage(JSON.stringify(response.message));
+		}
+	}
+
+	public async removePart(partPath: string): Promise<void> {
+		let parts = this.getApiResponse();
+		let index = parts.findIndex((part) => part.path == partPath);
+		if (index >= 0) {
+			parts.splice(index, 1);
+		}
+
+		// reload children from modified API Response
+		this._children = undefined;
+		await this.loadChildrenFromApi();
+	}
+
+	public async addPart(partPath: string): Promise<void> {
+		let parts = this.getApiResponse();
+		let index = parts.findIndex((part) => part.path == partPath);
+		if (index >= 0) {
+			throw vscode.FileSystemError.FileExists(partPath);
+		}
+		else {
+			parts.push({ "path": partPath, "payloadType": "InlineBase64", "payload": "" });
+		}
+
+		// reload children from modified API Response
+		this._children = undefined;
+		await this.loadChildrenFromApi();
+	}
+
+	public async createSubFolder(folderPath: string): Promise<void> {
+		let parts = this.getApiResponse();
+		let index = parts.findIndex((part) => part.path == folderPath);
+		if (index >= 0) {
+			throw vscode.FileSystemError.FileExists(folderPath);
+		}
+		else {
+			parts.push({ "path": folderPath + "/", "payloadType": "VSCodeFolder", "payload": "" });
+		}
+
+		// reload children from modified API Response
+		this._children = undefined;
+		await this.loadChildrenFromApi();
 	}
 }

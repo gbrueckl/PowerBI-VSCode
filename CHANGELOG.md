@@ -1,5 +1,9 @@
 # Change Log
 
+**v1.5.3**:
+- fixed issue with Fabric FileSystemProvider Cachen when changing user
+- fixed issue with error messages for internal files that cannot be found on the `fabric:/` scheme
+
 **v1.5.2**:
 - fixed issue with Fabric FileSystemProvider caused by special characters in the name
 

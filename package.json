@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.5.2",
+	"version": "1.5.3",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -505,8 +505,14 @@
 			},
 			{
 				"command": "Fabric.updateItemDefinition",
-				"title": "Publish",
+				"title": "Publish to Fabric",
 				"icon": "$(cloud-upload)",
+				"category": "Fabric"
+			},
+			{
+				"command": "Fabric.reloadFromFabric",
+				"title": "(Re)Load from Fabric",
+				"icon": "$(cloud-download)",
 				"category": "Fabric"
 			}
 		],
@@ -781,6 +787,11 @@
 				{
 					"command": "Fabric.updateItemDefinition",
 					"when": "resourceScheme == fabric && resource =~ /^fabric:[\\/]*[^\\/]*?\\/[^\\/]*?\\/[^\\/]*?$/",
+					"group": "2_workspace"
+				},
+				{
+					"command": "Fabric.reloadFromFabric",
+					"when": "resourceScheme == fabric",
 					"group": "2_workspace"
 				}
 			]

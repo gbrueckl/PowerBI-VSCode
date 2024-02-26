@@ -18,59 +18,75 @@ export abstract class FabricFSCache {
 		}
 	}
 
-	public static async stats(uri: FabricFSUri): Promise<vscode.FileStat | undefined> {
-		let item = FabricFSCache._cache.get(uri.cacheItemKey);
-		if (!item) {
-			item = await FabricFSCache.addCacheItem(uri);
+	public static async stats(fabricUri: FabricFSUri): Promise<vscode.FileStat | undefined> {
+		if(!fabricUri.isValid) {
+			ThisExtension.log(`stats() - Fabric URI is not valid: ${fabricUri.uri.toString()}`);
+			throw vscode.FileSystemError.FileNotFound(fabricUri.uri);
 		}
 
-		if (uri.uriType == FabricUriType.part) {
-			return (item as FabricFSItem).getStatsForSubpath(uri.part);
+		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
+		if (!item) {
+			item = await FabricFSCache.addCacheItem(fabricUri);
 		}
-		return item.stats();
+
+		if (fabricUri.uriType == FabricUriType.part) {
+			return (item as FabricFSItem).getStatsForSubpath(fabricUri.part);
+		}
+		const stats = await item.stats();
+
+		if(!stats) {
+			throw vscode.FileSystemError.FileNotFound(fabricUri.uri);
+		}
+
+		return stats;
 	}
 
-	public static async readDirectory(uri: FabricFSUri): Promise<[string, vscode.FileType][] | undefined> {
-		let item = FabricFSCache._cache.get(uri.cacheItemKey);
+	public static async readDirectory(fabricUri: FabricFSUri): Promise<[string, vscode.FileType][] | undefined> {
+		if(!fabricUri.isValid) {
+			ThisExtension.log(`readDirectory() - Fabric URI is not valid: ${fabricUri.uri.toString()}`);
+			throw vscode.FileSystemError.FileNotFound(fabricUri.uri);
+		}
+		
+		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
 		if (!item) {
-			item = await FabricFSCache.addCacheItem(uri);
+			item = await FabricFSCache.addCacheItem(fabricUri);
 		}
 
-		if (uri.uriType == FabricUriType.part) {
-			return (item as FabricFSItem).getChildrenForSubpath(uri.part);
+		if (fabricUri.uriType == FabricUriType.part) {
+			return (item as FabricFSItem).getChildrenForSubpath(fabricUri.part);
 		}
 
 		return item.readDirectory();
 	}
 
-	public static async readFile(uri: FabricFSUri): Promise<Uint8Array> {
-		let item = FabricFSCache._cache.get(uri.cacheItemKey);
+	public static async readFile(fabricUri: FabricFSUri): Promise<Uint8Array> {
+		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
 		if (!item) {
-			item = await FabricFSCache.addCacheItem(uri);
+			item = await FabricFSCache.addCacheItem(fabricUri);
 		}
 
-		if (uri.uriType == FabricUriType.part) {
-			return (item as FabricFSItem).getContentForSubpath(uri.part);
+		if (fabricUri.uriType == FabricUriType.part) {
+			return (item as FabricFSItem).getContentForSubpath(fabricUri.part);
 		}
 
-		vscode.window.showErrorMessage("Could not read File: " + uri.uri.toString());
-		throw vscode.FileSystemError.Unavailable("Could not read File: " + uri.uri.toString());
+		vscode.window.showErrorMessage("Could not read File: " + fabricUri.uri.toString());
+		throw vscode.FileSystemError.Unavailable("Could not read File: " + fabricUri.uri.toString());
 	}
 
-	public static async writeFile(uri: FabricFSUri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
-		let item = FabricFSCache._cache.get(uri.cacheItemKey);
+	public static async writeFile(fabricUri: FabricFSUri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
+		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
 		if (!item) {
-			item = await FabricFSCache.addCacheItem(uri);
+			item = await FabricFSCache.addCacheItem(fabricUri);
 		}
 
-		if (uri.uriType == FabricUriType.part) {
-			(item as FabricFSItem).writeContentToSubpath(uri.part, content, options);
+		if (fabricUri.uriType == FabricUriType.part) {
+			(item as FabricFSItem).writeContentToSubpath(fabricUri.part, content, options);
 
 			return;
 		}
 
-		vscode.window.showErrorMessage("Could not read File: " + uri.uri.toString());
-		throw vscode.FileSystemError.Unavailable("Could not read File: " + uri.uri.toString());
+		vscode.window.showErrorMessage("Could not read File: " + fabricUri.uri.toString());
+		throw vscode.FileSystemError.Unavailable("Could not read File: " + fabricUri.uri.toString());
 	}
 
 	public static async updateItemDefinition(resourceUri: vscode.Uri): Promise<void> {
@@ -81,14 +97,61 @@ export abstract class FabricFSCache {
 		item.updateItemDefinition();
 	}
 
-	private static async addCacheItem(uri: FabricFSUri): Promise<FabricFSCacheItem> {
-		let item = await uri.getCacheItem();
-		FabricFSCache._cache.set(uri.cacheItemKey, item);
+	private static async addCacheItem(fabricUri: FabricFSUri): Promise<FabricFSCacheItem> {
+		let item = await fabricUri.getCacheItem();
+		FabricFSCache._cache.set(fabricUri.cacheItemKey, item);
 
 		return item;
 	}
 
-	private static removeCacheItem(item: FabricFSCacheItem): boolean {
+	private static async removeCacheItem(item: FabricFSCacheItem): Promise<boolean> {
 		return FabricFSCache._cache.delete(item.FabricUri.cacheItemKey);
+	}
+
+	public static async delete(fabricUri: FabricFSUri): Promise<void> {
+		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
+		if (!item) {
+			throw vscode.FileSystemError.FileNotFound(fabricUri.uri);
+		}
+
+		if (fabricUri.uriType == FabricUriType.part) {
+			(item as FabricFSItem).removePart(fabricUri.part);
+
+			return;
+		}
+
+		vscode.window.showErrorMessage("Could not read File: " + fabricUri.uri.toString());
+		throw vscode.FileSystemError.Unavailable("Could not read File: " + fabricUri.uri.toString());
+	}
+
+	public static async createDirectory(fabricUri: FabricFSUri): Promise<void> {
+		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
+		if (!item) {
+			throw vscode.FileSystemError.FileNotFound(fabricUri.uri);
+		}
+
+		if (fabricUri.uriType == FabricUriType.part) {
+			(item as FabricFSItem).createSubFolder(fabricUri.part);
+
+			return;
+		}
+
+		vscode.window.showErrorMessage("Directory can not be created: " + fabricUri.uri.toString());
+		throw vscode.FileSystemError.NoPermissions("Directory can not be created: " + fabricUri.uri.toString());
+	}
+
+	public static async reloadFromFabric(resourceUri: vscode.Uri, reloadFromFabric: boolean = true): Promise<void> {
+		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
+
+		for (let key of FabricFSCache._cache.keys()) {
+			if (key.startsWith(fabricUri.cacheItemKey)) {
+				FabricFSCache._cache.delete(key);
+			}
+		}
+
+		// refresh
+		if (reloadFromFabric) {
+			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", resourceUri);
+		}
 	}
 }

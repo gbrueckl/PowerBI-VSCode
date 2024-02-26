@@ -24,32 +24,38 @@ export enum FabricUriType {
 export class FabricFSUri {
 	private static _workspaceNameIdMap: Map<string, string> = new Map<string, string>();
 	private static _itemNameIdMap: Map<string, string> = new Map<string, string>();
+	
 
 	uri: vscode.Uri;
-	isValid: boolean;
 	workspace?: string;
 	itemType?: FabricApiItemType;
 	item?: string;
 	part: string;
+	uriType: FabricUriType;
 
 	/*
 	fabric:/<workspace-id>/<itemType>/<item-id>/<partFolder/partfolder/partFile>
 	*/
 	constructor(uri: vscode.Uri) {
-		let match: RegExpExecArray;
-
 		this.uri = uri;
-		this.isValid = false;
 
 		let uriString = uri.toString();
 
 		if (uriString.startsWith(FABRIC_SCHEME + ":/")) {
 			let paths = uriString.split("/").filter((path) => path.length > 0).slice(1);
-			this.isValid = true;
 			this.workspace = paths[0];
 			this.itemType = FabricApiItemType.fromString(paths[1]);
 			this.item = paths[2];
 			this.part = paths.slice(3).join("/");
+
+			if(paths.length >= 5){
+				this.uriType = FabricUriType.part;
+			}
+			else {
+				this.uriType = paths.length + 1;
+			}
+
+			
 
 			return
 		}
@@ -62,27 +68,50 @@ export class FabricFSUri {
 	static async getInstance(uri: vscode.Uri): Promise<FabricFSUri> {
 		const fabricUri = new FabricFSUri(uri);
 
-		// VSCode always checks for files in the root of the URI
-		// as we can only have workspace IDs (GUIDs) or names from our NameIdMap, we can throw a FileNotFound error for all other files in the root
-		if(fabricUri.workspace && !Helper.isGuid(fabricUri.workspace) && !this._workspaceNameIdMap.has(fabricUri.workspace)) {
+		if(!fabricUri.isValid) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 
 		return fabricUri;
 	}
 
+	get isValid(): boolean {
+		if(this.uriType >= FabricUriType.itemType && !this.itemType) {
+			return false;
+		}
+
+		// VSCode always checks for files in the root of the URI
+		// as we can only have workspace IDs (GUIDs) or names from our NameIdMap, we can throw a FileNotFound error for all other files in the root
+		if(this.workspace && !Helper.isGuid(this.workspace) && !FabricFSUri._workspaceNameIdMap.has(this.workspaceMapName))
+		{
+			return false;
+		}
+		if(this.item && !Helper.isGuid(this.item) && !FabricFSUri._itemNameIdMap.has(this.itemMapName))
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	get workspaceId(): string {
 		if(Helper.isGuid(this.workspace)) return this.workspace;
 
-		const workspaceName = decodeURI(this.workspace);
-		return FabricFSUri._workspaceNameIdMap.get(workspaceName);
+		return FabricFSUri._workspaceNameIdMap.get(this.workspaceMapName);
+	}
+
+	private get workspaceMapName(): string {
+		return decodeURI(this.workspace);
+	}
+
+	private get itemMapName(): string {
+		return decodeURI(`${this.workspaceId}/${this.itemTypeText}/${this.item}`);
 	}
 
 	get itemId(): string {
 		if(Helper.isGuid(this.item)) return this.item;
 
-		const itemName = decodeURI(`${this.workspaceId}/${this.itemTypeText}/${this.item}`);
-		return FabricFSUri._itemNameIdMap.get(itemName);
+		return FabricFSUri._itemNameIdMap.get(this.itemMapName);
 	}
 
 	get itemTypeText(): string {
@@ -101,12 +130,10 @@ export class FabricFSUri {
 		let match: RegExpExecArray;
 
 		this.uri = uri;
-		this.isValid = false;
 
 		match = REGEX_FABRIC_URI.exec(Helper.trimChar(uri.toString(), "/"));
 
 		if (match) {
-			this.isValid = true;
 			this.workspace = match.groups["workspace"];
 			this.itemType = FabricApiItemType.fromString(match.groups["itemType"]);
 			this.item = match.groups["item"];
@@ -120,7 +147,7 @@ export class FabricFSUri {
 		throw vscode.FileSystemError.Unavailable("Invalid Fabric URI!");
 	}
 
-	get uriType(): FabricUriType {
+	get uriTypeCalc(): FabricUriType {
 		if (!this.workspace) {
 			return FabricUriType.root;
 		}

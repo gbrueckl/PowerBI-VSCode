@@ -236,6 +236,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		FabricFSCache.updateItemDefinition
 	);
 
+	vscode.commands.registerCommand('Fabric.reloadFromFabric',
+		(uri) => FabricFSCache.reloadFromFabric(uri, true)
+	);
+
 	EventHandlers.init(context);
 }
 

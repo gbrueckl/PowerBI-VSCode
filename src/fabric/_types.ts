@@ -21,13 +21,13 @@ export enum FabricApiItemType {
 };
 
 export namespace FabricApiItemType {
-    export function toString(dir: FabricApiItemType): string {
-        return FabricApiItemType[dir];
-    }
+	export function toString(dir: FabricApiItemType): string {
+		return FabricApiItemType[dir];
+	}
 
-    export function fromString(dir: string): FabricApiItemType {
-        return (FabricApiItemType as any)[dir];
-    }
+	export function fromString(dir: string): FabricApiItemType {
+		return (FabricApiItemType as any)[dir];
+	}
 }
 
 export enum FabricApiWorkspaceType {
@@ -59,7 +59,7 @@ export interface iFabricApiItem {
 	id: string;
 }
 
-export type FabricApiPayloadTypes = "InlineBase64";
+export type FabricApiPayloadTypes = "InlineBase64" | "VSCodeFolder";
 
 export interface iFabricApiItemPart {
 	path: string;
@@ -80,4 +80,14 @@ export interface iFabricPollingResponse {
 	lastUpdatedTimeUtc: Date;
 	percentComplete: number;
 	error: any;
-} 
+}
+
+export interface iFabricErrorResponse {
+	message: {
+		requestId: string;
+		errorCode: string;
+		message: string;
+	},
+	status: number;
+	statusText: string;
+}

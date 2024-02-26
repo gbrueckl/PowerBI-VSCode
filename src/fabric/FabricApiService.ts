@@ -5,7 +5,7 @@ import { fetch, FormData, RequestInit, RequestInfo, File, fileFrom, Response, ge
 import { Helper } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
-import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart, iFabricApiWorkspace, iFabricPollingResponse } from './_types';
+import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart, iFabricApiWorkspace, iFabricErrorResponse, iFabricPollingResponse } from './_types';
 import { FabricFSCache } from '../vscode/filesystemProvider/fabric/FabricFSCache';
 
 export abstract class FabricApiService {
@@ -62,7 +62,6 @@ export abstract class FabricApiService {
 			let resultText = await response.text();
 			let ret: T;
 
-
 			let callback = response.headers.get("location");
 			let retryAfter = response.headers.get("retry-after");
 			let requestFinished: boolean = false;
@@ -85,7 +84,7 @@ export abstract class FabricApiService {
 
 					if (response.ok){
 						if (pollingResult["status"] == "Failed") {
-							return { "value": { "status": 999, "statusText": pollingResult.error } } as T;
+							return { "error": { "status": 999, "statusText": pollingResult.error } } as T;
 						}
 					}
 				}
@@ -98,8 +97,7 @@ export abstract class FabricApiService {
 					ret = JSON.parse(resultText) as T;
 				}
 			}
-			if (!response.ok) {
-
+			else {
 				if (!resultText || resultText == "") {
 					ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
 				}
@@ -107,7 +105,7 @@ export abstract class FabricApiService {
 					throw new Error(resultText);
 				}
 				else {
-					ret = { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
+					return JSON.parse(resultText) as T;
 				}
 			}
 
@@ -228,10 +226,14 @@ export abstract class FabricApiService {
 		return (await FabricApiService.getItemDefinition(workspaceId, itemId, format)).definition.parts;
 	}
 
-	static async updateItemDefinition(workspaceId: string, itemId: string, itemDefinition: iFabricApiItemDefinition): Promise<void> {
+	static async updateItemDefinition(workspaceId: string, itemId: string, itemDefinition: iFabricApiItemDefinition): Promise<undefined | iFabricErrorResponse> {
 		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}/updateDefinition`;
 
-		(await FabricApiService.post<iFabricApiItemDefinition>(endpoint, itemDefinition));
+		const result = await FabricApiService.post<iFabricErrorResponse>(endpoint, itemDefinition);
 
+		if (result.message) {
+			return result;
+		}
+		return undefined;
 	}
 }
