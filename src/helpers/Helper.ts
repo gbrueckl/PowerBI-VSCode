@@ -79,7 +79,7 @@ export abstract class Helper {
 		return success;
 	}
 
-	static async awaitWithProgress<T>(message: string, promise: Promise<any>, keepResultMessage: number = 5000): Promise<T> {
+	static async awaitWithProgress<T>(message: string, promise: Promise<any>, showResultMessage: number = 5000): Promise<T> {
 		let ret: T = undefined;
 
 		await vscode.window.withProgress({
@@ -102,7 +102,7 @@ export abstract class Helper {
 			const p = await new Promise<void>(resolve => {
 				setTimeout(() => {
 					resolve();
-				}, keepResultMessage);
+				}, showResultMessage);
 			});
 
 			return p;

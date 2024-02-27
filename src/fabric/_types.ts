@@ -61,6 +61,11 @@ export interface iFabricApiItem {
 
 export type FabricApiPayloadTypes = "InlineBase64" | "VSCodeFolder";
 
+export interface iFabricListResponse<T> {
+	value: T[];
+	continuationToken?: string;
+	continuationUri?: string;
+}
 export interface iFabricApiItemPart {
 	path: string;
 	payload: string;
@@ -69,7 +74,7 @@ export interface iFabricApiItemPart {
 
 export interface iFabricApiItemDefinition {
 	definition: {
-		format: FabricApiItemFormat;
+		format?: FabricApiItemFormat;
 		parts: iFabricApiItemPart[];
 	}
 }
@@ -82,12 +87,24 @@ export interface iFabricPollingResponse {
 	error: any;
 }
 
+export interface iFabricErrorRelatedResource {
+	resourceId: string;  	// The resource ID that's involved in the error.
+	resourceType: string; 	// The type of the resource that's involved in the error.
+}
+export interface iFabricErrorResponseDetails {
+	errorCode: string; 	// A specific identifier that provides information about an error condition, allowing for standardized communication between our service and its users.
+	message: string; 	// A human readable representation of the error.
+	relatedResource: iFabricErrorRelatedResource; //The error related resource details.
+}
 export interface iFabricErrorResponse {
-	message: {
-		requestId: string;
-		errorCode: string;
-		message: string;
-	},
-	status: number;
-	statusText: string;
+	errorCode: string; 	// A specific identifier that provides information about an error condition, allowing for standardized communication between our service and its users.
+	message: string; 	// human readable representation of the error.
+	moreDetails?: iFabricErrorResponseDetails[] 		// List of additional error details.
+	relatedResource?: iFabricErrorRelatedResource 	// The error related resource details.
+	requestId?: string 	// ID of the request associated with the error.
+}
+
+export interface iFabricApiResponse<TSucces = any, TError = iFabricErrorResponse> {
+	success?: TSucces;
+	error?: TError;
 }

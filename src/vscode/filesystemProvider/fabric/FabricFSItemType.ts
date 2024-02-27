@@ -32,7 +32,7 @@ export class FabricFSItemType extends FabricFSCacheItem {
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
-			const apiItems = await FabricApiService.getItems(this.FabricUri.workspaceId, this.FabricUri.itemType);
+			const apiItems = await FabricApiService.listItems(this.FabricUri.workspaceId, this.FabricUri.itemType);
 			this._apiResponse = apiItems;
 			this._children = [];
 			for (let item of apiItems) {

@@ -74,7 +74,8 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			for (let item of this._apiResponse) {
 				const partParts = item.path.split("/");
 				if (partParts.length == 1) {
-					files.push([item.path, vscode.FileType.File]);
+					let fileName = item.path;
+					files.push([fileName, vscode.FileType.File]);
 				}
 				else {
 					const folderName = partParts[0];
@@ -123,10 +124,13 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 			if (pathLength == itemLength - 1) {
 				if (item.payloadType == "VSCodeFolder") {
-					folders.push([itemParts[pathLength - 1], vscode.FileType.Directory]);
+					if (itemParts[itemParts.length - 1] != '') {
+						folders.push([itemParts[pathLength - 1], vscode.FileType.Directory]);
+					}
 				}
 				else {
-					files.push([itemParts.pop(), vscode.FileType.File]);
+					let fileName = itemParts.pop();
+					files.push([fileName, vscode.FileType.File]);
 				}
 			}
 			else {
@@ -154,7 +158,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	public async writeContentToSubpath(path: string, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
 		const item = this.getApiResponse().find((item) => item.path == path);
 		if (item) {
-			if(options.overwrite) {
+			if (options.overwrite) {
 				if (item.payloadType == "InlineBase64") {
 					item.payload = Buffer.from(content).toString("base64");
 
@@ -166,7 +170,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			}
 		}
 		else {
-			if(options.create) {
+			if (options.create) {
 				this.addPart(path);
 				await this.writeContentToSubpath(path, content, { create: false, overwrite: true });
 				return;
@@ -181,16 +185,18 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 		parts = parts.filter((part) => part.payloadType != "VSCodeFolder");
 
-		return { "definition": { "format": this.format, "parts": parts } }
+		let definition =  { "definition": { "parts": parts } };
+
+		if(this.format) {
+			definition["format"] = this.format;
+		}
+
+		return definition;
 	}
 
 	public async updateItemDefinition(): Promise<void> {
 		let definition = await this.getItemDefinition();
-		const response = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition);
-
-		if (response.message) {
-			vscode.window.showErrorMessage(JSON.stringify(response.message));
-		}
+		const error = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Publish ${this.displayName}`);
 	}
 
 	public async removePart(partPath: string): Promise<void> {
