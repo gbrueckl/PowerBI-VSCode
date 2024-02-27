@@ -1,5 +1,10 @@
 # Change Log
 
+**v1.6.0**:
+- added support for `Publish to Fabric` in the context-menu of the Fabric Item
+- added support for `(Re)load from Fabric` in the context-menu
+- fixed issue with internal files being searched in the `fabric:/` scheme
+
 **v1.5.3**:
 - fixed issue with Fabric FileSystemProvider Cachen when changing user
 - fixed issue with error messages for internal files that cannot be found on the `fabric:/` scheme
