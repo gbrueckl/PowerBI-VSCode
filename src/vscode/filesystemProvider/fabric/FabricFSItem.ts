@@ -7,6 +7,7 @@ import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemD
 import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { ThisExtension } from '../../../ThisExtension';
+import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 
 export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	id: string;
@@ -29,8 +30,9 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	}
 
 	get format(): FabricApiItemFormat | undefined {
-		if (this.FabricUri.itemType == FabricApiItemType.Notebook) {
-			return FabricApiItemFormat.Notebook;
+		if (!this._format) {
+			const configuredFormats = PowerBIConfiguration.fabricFileFormats;
+			this._format = configuredFormats[FabricApiItemType[this.FabricUri.itemType]];
 		}
 		return this._format;
 	}
@@ -185,9 +187,9 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 		parts = parts.filter((part) => part.payloadType != "VSCodeFolder");
 
-		let definition =  { "definition": { "parts": parts } };
+		let definition = { "definition": { "parts": parts } };
 
-		if(this.format) {
+		if (this.format) {
 			definition["format"] = this.format;
 		}
 

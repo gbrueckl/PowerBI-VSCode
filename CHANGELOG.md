@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.6.1**:
+- added new configiguration `powerbi.Fabric.fileFormats` to control how notebooks are exported (`.py`(default) vs. `ipynb`)
+
 **v1.6.0**:
 - added support for `Publish to Fabric` in the context-menu of the Fabric Item
 - added support for `(Re)load from Fabric` in the context-menu

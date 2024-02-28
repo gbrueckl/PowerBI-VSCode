@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.6.0",
+	"version": "1.6.1",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -86,6 +86,21 @@
 						"type": "boolean",
 						"markdownDescription": "Set to true to allow editing Power BI datasets using TMDL.",
 						"default": true
+					},
+					"powerbi.Fabric.fileFormats": {
+						"type": "object",
+						"default": {},
+						"markdownDescription": "(Optional) The different file formats used when downloading notebooks from Microsoft Fabric.",
+						"scope": "window",
+						"properties": {
+							"Notebook": {
+								"type": "string",
+								"enum": [
+									"ipynb"
+								],
+								"description": "The file extension used when downloading Notebooks."
+							}
+						}
 					},
 					"powerbi.cloud": {
 						"type": "string",
