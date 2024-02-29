@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.6.2**:
+- fixed issue with special characters in file and folder names when using the `fabric:/` scheme
+
 **v1.6.1**:
 - added new configiguration `powerbi.Fabric.fileFormats` to control how notebooks are exported (`.py`(default) vs. `ipynb`)
 

@@ -91,7 +91,8 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	}
 
 	public getStatsForSubpath(path: string): vscode.FileStat | undefined {
-		const fileItem = this.getApiResponse().find((item) => item.path == path);
+		const pathDecoded = decodeURIComponent(path);
+		const fileItem = this.getApiResponse().find((item) => item.path == pathDecoded);
 		if (fileItem) {
 			return {
 				type: vscode.FileType.File,
@@ -100,7 +101,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 				size: fileItem.payload.length
 			};
 		}
-		const folderItem = this.getApiResponse().find((item) => item.path.startsWith(path + "/"));
+		const folderItem = this.getApiResponse().find((item) => item.path.startsWith(pathDecoded + "/"));
 		if (folderItem) {
 			return {
 				type: vscode.FileType.Directory,
@@ -110,16 +111,19 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			};
 		}
 
-		throw vscode.FileSystemError.FileNotFound(vscode.Uri.joinPath(this.FabricUri.uri, path));
+		// stats are also used to check existence of a file - so we should not show an error message to the user!
+		//vscode.window.showErrorMessage("FILE_NOT_FOUND - " + vscode.Uri.joinPath(this.FabricUri.uri, pathDecoded).toString());
+		throw vscode.FileSystemError.FileNotFound(vscode.Uri.joinPath(this.FabricUri.uri, pathDecoded));
 	}
 
 	public getChildrenForSubpath(path: string): [string, vscode.FileType][] | undefined {
-		const items = this.getApiResponse().filter((item) => item.path.startsWith(path + "/"));
+		const pathDecoded = decodeURIComponent(path);
+		const items = this.getApiResponse().filter((item) => item.path.startsWith(pathDecoded + "/"));
 
 		let folders: [string, vscode.FileType][] = [];
 		let files: [string, vscode.FileType][] = [];
 
-		const pathLength = path.split("/").length;
+		const pathLength = pathDecoded.split("/").length;
 		for (let item of items) {
 			const itemParts = item.path.split("/");
 			const itemLength = itemParts.length;
@@ -146,19 +150,22 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	}
 
 	public async getContentForSubpath(path: string): Promise<Uint8Array> {
-		const item = this.getApiResponse().find((item) => item.path == path);
+		const pathDecoded = decodeURIComponent(path);
+		const item = this.getApiResponse().find((item) => item.path == pathDecoded);
 		if (item) {
 			if (item.payloadType == "InlineBase64") {
 				const payloadBinary = Buffer.from(item.payload, "base64")
 				return payloadBinary;
 			}
 		}
-		vscode.window.showErrorMessage("Payload type not supported: " + item.payloadType);
-		throw vscode.FileSystemError.Unavailable("Payload type not supported: " + item.payloadType);
+
+		vscode.window.showErrorMessage("FILE_NOT_FOUND - " + vscode.Uri.joinPath(this.FabricUri.uri, pathDecoded).toString());
+		throw vscode.FileSystemError.FileNotFound(vscode.Uri.joinPath(this.FabricUri.uri, pathDecoded));
 	}
 
 	public async writeContentToSubpath(path: string, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
-		const item = this.getApiResponse().find((item) => item.path == path);
+		const pathDecoded = decodeURIComponent(path);
+		const item = this.getApiResponse().find((item) => item.path == pathDecoded);
 		if (item) {
 			if (options.overwrite) {
 				if (item.payloadType == "InlineBase64") {
@@ -178,8 +185,9 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 				return;
 			}
 		}
-		vscode.window.showErrorMessage("Payload type not supported: " + item.payloadType);
-		throw vscode.FileSystemError.Unavailable("Payload type not supported: " + item.payloadType);
+
+		vscode.window.showErrorMessage("FILE_NOT_FOUND - " + vscode.Uri.joinPath(this.FabricUri.uri, pathDecoded).toString());
+		throw vscode.FileSystemError.FileNotFound(vscode.Uri.joinPath(this.FabricUri.uri, pathDecoded));
 	}
 
 	public async getItemDefinition(): Promise<iFabricApiItemDefinition> {
@@ -203,7 +211,8 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 	public async removePart(partPath: string): Promise<void> {
 		let parts = this.getApiResponse();
-		let index = parts.findIndex((part) => part.path == partPath);
+		const partPathDecoded = decodeURIComponent(partPath);
+		let index = parts.findIndex((part) => part.path == partPathDecoded);
 		if (index >= 0) {
 			parts.splice(index, 1);
 		}
@@ -215,12 +224,13 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 	public async addPart(partPath: string): Promise<void> {
 		let parts = this.getApiResponse();
-		let index = parts.findIndex((part) => part.path == partPath);
+		const partPathDecoded = decodeURIComponent(partPath);
+		let index = parts.findIndex((part) => part.path == partPathDecoded);
 		if (index >= 0) {
-			throw vscode.FileSystemError.FileExists(partPath);
+			throw vscode.FileSystemError.FileExists(partPathDecoded);
 		}
 		else {
-			parts.push({ "path": partPath, "payloadType": "InlineBase64", "payload": "" });
+			parts.push({ "path": partPathDecoded, "payloadType": "InlineBase64", "payload": "" });
 		}
 
 		// reload children from modified API Response
@@ -230,12 +240,13 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 	public async createSubFolder(folderPath: string): Promise<void> {
 		let parts = this.getApiResponse();
-		let index = parts.findIndex((part) => part.path == folderPath);
+		const folderPathDecoded = decodeURIComponent(folderPath);
+		let index = parts.findIndex((part) => part.path == folderPathDecoded);
 		if (index >= 0) {
-			throw vscode.FileSystemError.FileExists(folderPath);
+			throw vscode.FileSystemError.FileExists(folderPathDecoded);
 		}
 		else {
-			parts.push({ "path": folderPath + "/", "payloadType": "VSCodeFolder", "payload": "" });
+			parts.push({ "path": folderPathDecoded + "/", "payloadType": "VSCodeFolder", "payload": "" });
 		}
 
 		// reload children from modified API Response
