@@ -38,6 +38,7 @@ import { PowerBIDatasetTable } from './vscode/treeviews/workspaces/PowerBIDatase
 import { PowerBIOnDropProvider } from './vscode/dropProvider/PowerBIOnDropProvider';
 import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/FabricFileSystemProvider';
 import { FabricFSCache } from './vscode/filesystemProvider/fabric/FabricFSCache';
+import { FabricFSUri } from './vscode/filesystemProvider/fabric/FabricFSUri';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -238,6 +239,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('Fabric.reloadFromFabric',
 		(uri) => FabricFSCache.reloadFromFabric(uri, true)
+	);
+
+	vscode.commands.registerCommand('Fabric.openInFabric',
+		(uri) => FabricFSUri.openInBrowser(uri)
 	);
 
 	EventHandlers.init(context);

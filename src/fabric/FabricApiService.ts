@@ -10,21 +10,44 @@ import { FabricFSCache } from '../vscode/filesystemProvider/fabric/FabricFSCache
 
 export abstract class FabricApiService {
 
+	private static _apiBaseUrl: string = "https://api.fabric.microsoft.com";
+	private static _tenantId: string;
+	private static _clientId: string;
+	private static _authenticationProvider: string;
+	private static _resourceId: string;
+
 	//#region Initialization
 	static async initialize(
 		// Default settings will be for Azure Global
-		apiBaseUrl: string = "https://api.powerbi.com/",
+		apiBaseUrl: string = "https://api.fabric.microsoft.com",
 		tenantId: string = undefined,
 		clientId: string = undefined,
-		tmdlClientId: string = undefined,
 		authenticationProvider: string = "microsoft",
 		resourceId: string = "https://analysis.windows.net/powerbi/api"
 	): Promise<boolean> {
+
+		this._tenantId = tenantId;
+		this._clientId = clientId;
+		this._authenticationProvider = authenticationProvider;
+		this._resourceId = resourceId;
 
 		FabricFSCache.initialize()
 
 		return true;
 	}
+
+	public static get TenantId(): string {
+		return this._tenantId;
+	}
+
+	public static get ClientId(): string {
+		return this._clientId;
+	}
+
+	public static get BrowserBaseUrl(): string {
+		return this._apiBaseUrl.replace("api.", "app.");
+	}
+
 	static async get<T = any>(endpoint: string, params: object = null, raiseError: boolean = false, raw: boolean = false): Promise<T> {
 		return PowerBIApiService.get<T>(endpoint, params, raiseError, raw);
 	}
@@ -139,7 +162,7 @@ export abstract class FabricApiService {
 
 	public static getFullUrl(endpoint: string, params?: object): string {
 
-		let baseItems = "https://api.fabric.microsoft.com".split("/");
+		let baseItems = this._apiBaseUrl.split("/");
 		baseItems.push("v1.0");
 		baseItems.push(PowerBIApiService.Org);
 		let pathItems = endpoint.split("/").filter(x => x);
@@ -225,28 +248,28 @@ export abstract class FabricApiService {
 	}
 
 	static async listWorkspaces(): Promise<iFabricApiWorkspace[]> {
-		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces`;
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces`;
 		return (await FabricApiService.getList<iFabricApiWorkspace>(endpoint));
 	}
 
 	static async getWorkspace(id: string): Promise<iFabricApiWorkspace> {
-		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${id}`;
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${id}`;
 		return FabricApiService.get<iFabricApiWorkspace>(endpoint);
 	}
 
 	static async listItems(workspaceId: string, itemType?: FabricApiItemType): Promise<iFabricApiItem[]> {
-		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items`;
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items`;
 		const itemTypeFilter = itemType ? {type: FabricApiItemType[itemType]} : undefined;
 		return (await FabricApiService.getList<iFabricApiItem>(endpoint, itemTypeFilter));
 	}
 
 	static async getItem(workspaceId: string, itemId: string): Promise<iFabricApiItem> {
-		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}`;
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}`;
 		return FabricApiService.get<iFabricApiItem>(endpoint);
 	}
 
 	static async getItemDefinition(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiItemDefinition> {
-		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}/getDefinition`;
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}/getDefinition`;
 		const itemFormat = format ? `?format=${format}` : '';
 
 		const result = await FabricApiService.post<iFabricApiItemDefinition>(endpoint + itemFormat, undefined);
@@ -264,7 +287,7 @@ export abstract class FabricApiService {
 	}
 
 	static async updateItemDefinition(workspaceId: string, itemId: string, itemDefinition: iFabricApiItemDefinition, progressText: string = "Publish Item"): Promise<iFabricApiResponse> {
-		const endpoint = `https://api.fabric.microsoft.com/v1/workspaces/${workspaceId}/items/${itemId}/updateDefinition`;
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}/updateDefinition`;
 
 		const result = await FabricApiService.awaitWithProgress(progressText, FabricApiService.post<any>(endpoint, itemDefinition), 3000); 
 

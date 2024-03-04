@@ -9,6 +9,7 @@ import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricFSItemType } from './FabricFSItemType';
 import { FabricFSItem } from './FabricFSItem';
 import { FabricFSRoot } from './FabricFSRoot';
+import { FabricApiService } from '../../../fabric/FabricApiService';
 
 // regex with a very basic check for valid GUIDs
 const REGEX_FABRIC_URI = /fabric:\/\/(?<workspace>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<Item>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
@@ -75,6 +76,27 @@ export class FabricFSUri {
 		return fabricUri;
 	}
 
+	static async openInBrowser(uri: vscode.Uri): Promise<void> {
+		const fabricUri = new FabricFSUri(uri);
+
+		const baseUrl = vscode.Uri.joinPath(vscode.Uri.parse(FabricApiService.BrowserBaseUrl), "groups", fabricUri.workspaceId, fabricUri.itemTypeBrowserLink, fabricUri.itemId).toString();
+
+		const tenantParam = FabricApiService.TenantId ? `?ctid=${FabricApiService.TenantId}` : "";
+		const fullLink = `${baseUrl}${tenantParam}`;
+		
+		Helper.openLink(fullLink);
+	}
+
+	private get itemTypeBrowserLink(): string {
+		switch(this.itemType) {
+			case FabricApiItemType.Notebook: return "synapsenotebooks";
+			case FabricApiItemType.SemanticModel: return "datasets";
+			case FabricApiItemType.Report: return "reports";
+			case FabricApiItemType.SparkJobDefinition: return "sparkjobdefinitions";
+			default: return this.itemTypeText.toLowerCase() + "s";
+		} 
+	}
+
 	get isValid(): boolean {
 		if(this.uriType >= FabricUriType.itemType && !this.itemType) {
 			return false;
@@ -117,6 +139,8 @@ export class FabricFSUri {
 	get itemTypeText(): string {
 		return FabricApiItemType[this.itemType];
 	}
+
+
 
 	public static addWorkspaceNameIdMap(workspaceName: string, workspaceId: string): void {
 		FabricFSUri._workspaceNameIdMap.set(workspaceName, workspaceId);

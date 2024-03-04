@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.6.2",
+	"version": "1.6.3",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -529,6 +529,12 @@
 				"title": "(Re)Load from Fabric",
 				"icon": "$(cloud-download)",
 				"category": "Fabric"
+			},
+			{
+				"command": "Fabric.openInFabric",
+				"title": "Open in Fabric",
+				"icon": "$(globe)",
+				"category": "Fabric"
 			}
 		],
 		"menus": {
@@ -802,6 +808,11 @@
 				{
 					"command": "Fabric.updateItemDefinition",
 					"when": "resourceScheme == fabric && resource =~ /^fabric:[\\/]*[^\\/]*?\\/[^\\/]*?\\/[^\\/]*?$/",
+					"group": "2_workspace"
+				},
+				{
+					"command": "Fabric.openInFabric",
+					"when": "resourceScheme == fabric && resource =~ /^fabric:(([\\/]+[^\\/]+?)?|([\\/]+[^\\/]+?){3})$/",
 					"group": "2_workspace"
 				},
 				{

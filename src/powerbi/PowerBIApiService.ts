@@ -54,7 +54,6 @@ export abstract class PowerBIApiService {
 				apiBaseUrl, 
 				tenantId,
 				clientId, 
-				tmdlClientId, 
 				authenticationProvider, 
 				resourceId
 			)
