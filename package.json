@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.6.3",
+	"version": "1.6.4",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {

@@ -5,6 +5,7 @@ import { ThisExtension } from '../../../ThisExtension';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSUri, FabricUriType } from './FabricFSUri';
 import { FabricFSItem } from './FabricFSItem';
+import { FabricFileDecorationProvider } from '../../fileDecoration/FabricFileDecorationProvider';
 
 export abstract class FabricFSCache {
 	private static _cache: Map<string, FabricFSCacheItem> = new Map<string, FabricFSCacheItem>();
@@ -81,6 +82,8 @@ export abstract class FabricFSCache {
 
 		if (fabricUri.uriType == FabricUriType.part) {
 			(item as FabricFSItem).writeContentToSubpath(fabricUri.part, content, options);
+			
+			await FabricFileDecorationProvider.fileModifed(item.FabricUri);
 
 			return;
 		}
@@ -91,6 +94,8 @@ export abstract class FabricFSCache {
 
 	public static async updateItemDefinition(resourceUri: vscode.Uri): Promise<void> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
+
+		await FabricFileDecorationProvider.fileSaved(fabricUri);
 
 		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey) as FabricFSItem;
 

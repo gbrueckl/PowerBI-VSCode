@@ -56,8 +56,6 @@ export class FabricFSUri {
 				this.uriType = paths.length + 1;
 			}
 
-			
-
 			return
 		}
 
@@ -114,6 +112,10 @@ export class FabricFSUri {
 		}
 
 		return true;
+	}
+
+	get uniqueKey(): string {
+		return this.uri.toString();
 	}
 
 	get workspaceId(): string {
@@ -192,18 +194,33 @@ export class FabricFSUri {
 		}
 	}
 
-	async getCacheItem(): Promise<FabricFSCacheItem> {
+	async getCacheItem<T = FabricFSCacheItem>(): Promise<T> {
 		switch (this.uriType) {
 			case FabricUriType.root:
-				return new FabricFSRoot(this);
+				return new FabricFSRoot(this) as T;
 			case FabricUriType.workspace:
-				return new FabricFSWorkspace(this);
+				return new FabricFSWorkspace(this) as T;
 			case FabricUriType.itemType:
-				return new FabricFSItemType(this);
+				return new FabricFSItemType(this) as T;
 			case FabricUriType.item:
-				return new FabricFSItem(this);
+				return new FabricFSItem(this) as T;
 			case FabricUriType.part:
-				return new FabricFSItem(this.fabricItemUri);
+				return new FabricFSItem(this.fabricItemUri) as T;
+		}
+	}
+
+	getCacheItemSync<T = FabricFSCacheItem>(): T {
+		switch (this.uriType) {
+			case FabricUriType.root:
+				return new FabricFSRoot(this) as T;
+			case FabricUriType.workspace:
+				return new FabricFSWorkspace(this) as T;
+			case FabricUriType.itemType:
+				return new FabricFSItemType(this) as T;
+			case FabricUriType.item:
+				return new FabricFSItem(this) as T;
+			case FabricUriType.part:
+				return new FabricFSItem(this.fabricItemUri) as T;
 		}
 	}
 

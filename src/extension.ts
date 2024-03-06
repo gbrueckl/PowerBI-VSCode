@@ -39,6 +39,7 @@ import { PowerBIOnDropProvider } from './vscode/dropProvider/PowerBIOnDropProvid
 import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/FabricFileSystemProvider';
 import { FabricFSCache } from './vscode/filesystemProvider/fabric/FabricFSCache';
 import { FabricFSUri } from './vscode/filesystemProvider/fabric/FabricFSUri';
+import { FabricFileDecorationProvider } from './vscode/fileDecoration/FabricFileDecorationProvider';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -211,6 +212,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Fabric FileSystemProvider
 	FabricFileSystemProvider.register(context);
+
+	// Fabric FileDecorationProvider
+	FabricFileDecorationProvider.register(context);
 
 	vscode.commands.registerCommand('PowerBI.TMDL.test', () => TMDLProxy.test());
 

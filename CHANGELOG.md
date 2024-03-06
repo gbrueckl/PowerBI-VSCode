@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.6.4**:
+- added custom `FileDecorationProvider` to highlight changed but unpublished files in the `fabric:/` scheme
+
 **v1.6.3**:
 - added `Open in Fabric` for `fabric:/` scheme
 
