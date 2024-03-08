@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.6.4",
+	"version": "1.6.5",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -302,13 +302,15 @@
 				"command": "PowerBIDataset.configureScaleOut",
 				"title": "Configure Scale Out",
 				"icon": "$(repo-forked)",
-				"category": "PowerBI"
+				"category": "PowerBI",
+				"enablement": "viewItem =~ /.*,CONFIGURESCALEOUT,.*/"
 			},
 			{
 				"command": "PowerBIDataset.syncReadOnlyReplicas",
 				"title": "Sync RO Replicas",
 				"icon": "$(repo-sync)",
-				"category": "PowerBI"
+				"category": "PowerBI",
+				"enablement": "viewItem =~ /.*,SYNCREADONLYREPLICAS,.*/"
 			},
 			{
 				"command": "PowerBIDatasetTable.loadColumnStatistics",
@@ -320,20 +322,22 @@
 				"command": "PowerBI.TOM.backup",
 				"title": "Backup",
 				"icon": "$(cloud-upload)",
-				"category": "PowerBI"
+				"category": "PowerBI",
+				"enablement": "viewItem =~ /.*,BACKUP,.*/"
 			},
 			{
 				"command": "PowerBI.TOM.restore",
 				"title": "Restore",
 				"icon": "$(cloud-download)",
-				"category": "PowerBI"
+				"category": "PowerBI",
+				"enablement": "viewItem =~ /.*,RESTORE,.*/"
 			},
 			{
 				"command": "PowerBIDataset.editTMDL",
 				"title": "Edit TMDL",
 				"icon": "$(edit)",
 				"category": "PowerBI",
-				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled"
+				"enablement": "!powerbi.isInBrowser && powerbi.isTMDLEnabled && viewItem =~ /.*,EDIT_TMDL,.*/"
 			},
 			{
 				"command": "PowerBI.TMDL.validate",
@@ -381,7 +385,8 @@
 				"command": "PowerBIDataset.updateAllParameters",
 				"title": "Update Parameters",
 				"icon": "$(pencil)",
-				"category": "PowerBI"
+				"category": "PowerBI",
+				"enablement": "viewItem =~ /.*,UPDATEDATASETPARAMETERS,.*/"
 			},
 			{
 				"command": "PowerBIDataset.copyConnectionString",
@@ -393,7 +398,8 @@
 				"command": "PowerBIDatasetParameter.update",
 				"title": "Update",
 				"icon": "$(pencil)",
-				"category": "PowerBI"
+				"category": "PowerBI",
+				"enablement": "viewItem =~ /.*,UPDATEDATASETPARAMETER,.*/"
 			},
 			{
 				"command": "PowerBIReport.takeOver",
@@ -648,7 +654,7 @@
 				},
 				{
 					"command": "PowerBIDataset.configureScaleOut",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,CONFIGURESCALEOUT,.*/",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/",
 					"group": "2_operations"
 				},
 				{
@@ -658,27 +664,27 @@
 				},
 				{
 					"command": "PowerBI.TOM.backup",
-					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,BACKUP,.*/",
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/",
 					"group": "2_operations"
 				},
 				{
 					"command": "PowerBI.TOM.restore",
-					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,RESTORE,.*/",
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/",
 					"group": "2_operations"
 				},
 				{
 					"command": "PowerBI.TOM.restore",
-					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,GROUP,.*/ && viewItem =~ /.*,RESTORE,.*/",
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,GROUP,.*/",
 					"group": "2_operations"
 				},
 				{
 					"command": "PowerBIDataset.editTMDL",
-					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,EDIT_TMDL,.*/",
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/",
 					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDataset.updateAllParameters",
-					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,UPDATEDATASETPARAMETERS,.*/",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/",
 					"group": "navigation"
 				},
 				{

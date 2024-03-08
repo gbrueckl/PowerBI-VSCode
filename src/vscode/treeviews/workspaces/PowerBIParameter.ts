@@ -27,11 +27,24 @@ export class PowerBIParameter extends PowerBIWorkspaceTreeItem {
 		// the parameter name is not unique hence we make it unique
 		this.id = this.dataset.uid + "/" + this.itemType.toString() + "/" + definition.name;
 		this.tooltip = this._tooltip;
+		this.contextValue = this._contextValue;
 	}
 
 	/* Overwritten properties from PowerBIApiTreeItem */
 	get definition(): iPowerBIDatasetParameter {
 		return super.definition as iPowerBIDatasetParameter;
+	}
+
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = []
+
+		if (this.dataset.definition.configuredBy == PowerBIApiService.SessionUserEmail) {
+			actions.push("UPDATEDATASETPARAMETER")
+		}
+
+		return orig + actions.join(",") + ",";
 	}
 
 	private set definition(value: iPowerBIDatasetParameter) {

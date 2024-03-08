@@ -1,5 +1,9 @@
 # Change Log
 
+**v1.6.5**:
+- changed Dataset actions from hidden to disabled if they are not available (e.g. a `TakeOver` needs to be done first)
+- fixed issue with `Update Parameter` if the user is not the Owner of the dataset
+
 **v1.6.4**:
 - added custom `FileDecorationProvider` to highlight changed but unpublished files in the `fabric:/` scheme
 
