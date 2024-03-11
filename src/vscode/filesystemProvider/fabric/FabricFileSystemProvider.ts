@@ -103,8 +103,7 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 
-		// , { uri, type: vscode.FileChangeType.Deleted }
-		this._fireSoon({ type: vscode.FileChangeType.Changed, uri: Helper.parentUri(uri) });
+		this._fireSoon({ type: vscode.FileChangeType.Changed, uri: Helper.parentUri(uri) }, { uri, type: vscode.FileChangeType.Deleted });
 	}
 
 	async fireDeleted(uri: vscode.Uri): Promise<void> {

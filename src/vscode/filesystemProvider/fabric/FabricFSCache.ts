@@ -100,11 +100,10 @@ export abstract class FabricFSCache {
 	public static async publish(resourceUri: vscode.Uri): Promise<void> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
 
-		await FabricFileDecorationProvider.uriPublished(fabricUri);
-
 		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey) as FabricFSItem;
 
 		await item.publish();
+		await FabricFileDecorationProvider.uriPublished(fabricUri);
 	}
 
 	public static async addCacheItem(fabricUri: FabricFSUri): Promise<FabricFSCacheItem> {
@@ -135,6 +134,8 @@ export abstract class FabricFSCache {
 		}else if (fabricUri.uriType == FabricUriType.item) {
 			(item as FabricFSItem).delete();
 			await FabricFileDecorationProvider.uriDeleted(fabricUri);
+
+			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", fabricUri.uri);
 
 			return;
 		}
@@ -183,7 +184,7 @@ export abstract class FabricFSCache {
 		throw vscode.FileSystemError.NoPermissions("Directory can not be created: " + fabricUri.uri.toString());
 	}
 
-	public static async reloadFromFabric(resourceUri: vscode.Uri, reloadFromFabric: boolean = true): Promise<void> {
+	public static async reloadFromFabric(resourceUri: vscode.Uri): Promise<void> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
 
 		for (let key of FabricFSCache._cache.keys()) {
@@ -192,10 +193,10 @@ export abstract class FabricFSCache {
 			}
 		}
 
-		// refresh
-		if (reloadFromFabric) {
-			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", resourceUri);
-		}
+		await FabricFileDecorationProvider.uriReloaded(fabricUri)
+
+		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", resourceUri);
+
 	}
 
 	public static addLocalItem(fabricUri: FabricFSUri): void {

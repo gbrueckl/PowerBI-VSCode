@@ -1,5 +1,10 @@
 # Change Log
 
+**v1.7.0**:
+- added support for creating items by creating a folder under the specific `Item Type`
+- improved `Publish to Fabric` to also handle `Create Item` and `Delete Item`
+- improved custom `FileDecorationProvider` to also highlight added and deleted items
+
 **v1.6.5**:
 - changed Dataset actions from hidden to disabled if they are not available (e.g. a `TakeOver` needs to be done first)
 - fixed issue with `Update Parameter` if the user is not the Owner of the dataset

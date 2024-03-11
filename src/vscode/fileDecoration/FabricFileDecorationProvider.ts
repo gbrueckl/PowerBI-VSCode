@@ -2,12 +2,11 @@ import * as vscode from 'vscode';
 import { FABRIC_SCHEME } from '../filesystemProvider/fabric/FabricFileSystemProvider';
 import { FabricFSUri, FabricUriType } from '../filesystemProvider/fabric/FabricFSUri';
 import { FabricFSItem } from '../filesystemProvider/fabric/FabricFSItem';
+import { FabricFSPublishAction } from '../filesystemProvider/fabric/_types';
 
 
 export class FabricFileDecorationProvider implements vscode.FileDecorationProvider {
-	private static _addedUris: string[] = [];
-	private static _modifiedUris: string[] = [];
-	private static _deletedUris: string[] = [];
+	private static _decoratedUris: Map<string, FabricFSPublishAction> = new Map<string, FabricFSPublishAction>();
 	public static provider: FabricFileDecorationProvider;
 
 	protected _onDidChangeFileDecorations = new vscode.EventEmitter<vscode.Uri[]>();
@@ -18,28 +17,23 @@ export class FabricFileDecorationProvider implements vscode.FileDecorationProvid
 		context.subscriptions.push(vscode.window.registerFileDecorationProvider(fdp));
 
 		FabricFileDecorationProvider.provider = fdp;
+		FabricFileDecorationProvider._decoratedUris = new Map<string, FabricFSPublishAction>();
 	}
 
 	public static async uriAdded(fabricUri: FabricFSUri): Promise<void> {
-		if (!FabricFileDecorationProvider._addedUris.includes(fabricUri.uniqueKey)) {
-			FabricFileDecorationProvider._addedUris.push(fabricUri.uniqueKey);
-		}
+		this._decoratedUris.set(fabricUri.uniqueKey, FabricFSPublishAction.CREATE);
 
 		FabricFileDecorationProvider.provider._onDidChangeFileDecorations.fire([fabricUri.uri]);
 	}
 
 	public static async uriModifed(fabricUri: FabricFSUri): Promise<void> {
-		if (!FabricFileDecorationProvider._modifiedUris.includes(fabricUri.uniqueKey)) {
-			FabricFileDecorationProvider._modifiedUris.push(fabricUri.uniqueKey);
-		}
+		this._decoratedUris.set(fabricUri.uniqueKey, FabricFSPublishAction.UPDATE);
 
 		FabricFileDecorationProvider.provider._onDidChangeFileDecorations.fire([fabricUri.uri]);
 	}
 
 	public static async uriDeleted(fabricUri: FabricFSUri): Promise<void> {
-		if (!FabricFileDecorationProvider._deletedUris.includes(fabricUri.uniqueKey)) {
-			FabricFileDecorationProvider._deletedUris.push(fabricUri.uniqueKey);
-		}
+		this._decoratedUris.set(fabricUri.uniqueKey, FabricFSPublishAction.DELETE);
 
 		FabricFileDecorationProvider.provider._onDidChangeFileDecorations.fire([fabricUri.uri]);
 	}
@@ -48,29 +42,25 @@ export class FabricFileDecorationProvider implements vscode.FileDecorationProvid
 		let ret: boolean = false;
 		let index: number = undefined;
 
-		index = FabricFileDecorationProvider._modifiedUris.indexOf(fabricUri.uniqueKey, 0);
-		if (index > -1) {
-			FabricFileDecorationProvider._modifiedUris.splice(index, 1);
-			ret = true;
-		}
+		ret = this._decoratedUris.delete(fabricUri.uniqueKey);
 
-		index = FabricFileDecorationProvider._addedUris.indexOf(fabricUri.uniqueKey, 0);
-		if (index > -1) {
-			FabricFileDecorationProvider._addedUris.splice(index, 1);
-			ret = true;
-		}
-
-		index = FabricFileDecorationProvider._deletedUris.indexOf(fabricUri.uniqueKey, 0);
-		if (index > -1) {
-			FabricFileDecorationProvider._deletedUris.splice(index, 1);
-			ret = true;
-		}
-
-		if(ret)
-		{
+		if (ret) {
 			FabricFileDecorationProvider.provider._onDidChangeFileDecorations.fire([fabricUri.uri]);
 		}
 		return ret;
+	}
+
+	public static async uriReloaded(fabricUri: FabricFSUri): Promise<void> {
+		let reloadedUris: vscode.Uri[] = [];
+
+		for (let [key, action] of FabricFileDecorationProvider._decoratedUris.entries()) {
+			if (key.startsWith(fabricUri.uniqueKey)) {
+				FabricFileDecorationProvider._decoratedUris.delete(key)
+				reloadedUris.push(vscode.Uri.parse(key));
+			}
+		}
+
+		FabricFileDecorationProvider.provider._onDidChangeFileDecorations.fire(reloadedUris);
 	}
 
 	public provideFileDecoration(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<vscode.FileDecoration> {
@@ -84,17 +74,18 @@ export class FabricFileDecorationProvider implements vscode.FileDecorationProvid
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 
-		if (fabricUri.uriType === FabricUriType.item && FabricFileDecorationProvider._addedUris.includes(fabricUri.uniqueKey)) {
-			const item = fabricUri.getCacheItemSync<FabricFSItem>();
-			return new vscode.FileDecoration("A", "Added", new vscode.ThemeColor("gitDecoration.addedResourceForeground"));
-		}
-		if (fabricUri.uriType === FabricUriType.item && FabricFileDecorationProvider._deletedUris.includes(fabricUri.uniqueKey)) {
-			const item = fabricUri.getCacheItemSync<FabricFSItem>();
-			return new vscode.FileDecoration("D", "Deleted", new vscode.ThemeColor("gitDecoration.deletedResourceForeground"));
-		}
-		if (fabricUri.uriType === FabricUriType.item && FabricFileDecorationProvider._modifiedUris.includes(fabricUri.uniqueKey)) {
-			const item = fabricUri.getCacheItemSync<FabricFSItem>();
-			return new vscode.FileDecoration("U", "Unpublished", new vscode.ThemeColor("gitDecoration.modifiedResourceForeground"));
+		if (fabricUri.uriType === FabricUriType.item) {
+			const item = FabricFileDecorationProvider._decoratedUris.get(fabricUri.uniqueKey);
+			if (item != undefined) {
+				switch (item) {
+					case FabricFSPublishAction.CREATE:
+						return new vscode.FileDecoration("A", "Added", new vscode.ThemeColor("gitDecoration.addedResourceForeground"));
+					case FabricFSPublishAction.UPDATE:
+						return new vscode.FileDecoration("U", "Unpublished", new vscode.ThemeColor("gitDecoration.modifiedResourceForeground"));
+					case FabricFSPublishAction.DELETE:
+						return new vscode.FileDecoration("D", "Deleted", new vscode.ThemeColor("gitDecoration.deletedResourceForeground"));
+				}
+			}
 		}
 		return undefined;
 	}

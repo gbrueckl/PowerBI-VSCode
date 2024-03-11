@@ -238,11 +238,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// new commands for Fabric FileSystemProvider
 	vscode.commands.registerCommand('Fabric.publishToFabric',
-		FabricFSCache.publish
+		(uri) => FabricFSCache.publish(uri)
 	);
 
 	vscode.commands.registerCommand('Fabric.reloadFromFabric',
-		(uri) => FabricFSCache.reloadFromFabric(uri, true)
+		(uri) => FabricFSCache.reloadFromFabric(uri)
 	);
 
 	vscode.commands.registerCommand('Fabric.openInFabric',
