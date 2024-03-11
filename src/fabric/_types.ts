@@ -53,10 +53,10 @@ export interface iFabricApiWorkspace {
 // https://learn.microsoft.com/en-us/rest/api/fabric/core/items/get-item?tabs=HTTP#item
 export interface iFabricApiItem {
 	displayName: string;
-	description: string;
+	description?: string;
 	type: FabricApiItemType;
 	workspaceId: string;
-	id: string;
+	id?: string;
 }
 
 export type FabricApiPayloadTypes = "InlineBase64" | "VSCodeFolder";

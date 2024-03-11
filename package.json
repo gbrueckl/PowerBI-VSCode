@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.6.5",
+	"version": "1.6.6",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -90,7 +90,7 @@
 					"powerbi.Fabric.fileFormats": {
 						"type": "object",
 						"default": {},
-						"markdownDescription": "(Optional) The different file formats used when downloading notebooks from Microsoft Fabric.",
+						"markdownDescription": "(Optional) The different file formats used when downloading notebooks from Microsoft Fabric. Can be configured for each [ItemType](https://learn.microsoft.com/en-us/rest/api/fabric/core/items/list-items?tabs=HTTP#itemtype) individually.",
 						"scope": "window",
 						"properties": {
 							"Notebook": {
@@ -525,14 +525,14 @@
 				"category": "PowerBI"
 			},
 			{
-				"command": "Fabric.updateItemDefinition",
+				"command": "Fabric.publishToFabric",
 				"title": "Publish to Fabric",
 				"icon": "$(cloud-upload)",
 				"category": "Fabric"
 			},
 			{
 				"command": "Fabric.reloadFromFabric",
-				"title": "(Re)Load from Fabric",
+				"title": "Reload from Fabric",
 				"icon": "$(cloud-download)",
 				"category": "Fabric"
 			},
@@ -812,7 +812,7 @@
 					"group": "2_workspace"
 				},
 				{
-					"command": "Fabric.updateItemDefinition",
+					"command": "Fabric.publishToFabric",
 					"when": "resourceScheme == fabric && resource =~ /^fabric:[\\/]*[^\\/]*?\\/[^\\/]*?\\/[^\\/]*?$/",
 					"group": "2_workspace"
 				},

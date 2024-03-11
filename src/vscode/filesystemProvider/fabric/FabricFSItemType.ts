@@ -4,8 +4,11 @@ import { FabricFSUri } from './FabricFSUri';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
-import { FabricApiItemType } from '../../../fabric/_types';
-import { FABRIC_FS_ITEM_TYPES } from './_types';
+import { FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition } from '../../../fabric/_types';
+import { FABRIC_FS_ITEM_TYPES, FabricFSPublishAction } from './_types';
+import { FabricFSCache } from './FabricFSCache';
+import { Helper } from '../../../helpers/Helper';
+import { FabricFSItem } from './FabricFSItem';
 
 export class FabricFSItemType extends FabricFSCacheItem {
 	constructor(uri: FabricFSUri) {
@@ -39,6 +42,21 @@ export class FabricFSItemType extends FabricFSCacheItem {
 				FabricFSUri.addItemNameIdMap(`${item.workspaceId}/${item.type}/${item.displayName}`, item.id);
 				this._children.push([item.displayName, vscode.FileType.Directory]);
 			}
+		}
+	}
+
+	public async createItem(name: string): Promise<void> {
+		if (!this._children.includes([name, vscode.FileType.Directory])) {
+			this._children.push([name, vscode.FileType.Directory]);
+
+			const fabricUri = await FabricFSUri.getInstance(vscode.Uri.joinPath(this._uri.uri, name), true)
+			await FabricFSCache.addLocalItem(fabricUri);
+
+			let newItem = await FabricFSCache.addCacheItem(fabricUri) as FabricFSItem;
+
+			newItem.initializeEmpty([]);
+			newItem.displayName = name;
+			newItem.publishAction = FabricFSPublishAction.CREATE;
 		}
 	}
 }

@@ -96,30 +96,32 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 			await FabricFSCache.delete(fabricUri);
 		}
 		else if(fabricUri.uriType == FabricUriType.item) {
-			// TODO
-			throw vscode.FileSystemError.FileNotFound(uri);
+			await FabricFSCache.delete(fabricUri);
 		}
 		else {
 			// we only support renaming of Items or Itemparts
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 
-		
-		this._fireSoon({ type: vscode.FileChangeType.Changed, uri: Helper.parentUri(uri) }, { uri, type: vscode.FileChangeType.Deleted });
+		// , { uri, type: vscode.FileChangeType.Deleted }
+		this._fireSoon({ type: vscode.FileChangeType.Changed, uri: Helper.parentUri(uri) });
+	}
+
+	async fireDeleted(uri: vscode.Uri): Promise<void> {
+		this._fireSoon({ type: vscode.FileChangeType.Deleted, uri });
 	}
 
 	async createDirectory(uri: vscode.Uri): Promise<void> {
-		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(uri);
+		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(uri, true);
 
 		if(fabricUri.uriType == FabricUriType.part) {
 			await FabricFSCache.createDirectory(fabricUri);
 		}
 		else if(fabricUri.uriType == FabricUriType.item) {
-			// TODO
-			throw vscode.FileSystemError.FileNotFound(uri);
+			await FabricFSCache.createDirectory(fabricUri);
 		}
 		else {
-			// we only support renaming of Items or Itemparts
+			// we only support creation of Items or Itemparts
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 		

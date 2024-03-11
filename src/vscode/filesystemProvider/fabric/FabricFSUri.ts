@@ -10,6 +10,7 @@ import { FabricFSItemType } from './FabricFSItemType';
 import { FabricFSItem } from './FabricFSItem';
 import { FabricFSRoot } from './FabricFSRoot';
 import { FabricApiService } from '../../../fabric/FabricApiService';
+import { FabricFSCache } from './FabricFSCache';
 
 // regex with a very basic check for valid GUIDs
 const REGEX_FABRIC_URI = /fabric:\/\/(?<workspace>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<Item>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
@@ -25,7 +26,7 @@ export enum FabricUriType {
 export class FabricFSUri {
 	private static _workspaceNameIdMap: Map<string, string> = new Map<string, string>();
 	private static _itemNameIdMap: Map<string, string> = new Map<string, string>();
-	
+
 
 	uri: vscode.Uri;
 	workspace?: string;
@@ -49,7 +50,7 @@ export class FabricFSUri {
 			this.item = paths[2];
 			this.part = paths.slice(3).join("/");
 
-			if(paths.length >= 5){
+			if (paths.length >= 5) {
 				this.uriType = FabricUriType.part;
 			}
 			else {
@@ -64,10 +65,10 @@ export class FabricFSUri {
 		throw vscode.FileSystemError.Unavailable("Invalid Fabric URI!");
 	}
 
-	static async getInstance(uri: vscode.Uri): Promise<FabricFSUri> {
+	static async getInstance(uri: vscode.Uri, create: boolean = false): Promise<FabricFSUri> {
 		const fabricUri = new FabricFSUri(uri);
 
-		if(!fabricUri.isValid) {
+		if (!fabricUri.isValid && !create) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 
@@ -81,33 +82,37 @@ export class FabricFSUri {
 
 		const tenantParam = FabricApiService.TenantId ? `?ctid=${FabricApiService.TenantId}` : "";
 		const fullLink = `${baseUrl}${tenantParam}`;
-		
+
 		Helper.openLink(fullLink);
 	}
 
 	private get itemTypeBrowserLink(): string {
-		switch(this.itemType) {
+		switch (this.itemType) {
 			case FabricApiItemType.Notebook: return "synapsenotebooks";
 			case FabricApiItemType.SemanticModel: return "datasets";
 			case FabricApiItemType.Report: return "reports";
 			case FabricApiItemType.SparkJobDefinition: return "sparkjobdefinitions";
-			default: return this.itemTypeText.toLowerCase() + "s";
-		} 
+			default:
+				vscode.window.showWarningMessage(`No Browser Link specified for Item Type '${this.itemType}'!`);
+				return this.itemTypeText.toLowerCase() + "s";
+		}
 	}
 
 	get isValid(): boolean {
-		if(this.uriType >= FabricUriType.itemType && !this.itemType) {
+		if (this.uriType >= FabricUriType.itemType && !this.itemType) {
 			return false;
+		}
+
+		if(FabricFSCache.hasCacheItem(this)) {
+			return true;
 		}
 
 		// VSCode always checks for files in the root of the URI
 		// as we can only have workspace IDs (GUIDs) or names from our NameIdMap, we can throw a FileNotFound error for all other files in the root
-		if(this.workspace && !Helper.isGuid(this.workspace) && !FabricFSUri._workspaceNameIdMap.has(this.workspaceMapName))
-		{
+		if (this.workspace && !Helper.isGuid(this.workspace) && !FabricFSUri._workspaceNameIdMap.has(this.workspaceMapName)) {
 			return false;
 		}
-		if(this.item && !Helper.isGuid(this.item) && !FabricFSUri._itemNameIdMap.has(this.itemMapName))
-		{
+		if (this.item && !Helper.isGuid(this.item) && !FabricFSUri._itemNameIdMap.has(this.itemMapName) && !FabricFSCache.hasLocalItem(this)) {
 			return false;
 		}
 
@@ -119,7 +124,7 @@ export class FabricFSUri {
 	}
 
 	get workspaceId(): string {
-		if(Helper.isGuid(this.workspace)) return this.workspace;
+		if (Helper.isGuid(this.workspace)) return this.workspace;
 
 		return FabricFSUri._workspaceNameIdMap.get(this.workspaceMapName);
 	}
@@ -133,7 +138,7 @@ export class FabricFSUri {
 	}
 
 	get itemId(): string {
-		if(Helper.isGuid(this.item)) return this.item;
+		if (Helper.isGuid(this.item)) return this.item;
 
 		return FabricFSUri._itemNameIdMap.get(this.itemMapName);
 	}
@@ -142,6 +147,9 @@ export class FabricFSUri {
 		return FabricApiItemType[this.itemType];
 	}
 
+	async getParent(): Promise<FabricFSUri> {
+		return await FabricFSUri.getInstance(Helper.parentUri(this.uri));
+	}
 
 
 	public static addWorkspaceNameIdMap(workspaceName: string, workspaceId: string): void {
@@ -151,7 +159,7 @@ export class FabricFSUri {
 	public static addItemNameIdMap(itemName: string, itemId: string): void {
 		FabricFSUri._itemNameIdMap.set(itemName, itemId);
 	}
-	
+
 	private constructor_regex(uri: vscode.Uri) {
 		let match: RegExpExecArray;
 
@@ -225,8 +233,7 @@ export class FabricFSUri {
 	}
 
 	get cacheItemKey(): string {
-		if(this.uriType == FabricUriType.part)
-		{
+		if (this.uriType == FabricUriType.part) {
 			return this.fabricItemUri.cacheItemKey;
 		}
 		return this.uri.toString().replace("//", "/");

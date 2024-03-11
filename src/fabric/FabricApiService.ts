@@ -56,9 +56,8 @@ export abstract class FabricApiService {
 		let response = await PowerBIApiService.get<iFabricListResponse<T>>(endpoint, params, raiseError, false);
 
 		let ret: T[] = response[listProperty];
-		
-		while(response.continuationUri)
-		{
+
+		while (response.continuationUri) {
 			ret = ret.concat(response[listProperty]);
 			response = await PowerBIApiService.get<iFabricListResponse<T>>(response.continuationUri, undefined, raiseError, false);
 		}
@@ -228,11 +227,11 @@ export abstract class FabricApiService {
 			ThisExtension.log(message + " took " + duration + "ms!");
 
 			let resultMessage = `SUCCEEDED after ${Math.round(duration / 1000)}s!`;
-			if(result.error) {
+			if (result.error) {
 				resultMessage = `FAILED after ${Math.round(duration / 1000)}s!`;
 				vscode.window.showErrorMessage(JSON.stringify(result.error));
 			}
-			progress.report({ increment: 100, message: resultMessage});
+			progress.report({ increment: 100, message: resultMessage });
 			ret = result;
 
 			const p = await new Promise<void>(resolve => {
@@ -259,7 +258,7 @@ export abstract class FabricApiService {
 
 	static async listItems(workspaceId: string, itemType?: FabricApiItemType): Promise<iFabricApiItem[]> {
 		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items`;
-		const itemTypeFilter = itemType ? {type: FabricApiItemType[itemType]} : undefined;
+		const itemTypeFilter = itemType ? { type: FabricApiItemType[itemType] } : undefined;
 		return (await FabricApiService.getList<iFabricApiItem>(endpoint, itemTypeFilter));
 	}
 
@@ -286,10 +285,31 @@ export abstract class FabricApiService {
 		return (await FabricApiService.getItemDefinition(workspaceId, itemId, format)).definition.parts;
 	}
 
-	static async updateItemDefinition(workspaceId: string, itemId: string, itemDefinition: iFabricApiItemDefinition, progressText: string = "Publish Item"): Promise<iFabricApiResponse> {
+	static async updateItemDefinition(workspaceId: string, itemId: string, itemDefinition: iFabricApiItemDefinition, progressText: string = "Creating Item"): Promise<iFabricApiResponse> {
 		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}/updateDefinition`;
 
-		const result = await FabricApiService.awaitWithProgress(progressText, FabricApiService.post<any>(endpoint, itemDefinition), 3000); 
+		const result = await FabricApiService.awaitWithProgress(progressText, FabricApiService.post<any>(endpoint, itemDefinition), 3000);
+
+		return result;
+	}
+
+	static async createItem(workspaceId: string, name: string, type: FabricApiItemType, definition?: iFabricApiItemDefinition, progressText: string = "Publishing Item"): Promise<iFabricApiResponse> {
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items`;
+
+		const body = Object.assign({}, {
+			displayName: name,
+			type: FabricApiItemType[type]
+		}, definition)
+
+		const result = await FabricApiService.awaitWithProgress(progressText, FabricApiService.post<any>(endpoint, body), 3000);
+
+		return result;
+	}
+
+	static async deleteItem(workspaceId: string, itemId: string, progressText: string = "Deleting Item"): Promise<iFabricApiResponse> {
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}`;
+
+		const result = await FabricApiService.awaitWithProgress(progressText, FabricApiService.delete<any>(endpoint, undefined), 3000);
 
 		return result;
 	}

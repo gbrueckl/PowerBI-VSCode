@@ -6,6 +6,12 @@ export type LoadingState =
 	| "loaded"	// for server only, if only a specific database has been loaded yet
 ;
 
+export enum FabricFSPublishAction {
+	"CREATE"		// create the object
+	, "UPDATE"		// update the object
+	, "DELETE"		// delete the object
+};
+
 // constant list of Fabric Item Types that support GetDefinition and will be shown in the workspace
 export const FABRIC_FS_ITEM_TYPES = [
 	FabricApiItemType.Notebook
@@ -13,4 +19,6 @@ export const FABRIC_FS_ITEM_TYPES = [
 	, FabricApiItemType.Report
 	, FabricApiItemType.SparkJobDefinition
 ]
+
+export const FABRIC_FS_ITEM_TYPE_NAMES = FABRIC_FS_ITEM_TYPES.map((itemType) => FabricApiItemType[itemType]);
 

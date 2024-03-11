@@ -32,6 +32,7 @@ The extension supports the following VSCode settings:
 |`powerbi.cloud`|(Optional) Only use when you want to connect to a sovereign or governmental cloud!|GlobalCloud|
 |`powerbi.TMDL.clientId`|(Optional) To use **TMDL features**, a custom ClientID/Application can be used. You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permitted in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details. If this is configured, VSCode will manage the authentication and also remember it!|A GUID, `058487e5-bde7-4aba-a5dc-2f9ac58cb668`|
 |`powerbi.TMDL.enabled`|Set to `true` (default) to allow editing Power BI datasets using TMDL.|`true`(default)/`false`|
+|`powerbi.Fabric.fileFormats`|(Optional) Can be used to specify different file formats in which Fabric items are downloaded|`"Notebook": "ipynb"` ([docs](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/notebook-definition#supported-formats))|
 
 # Notebooks
 You can open a new Power BI notebook via the UI from the header of each treeview or by running the command **Open new PowerBI Notebook** (command `PowerBI.openNewNotebook`). Power BI notebooks have the file extension `.pbinb` and will automatically open in the notebook editor.
@@ -149,7 +150,8 @@ The extension also provides an easy way to interact with all items hosted in Mic
 }
 ```
 
-Once this is set up, you can browse your Fabric items as if they were local. In fact we use the API to download them and cache them locally in memory for you. You can also modify the files and publish them back to Fabric by right-clicking on the Item-folder (e.g the Dataset, the Report, ...) and select `Publish`.
+Once this is set up, you can browse your Fabric items as if they were local. In fact we use the API to download them and cache them locally in memory for you. You can also modify the files and publish them back to Fabric by right-clicking on the Item-folder (e.g the Dataset, the Report, the Notebook, ...) and select `Publish to Fabric`. Fabric items that have been modified locally and have not yet been published will show up in yellow with a `U` badge at the end (similar to GIT) indicating unpublished changes.
+To undo your local changes or force the reload of content from Fabric (e.g. if you changed/created a new item in the Fabric UI), you can use `Reload from Fabric`.
 
 # TMDL
 

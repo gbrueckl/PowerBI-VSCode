@@ -101,6 +101,11 @@ export abstract class PowerBIConfiguration {
 	static get tmdlEnabled(): boolean { return this.getValue("TMDL.enabled"); }
 	static set tmdlEnabled(value: boolean) { this.setValue("TMDL.enabled", value); }
 
+	// key must be a string value from FabricApiItemType
+	static get fabricFileFormats(): { [key: string]: FabricApiItemFormat } { 
+		return this.getValue("Fabric.fileFormats"); 
+	}
+
 	static get apiUrl(): string { return CLOUD_CONFIGS[this.cloud].apiEndpoint; }
 
 	static get authenticationProvider(): string { return CLOUD_CONFIGS[this.cloud].authenticationProvider; }
@@ -108,11 +113,6 @@ export abstract class PowerBIConfiguration {
 	static get authenticationEndpoint(): string { return CLOUD_CONFIGS[this.cloud].authenticationEndpoint; }
 
 	static get resourceId(): string { return CLOUD_CONFIGS[this.cloud].resourceId; }
-
-	// key must be a string value from FabricApiItemType
-	static get fabricFileFormats(): { [key: string]: FabricApiItemFormat } { 
-		return this.getValue("Fabric.fileFormats"); 
-	}
 
 	static get isSovereignCloud(): boolean {
 		// If the base URL for the API is not pointed to api.powerbi.com assume 

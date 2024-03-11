@@ -8,6 +8,7 @@ import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
+import { FabricFSPublishAction } from './_types';
 
 export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	id: string;
@@ -32,7 +33,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	get format(): FabricApiItemFormat | undefined {
 		if (!this._format) {
 			const configuredFormats = PowerBIConfiguration.fabricFileFormats;
-			this._format = configuredFormats[FabricApiItemType[this.FabricUri.itemType]];
+			this._format = configuredFormats[this.FabricUri.itemTypeText];
 		}
 		return this._format;
 	}
@@ -44,7 +45,8 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	public async loadStatsFromApi<T>(): Promise<void> {
 		const apiItem = await FabricApiService.getItem(this.FabricUri.workspaceId, this.FabricUri.itemId);
 
-		if (apiItem) {
+		// we might get an error response so we  also need to check for the id
+		if (apiItem && apiItem.id) {
 			this.id = apiItem.id;
 			this.displayName = apiItem.displayName;
 			this.description = apiItem.description;
@@ -73,7 +75,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			let folders: [string, vscode.FileType][] = [];
 			let files: [string, vscode.FileType][] = [];
 
-			for (let item of this._apiResponse) {
+			for (let item of this.getApiResponse()) {
 				const partParts = item.path.split("/");
 				if (partParts.length == 1) {
 					let fileName = item.path;
@@ -195,18 +197,29 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 		parts = parts.filter((part) => part.payloadType != "VSCodeFolder");
 
-		let definition = { "definition": { "parts": parts } };
+		let definition = { "parts": parts };
 
 		if (this.format) {
 			definition["format"] = this.format;
 		}
 
-		return definition;
+		return { "definition": definition };
 	}
 
-	public async updateItemDefinition(): Promise<void> {
+	public async publish(): Promise<void> {
 		let definition = await this.getItemDefinition();
-		const error = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Publish ${this.displayName}`);
+		// if the item was created locally, we need to use CREATE instead of UPDATE
+		if (this.publishAction == FabricFSPublishAction.CREATE) {
+			const error = await FabricApiService.createItem(this.workspaceId, this.displayName, this.FabricUri.itemType, definition, `Creating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+			this.publishAction = FabricFSPublishAction.UPDATE;
+		}
+		else if (this.publishAction == FabricFSPublishAction.UPDATE) {
+			const error = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Updating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+		}
+		else if (this.publishAction == FabricFSPublishAction.DELETE) {
+			const error = await FabricApiService.deleteItem(this.workspaceId, this.itemId, `Deleting ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+			ThisExtension.FabricFileSystemProvider.fireDeleted(this.FabricUri.uri);
+		}
 	}
 
 	public async removePart(partPath: string): Promise<void> {
@@ -252,5 +265,9 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		// reload children from modified API Response
 		this._children = undefined;
 		await this.loadChildrenFromApi();
+	}
+
+	public async delete(): Promise<void> {
+		this.publishAction = FabricFSPublishAction.DELETE;
 	}
 }

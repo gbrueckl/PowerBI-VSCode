@@ -158,6 +158,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		PowerBIApiService.post(apiUrl, null);
 		ThisExtension.setStatusBarRight("Dataset taken over!");
 
+		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 

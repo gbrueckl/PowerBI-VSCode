@@ -6,6 +6,8 @@ import { FabricFSUri, FabricUriType } from './FabricFSUri';
 import { Helper } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { FabricApiService } from '../../../fabric/FabricApiService';
+import { FabricFSCache } from './FabricFSCache';
+import { FabricFSPublishAction } from './_types';
 
 export class FabricFSCacheItem {
 	
@@ -16,11 +18,28 @@ export class FabricFSCacheItem {
 	protected _children: [string, vscode.FileType][] | undefined;
 	protected _content: Uint8Array | undefined;
 	protected _apiResponse: any;
+	protected _isLocalOnly: boolean = false;
+	protected _publishAction: FabricFSPublishAction
 
 	constructor(uri: FabricFSUri) {
 		this._uri = uri;
 		this._loadingStateStats = "not_loaded";
 		this._loadingStateChildren = "not_loaded";
+	}
+
+	public initializeEmpty(apiResponse: any = undefined): void {
+		this._loadingStateStats = "loaded";
+		this._stats = {
+			type: vscode.FileType.Directory,
+			ctime: undefined,
+			mtime: undefined,
+			size: undefined
+		};
+
+		this._loadingStateChildren = "loaded";
+		this._children = [];
+
+		this._apiResponse = apiResponse;
 	}
 
 	get UriType(): FabricUriType {
@@ -34,7 +53,7 @@ export class FabricFSCacheItem {
 	get uri(): vscode.Uri {
 		return this.FabricUri.uri;
 	}
-	
+
 	getApiResponse<T>(): T {
 		return this._apiResponse as T;
 	}
@@ -53,6 +72,14 @@ export class FabricFSCacheItem {
 
 	set loadingStateChildren(value: LoadingState) {
 		this._loadingStateChildren = value;
+	}
+
+	get publishAction(): FabricFSPublishAction {
+		return this._publishAction;
+	}
+
+	set publishAction(value: FabricFSPublishAction) {
+		this._publishAction = value;
 	}
 
 	public async stats(): Promise<vscode.FileStat | undefined> {

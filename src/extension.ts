@@ -237,8 +237,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	);
 
 	// new commands for Fabric FileSystemProvider
-	vscode.commands.registerCommand('Fabric.updateItemDefinition',
-		FabricFSCache.updateItemDefinition
+	vscode.commands.registerCommand('Fabric.publishToFabric',
+		FabricFSCache.publish
 	);
 
 	vscode.commands.registerCommand('Fabric.reloadFromFabric',
