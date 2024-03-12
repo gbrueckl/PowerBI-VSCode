@@ -50,7 +50,7 @@ export class FabricFSItemType extends FabricFSCacheItem {
 			this._children.push([name, vscode.FileType.Directory]);
 
 			const fabricUri = await FabricFSUri.getInstance(vscode.Uri.joinPath(this._uri.uri, name), true)
-			await FabricFSCache.addLocalItem(fabricUri);
+			FabricFSCache.localItemAdded(fabricUri);
 
 			let newItem = await FabricFSCache.addCacheItem(fabricUri) as FabricFSItem;
 

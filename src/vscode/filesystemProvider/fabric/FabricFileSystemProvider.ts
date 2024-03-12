@@ -82,7 +82,7 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 		}
 		else {
 			// we only support renaming of Items or Itemparts
-			throw vscode.FileSystemError.FileNotFound(oldUri);
+			throw vscode.FileSystemError.FileNotFound("Rename is currently not supported!");
 		}
 
 		this._fireSoon({ type: vscode.FileChangeType.Changed, uri: Helper.parentUri(oldUri) }, { type: vscode.FileChangeType.Deleted, uri: oldUri });

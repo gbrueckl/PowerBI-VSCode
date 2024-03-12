@@ -14,7 +14,7 @@ The extensions can be installed directly from within VSCode by searching for thi
 # Features
 - GUI to browse your workspace and run operations like [rebind](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/rebind-report-in-group), [clone](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/clone-report-in-group), ...
 - Modify Power BI datasets using **TMDL** - see [TMDL](#tmdl)
-- Microsoft Fabric integration - see [Microsoft Fabric](#microsoft-fabric)
+- Microsoft Fabric integration - see [Microsoft Fabric](#microsoft-fabric) (Preview)
 - Supports VSCode and [vscode.dev](https://vscode.dev)
 - Connect to remote tenants where you are invited as a guest user - see [Configuration](#configuration)
 - Run DAX queries in a notebook against your Power BI Datasets using `%dax` magic
@@ -150,8 +150,15 @@ The extension also provides an easy way to interact with all items hosted in Mic
 }
 ```
 
-Once this is set up, you can browse your Fabric items as if they were local. In fact we use the API to download them and cache them locally in memory for you. You can also modify the files and publish them back to Fabric by right-clicking on the Item-folder (e.g the Dataset, the Report, the Notebook, ...) and select `Publish to Fabric`. Fabric items that have been modified locally and have not yet been published will show up in yellow with a `U` badge at the end (similar to GIT) indicating unpublished changes.
-To undo your local changes or force the reload of content from Fabric (e.g. if you changed/created a new item in the Fabric UI), you can use `Reload from Fabric`.
+Once this is set up, you can browse your Fabric items as if they were local. In fact we use the API to download them and cache them locally in memory for you. You can also add, modify or delete the whole Fabric items or its files. Locally changed files will be displayed similar to changed items in GIT:
+
+- green with `A` badge -> Added
+- yellow with `M` badge -> Modified
+- red with `D` badge -> Deleted
+
+To publish your local changes back to Fabric, right-clicking on the Item-folder (e.g the Dataset, the Report, the Notebook, ...) and select `Publish to Fabric`.
+
+To undo your local changes or force the reload of content from Fabric (e.g. if you changed/created a new item in the Fabric UI), you can use `Reload from Fabric` from the context menu.
 
 # TMDL
 

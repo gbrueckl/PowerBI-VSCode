@@ -112,7 +112,7 @@ export class FabricFSUri {
 		if (this.workspace && !Helper.isGuid(this.workspace) && !FabricFSUri._workspaceNameIdMap.has(this.workspaceMapName)) {
 			return false;
 		}
-		if (this.item && !Helper.isGuid(this.item) && !FabricFSUri._itemNameIdMap.has(this.itemMapName) && !FabricFSCache.hasLocalItem(this)) {
+		if (this.item && !Helper.isGuid(this.item) && !FabricFSUri._itemNameIdMap.has(this.itemMapName) && !FabricFSCache.getLocalChanges(this)) {
 			return false;
 		}
 

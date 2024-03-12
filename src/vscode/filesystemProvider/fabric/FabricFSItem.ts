@@ -211,9 +211,9 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		// if the item was created locally, we need to use CREATE instead of UPDATE
 		if (this.publishAction == FabricFSPublishAction.CREATE) {
 			const error = await FabricApiService.createItem(this.workspaceId, this.displayName, this.FabricUri.itemType, definition, `Creating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
-			this.publishAction = FabricFSPublishAction.UPDATE;
+			this.publishAction = FabricFSPublishAction.MODIFIED;
 		}
-		else if (this.publishAction == FabricFSPublishAction.UPDATE) {
+		else if (this.publishAction == FabricFSPublishAction.MODIFIED) {
 			const error = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Updating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
 		}
 		else if (this.publishAction == FabricFSPublishAction.DELETE) {

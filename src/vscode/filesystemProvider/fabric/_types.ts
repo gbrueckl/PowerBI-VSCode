@@ -7,9 +7,9 @@ export type LoadingState =
 ;
 
 export enum FabricFSPublishAction {
-	"CREATE"		// create the object
-	, "UPDATE"		// update the object
-	, "DELETE"		// delete the object
+	"CREATE" = 10		// create the object
+	, "MODIFIED" = 20		// update the object
+	, "DELETE" = 30		// delete the object
 };
 
 // constant list of Fabric Item Types that support GetDefinition and will be shown in the workspace

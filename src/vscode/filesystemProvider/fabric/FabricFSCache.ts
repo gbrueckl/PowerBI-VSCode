@@ -5,11 +5,12 @@ import { ThisExtension } from '../../../ThisExtension';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSUri, FabricUriType } from './FabricFSUri';
 import { FabricFSItem } from './FabricFSItem';
-import { FabricFileDecorationProvider } from '../../fileDecoration/FabricFileDecorationProvider';
-import { FABRIC_FS_ITEM_TYPE_NAMES } from './_types';
+import { FabricFSFileDecorationProvider } from '../../fileDecoration/FabricFileDecorationProvider';
+import { FABRIC_FS_ITEM_TYPE_NAMES, FabricFSPublishAction } from './_types';
 import { FabricFSItemType } from './FabricFSItemType';
 
 export abstract class FabricFSCache {
+	private static _localChanges: Map<string, FabricFSPublishAction> = new Map<string, FabricFSPublishAction>();
 	private static _localItems: string[] = [];
 	private static _cache: Map<string, FabricFSCacheItem> = new Map<string, FabricFSCacheItem>();
 
@@ -88,7 +89,7 @@ export abstract class FabricFSCache {
 		if (fabricUri.uriType == FabricUriType.part) {
 			(item as FabricFSItem).writeContentToSubpath(fabricUri.part, content, options);
 
-			await FabricFileDecorationProvider.uriModifed(item.FabricUri);
+			FabricFSCache.localItemModified(item.FabricUri);
 
 			return;
 		}
@@ -97,13 +98,15 @@ export abstract class FabricFSCache {
 		throw vscode.FileSystemError.Unavailable("Could not read File: " + fabricUri.uri.toString());
 	}
 
-	public static async publish(resourceUri: vscode.Uri): Promise<void> {
+	public static async publishToFabric(resourceUri: vscode.Uri): Promise<void> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
 
 		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey) as FabricFSItem;
 
 		await item.publish();
-		await FabricFileDecorationProvider.uriPublished(fabricUri);
+		FabricFSCache.localItemPublished(fabricUri);
+
+		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", fabricUri.uri);
 	}
 
 	public static async addCacheItem(fabricUri: FabricFSUri): Promise<FabricFSCacheItem> {
@@ -133,7 +136,7 @@ export abstract class FabricFSCache {
 			return;
 		}else if (fabricUri.uriType == FabricUriType.item) {
 			(item as FabricFSItem).delete();
-			await FabricFileDecorationProvider.uriDeleted(fabricUri);
+			FabricFSCache.localItemDeleted(fabricUri);
 
 			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", fabricUri.uri);
 
@@ -151,7 +154,7 @@ export abstract class FabricFSCache {
 				let itemType = FabricFSCache._cache.get((await fabricUri.getParent()).cacheItemKey) as FabricFSItemType;
 
 				await itemType.createItem(decodeURIComponent(fabricUri.item));
-				await FabricFileDecorationProvider.uriAdded(fabricUri);
+				FabricFSCache.localItemAdded(fabricUri);
 
 				return;
 			}
@@ -193,26 +196,57 @@ export abstract class FabricFSCache {
 			}
 		}
 
-		await FabricFileDecorationProvider.uriReloaded(fabricUri)
+		FabricFSCache.localItemReloaded(fabricUri);
 
 		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", resourceUri);
 
 	}
 
-	public static addLocalItem(fabricUri: FabricFSUri): void {
-		if (!FabricFSCache._localItems.includes(fabricUri.cacheItemKey)) {
-			FabricFSCache._localItems.push(fabricUri.cacheItemKey);
-		}
+	//#region Local Changes - for FileDecorationProvider
+	public static localItemAdded(fabricUri: FabricFSUri): void {
+		FabricFSCache._localChanges.set(fabricUri.uniqueKey, FabricFSPublishAction.CREATE);
+
+		FabricFSFileDecorationProvider.updateFileDecoration([fabricUri.uri]);
 	}
 
-	public static removeLocalItem(fabricUri: FabricFSUri): void {
-		const index = FabricFSCache._localItems.indexOf(fabricUri.cacheItemKey, 0);
-		if (index > -1) {
-			FabricFSCache._localItems.splice(index, 1);
-		}
+	public static localItemModified(fabricUri: FabricFSUri): void {
+		FabricFSCache._localChanges.set(fabricUri.uniqueKey, FabricFSPublishAction.MODIFIED);
+
+		FabricFSFileDecorationProvider.updateFileDecoration([fabricUri.uri]);
 	}
 
-	public static hasLocalItem(fabricUri: FabricFSUri): boolean {
-		return FabricFSCache._localItems.includes(fabricUri.cacheItemKey);
+	public static localItemDeleted(fabricUri: FabricFSUri): void {
+		FabricFSCache._localChanges.set(fabricUri.uniqueKey, FabricFSPublishAction.DELETE);
+
+		FabricFSFileDecorationProvider.updateFileDecoration([fabricUri.uri]);
 	}
+
+	public static localItemPublished(fabricUri: FabricFSUri): boolean {
+		let ret: boolean = false;
+
+		ret = FabricFSCache._localChanges.delete(fabricUri.uniqueKey);
+
+		if (ret) {
+			FabricFSFileDecorationProvider.updateFileDecoration([fabricUri.uri]);
+		}
+		return ret;
+	}
+
+	public static localItemReloaded(fabricUri: FabricFSUri): void {
+		let reloadedUris: vscode.Uri[] = [];
+
+		for (let [key, action] of FabricFSCache._localChanges.entries()) {
+			if (key.startsWith(fabricUri.uniqueKey)) {
+				FabricFSCache._localChanges.delete(key)
+				reloadedUris.push(vscode.Uri.parse(key));
+			}
+		}
+
+		FabricFSFileDecorationProvider.updateFileDecoration(reloadedUris);
+	}
+
+	public static getLocalChanges(fabricUri: FabricFSUri): FabricFSPublishAction {
+		return FabricFSCache._localChanges.get(fabricUri.uniqueKey);
+	}
+	//#endregion
 }
