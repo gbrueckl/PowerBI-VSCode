@@ -30,10 +30,9 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		return this.FabricUri.itemId;
 	}
 
-	get format(): FabricApiItemFormat | undefined {
+	get format(): FabricApiItemFormat {
 		if (!this._format) {
-			const configuredFormats = PowerBIConfiguration.fabricFileFormats;
-			this._format = configuredFormats[this.FabricUri.itemTypeText];
+			this._format = PowerBIConfiguration.getFabricItemTypeformat(this.FabricUri.itemType);
 		}
 		return this._format;
 	}
@@ -51,6 +50,8 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			this.displayName = apiItem.displayName;
 			this.description = apiItem.description;
 			this.type = apiItem.type;
+
+			this.publishAction = FabricFSPublishAction.MODIFIED;
 
 			this._stats = {
 				type: vscode.FileType.Directory,
@@ -199,7 +200,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 		let definition = { "parts": parts };
 
-		if (this.format) {
+		if (this.format && this.format != FabricApiItemFormat.DEFAULT) {
 			definition["format"] = this.format;
 		}
 

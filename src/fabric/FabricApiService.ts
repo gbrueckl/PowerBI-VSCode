@@ -269,7 +269,7 @@ export abstract class FabricApiService {
 
 	static async getItemDefinition(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiItemDefinition> {
 		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}/getDefinition`;
-		const itemFormat = format ? `?format=${format}` : '';
+		const itemFormat = format && format != FabricApiItemFormat.DEFAULT ? `?format=${format}` : '';
 
 		const result = await FabricApiService.post<iFabricApiItemDefinition>(endpoint + itemFormat, undefined);
 

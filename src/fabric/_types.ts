@@ -36,7 +36,8 @@ export enum FabricApiWorkspaceType {
 };
 
 export enum FabricApiItemFormat {
-	Notebook = "ipynb"
+	DEFAULT = "DEFAULT"
+	, Notebook = "ipynb"
 	, SparkJobDefinitionV1 = "SparkJobDefinitionV1"
 }
 

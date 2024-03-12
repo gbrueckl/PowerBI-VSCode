@@ -1,4 +1,5 @@
 import { FabricApiItemType } from "../../../fabric/_types";
+import { PowerBIConfiguration } from "../../configuration/PowerBIConfiguration";
 
 export type LoadingState =
 	"not_loaded" // not loaded yet
@@ -11,14 +12,3 @@ export enum FabricFSPublishAction {
 	, "MODIFIED" = 20		// update the object
 	, "DELETE" = 30		// delete the object
 };
-
-// constant list of Fabric Item Types that support GetDefinition and will be shown in the workspace
-export const FABRIC_FS_ITEM_TYPES = [
-	FabricApiItemType.Notebook
-	, FabricApiItemType.SemanticModel
-	, FabricApiItemType.Report
-	, FabricApiItemType.SparkJobDefinition
-]
-
-export const FABRIC_FS_ITEM_TYPE_NAMES = FABRIC_FS_ITEM_TYPES.map((itemType) => FabricApiItemType[itemType]);
-

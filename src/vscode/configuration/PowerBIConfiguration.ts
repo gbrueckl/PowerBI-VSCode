@@ -102,8 +102,34 @@ export abstract class PowerBIConfiguration {
 	static set tmdlEnabled(value: boolean) { this.setValue("TMDL.enabled", value); }
 
 	// key must be a string value from FabricApiItemType
-	static get fabricFileFormats(): { [key: string]: FabricApiItemFormat } { 
-		return this.getValue("Fabric.fileFormats"); 
+	static get fabricItemTypes(): { itemType: FabricApiItemType, format: FabricApiItemFormat }[] { 
+		let confValues = this.getValue("Fabric.itemTypes") as { itemType: string, format: string }[];
+		
+		let typedValues = confValues.map((item) => {
+			return { 
+				itemType: FabricApiItemType[item.itemType], // strict cast as the list of itemTypes is static
+				format: item.format as FabricApiItemFormat // loose cast as the list of formats may change
+			};
+		});
+
+		return typedValues;
+	}
+
+	static get fabricItemTypeNames(): string[] {
+		return this.fabricItemTypes.map((itemType) => FabricApiItemType[itemType.itemType]);
+	}
+
+	static get fabricItemTypeKeys(): FabricApiItemType[] {
+		return this.fabricItemTypes.map((itemType) => itemType.itemType);
+	}
+
+	static getFabricItemTypeformat(itemType: FabricApiItemType): FabricApiItemFormat {
+		const item = this.fabricItemTypes.find((item) => item.itemType == itemType);
+		if(!item || !item.format)
+		{
+			return FabricApiItemFormat.DEFAULT;
+		}
+		return item.format;
 	}
 
 	static get apiUrl(): string { return CLOUD_CONFIGS[this.cloud].apiEndpoint; }

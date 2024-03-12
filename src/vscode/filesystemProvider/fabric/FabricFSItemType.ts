@@ -2,13 +2,12 @@ import * as vscode from 'vscode';
 
 import { FabricFSUri } from './FabricFSUri';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
-import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
-import { FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition } from '../../../fabric/_types';
-import { FABRIC_FS_ITEM_TYPES, FabricFSPublishAction } from './_types';
+import { FabricApiItemType } from '../../../fabric/_types';
+import { FabricFSPublishAction } from './_types';
 import { FabricFSCache } from './FabricFSCache';
-import { Helper } from '../../../helpers/Helper';
 import { FabricFSItem } from './FabricFSItem';
+import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 
 export class FabricFSItemType extends FabricFSCacheItem {
 	constructor(uri: FabricFSUri) {
@@ -20,7 +19,7 @@ export class FabricFSItemType extends FabricFSCacheItem {
 	}
 
 	public async loadStatsFromApi<T>(): Promise<void> {
-		if (FABRIC_FS_ITEM_TYPES.includes(this.itemType)) {
+		if (PowerBIConfiguration.fabricItemTypeKeys.includes(this.itemType)) {
 			this._stats = {
 				type: vscode.FileType.Directory,
 				ctime: undefined,

@@ -1,5 +1,9 @@
 # Change Log
 
+**v1.7.1**:
+- added configuration `powerbi.Fabric.itemTypes` to control which Fabric Items are downloaded with an optional format
+- fixed an issue with publishing of modified items
+
 **v1.7.0**:
 - added support for creating items by creating a folder under the specific `Item Type`
 - improved `Publish to Fabric` to also handle `Create Item` and `Delete Item`

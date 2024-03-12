@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.7.0",
+	"version": "1.7.1",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -87,20 +87,39 @@
 						"markdownDescription": "Set to true to allow editing Power BI datasets using TMDL.",
 						"default": true
 					},
-					"powerbi.Fabric.fileFormats": {
-						"type": "object",
-						"default": {},
-						"markdownDescription": "(Optional) The different file formats used when downloading notebooks from Microsoft Fabric. Can be configured for each [ItemType](https://learn.microsoft.com/en-us/rest/api/fabric/core/items/list-items?tabs=HTTP#itemtype) individually.",
+					"powerbi.Fabric.itemTypes": {
+						"type": "array",
+						"markdownDescription": "(Optional) A list of [Fabric Item Types](https://learn.microsoft.com/en-us/rest/api/fabric/core/items/list-items?tabs=HTTP#itemtype) with an optional [Format](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/notebook-definition#supported-formats) as list of objects.",
 						"scope": "window",
-						"properties": {
-							"Notebook": {
-								"type": "string",
-								"enum": [
-									"ipynb"
-								],
-								"description": "The file extension used when downloading Notebooks."
+						"items": {
+							"type": "object",
+							"properties": {
+								"itemType": {
+									"type": "string",
+									"markdownDescription": "The ItemType to configure the file format for.",
+									"required": true
+								},
+								"format": {
+									"type": "string",
+									"markdownDescription": "The file extension used when downloading the specified ItemType.",
+									"required": false
+								}
 							}
-						}
+						},
+						"default": [
+							{
+								"itemType": "Notebook"
+							},
+							{
+								"itemType": "Report"
+							},
+							{
+								"itemType": "SemanticModel"
+							},
+							{
+								"itemType": "SparkJobDefinition"
+							}
+						]
 					},
 					"powerbi.cloud": {
 						"type": "string",

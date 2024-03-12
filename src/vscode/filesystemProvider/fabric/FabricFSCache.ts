@@ -6,8 +6,9 @@ import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSUri, FabricUriType } from './FabricFSUri';
 import { FabricFSItem } from './FabricFSItem';
 import { FabricFSFileDecorationProvider } from '../../fileDecoration/FabricFileDecorationProvider';
-import { FABRIC_FS_ITEM_TYPE_NAMES, FabricFSPublishAction } from './_types';
+import { FabricFSPublishAction } from './_types';
 import { FabricFSItemType } from './FabricFSItemType';
+import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 
 export abstract class FabricFSCache {
 	private static _localChanges: Map<string, FabricFSPublishAction> = new Map<string, FabricFSPublishAction>();
@@ -166,7 +167,7 @@ export abstract class FabricFSCache {
 
 				const newItemType = newFolderName.split(".").pop();
 
-				if (!FABRIC_FS_ITEM_TYPE_NAMES.includes(newItemType)) {
+				if (!PowerBIConfiguration.fabricItemTypeNames.includes(newItemType)) {
 					(item as FabricFSItem).createSubFolder(newItemType);
 
 					return;
