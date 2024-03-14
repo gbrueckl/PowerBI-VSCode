@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.7.2**:
+- removed Table name and square brackets from DAX query results in notebooks
+
 **v1.7.1**:
 - added configuration `powerbi.Fabric.itemTypes` to control which Fabric Items are downloaded with an optional format
 - fixed an issue with publishing of modified items

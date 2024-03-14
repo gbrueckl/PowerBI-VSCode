@@ -189,7 +189,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 		let linesWithoutComments = lines.filter(l => !l.trim().startsWith("#") && !l.trim().startsWith("//") && !l.trim().startsWith("--/"));
 		let commandTextClean = linesWithoutComments.join("\n");
 
-		for(let variable in context.variables){
+		for (let variable in context.variables) {
 			commandTextClean = commandTextClean.replace(new RegExp(`\\$\\(${variable}\\)`, "gi"), context.variables[variable]);
 		}
 
@@ -350,8 +350,21 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					return;
 				}
 				if (result.results) {
+					let rows = result.results[0].tables[0].rows;
+
+					// remove table name and square brackets from final result
+					for (let row of rows) {
+						for (const old_key of Object.keys(row)) {
+							const new_key = old_key.replace(/.*?\[(.*?)\]/, "$1")
+							if (old_key !== new_key) {
+								Object.defineProperty(row, new_key,
+									Object.getOwnPropertyDescriptor(row, old_key));
+								delete row[old_key];
+							}
+						}
+					}
 					let output: vscode.NotebookCellOutput = new vscode.NotebookCellOutput([
-						vscode.NotebookCellOutputItem.json(result.results[0].tables[0].rows, 'application/json'), // to be used by proper JSON/table renderers
+						vscode.NotebookCellOutputItem.json(rows, 'application/json'), // to be used by proper JSON/table renderers
 						vscode.NotebookCellOutputItem.json(result.results, 'application/powerbi-results') // the original result from databricks including schema and datatypes for more advanced renderers
 					])
 
