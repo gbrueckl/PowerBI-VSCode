@@ -60,7 +60,7 @@ export interface iFabricApiItem {
 	id?: string;
 }
 
-export type FabricApiPayloadTypes = "InlineBase64" | "VSCodeFolder";
+export type FabricApiPayloadType = "InlineBase64" | "VSCodeFolder";
 
 export interface iFabricListResponse<T> {
 	value: T[];
@@ -70,7 +70,7 @@ export interface iFabricListResponse<T> {
 export interface iFabricApiItemPart {
 	path: string;
 	payload: string;
-	payloadType: FabricApiPayloadTypes;
+	payloadType: FabricApiPayloadType;
 }
 
 export interface iFabricApiItemDefinition {

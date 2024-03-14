@@ -3,12 +3,13 @@ import * as vscode from 'vscode';
 
 import { FabricFSUri } from './FabricFSUri';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
-import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart } from '../../../fabric/_types';
+import { FabricApiItemFormat, FabricApiItemType, FabricApiPayloadType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart } from '../../../fabric/_types';
 import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 import { FabricFSPublishAction } from './_types';
+import { FabricFSItemType } from './FabricFSItemType';
 
 export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	id: string;
@@ -35,6 +36,10 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			this._format = PowerBIConfiguration.getFabricItemTypeformat(this.FabricUri.itemType);
 		}
 		return this._format;
+	}
+
+	get parent(): FabricFSItemType {
+		return super.parent as FabricFSItemType;
 	}
 
 	getApiResponse<T = iFabricApiItemPart[]>(): T {
@@ -215,7 +220,8 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			this.publishAction = FabricFSPublishAction.MODIFIED;
 		}
 		else if (this.publishAction == FabricFSPublishAction.MODIFIED) {
-			const error = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Updating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+			const error1 = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Updating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+			const error2 = await FabricApiService.updateItem(this.workspaceId, this.itemId, this.displayName, this.description);
 		}
 		else if (this.publishAction == FabricFSPublishAction.DELETE) {
 			const error = await FabricApiService.deleteItem(this.workspaceId, this.itemId, `Deleting ${this.FabricUri.itemTypeText} '${this.displayName}'`);
@@ -236,7 +242,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		await this.loadChildrenFromApi();
 	}
 
-	public async addPart(partPath: string): Promise<void> {
+	public async addPart(partPath: string, payload: string = "", payloadType: FabricApiPayloadType = "InlineBase64"): Promise<void> {
 		let parts = this.getApiResponse();
 		const partPathDecoded = decodeURIComponent(partPath);
 		let index = parts.findIndex((part) => part.path == partPathDecoded);
@@ -244,12 +250,25 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			throw vscode.FileSystemError.FileExists(partPathDecoded);
 		}
 		else {
-			parts.push({ "path": partPathDecoded, "payloadType": "InlineBase64", "payload": "" });
+			parts.push({ "path": partPathDecoded, "payloadType": payloadType, "payload": payload });
 		}
 
 		// reload children from modified API Response
 		this._children = undefined;
 		await this.loadChildrenFromApi();
+	}
+
+	public async getPart(partPath: string): Promise<iFabricApiItemPart> {
+		let parts = this.getApiResponse();
+		const partPathDecoded = decodeURIComponent(partPath);
+		const part = parts.find((part) => part.path == partPathDecoded);
+		if (part) {
+			return part;
+		}
+		else {
+			vscode.window.showErrorMessage("FILE_NOT_FOUND - FabricFSItem.getPart()" + vscode.Uri.joinPath(this.FabricUri.uri, partPathDecoded).toString());
+			throw vscode.FileSystemError.FileNotFound(vscode.Uri.joinPath(this.FabricUri.uri, partPathDecoded));
+		}
 	}
 
 	public async createSubFolder(folderPath: string): Promise<void> {

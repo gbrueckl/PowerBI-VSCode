@@ -293,6 +293,19 @@ export abstract class FabricApiService {
 		return result;
 	}
 
+	static async updateItem(workspaceId: string, itemId: string, newName: string, newDescription: string): Promise<iFabricApiResponse> {
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}`;
+
+		const body = {
+			displayName: newName,
+			description: newDescription
+		};
+
+		const result = FabricApiService.patch<any>(endpoint, body);
+
+		return result;
+	}
+
 	static async createItem(workspaceId: string, name: string, type: FabricApiItemType, definition?: iFabricApiItemDefinition, progressText: string = "Publishing Item"): Promise<iFabricApiResponse> {
 		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items`;
 

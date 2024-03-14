@@ -11,6 +11,10 @@ export class FabricFSRoot extends FabricFSCacheItem {
 		super(uri);
 	}
 
+	get parent(): FabricFSRoot {
+		return undefined;
+	}
+
 	public async loadStatsFromApi<T>(): Promise<void> {
 		this._stats = {
 			type: vscode.FileType.Directory,

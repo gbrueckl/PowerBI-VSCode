@@ -65,10 +65,10 @@ export class FabricFSUri {
 		throw vscode.FileSystemError.Unavailable("Invalid Fabric URI!");
 	}
 
-	static async getInstance(uri: vscode.Uri, create: boolean = false): Promise<FabricFSUri> {
+	static async getInstance(uri: vscode.Uri, skipValidation: boolean = false): Promise<FabricFSUri> {
 		const fabricUri = new FabricFSUri(uri);
 
-		if (!fabricUri.isValid && !create) {
+		if (!fabricUri.isValid && !skipValidation) {
 			throw vscode.FileSystemError.FileNotFound(uri);
 		}
 

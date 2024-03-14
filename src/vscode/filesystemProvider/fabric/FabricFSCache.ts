@@ -21,7 +21,6 @@ export abstract class FabricFSCache {
 		}
 		else {
 			FabricFSCache._cache = new Map<string, FabricFSCacheItem>();
-			
 		}
 		FabricFSCache._localItems = [];
 	}
@@ -32,7 +31,7 @@ export abstract class FabricFSCache {
 			throw vscode.FileSystemError.FileNotFound(fabricUri.uri);
 		}
 
-		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
+		let item = FabricFSCache.getCacheItem(fabricUri);
 		if (!item) {
 			item = await FabricFSCache.addCacheItem(fabricUri);
 		}
@@ -55,7 +54,7 @@ export abstract class FabricFSCache {
 			throw vscode.FileSystemError.FileNotFound(fabricUri.uri);
 		}
 
-		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
+		let item = FabricFSCache.getCacheItem(fabricUri);
 		if (!item) {
 			item = await FabricFSCache.addCacheItem(fabricUri);
 		}
@@ -68,7 +67,7 @@ export abstract class FabricFSCache {
 	}
 
 	public static async readFile(fabricUri: FabricFSUri): Promise<Uint8Array> {
-		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
+		let item = FabricFSCache.getCacheItem(fabricUri);
 		if (!item) {
 			item = await FabricFSCache.addCacheItem(fabricUri);
 		}
@@ -82,7 +81,7 @@ export abstract class FabricFSCache {
 	}
 
 	public static async writeFile(fabricUri: FabricFSUri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
-		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
+		let item = FabricFSCache.getCacheItem(fabricUri);
 		if (!item) {
 			item = await FabricFSCache.addCacheItem(fabricUri);
 		}
@@ -102,7 +101,7 @@ export abstract class FabricFSCache {
 	public static async publishToFabric(resourceUri: vscode.Uri): Promise<void> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
 
-		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey) as FabricFSItem;
+		let item = FabricFSCache.getCacheItem(fabricUri) as FabricFSItem;
 
 		await item.publish();
 		FabricFSCache.localItemPublished(fabricUri);
@@ -110,23 +109,30 @@ export abstract class FabricFSCache {
 		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", fabricUri.uri);
 	}
 
-	public static async addCacheItem(fabricUri: FabricFSUri): Promise<FabricFSCacheItem> {
-		let item = await fabricUri.getCacheItem();
-		FabricFSCache._cache.set(fabricUri.cacheItemKey, item);
+	public static async addCacheItem(fabricUri: FabricFSUri, cacheItem: FabricFSCacheItem = undefined): Promise<FabricFSCacheItem> {
+		if(!cacheItem) {
+			cacheItem = await fabricUri.getCacheItem();
+		}
+		FabricFSCache._cache.set(fabricUri.cacheItemKey, cacheItem);
 
-		return item;
+		return cacheItem;
 	}
 
 	private static removeCacheItem(item: FabricFSCacheItem): boolean {
 		return FabricFSCache._cache.delete(item.FabricUri.cacheItemKey);
 	}
 
+	public static getCacheItem(fabricUri: FabricFSUri): FabricFSCacheItem {
+		return FabricFSCache._cache.get(fabricUri.cacheItemKey);
+	}
+
+
 	public static hasCacheItem(item: FabricFSUri): boolean {
 		return FabricFSCache._cache.has(item.cacheItemKey);
 	}
 
 	public static async delete(fabricUri: FabricFSUri): Promise<void> {
-		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
+		let item = FabricFSCache.getCacheItem(fabricUri);
 		if (!item) {
 			throw vscode.FileSystemError.FileNotFound(fabricUri.uri);
 		}
@@ -135,7 +141,7 @@ export abstract class FabricFSCache {
 			(item as FabricFSItem).removePart(fabricUri.part);
 
 			return;
-		}else if (fabricUri.uriType == FabricUriType.item) {
+		} else if (fabricUri.uriType == FabricUriType.item) {
 			(item as FabricFSItem).delete();
 			FabricFSCache.localItemDeleted(fabricUri);
 
@@ -144,15 +150,59 @@ export abstract class FabricFSCache {
 			return;
 		}
 
-		vscode.window.showErrorMessage("Could not read File: " + fabricUri.uri.toString());
-		throw vscode.FileSystemError.Unavailable("Could not read File: " + fabricUri.uri.toString());
+		vscode.window.showErrorMessage("Could not delete File: " + fabricUri.uri.toString());
+		throw vscode.FileSystemError.Unavailable("Could not delete File: " + fabricUri.uri.toString());
+	}
+
+	public static async rename(oldFabricUri: FabricFSUri, newFabricUri: FabricFSUri): Promise<void> {
+		let oldItem = FabricFSCache.getCacheItem(oldFabricUri);
+		if (!oldItem) {
+			throw vscode.FileSystemError.FileNotFound(oldFabricUri.uri);
+		}
+
+		let newItem = FabricFSCache.getCacheItem(newFabricUri);
+		if (!newItem) {
+			newItem = await FabricFSCache.addCacheItem(newFabricUri);
+		}
+
+		if (oldFabricUri.uriType == FabricUriType.part && newFabricUri.uriType == FabricUriType.part) {
+			// check if the target file already exists
+			const newPart = await (newItem as FabricFSItem).getPart(newFabricUri.part);
+			if(newPart) {
+				throw vscode.FileSystemError.FileExists(newFabricUri.uri);
+			}
+
+			let part = await (oldItem as FabricFSItem).getPart(oldFabricUri.part);
+			(oldItem as FabricFSItem).removePart(oldFabricUri.part);
+
+			(newItem as FabricFSItem).addPart(newFabricUri.part, part.payload, part.payloadType);
+
+			return;
+		}
+		else if (oldFabricUri.uriType == FabricUriType.item && newFabricUri.uriType == FabricUriType.item) {
+			// update parent child list
+			(oldItem as FabricFSItem).parent.removeChild(decodeURIComponent(oldFabricUri.item));
+			(newItem as FabricFSItem).parent.addChild(decodeURIComponent(newFabricUri.item), vscode.FileType.Directory);
+
+			FabricFSUri.addItemNameIdMap(decodeURIComponent(newFabricUri.item), oldFabricUri.itemId);
+
+			(oldItem as FabricFSItem).displayName = decodeURIComponent(newFabricUri.item);
+			FabricFSCache.addCacheItem(newFabricUri, oldItem)
+
+			FabricFSCache.localItemModified(newFabricUri);
+
+			return;
+		}
+
+		vscode.window.showErrorMessage("Could not rename File: " + oldFabricUri.uri.toString());
+		throw vscode.FileSystemError.Unavailable("Could not rename File: " + oldFabricUri.uri.toString());
 	}
 
 	public static async createDirectory(fabricUri: FabricFSUri): Promise<void> {
-		let item = FabricFSCache._cache.get(fabricUri.cacheItemKey);
+		let item = FabricFSCache.getCacheItem(fabricUri);
 		if (!item) {
 			if (fabricUri.uriType == FabricUriType.item) {
-				let itemType = FabricFSCache._cache.get((await fabricUri.getParent()).cacheItemKey) as FabricFSItemType;
+				let itemType = FabricFSCache.getCacheItem((await fabricUri.getParent())) as FabricFSItemType;
 
 				await itemType.createItem(decodeURIComponent(fabricUri.item));
 				FabricFSCache.localItemAdded(fabricUri);

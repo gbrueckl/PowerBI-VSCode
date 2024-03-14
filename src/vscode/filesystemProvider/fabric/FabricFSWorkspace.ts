@@ -5,6 +5,7 @@ import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSUri } from './FabricFSUri';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
+import { FabricFSRoot } from './FabricFSRoot';
 
 export class FabricFSWorkspace extends FabricFSCacheItem implements iFabricApiWorkspace {
 	id: string;
@@ -16,6 +17,10 @@ export class FabricFSWorkspace extends FabricFSCacheItem implements iFabricApiWo
 
 	constructor(uri: FabricFSUri) {
 		super(uri);
+	}
+
+	get parent(): FabricFSRoot {
+		return super.parent as FabricFSRoot;
 	}
 
 	public async loadStatsFromApi<T>(): Promise<void> {

@@ -8,6 +8,7 @@ import { FabricFSPublishAction } from './_types';
 import { FabricFSCache } from './FabricFSCache';
 import { FabricFSItem } from './FabricFSItem';
 import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
+import { FabricFSWorkspace } from './FabricFSWorkspace';
 
 export class FabricFSItemType extends FabricFSCacheItem {
 	constructor(uri: FabricFSUri) {
@@ -16,6 +17,10 @@ export class FabricFSItemType extends FabricFSCacheItem {
 
 	get itemType(): FabricApiItemType {
 		return this.FabricUri.itemType;
+	}
+
+	get parent(): FabricFSWorkspace {
+		return super.parent as FabricFSWorkspace;
 	}
 
 	public async loadStatsFromApi<T>(): Promise<void> {

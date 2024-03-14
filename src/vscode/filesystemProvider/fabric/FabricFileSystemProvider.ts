@@ -72,13 +72,13 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 	async rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean }): Promise<void> {
 		// rename is also called when moving files within the fabric scheme!
 		const oldFabricUri: FabricFSUri = await FabricFSUri.getInstance(oldUri);
-		const newFabricUri: FabricFSUri = await FabricFSUri.getInstance(newUri);
+		const newFabricUri: FabricFSUri = await FabricFSUri.getInstance(newUri, true);
 
 		if(oldFabricUri.uriType == FabricUriType.item) {
-			
+			await FabricFSCache.rename(oldFabricUri, newFabricUri);
 		}
 		else if(oldFabricUri.uriType == FabricUriType.part) {
-
+			await FabricFSCache.rename(oldFabricUri, newFabricUri);
 		}
 		else {
 			// we only support renaming of Items or Itemparts

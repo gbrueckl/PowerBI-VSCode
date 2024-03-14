@@ -20,6 +20,7 @@ export class FabricFSCacheItem {
 	protected _apiResponse: any;
 	protected _isLocalOnly: boolean = false;
 	protected _publishAction: FabricFSPublishAction
+	protected _parent: FabricFSCacheItem;
 
 	constructor(uri: FabricFSUri) {
 		this._uri = uri;
@@ -82,6 +83,10 @@ export class FabricFSCacheItem {
 		this._publishAction = value;
 	}
 
+	get parent(): FabricFSCacheItem {
+		return FabricFSCache.getCacheItem(new FabricFSUri(Helper.parentUri(this.uri)));
+	}
+
 	public async stats(): Promise<vscode.FileStat | undefined> {
 		if (this.loadingStateStats == "not_loaded") {
 			this.loadingStateStats = "loading";
@@ -142,5 +147,18 @@ export class FabricFSCacheItem {
 
 	public async loadStatsFromApi<T>(): Promise<void> {
 		
+	}
+
+	public addChild(name: string, type: vscode.FileType): void {
+		if (!this._children) {
+			this._children = [];
+		}
+		this._children.push([name, type]);
+	}
+
+	public removeChild(name: string): void {
+		if (this._children) {
+			this._children = this._children.filter((value) => value[0] != name);
+		}
 	}
 }
