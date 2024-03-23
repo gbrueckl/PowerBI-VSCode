@@ -26,10 +26,10 @@ export class FabricFSRoot extends FabricFSCacheItem {
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
-			const apiItems = await FabricApiService.listWorkspaces();
-			this._apiResponse = apiItems;
+			const response = await FabricApiService.listWorkspaces();
+			this._apiResponse = response.success;
 			this._children = [];
-			for (let apiItem of apiItems) {
+			for (let apiItem of this._apiResponse) {
 				FabricFSUri.addWorkspaceNameIdMap(apiItem.displayName, apiItem.id);
 				this._children.push([apiItem.displayName, vscode.FileType.Directory]);
 			}

@@ -39,10 +39,10 @@ export class FabricFSItemType extends FabricFSCacheItem {
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
-			const apiItems = await FabricApiService.listItems(this.FabricUri.workspaceId, this.FabricUri.itemType);
-			this._apiResponse = apiItems;
+			const response = await FabricApiService.listItems(this.FabricUri.workspaceId, this.FabricUri.itemType);
+			this._apiResponse = response.success;
 			this._children = [];
-			for (let item of apiItems) {
+			for (let item of this._apiResponse) {
 				FabricFSUri.addItemNameIdMap(`${item.workspaceId}/${item.type}/${item.displayName}`, item.id);
 				this._children.push([item.displayName, vscode.FileType.Directory]);
 			}

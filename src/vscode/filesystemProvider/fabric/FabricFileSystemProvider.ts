@@ -107,7 +107,7 @@ export class FabricFileSystemProvider implements vscode.FileSystemProvider, vsco
 	}
 
 	async fireDeleted(uri: vscode.Uri): Promise<void> {
-		this._fireSoon({ type: vscode.FileChangeType.Deleted, uri });
+		this._fireSoon({ type: vscode.FileChangeType.Changed, uri: Helper.parentUri(uri) }, { uri, type: vscode.FileChangeType.Deleted });
 	}
 
 	async createDirectory(uri: vscode.Uri): Promise<void> {

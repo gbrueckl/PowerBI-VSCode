@@ -24,22 +24,25 @@ export class FabricFSWorkspace extends FabricFSCacheItem implements iFabricApiWo
 	}
 
 	public async loadStatsFromApi<T>(): Promise<void> {
-		const apiItem = await FabricApiService.getWorkspace(this.FabricUri.workspaceId);
+		const response = await FabricApiService.getWorkspace(this.FabricUri.workspaceId);
 
-		if(apiItem) {	
-			this.id = apiItem.id;
-			this.displayName = apiItem.displayName;
-			this.description = apiItem.description;
-			this.type = apiItem.type;
-			this.capacityId = apiItem.capacityId;
-			this.capacityAssignmentProgress = apiItem.capacityAssignmentProgress;
+		if (response.success) {
+			const apiItem = response.success;
+			if (apiItem) {
+				this.id = apiItem.id;
+				this.displayName = apiItem.displayName;
+				this.description = apiItem.description;
+				this.type = apiItem.type;
+				this.capacityId = apiItem.capacityId;
+				this.capacityAssignmentProgress = apiItem.capacityAssignmentProgress;
 
-			this._stats = {
-				type: vscode.FileType.Directory,
-				ctime: undefined,
-				mtime: undefined,
-				size: undefined
-			};
+				this._stats = {
+					type: vscode.FileType.Directory,
+					ctime: undefined,
+					mtime: undefined,
+					size: undefined
+				};
+			}
 		}
 		else {
 			this._stats = undefined;

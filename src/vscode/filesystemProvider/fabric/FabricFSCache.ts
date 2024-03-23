@@ -9,6 +9,7 @@ import { FabricFSFileDecorationProvider } from '../../fileDecoration/FabricFileD
 import { FabricFSPublishAction } from './_types';
 import { FabricFSItemType } from './FabricFSItemType';
 import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
+import { Helper } from '../../../helpers/Helper';
 
 export abstract class FabricFSCache {
 	private static _localChanges: Map<string, FabricFSPublishAction> = new Map<string, FabricFSPublishAction>();
@@ -84,12 +85,15 @@ export abstract class FabricFSCache {
 		let item = FabricFSCache.getCacheItem(fabricUri);
 		if (!item) {
 			item = await FabricFSCache.addCacheItem(fabricUri);
+			FabricFSCache.localItemAdded(item.FabricUri);
 		}
 
 		if (fabricUri.uriType == FabricUriType.part) {
-			(item as FabricFSItem).writeContentToSubpath(fabricUri.part, content, options);
+			const newFileAdded = await (item as FabricFSItem).writeContentToSubpath(fabricUri.part, content, options);
 
-			FabricFSCache.localItemModified(item.FabricUri);
+			if (item.publishAction != FabricFSPublishAction.CREATE) {
+				FabricFSCache.localItemModified(item.FabricUri);
+			}
 
 			return;
 		}
@@ -98,38 +102,7 @@ export abstract class FabricFSCache {
 		throw vscode.FileSystemError.Unavailable("Could not read File: " + fabricUri.uri.toString());
 	}
 
-	public static async publishToFabric(resourceUri: vscode.Uri): Promise<void> {
-		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
 
-		let item = FabricFSCache.getCacheItem(fabricUri) as FabricFSItem;
-
-		await item.publish();
-		FabricFSCache.localItemPublished(fabricUri);
-
-		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", fabricUri.uri);
-	}
-
-	public static async addCacheItem(fabricUri: FabricFSUri, cacheItem: FabricFSCacheItem = undefined): Promise<FabricFSCacheItem> {
-		if(!cacheItem) {
-			cacheItem = await fabricUri.getCacheItem();
-		}
-		FabricFSCache._cache.set(fabricUri.cacheItemKey, cacheItem);
-
-		return cacheItem;
-	}
-
-	private static removeCacheItem(item: FabricFSCacheItem): boolean {
-		return FabricFSCache._cache.delete(item.FabricUri.cacheItemKey);
-	}
-
-	public static getCacheItem(fabricUri: FabricFSUri): FabricFSCacheItem {
-		return FabricFSCache._cache.get(fabricUri.cacheItemKey);
-	}
-
-
-	public static hasCacheItem(item: FabricFSUri): boolean {
-		return FabricFSCache._cache.has(item.cacheItemKey);
-	}
 
 	public static async delete(fabricUri: FabricFSUri): Promise<void> {
 		let item = FabricFSCache.getCacheItem(fabricUri);
@@ -145,7 +118,7 @@ export abstract class FabricFSCache {
 			(item as FabricFSItem).delete();
 			FabricFSCache.localItemDeleted(fabricUri);
 
-			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", fabricUri.uri);
+			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", Helper.parentUri(fabricUri.uri));
 
 			return;
 		}
@@ -168,7 +141,7 @@ export abstract class FabricFSCache {
 		if (oldFabricUri.uriType == FabricUriType.part && newFabricUri.uriType == FabricUriType.part) {
 			// check if the target file already exists
 			const newPart = await (newItem as FabricFSItem).getPart(newFabricUri.part);
-			if(newPart) {
+			if (newPart) {
 				throw vscode.FileSystemError.FileExists(newFabricUri.uri);
 			}
 
@@ -219,8 +192,6 @@ export abstract class FabricFSCache {
 
 				if (!PowerBIConfiguration.fabricItemTypeNames.includes(newItemType)) {
 					(item as FabricFSItem).createSubFolder(newItemType);
-
-					return;
 				}
 
 				return;
@@ -238,6 +209,7 @@ export abstract class FabricFSCache {
 		throw vscode.FileSystemError.NoPermissions("Directory can not be created: " + fabricUri.uri.toString());
 	}
 
+
 	public static async reloadFromFabric(resourceUri: vscode.Uri): Promise<void> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
 
@@ -250,7 +222,45 @@ export abstract class FabricFSCache {
 		FabricFSCache.localItemReloaded(fabricUri);
 
 		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", resourceUri);
+	}
 
+		public static async publishToFabric(resourceUri: vscode.Uri): Promise<void> {
+		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
+
+		let item = FabricFSCache.getCacheItem(fabricUri) as FabricFSItem;
+
+		const response = await item.publish();
+
+		if (response.error) {
+			vscode.window.showErrorMessage(response.error.message);
+		}
+		else {
+			FabricFSCache.localItemPublished(fabricUri);
+
+			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", fabricUri.uri);
+		}
+	}
+
+	public static async addCacheItem(fabricUri: FabricFSUri, cacheItem: FabricFSCacheItem = undefined): Promise<FabricFSCacheItem> {
+		if (!cacheItem) {
+			cacheItem = await fabricUri.getCacheItem();
+		}
+		FabricFSCache._cache.set(fabricUri.cacheItemKey, cacheItem);
+
+		return cacheItem;
+	}
+
+	public static removeCacheItem(item: FabricFSCacheItem): boolean {
+		return FabricFSCache._cache.delete(item.FabricUri.cacheItemKey);
+	}
+
+	public static getCacheItem(fabricUri: FabricFSUri): FabricFSCacheItem {
+		return FabricFSCache._cache.get(fabricUri.cacheItemKey);
+	}
+
+
+	public static hasCacheItem(item: FabricFSUri): boolean {
+		return FabricFSCache._cache.has(item.cacheItemKey);
 	}
 
 	//#region Local Changes - for FileDecorationProvider
