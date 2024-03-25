@@ -84,11 +84,14 @@ export abstract class FabricApiService {
 	}
 
 	static async longRunningOperation<TSuccess = any>(response: Response, maxWaitTimeMS: number = 2000): Promise<iFabricApiResponse<TSuccess>> {
+		// https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation
+		
 		let callback = response.headers.get("location");
 		let retryAfter = response.headers.get("retry-after");
 
 		let customWaitMs: number = 250;
 		let resultText: string;
+		let pollingResult: iFabricPollingResponse;
 
 		while (response.ok && callback) {
 			if (callback.endsWith("/result")) {
@@ -100,6 +103,7 @@ export abstract class FabricApiService {
 				await Helper.wait(customWaitMs);
 				customWaitMs = Math.min(customWaitMs * 2, maxWaitTimeMS);
 				let callback_response = await this.get<Response>(callback, undefined, true);
+
 				if (callback_response.error) {
 					return { error: callback_response.error };
 				}
@@ -108,7 +112,7 @@ export abstract class FabricApiService {
 				retryAfter = callback_response.success.headers.get("retry-after");
 
 				resultText = await callback_response.success.text();
-				let pollingResult = JSON.parse(resultText) as any as iFabricPollingResponse;
+				pollingResult = JSON.parse(resultText) as any as iFabricPollingResponse;
 
 				if (callback_response.success.ok) {
 					if (pollingResult["status"] == "Failed") {
@@ -117,6 +121,9 @@ export abstract class FabricApiService {
 				}
 			}
 		}
+		return {
+			success: pollingResult as TSuccess
+		};
 	}
 
 	static async post<TSuccess = any>(endpoint: string, body: object, raw: boolean = false): Promise<iFabricApiResponse<TSuccess>> {
@@ -136,7 +143,7 @@ export abstract class FabricApiService {
 				return { error: response.json() as any as iFabricErrorResponse };
 			}
 			else {
-				if(raw) {
+				if (raw) {
 					return { success: response as any as TSuccess };
 				}
 				if (response.status == 202) {
@@ -178,7 +185,7 @@ export abstract class FabricApiService {
 		const ret = await PowerBIApiService.patch<T>(endpoint, body, false);
 
 		if (ret["error"]) {
-			return { error: ret["error"]["message"] || ret["error"] };
+			return { error: JSON.parse(ret["error"]["message"]) || JSON.parse(ret["error"]) };
 		}
 		else {
 			return { success: ret };
@@ -201,8 +208,11 @@ export abstract class FabricApiService {
 	}
 
 	public static async Initialization(): Promise<boolean> {
+		if (PowerBIApiService.isInitialized) {
+			return true;
+		}
 		// wait 5 minutes for the service to initialize
-		return Helper.awaitCondition(async () => FabricApiService.isInitialized, 300000, 500);
+		return Helper.awaitCondition(async () => FabricApiService.isInitialized, 300000, 100);
 	}
 
 	public static getFullUrl(endpoint: string, params?: object): string {
@@ -278,15 +288,12 @@ export abstract class FabricApiService {
 				vscode.window.showErrorMessage(JSON.stringify(result.error));
 			}
 			progress.report({ increment: 100, message: resultMessage });
+
+			Helper.showTemporaryInformationMessage(message + ": " + resultMessage, showResultMessage);
+
 			ret = result;
 
-			const p = await new Promise<void>(resolve => {
-				setTimeout(() => {
-					resolve();
-				}, showResultMessage);
-			});
-
-			return p;
+			return;
 		});
 
 		return ret;
@@ -334,7 +341,7 @@ export abstract class FabricApiService {
 	static async updateItemDefinition(workspaceId: string, itemId: string, itemDefinition: iFabricApiItemDefinition, progressText: string = "Creating Item"): Promise<iFabricApiResponse> {
 		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}/updateDefinition`;
 
-		return FabricApiService.awaitWithProgress(progressText, FabricApiService.post(endpoint, itemDefinition), 3000);
+		return await FabricApiService.awaitWithProgress(progressText, FabricApiService.post(endpoint, itemDefinition), 3000);
 	}
 
 	static async updateItem(workspaceId: string, itemId: string, newName?: string, newDescription?: string): Promise<iFabricApiResponse> {
@@ -363,12 +370,12 @@ export abstract class FabricApiService {
 			type: FabricApiItemType[type]
 		}, definition)
 
-		return FabricApiService.awaitWithProgress(progressText, FabricApiService.post<iFabricApiItem>(endpoint, body), 3000);
+		return await FabricApiService.awaitWithProgress(progressText, FabricApiService.post<iFabricApiItem>(endpoint, body), 3000);
 	}
 
 	static async deleteItem(workspaceId: string, itemId: string, progressText: string = "Deleting Item"): Promise<iFabricApiResponse> {
 		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}`;
 
-		return FabricApiService.awaitWithProgress(progressText, FabricApiService.delete<any>(endpoint, undefined), 3000);
+		return await FabricApiService.awaitWithProgress(progressText, FabricApiService.delete<any>(endpoint, undefined), 3000);
 	}
 }

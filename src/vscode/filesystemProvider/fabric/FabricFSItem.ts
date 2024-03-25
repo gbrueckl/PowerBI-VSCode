@@ -75,11 +75,11 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		}
 		else {
 			this._stats = {
-					type: vscode.FileType.Directory,
-					ctime: undefined,
-					mtime: undefined,
-					size: undefined
-				};
+				type: vscode.FileType.Directory,
+				ctime: undefined,
+				mtime: undefined,
+				size: undefined
+			};
 		}
 	}
 
@@ -232,17 +232,20 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		// if the item was created locally, we need to use CREATE instead of UPDATE
 		if (this.publishAction == FabricFSPublishAction.CREATE) {
 			response = await FabricApiService.createItem(this.workspaceId, this.displayName, this.FabricUri.itemType, definition, `Creating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+			// add NameIdMap for subsequent calls to the created item
+			FabricFSUri.addItemNameIdMap(`${response.success.workspaceId}/${response.success.type}/${response.success.displayName}`, response.success.id);
 			this.publishAction = FabricFSPublishAction.MODIFIED;
 		}
 		else if (this.publishAction == FabricFSPublishAction.MODIFIED) {
 			response = await FabricApiService.updateItem(this.workspaceId, this.itemId, this.displayName, this.description);
-			if(!response.error)
-			{
-			response = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Updating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+			if (!response.error) {
+				response = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Updating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
 			}
 		}
 		else if (this.publishAction == FabricFSPublishAction.DELETE) {
 			response = await FabricApiService.deleteItem(this.workspaceId, this.itemId, `Deleting ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+			FabricFSCache.removeCacheItem(this);
+			this.parent.removeChild(this.displayName)
 			ThisExtension.FabricFileSystemProvider.fireDeleted(this.FabricUri.uri);
 		}
 
@@ -309,7 +312,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 
 	public async delete(): Promise<void> {
 		// if the item was created locally, we need to remove it locally only
-		if(this.publishAction == FabricFSPublishAction.CREATE) {
+		if (this.publishAction == FabricFSPublishAction.CREATE) {
 			// remove it from the cache and from the parent
 			FabricFSCache.removeCacheItem(this);
 			this.parent.removeChild(this.displayName)

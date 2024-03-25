@@ -1,5 +1,10 @@
 # Change Log
 
+**v1.8.0**:
+- reworked [Long Running Operation (LRO)](https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation) in Fabric
+- added support to publish changes to multiple Fabric items at once
+- reworked API respnose structure
+
 **v1.7.2**:
 - removed Table name and square brackets from DAX query results in notebooks
 

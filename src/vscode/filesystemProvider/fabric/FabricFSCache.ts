@@ -224,20 +224,23 @@ export abstract class FabricFSCache {
 		vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", resourceUri);
 	}
 
-		public static async publishToFabric(resourceUri: vscode.Uri): Promise<void> {
+	public static async publishToFabric(resourceUri: vscode.Uri): Promise<void> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
 
-		let item = FabricFSCache.getCacheItem(fabricUri) as FabricFSItem;
+		for (let [key, action] of FabricFSCache._localChanges.entries()) {
+			if (key.startsWith(fabricUri.uniqueKey)) {
+				const itemToPublish = FabricFSCache.getCacheItem(await FabricFSUri.getInstance(vscode.Uri.parse(key))) as FabricFSItem;
+				const response = await itemToPublish.publish();
 
-		const response = await item.publish();
+				if (response.error) {
+					vscode.window.showErrorMessage(response.error.message);
+				}
+				else {
+					FabricFSCache.localItemPublished(itemToPublish.FabricUri);
 
-		if (response.error) {
-			vscode.window.showErrorMessage(response.error.message);
-		}
-		else {
-			FabricFSCache.localItemPublished(fabricUri);
-
-			vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", fabricUri.uri);
+					vscode.commands.executeCommand("workbench.files.action.refreshFilesExplorer", fabricUri.uri);
+				}
+			}
 		}
 	}
 
