@@ -140,7 +140,7 @@ export abstract class FabricApiService {
 			let response: Response = await fetch(endpoint, config);
 
 			if (!response.ok) {
-				return { error: response.json() as any as iFabricErrorResponse };
+				return { error: (await response.json()) as any as iFabricErrorResponse };
 			}
 			else {
 				if (raw) {
@@ -306,7 +306,7 @@ export abstract class FabricApiService {
 
 	static async getWorkspace(id: string): Promise<iFabricApiResponse<iFabricApiWorkspace>> {
 		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${id}`;
-		return FabricApiService.get<iFabricApiWorkspace>(endpoint);
+		return await FabricApiService.get<iFabricApiWorkspace>(endpoint);
 	}
 
 	static async listItems(workspaceId: string, itemType?: FabricApiItemType): Promise<iFabricApiResponse<iFabricApiItem[]>> {
@@ -317,14 +317,14 @@ export abstract class FabricApiService {
 
 	static async getItem(workspaceId: string, itemId: string): Promise<iFabricApiResponse<iFabricApiItem>> {
 		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}`;
-		return FabricApiService.get<iFabricApiItem>(endpoint);
+		return await FabricApiService.get<iFabricApiItem>(endpoint);
 	}
 
 	static async getItemDefinition(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiResponse<iFabricApiItemDefinition>> {
 		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}/getDefinition`;
 		const itemFormat = format && format != FabricApiItemFormat.DEFAULT ? `?format=${format}` : '';
 
-		return FabricApiService.post<iFabricApiItemDefinition>(endpoint + itemFormat, undefined);
+		return await FabricApiService.post<iFabricApiItemDefinition>(endpoint + itemFormat, undefined);
 	}
 
 	static async getItemDefinitionParts(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiResponse<iFabricApiItemPart[]>> {

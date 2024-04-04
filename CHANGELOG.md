@@ -1,5 +1,9 @@
 # Change Log
 
+**v1.8.1**:
+- fix issue with Processing of individual partitions if Incremental Refresh is configured ([#27](/../../issues/27))
+- propate change decoration of Fabric items to parents
+
 **v1.8.0**:
 - reworked [Long Running Operation (LRO)](https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation) in Fabric
 - added support to publish changes to multiple Fabric items at once

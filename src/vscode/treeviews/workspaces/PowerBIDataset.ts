@@ -130,7 +130,8 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 				return;
 			}
 			body = {
-				"type": processType.label
+				"type": processType.label,
+				"applyRefreshPolicy": false
 			}
 
 			if (objectsToRefresh) {

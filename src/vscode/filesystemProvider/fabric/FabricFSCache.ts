@@ -227,6 +227,8 @@ export abstract class FabricFSCache {
 	public static async publishToFabric(resourceUri: vscode.Uri): Promise<void> {
 		const fabricUri: FabricFSUri = await FabricFSUri.getInstance(resourceUri);
 
+		ThisExtension.log("Publishing changes to Fabric ...");
+		
 		for (let [key, action] of FabricFSCache._localChanges.entries()) {
 			if (key.startsWith(fabricUri.uniqueKey)) {
 				const itemToPublish = FabricFSCache.getCacheItem(await FabricFSUri.getInstance(vscode.Uri.parse(key))) as FabricFSItem;

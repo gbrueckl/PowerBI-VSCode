@@ -37,14 +37,23 @@ export class FabricFSFileDecorationProvider implements vscode.FileDecorationProv
 		if (fabricUri.uriType === FabricUriType.item) {
 			const item = FabricFSCache.getLocalChanges(fabricUri);
 			if (item != undefined) {
+				let fileDeco: vscode.FileDecoration;
 				switch (item) {
 					case FabricFSPublishAction.CREATE:
-						return new vscode.FileDecoration("A", "Added", new vscode.ThemeColor("gitDecoration.addedResourceForeground"));
+						fileDeco = new vscode.FileDecoration("A", "Added", new vscode.ThemeColor("gitDecoration.addedResourceForeground"));
+						break;
 					case FabricFSPublishAction.MODIFIED:
-						return new vscode.FileDecoration("M", "Modified", new vscode.ThemeColor("gitDecoration.modifiedResourceForeground"));
+						fileDeco = new vscode.FileDecoration("M", "Modified", new vscode.ThemeColor("gitDecoration.modifiedResourceForeground"));
+						break;
 					case FabricFSPublishAction.DELETE:
-						return new vscode.FileDecoration("D", "Deleted", new vscode.ThemeColor("gitDecoration.deletedResourceForeground"));
+						fileDeco = new vscode.FileDecoration("D", "Deleted", new vscode.ThemeColor("gitDecoration.deletedResourceForeground"));
+						break;
+					default:
+						vscode.window.showErrorMessage(`Unknown publish action: '${item}'`);
+						return undefined;
 				}
+				fileDeco.propagate = true;
+				return fileDeco
 			}
 		}
 		return undefined;
