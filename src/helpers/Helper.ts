@@ -15,6 +15,16 @@ export class UniqueId extends String {
 	}
 }
 
+export namespace UniqueId {
+	export function toString(dir: UniqueId): string {
+		return dir.toString();
+	}
+
+	export function fromString(dir: string): UniqueId {
+		return new UniqueId(dir);
+	}
+}
+
 export abstract class Helper {
 	private static _doubleClickTimer: any;
 

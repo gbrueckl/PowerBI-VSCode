@@ -1,5 +1,8 @@
 # Change Log
 
+**v1.8.2**:
+- added check for Dataset refreshes and whether `isRefreshable = true`
+
 **v1.8.1**:
 - fix issue with Processing of individual partitions if Incremental Refresh is configured ([#27](/../../issues/27))
 - propate change decoration of Fabric items to parents

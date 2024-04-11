@@ -16,13 +16,15 @@ import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICa
 import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatewayTreeItem';
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
 import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/FabricFileSystemProvider';
+import { FabricWorkspacesTreeProvider } from './vscode/treeviews/FabricWorkspace/FabricWorkspacesTreeProvider';
 
 
 export type TreeProviderId =
 	"application/vnd.code.tree.powerbiworkspaces"
 	| "application/vnd.code.tree.powerbicapacities"
 	| "application/vnd.code.tree.powerbigateways"
-	| "application/vnd.code.tree.powerbipipelines";
+	| "application/vnd.code.tree.powerbipipelines"
+	| "application/vnd.code.tree.fabricworkspaces";
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export abstract class ThisExtension {
@@ -38,6 +40,7 @@ export abstract class ThisExtension {
 	private static _tmdlFileSystemProvider: TMDLFileSystemProvider;
 	private static _fabricFileSystemProvider: FabricFileSystemProvider;
 	private static _treeViewWorkspaces: PowerBIWorkspacesTreeProvider;
+	private static _treeViewFabric: FabricWorkspacesTreeProvider;
 	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
 	private static _treeViewGateways: PowerBIGatewaysTreeProvider;
 	private static _treeViewPipeliness: PowerBIPipelinesTreeProvider;
@@ -127,6 +130,14 @@ export abstract class ThisExtension {
 
 	static get TreeViewWorkspaces(): PowerBIWorkspacesTreeProvider {
 		return this._treeViewWorkspaces;
+	}
+
+	static set TreeViewFabric(treeView: FabricWorkspacesTreeProvider) {
+		this._treeViewFabric = treeView;
+	}
+
+	static get TreeViewFabric(): FabricWorkspacesTreeProvider {
+		return this._treeViewFabric;
 	}
 
 	static set TreeViewCapacities(treeView: PowerBICapacitiesTreeProvider) {

@@ -53,6 +53,8 @@ export abstract class FabricApiService {
 	}
 
 	static async get<T = any>(endpoint: string, params: object = null, raw: boolean = false): Promise<iFabricApiResponse<T>> {
+		endpoint = this.getFullUrl(endpoint);
+		
 		const ret = await PowerBIApiService.get<T>(endpoint, params, false, raw);
 
 		if (ret["error"]) {
@@ -159,18 +161,9 @@ export abstract class FabricApiService {
 
 	}
 
-	static async postOrig<T = any>(endpoint: string, body: object): Promise<iFabricApiResponse<T>> {
-		const ret = await PowerBIApiService.post<T>(endpoint, body, false);
-
-		if (ret["error"]) {
-			return { error: ret["error"] };
-		}
-		else {
-			return { success: ret };
-		}
-	}
-
 	static async delete<T = any>(endpoint: string, body: object): Promise<iFabricApiResponse<T>> {
+		endpoint = this.getFullUrl(endpoint);
+
 		const ret = await PowerBIApiService.delete<T>(endpoint, body, false);
 
 		if (ret["error"]) {
@@ -182,6 +175,8 @@ export abstract class FabricApiService {
 	}
 
 	static async patch<T = any>(endpoint: string, body: object): Promise<iFabricApiResponse<T>> {
+		endpoint = this.getFullUrl(endpoint);
+
 		const ret = await PowerBIApiService.patch<T>(endpoint, body, false);
 
 		if (ret["error"]) {
@@ -193,6 +188,8 @@ export abstract class FabricApiService {
 	}
 
 	static async put<T = any>(endpoint: string, body: object): Promise<iFabricApiResponse<T>> {
+		endpoint = this.getFullUrl(endpoint);
+
 		const ret = await PowerBIApiService.put<T>(endpoint, body, false);
 
 		if (ret["error"]) {
@@ -218,8 +215,7 @@ export abstract class FabricApiService {
 	public static getFullUrl(endpoint: string, params?: object): string {
 
 		let baseItems = this._apiBaseUrl.split("/");
-		baseItems.push("v1.0");
-		baseItems.push(PowerBIApiService.Org);
+		baseItems.push("v1");
 		let pathItems = endpoint.split("/").filter(x => x);
 
 		let index = baseItems.indexOf(pathItems[0]);

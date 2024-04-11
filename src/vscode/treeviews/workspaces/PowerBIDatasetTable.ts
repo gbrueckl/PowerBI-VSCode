@@ -66,7 +66,11 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem implements Pow
 	get _contextValue(): string {
 		let orig: string = super._contextValue;
 
-		let actions: string[] = ["REFRESH", "LOADSTATISTICS"];
+		let actions: string[] = ["LOADSTATISTICS"];
+
+		if (this.dataset.workspace.isPremiumCapacity && this.dataset.definition.IsRefreshable) {
+			actions.push("REFRESH");
+		}
 
 		return orig + actions.join(",") + ",";
 	}

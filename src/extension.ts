@@ -40,6 +40,8 @@ import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/Fab
 import { FabricFSCache } from './vscode/filesystemProvider/fabric/FabricFSCache';
 import { FabricFSUri } from './vscode/filesystemProvider/fabric/FabricFSUri';
 import { FabricFSFileDecorationProvider } from './vscode/fileDecoration/FabricFileDecorationProvider';
+import { FabricWorkspacesTreeProvider } from './vscode/treeviews/FabricWorkspace/FabricWorkspacesTreeProvider';
+import { FabricWorkspaceTreeItem } from './vscode/treeviews/FabricWorkspace/FabricWorkspaceTreeItem';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -97,6 +99,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIItem.copyNameToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyNameToClipboard());
 	vscode.commands.registerCommand('PowerBIItem.copyPathToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyPathToClipboard());
 	vscode.commands.registerCommand('PowerBIItem.insertPath', (treeItem: PowerBIApiTreeItem) => treeItem.insertCode());
+
+	// register FabricWorkspacesTreeProvider
+	let fabricWorkspacesTreeProvider = new FabricWorkspacesTreeProvider(context);
+	vscode.commands.registerCommand('FabricWorkspaces.refresh', (item: FabricWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => fabricWorkspacesTreeProvider.refresh(item, showInfoMessage));
+
 
 	// register PowerBIWorkspacesTreeProvider
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);

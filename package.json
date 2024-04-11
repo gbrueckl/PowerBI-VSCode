@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.8.1",
+	"version": "1.8.2",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -188,6 +188,10 @@
 				{
 					"id": "PowerBIGateways",
 					"name": "Gateways"
+				},
+				{
+					"id": "FabricWorkspaces",
+					"name": "Fabric Workspace"
 				}
 			]
 		},
@@ -563,6 +567,12 @@
 				"title": "Open in Fabric",
 				"icon": "$(globe)",
 				"category": "Fabric"
+			},
+			{
+				"command": "FabricWorkspaces.refresh",
+				"title": "Refresh View",
+				"icon": "$(refresh)",
+				"category": "Fabric"
 			}
 		],
 		"menus": {
@@ -600,6 +610,11 @@
 				{
 					"command": "PowerBIPipelines.add",
 					"when": "view == PowerBIPipelines",
+					"group": "navigation"
+				},
+				{
+					"command": "FabricWorkspaces.refresh",
+					"when": "view == FabricWorkspaces",
 					"group": "navigation"
 				}
 			],

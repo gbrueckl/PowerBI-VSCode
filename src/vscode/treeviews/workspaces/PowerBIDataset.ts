@@ -39,10 +39,13 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		let orig: string = super._contextValue;
 
 		let actions: string[] = [
-			"REFRESH",
 			"DELETE"
 		]
 
+		if(this.definition.IsRefreshable) {
+			actions.push("REFRESH");
+		}
+		
 		if (this.definition.configuredBy != PowerBIApiService.SessionUserEmail) {
 			actions.push("TAKEOVER");
 		}

@@ -1,6 +1,9 @@
+import { UniqueId } from "../helpers/Helper";
+
 // https://learn.microsoft.com/en-us/rest/api/fabric/core/items/get-item?tabs=HTTP#itemtype
 export enum FabricApiItemType {
-	"Dashboard"				//	PowerBI dashboard.
+	"Workspace"
+	, "Dashboard"				//	PowerBI dashboard.
 	, "DataPipeline"			//	A data pipeline.
 	, "Datamart"				//	PowerBI datamart.
 	, "Eventstream"			//	An eventstream item.
@@ -8,6 +11,7 @@ export enum FabricApiItemType {
 	, "KQLDatabase"			//	A KQL database.
 	, "KQLQueryset"			//	A KQL queryset.
 	, "Lakehouse"				//	Lakehouse item.
+	, "Lakehouses"				//	Lakehouse item.
 	, "MLExperiment"			//	A machine learning experiment.
 	, "MLModel"				//	A machine learning model.
 	, "MountedWarehouse"		//	A MountedWarehouse item.
@@ -42,23 +46,33 @@ export enum FabricApiItemFormat {
 }
 
 
+// https://learn.microsoft.com/en-us/rest/api/fabric/core/items/get-item?tabs=HTTP#item
+export interface iFabricApiItem {
+	displayName: string;
+	description?: string | boolean; // to be compatible with TreeItem property "description"
+	type: FabricApiItemType;
+	workspaceId?: UniqueId;
+	id?: string;
+}
+
 export interface iFabricApiWorkspace {
 	id: string;
 	displayName: string;
-	description: string;
-	type: FabricApiWorkspaceType;
+	description?: string;
+	type: FabricApiWorkspaceType | FabricApiItemType;
 	capacityId: string;
 	capacityAssignmentProgress: string;
 }
 
-// https://learn.microsoft.com/en-us/rest/api/fabric/core/items/get-item?tabs=HTTP#item
-export interface iFabricApiItem {
+export interface iFabricApiCapacity {
+	id: string;
 	displayName: string;
-	description?: string;
-	type: FabricApiItemType;
-	workspaceId: string;
-	id?: string;
+	state: string;
+	sku: string;
+	region: string;
 }
+
+
 
 export type FabricApiPayloadType = "InlineBase64" | "VSCodeFolder";
 
