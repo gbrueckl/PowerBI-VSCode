@@ -23,7 +23,7 @@ export class FabricWorkspaceGenericFolder extends FabricWorkspaceTreeItem {
 
 		this.customApiUrlPart = apiUrlPart;
 		// the workspaceId is not unique for logical folders hence we make it unique
-		this.id = workspaceId + "/" + this.type.toString();
+		this.id = workspaceId + "/" + parent.itemId + "/" + this.type.toString();
 		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { FabricApiWorkspaceType, iFabricApiWorkspace } from '../../../fabric/_types';
+import { iFabricApiWorkspace } from '../../../fabric/_types';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSUri } from './FabricFSUri';
 import { FabricApiService } from '../../../fabric/FabricApiService';
@@ -11,7 +11,7 @@ export class FabricFSWorkspace extends FabricFSCacheItem implements iFabricApiWo
 	id: string;
 	displayName: string;
 	description: string;
-	type: FabricApiWorkspaceType;
+	type: string;
 	capacityId: string;
 	capacityAssignmentProgress: string;
 

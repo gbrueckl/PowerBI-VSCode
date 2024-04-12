@@ -16,7 +16,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 	id: string;
 	displayName: string;
 	description: string;
-	type: FabricApiItemType;
+	type: string;
 	workspace: FabricFSWorkspace;
 	private _format?: FabricApiItemFormat;
 
@@ -57,7 +57,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 			if (apiItem && apiItem.id) {
 				this.id = apiItem.id;
 				this.displayName = apiItem.displayName;
-				this.description = apiItem.description;
+				this.description = apiItem.description?.toString();
 				this.type = apiItem.type;
 
 				this.publishAction = FabricFSPublishAction.MODIFIED;

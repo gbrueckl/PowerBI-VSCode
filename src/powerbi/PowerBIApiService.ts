@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { fetch, FormData, RequestInit, RequestInfo, File, fileFrom, Response, getProxyAgent } from '@env/fetch';
+import { fetch,  RequestInit, Response, getProxyAgent } from '@env/fetch';
 
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';

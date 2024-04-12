@@ -42,6 +42,8 @@ import { FabricFSUri } from './vscode/filesystemProvider/fabric/FabricFSUri';
 import { FabricFSFileDecorationProvider } from './vscode/fileDecoration/FabricFileDecorationProvider';
 import { FabricWorkspacesTreeProvider } from './vscode/treeviews/FabricWorkspace/FabricWorkspacesTreeProvider';
 import { FabricWorkspaceTreeItem } from './vscode/treeviews/FabricWorkspace/FabricWorkspaceTreeItem';
+import { FabricWorkspace } from './vscode/treeviews/FabricWorkspace/FabricWorkspace';
+import { FabricLakehouse } from './vscode/treeviews/FabricWorkspace/FabricLakehouse';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -103,7 +105,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	// register FabricWorkspacesTreeProvider
 	let fabricWorkspacesTreeProvider = new FabricWorkspacesTreeProvider(context);
 	vscode.commands.registerCommand('FabricWorkspaces.refresh', (item: FabricWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => fabricWorkspacesTreeProvider.refresh(item, showInfoMessage));
+	vscode.commands.registerCommand('FabricWorkspaces.editItems', (item: FabricWorkspaceTreeItem = undefined) => item.editItems());
 
+	vscode.commands.registerCommand('Fabric.Lakehouse.copySQLConnectionString', (treeItem: FabricLakehouse) => treeItem.copySQLConnectionString());
+	vscode.commands.registerCommand('Fabric.Lakehouse.copyOneLakeFilesPath', (treeItem: FabricLakehouse) => treeItem.copyOneLakeFilesPath());
+	vscode.commands.registerCommand('Fabric.Lakehouse.copyOneLakeTablesPath', (treeItem: FabricLakehouse) => treeItem.copyOneLakeTablesPath());
 
 	// register PowerBIWorkspacesTreeProvider
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);

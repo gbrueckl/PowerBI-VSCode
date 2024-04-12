@@ -23,6 +23,8 @@ export class FabricLakehouses extends FabricWorkspaceGenericFolder {
 		parent: FabricWorkspaceTreeItem
 	) {
 		super("Lakehouses", FabricApiItemType.Lakehouses, workspaceId, parent, "lakehouses");
+
+		this.id = workspaceId + "/" + parent.itemId + "/" + this.type.toString();
 	}
 
 	async getChildren(element?: FabricWorkspaceTreeItem): Promise<FabricWorkspaceTreeItem[]> {
@@ -37,7 +39,7 @@ export class FabricLakehouses extends FabricWorkspaceGenericFolder {
 			let children: FabricLakehouse[] = [];
 
 			try {
-				const items = await FabricApiService.getList<iFabricApiItem>(this.parent.apiPath + "/items", {"type": "lakehouse"});
+				const items = await FabricApiService.getList<iFabricApiItem>(this.apiPath);
 
 				for (let item of items.success) {
 					let treeItem = new FabricLakehouse(item, this.workspaceId, this);

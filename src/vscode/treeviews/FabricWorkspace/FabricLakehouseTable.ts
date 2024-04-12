@@ -2,44 +2,62 @@ import * as vscode from 'vscode';
 
 import { Helper, UniqueId } from '../../../helpers/Helper';
 import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';
-import { FabricApiItemType, iFabricApiItem } from '../../../fabric/_types';
+import { FabricApiItemType, iFabricApiItem, iFabricApiLakehouseTable } from '../../../fabric/_types';
 import { FabricLakehouseTables } from './FabricLakehouseTables';
 import { FabricWorkspace } from './FabricWorkspace';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class FabricLakehouseTable extends FabricWorkspaceTreeItem {
+	private _tableDefinition: iFabricApiLakehouseTable;
 
 	constructor(
-		definition: iFabricApiItem,
-		group: UniqueId,
+		definition: iFabricApiLakehouseTable,
+		workspaceId: UniqueId,
 		parent: FabricWorkspaceTreeItem
 	) {
-		super(definition.displayName, group, FabricApiItemType.Lakehouse, definition.id, parent, definition.description.toString(), vscode.TreeItemCollapsibleState.Collapsed);
+		super(definition.name, workspaceId, FabricApiItemType.LakehouseTable, definition.name, parent, "", vscode.TreeItemCollapsibleState.None);
 
-		this.id = definition.id;
-		this.definition = definition;
+		this._tableDefinition = definition;
+
+		this.definition = {
+			"description": "",
+			"displayName": definition.name,
+			"id": parent.parent.itemId + "/" + definition.name,
+			"type": FabricApiItemType.LakehouseTable.toString(),
+			"workspaceId": workspaceId,
+		};
+
+		this.tooltip = this.getToolTip(this._tableDefinition);
+		this.description = this._description;
+
+		this.iconPath = this.getIcon();
 	}
 
 	/* Overwritten properties from FabricApiTreeItem */
-	get definition(): iFabricApiItem {
-		return super.definition as iFabricApiItem;
+	getIcon(): vscode.ThemeIcon {
+		return new vscode.ThemeIcon("layout-panel-justify");
 	}
 
-	private set definition(value: iFabricApiItem) {
-		super.definition = value;
+	// description is show next to the label
+	get _description(): string {
+		if (this.tableDefinition) {
+			return `${this.tableType} - ${this.tableFormat}`;
+		}
 	}
 
-	async getChildren(element?: FabricWorkspaceTreeItem): Promise<FabricWorkspaceTreeItem[]> {
-		let children: FabricWorkspaceTreeItem[] = [];
-
-		children.push(new FabricLakehouseTables(this.workspaceId, this));
-		//children.push(new PowerBIDataflowDatasources(this.groupId, this));
-
-		return children;
+	// LakehouseTable-specific funtions
+	get tableDefinition(): iFabricApiLakehouseTable {
+		return this._tableDefinition;
+	}
+	get tableType(): string {
+		return this.tableDefinition.type;
 	}
 
-	// Dataflow-specific funtions
-	get workspace(): FabricWorkspace {
-		return this.getParentByType<FabricWorkspace>(FabricApiItemType.Workspace);
+	get tableFormat(): string {
+		return this.tableDefinition.format
+	}
+
+	get tableLocation(): string {
+		return this.tableDefinition.location
 	}
 }

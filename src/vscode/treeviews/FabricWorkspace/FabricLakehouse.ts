@@ -2,31 +2,26 @@ import * as vscode from 'vscode';
 
 import { Helper, UniqueId } from '../../../helpers/Helper';
 import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';
-import { FabricApiItemType, iFabricApiItem } from '../../../fabric/_types';
+import { FabricApiItemType, iFabricApiItem, iFabricApiLakehouseProperties } from '../../../fabric/_types';
 import { FabricLakehouseTables } from './FabricLakehouseTables';
 import { FabricWorkspace } from './FabricWorkspace';
+import { FabricApiService } from '../../../fabric/FabricApiService';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class FabricLakehouse extends FabricWorkspaceTreeItem {
+	private _properties: iFabricApiLakehouseProperties;
 
 	constructor(
 		definition: iFabricApiItem,
 		group: UniqueId,
 		parent: FabricWorkspaceTreeItem
 	) {
-		super(definition.displayName, group, FabricApiItemType.Lakehouse, definition.id, parent, definition.description.toString(), vscode.TreeItemCollapsibleState.Collapsed);
+		super(definition.displayName, group, FabricApiItemType.Lakehouse, definition.id, parent, definition.description, vscode.TreeItemCollapsibleState.Collapsed);
 
 		this.id = definition.id;
 		this.definition = definition;
-	}
 
-	/* Overwritten properties from FabricApiTreeItem */
-	get definition(): iFabricApiItem {
-		return super.definition as iFabricApiItem;
-	}
-
-	private set definition(value: iFabricApiItem) {
-		super.definition = value;
+		this.contextValue = this._contextValue;
 	}
 
 	async getChildren(element?: FabricWorkspaceTreeItem): Promise<FabricWorkspaceTreeItem[]> {
@@ -38,8 +33,41 @@ export class FabricLakehouse extends FabricWorkspaceTreeItem {
 		return children;
 	}
 
-	// Dataflow-specific funtions
-	get workspace(): FabricWorkspace {
-		return this.getParentByType<FabricWorkspace>(FabricApiItemType.Workspace);
+	public async getProperties(): Promise<iFabricApiLakehouseProperties> {
+		if (this._properties == null) {
+			this._properties = (await FabricApiService.get(this.apiPath)).success;
+		}
+
+		return this._properties["properties"];
+	}
+
+	public async getSQLConnectionString(): Promise<string> {
+		let properties = await this.getProperties();
+
+		return properties.sqlEndpointProperties.connectionString;
+	}
+
+	public async copySQLConnectionString(): Promise<void> {
+		vscode.env.clipboard.writeText(await this.getSQLConnectionString());
+	}
+
+	public async getOneLakeFilesPath(): Promise<string> {
+		let properties = await this.getProperties();
+
+		return properties.oneLakeFilesPath;
+	}
+
+	public async copyOneLakeFilesPath(): Promise<void> {
+		vscode.env.clipboard.writeText(await this.getOneLakeFilesPath());
+	}
+
+	public async getOneLakeTablesPath(): Promise<string> {
+		let properties = await this.getProperties();
+
+		return properties.oneLakeTablesPath;
+	}
+
+	public async copyOneLakeTablesPath(): Promise<void> {
+		vscode.env.clipboard.writeText(await this.getOneLakeTablesPath());
 	}
 }

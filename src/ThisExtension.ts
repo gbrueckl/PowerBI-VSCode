@@ -17,6 +17,7 @@ import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatew
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
 import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/FabricFileSystemProvider';
 import { FabricWorkspacesTreeProvider } from './vscode/treeviews/FabricWorkspace/FabricWorkspacesTreeProvider';
+import { FabricWorkspaceTreeItem } from './vscode/treeviews/FabricWorkspace/FabricWorkspaceTreeItem';
 
 
 export type TreeProviderId =
@@ -164,7 +165,7 @@ export abstract class ThisExtension {
 		return this._treeViewPipeliness;
 	}
 
-	static getTreeView(id: TreeProviderId): vscode.TreeDataProvider<PowerBIApiTreeItem> {
+	static getTreeView(id: TreeProviderId): vscode.TreeDataProvider<PowerBIApiTreeItem> | vscode.TreeDataProvider<FabricWorkspaceTreeItem> {
 		switch (id) {
 			case "application/vnd.code.tree.powerbiworkspaces":
 				return this.TreeViewWorkspaces;
@@ -174,10 +175,12 @@ export abstract class ThisExtension {
 				return this.TreeViewGateways;
 			case "application/vnd.code.tree.powerbipipelines":
 				return this.TreeViewPipelines;
+			case "application/vnd.code.tree.fabricworkspaces":
+				return this.TreeViewFabric;
 		}
 	}
 
-	static async refreshTreeView(id: TreeProviderId, item: PowerBIApiTreeItem = null, ): Promise<void> {
+	static async refreshTreeView(id: TreeProviderId, item: PowerBIApiTreeItem | FabricWorkspaceTreeItem = null, ): Promise<void> {
 		switch (id) {
 			case "application/vnd.code.tree.powerbiworkspaces":
 				await this.TreeViewWorkspaces.refresh(item as PowerBIWorkspaceTreeItem);
@@ -187,6 +190,8 @@ export abstract class ThisExtension {
 				await this.TreeViewGateways.refresh(item as PowerBIGatewayTreeItem);
 			case "application/vnd.code.tree.powerbipipelines":
 				await this.TreeViewPipelines.refresh(item as PowerBIPipelineTreeItem);
+			case "application/vnd.code.tree.fabricworkspaces":
+				await this.TreeViewFabric.refresh(item as FabricWorkspaceTreeItem);
 		}
 	}
 	//#endregion
@@ -264,6 +269,7 @@ export abstract class ThisExtension {
 			"application/vnd.code.tree.powerbipipelines",
 			"application/vnd.code.tree.powerbigateways",
 			"application/vnd.code.tree.powerbicapacities",
+			"application/vnd.code.tree.fabricworkspaces",
 		];
 	}
 
@@ -271,7 +277,7 @@ export abstract class ThisExtension {
 	public static async refreshUI(): Promise<void> {
 		// refresh all treeviews after the extension has been initialized
 		const allCommands = await vscode.commands.getCommands(true);
-		const powerBiRefreshCommands = allCommands.filter(command => command.match(/^PowerBI.*?s\.refresh/));
+		const powerBiRefreshCommands = allCommands.filter(command => command.match(/^(PowerBI|Fabric).*?s\.refresh/));
 
 		ThisExtension.log("Refreshing UI ...");
 		for (let command of powerBiRefreshCommands) {

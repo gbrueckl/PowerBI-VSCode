@@ -5,7 +5,7 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
-import { iFabricApiItem } from '../../../fabric/_types';
+import { FabricApiItemType, iFabricApiItem, iFabricApiLakehouseTable } from '../../../fabric/_types';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';
 import { FabricLakehouse } from './FabricLakehouse';
@@ -15,10 +15,10 @@ import { FabricLakehouseTable } from './FabricLakehouseTable';
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class FabricLakehouseTables extends FabricWorkspaceGenericFolder {
 	constructor(
-		groupId: UniqueId,
+		workspaceId: UniqueId,
 		parent: FabricWorkspaceTreeItem
 	) {
-		super("Tables", "LAKEHOUSETABLES", groupId, parent, "tables");
+		super("Tables", FabricApiItemType.LakehouseTables, workspaceId, parent, "tables");
 	}
 
 	async getChildren(element?: FabricWorkspaceTreeItem): Promise<FabricWorkspaceTreeItem[]> {
@@ -30,10 +30,10 @@ export class FabricLakehouseTables extends FabricWorkspaceGenericFolder {
 			return element.getChildren();
 		}
 		else {
-			let children: FabricLakehouse[] = [];
+			let children: FabricLakehouseTable[] = [];
 
 			try {
-				const items = await FabricApiService.getList<iFabricApiItem>(this.apiPath, {"itemType": "lakehouse"});
+				const items = await FabricApiService.getList<iFabricApiLakehouseTable>(this.apiPath, undefined, "data");
 
 				for (let item of items.success) {
 					let treeItem = new FabricLakehouseTable(item, this.workspaceId, this);
@@ -41,7 +41,7 @@ export class FabricLakehouseTables extends FabricWorkspaceGenericFolder {
 				}
 			}
 			catch (e) {
-				ThisExtension.log("No tables found for lakehouse " + this.displayName);
+				ThisExtension.log("No tables found for lakehouse " + this.parent.displayName);
 			}
 
 			return children;

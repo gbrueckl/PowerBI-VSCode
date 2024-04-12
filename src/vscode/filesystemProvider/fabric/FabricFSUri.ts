@@ -13,7 +13,7 @@ import { FabricApiService } from '../../../fabric/FabricApiService';
 import { FabricFSCache } from './FabricFSCache';
 
 // regex with a very basic check for valid GUIDs
-const REGEX_FABRIC_URI = /fabric:\/\/(?<workspace>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<Item>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
+const REGEX_FABRIC_URI = /fabric:\/\/workspaces\/(?<workspace>[0-9a-fA-F-]{36})?(\/(?<itemType>[a-zA-Z]*))?(\/(?<Item>[0-9a-fA-F-]{36}))?(\/(?<part>.*))?($|\?)/gm
 
 export enum FabricUriType {
 	root = 1,
@@ -36,7 +36,7 @@ export class FabricFSUri {
 	uriType: FabricUriType;
 
 	/*
-	fabric:/<workspace-id>/<itemType>/<item-id>/<partFolder/partfolder/partFile>
+	fabric://workspaces/<workspace-id>/<itemType>/<item-id>/<partFolder/partfolder/partFile>
 	*/
 	constructor(uri: vscode.Uri) {
 		this.uri = uri;
@@ -45,16 +45,19 @@ export class FabricFSUri {
 
 		if (uriString.startsWith(FABRIC_SCHEME + ":/")) {
 			let paths = uriString.split("/").filter((path) => path.length > 0).slice(1);
-			this.workspace = paths[0];
-			this.itemType = FabricApiItemType.fromString(paths[1]);
-			this.item = paths[2];
-			this.part = paths.slice(3).join("/");
+			if(paths[0] != 'workspaces') {
+				ThisExtension.log(`Fabric URI '${uri.toString()}' does not match pattern ${REGEX_FABRIC_URI}!`);
+			}
+			this.workspace = paths[1];
+			this.itemType = FabricApiItemType.fromString(paths[2]);
+			this.item = paths[3];
+			this.part = paths.slice(4).join("/");
 
-			if (paths.length >= 5) {
+			if (paths.length >= 6) {
 				this.uriType = FabricUriType.part;
 			}
 			else {
-				this.uriType = paths.length + 1;
+				this.uriType = paths.length;
 			}
 
 			return
@@ -242,8 +245,8 @@ export class FabricFSUri {
 	}
 
 	get fabricItemUri(): FabricFSUri {
-		// fabric://<workspace-id>/<itemType>/<item-id>/<part1/part2/part3> to fabric://<workspace-id>/<itemType>/<item-id>
-		let uri = vscode.Uri.parse(this.uri.toString().split("/").filter((path) => path.length > 0).slice(undefined, 4).join("/"));
+		// fabric://workspaces/<workspace-id>/<itemType>/<item-id>/<part1/part2/part3> to fabric://workspaces/<workspace-id>/<itemType>/<item-id>
+		let uri = vscode.Uri.parse(this.uri.toString().split("/").filter((path) => path.length > 0).slice(undefined, 5).join("/"));
 		return new FabricFSUri(uri);
 	}
 }

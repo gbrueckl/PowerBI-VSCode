@@ -3,12 +3,14 @@ import * as vscode from 'vscode';
 import { Helper, UniqueId } from '../../../helpers/Helper';
 
 import { ThisExtension, TreeProviderId } from '../../../ThisExtension';
-import { FabricApiItemType, iFabricApiItem } from '../../../fabric/_types';
+import { FabricApiItemType, FabricApiWorkspaceType, iFabricApiItem } from '../../../fabric/_types';
+import { FabricFSUri } from '../../filesystemProvider/fabric/FabricFSUri';
+import { FABRIC_SCHEME } from '../../filesystemProvider/fabric/FabricFileSystemProvider';
 
 export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabricApiItem {
 	protected _displayName: string;
 	protected _workspaceId: UniqueId;
-	protected _type: FabricApiItemType;
+	protected _type: string;
 	protected _itemId: UniqueId;
 	protected _parent: FabricWorkspaceTreeItem;
 	protected _itemDescription?: string;
@@ -18,10 +20,10 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 	constructor(
 		displayName: string,
 		workspaceId: UniqueId,
-		type: FabricApiItemType,
+		type: FabricApiItemType | FabricApiWorkspaceType,
 		id: UniqueId,
 		parent: FabricWorkspaceTreeItem,
-		description?: string,
+		description?: string | boolean,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
 		super(displayName, collapsibleState);
@@ -29,27 +31,41 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 		this._parent = parent;
 		this._displayName = displayName;
 		this._itemId = id;
-		this._type = type;
+		this._type = type.toString();
 		this._workspaceId = workspaceId;
-		this._itemDescription = description;
+		if(description !== undefined && typeof description === "string")
+		{
+			this._itemDescription = description;
+		}
 
 		this.definition = {
 			displayName: displayName,
 			workspaceId: workspaceId.toString(),
-			type: type,
+			type: FabricApiItemType[type],
 			id: id.toString(),
 			description: description
+		};
+
+		this.id = (id as string);
+		this.label = this._displayName;
+		this.tooltip = this.getToolTip(this.definition);
+		this.description = this._description;
+		this.contextValue = this._contextValue;
+		
+		this.iconPath = {
+			light: this.getIconPath("light"),
+			dark: this.getIconPath("dark")
 		};
 	}
 
 	protected getIconPath(theme: string): string | vscode.Uri {
-		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.type.toString().toLowerCase() + '.png');
+		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, FabricApiItemType[this.type] + '.png');
 	}
 
 	// tooltip shown when hovering over the item
-	get _tooltip(): string {
+	protected getToolTip(definition: any) {
 		let tooltip: string = "";
-		for (const [key, value] of Object.entries(this._definition)) {
+		for (const [key, value] of Object.entries(definition)) {
 			if (typeof value === "string") {
 				if (value.length > 100) {
 					continue;
@@ -60,6 +76,7 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 
 		return tooltip.trim();
 	}
+	
 
 	// description is show next to the label
 	get _description(): string {
@@ -68,7 +85,8 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 
 	// used in package.json to filter commands via viewItem =~ /.*,GROUP,.*/
 	get _contextValue(): string {
-		return "," + this.type + ",";
+		const actions = [FabricApiItemType[this.type].toUpperCase(), "FABRIC"]
+		return "," + actions.join(",") + ",";
 	}
 	
 	get itemId(): UniqueId {
@@ -83,7 +101,7 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 		return this._workspaceId;
 	}
 
-	get type(): FabricApiItemType {
+	get type(): string {
 		return this._type;
 	}
 
@@ -112,7 +130,7 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 	getParentByType<T = FabricWorkspaceTreeItem>(type: FabricApiItemType): T {
 		let parent: FabricWorkspaceTreeItem = this.parent;
 
-		while (parent !== undefined && parent.type !== type) {
+		while (parent !== undefined && FabricApiItemType[parent.type] !== type) {
 			parent = parent.parent;
 		}
 
@@ -122,7 +140,7 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 	getPathItemByType<T = FabricWorkspaceTreeItem>(type: FabricApiItemType): T {
 		let parent: FabricWorkspaceTreeItem = this;
 
-		while (parent !== undefined && parent.type !== type) {
+		while (parent !== undefined && FabricApiItemType[parent.type] !== type) {
 			parent = parent.parent;
 		}
 
@@ -181,5 +199,16 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 	// API Drop
 	get apiDrop(): string {
 		return Helper.trimChar("/" + this.apiPath.split("/").slice(2).join("/"), "/", false);
+	}
+
+	
+	public async editItems(): Promise<void> {
+		const fabricUri = new FabricFSUri(vscode.Uri.parse(`${FABRIC_SCHEME}://${this.itemPath}`));
+
+		await Helper.addToWorkspace(fabricUri.uri, `Fabric - ${this.displayName}`);
+		// if the workspace does not exist, the folder is opened in a new workspace where the Fabric folder would be reloaded again
+		// so we only load the URI if we already have a workspace
+
+		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", fabricUri.uri);
 	}
 }

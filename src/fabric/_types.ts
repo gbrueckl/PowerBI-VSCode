@@ -2,8 +2,7 @@ import { UniqueId } from "../helpers/Helper";
 
 // https://learn.microsoft.com/en-us/rest/api/fabric/core/items/get-item?tabs=HTTP#itemtype
 export enum FabricApiItemType {
-	"Workspace"
-	, "Dashboard"				//	PowerBI dashboard.
+	"Dashboard"				//	PowerBI dashboard.
 	, "DataPipeline"			//	A data pipeline.
 	, "Datamart"				//	PowerBI datamart.
 	, "Eventstream"			//	An eventstream item.
@@ -11,7 +10,6 @@ export enum FabricApiItemType {
 	, "KQLDatabase"			//	A KQL database.
 	, "KQLQueryset"			//	A KQL queryset.
 	, "Lakehouse"				//	Lakehouse item.
-	, "Lakehouses"				//	Lakehouse item.
 	, "MLExperiment"			//	A machine learning experiment.
 	, "MLModel"				//	A machine learning model.
 	, "MountedWarehouse"		//	A MountedWarehouse item.
@@ -22,6 +20,12 @@ export enum FabricApiItemType {
 	, "SemanticModel"			//	PowerBI semantic model.
 	, "SparkJobDefinition"	//	A spark job definition.
 	, "Warehouse"				//	A warehouse item.
+
+	// custom types
+	, "Workspace"
+	, "Lakehouses"					//	Folder for Lakehouse item.
+	, "LakehouseTable"				//	Lakehouse Table
+	, "LakehouseTables"				//	Folder for Lakehouse Table item.
 };
 
 export namespace FabricApiItemType {
@@ -50,7 +54,7 @@ export enum FabricApiItemFormat {
 export interface iFabricApiItem {
 	displayName: string;
 	description?: string | boolean; // to be compatible with TreeItem property "description"
-	type: FabricApiItemType;
+	type: string;
 	workspaceId?: UniqueId;
 	id?: string;
 }
@@ -59,9 +63,26 @@ export interface iFabricApiWorkspace {
 	id: string;
 	displayName: string;
 	description?: string;
-	type: FabricApiWorkspaceType | FabricApiItemType;
+	type: string;
 	capacityId: string;
 	capacityAssignmentProgress: string;
+}
+
+export interface iFabricApiLakehouseProperties {
+	oneLakeTablesPath: string;
+	oneLakeFilesPath: string;
+	sqlEndpointProperties: {
+		id: UniqueId
+		connectionString: string;
+		provisioningStatus: string;
+	}
+}
+
+export interface iFabricApiLakehouseTable {
+	format: string		// Table format.
+	location: string	// Table location.	
+	name: string		// Table name.
+	type: string		//Table type.
 }
 
 export interface iFabricApiCapacity {

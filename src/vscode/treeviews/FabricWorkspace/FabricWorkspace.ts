@@ -5,8 +5,6 @@ import { ThisExtension } from '../../../ThisExtension';
 import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { Helper } from '../../../helpers/Helper';
-import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
-import { TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
 
 import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';
 import { FabricLakehouses } from './FabricLakehouses';
@@ -18,21 +16,24 @@ import { FabricFSUri } from '../../filesystemProvider/fabric/FabricFSUri';
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class FabricWorkspace extends FabricWorkspaceTreeItem {
 	private _workspaceDefinition: iFabricApiWorkspace;
+
 	constructor(
 		definition: iFabricApiWorkspace
 	) {
 		super(definition.displayName, definition.id, FabricApiItemType.Workspace, definition.id, undefined, definition.description);
 
 		this._workspaceDefinition = definition;
+
 		this.definition = {
 			"description": definition.description,
 			"displayName": definition.displayName,
 			"id": definition.id,	
-			"type": FabricApiItemType.Workspace,
+			"type": definition.type,
 			"workspaceId": definition.id,
 		};
 
 		this.contextValue = this._contextValue;
+		this.tooltip = this.getToolTip(this._workspaceDefinition);
 
 		this.iconPath = {
 			light: this.getIconPath("light"),
@@ -77,11 +78,11 @@ export class FabricWorkspace extends FabricWorkspaceTreeItem {
 	}
 
 	get capacityId(): string {
-		return this._workspaceDefinition.capacityId;
+		return this._workspaceDefinition?.capacityId;
 	}
 
 	get workspaceType(): FabricApiWorkspaceType {
-		return this._workspaceDefinition.type as FabricApiWorkspaceType;
+		return FabricApiWorkspaceType[this._workspaceDefinition.type];
 	}
 
 	// Workspace-specific functions
@@ -90,7 +91,7 @@ export class FabricWorkspace extends FabricWorkspaceTreeItem {
 			return undefined;
 		}
 
-		return (await FabricApiService.get<iFabricApiCapacity>(`/v1/capacities${this.capacityId}`)).success;
+		return (await FabricApiService.get<iFabricApiCapacity>(`/v1/capacities/${this.capacityId}`)).success;
 	}
 
 	// static get MyWorkspace(): FabricWorkspace {
@@ -101,49 +102,6 @@ export class FabricWorkspace extends FabricWorkspaceTreeItem {
 	// }
 
 	// Workspace-specific functions
-	public static async assignToCapacity(workspace: FabricWorkspace, settings: object = undefined): Promise<void> {
-		const apiUrl = Helper.joinPath(workspace.apiPath, "AssignToCapacity");
-
-		let confirm: string = await PowerBICommandBuilder.showInputBox("", "Confirm assignment to capacity by typeing the Workspace name '" + workspace.displayName + "' again.", undefined, undefined);
-
-		if (!confirm || confirm != workspace.displayName) {
-			ThisExtension.log("Assignment to capacity aborted!")
-			return;
-		}
-
-		if (settings == undefined) // prompt user for inputs
-		{
-			PowerBICommandBuilder.execute<any>(apiUrl, "POST",
-				[
-					new PowerBICommandInput("Capacity", "CAPACITY_SELECTOR", "capacityId", true, "The capacity ID. To unassign from a capacity, use an empty GUID (00000000-0000-0000-0000-000000000000).")
-				]);
-		}
-		else {
-			PowerBIApiService.post(apiUrl, settings);
-		}
-
-		ThisExtension.TreeViewFabric.refresh(workspace.parent, false);
-		ThisExtension.TreeViewCapacities.refresh(null, false);
-	}
-
-	public static async unassignFromCapacity(workspace: FabricWorkspace): Promise<void> {
-		const apiUrl = Helper.joinPath(workspace.apiPath, "AssignToCapacity");
-
-		let confirm: string = await PowerBICommandBuilder.showInputBox("", "Confirm unassignment from capacity by typeing the Workspace name '" + workspace.displayName + "' again.", undefined, undefined);
-
-		if (!confirm || confirm != workspace.displayName) {
-			ThisExtension.log("Unassignment from capacity aborted!")
-			return;
-		}
-
-		let settings: object = { "capacityId": "00000000-0000-0000-0000-000000000000" };
-
-		PowerBIApiService.post(apiUrl, settings);
-
-		ThisExtension.TreeViewFabric.refresh(workspace.parent, false);
-		ThisExtension.TreeViewCapacities.refresh(null, false);
-	}
-
 	public async browseFabric(): Promise<void> {
 		const fabricUri = new FabricFSUri(vscode.Uri.parse(`${FABRIC_SCHEME}://${this.workspaceId}`))
 

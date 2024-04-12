@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
 	"description": "Power BI Extension for VSCode",
-	"version": "1.8.2",
+	"version": "1.9.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -175,7 +175,7 @@
 			"powerbi": [
 				{
 					"id": "PowerBIWorkspaces",
-					"name": "Workspaces"
+					"name": "PowerBI Workspaces"
 				},
 				{
 					"id": "PowerBIPipelines",
@@ -191,7 +191,7 @@
 				},
 				{
 					"id": "FabricWorkspaces",
-					"name": "Fabric Workspace"
+					"name": "Fabric Workspaces"
 				}
 			]
 		},
@@ -210,6 +210,10 @@
 			},
 			{
 				"view": "PowerBIPipelines",
+				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
+			},
+			{
+				"view": "FabricWorkspaces",
 				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			}
 		],
@@ -573,6 +577,30 @@
 				"title": "Refresh View",
 				"icon": "$(refresh)",
 				"category": "Fabric"
+			},
+			{
+				"command": "FabricWorkspaces.editItems",
+				"title": "Edit Fabric Items",
+				"icon": "$(pencil)",
+				"category": "Fabric"
+			},
+			{
+				"command": "Fabric.Lakehouse.copySQLConnectionString",
+				"title": "Copy SQL ConnectionString",
+				"icon": "$(debug-disconnect)",
+				"category": "Fabric.Lakehouse"
+			},
+			{
+				"command": "Fabric.Lakehouse.copyOneLakeFilesPath",
+				"title": "Copy OneLake Files Path",
+				"icon": "$(file-binary)",
+				"category": "Fabric.Lakehouse"
+			},
+			{
+				"command": "Fabric.Lakehouse.copyOneLakeTablesPath",
+				"title": "Copy OneLake Tables Path",
+				"icon": "$(layout-panel-justify)",
+				"category": "Fabric.Lakehouse"
 			}
 		],
 		"menus": {
@@ -614,6 +642,11 @@
 				},
 				{
 					"command": "FabricWorkspaces.refresh",
+					"when": "view == FabricWorkspaces",
+					"group": "navigation"
+				},
+				{
+					"command": "FabricWorkspaces.editItems",
 					"when": "view == FabricWorkspaces",
 					"group": "navigation"
 				}
@@ -813,6 +846,21 @@
 					"command": "PowerBIPipelineStage.unassignWorkspace",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,UNASSIGN,.*/",
 					"group": "navigation"
+				},
+				{
+					"command": "Fabric.Lakehouse.copySQLConnectionString",
+					"when": "view == FabricWorkspaces && viewItem =~ /.*,LAKEHOUSE,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "Fabric.Lakehouse.copyOneLakeFilesPath",
+					"when": "view == FabricWorkspaces && viewItem =~ /.*,LAKEHOUSE,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "Fabric.Lakehouse.copyOneLakeTablesPath",
+					"when": "view == FabricWorkspaces && viewItem =~ /.*,LAKEHOUSE,.*/",
+					"group": "navigation"
 				}
 			],
 			"editor/title": [
@@ -850,12 +898,12 @@
 				},
 				{
 					"command": "Fabric.publishToFabric",
-					"when": "resourceScheme == fabric && resource =~ /^fabric:[\\/]*[^\\/]*?\\/[^\\/]*?\\/[^\\/]*?$/",
+					"when": "resourceScheme == fabric && resource =~ /^fabric:[\\/]*workspaces\\/[^\\/]*?\\/[^\\/]*?\\/[^\\/]*?$/",
 					"group": "2_workspace"
 				},
 				{
 					"command": "Fabric.openInFabric",
-					"when": "resourceScheme == fabric && resource =~ /^fabric:(([\\/]+[^\\/]+?)?|([\\/]+[^\\/]+?){3})$/",
+					"when": "resourceScheme == fabric && resource =~ /^fabric:(([\\/]+[^\\/]+?)?|([\\/]+[^\\/]+?){4})$/",
 					"group": "2_workspace"
 				},
 				{

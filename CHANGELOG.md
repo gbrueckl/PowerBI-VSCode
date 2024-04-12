@@ -1,6 +1,7 @@
 # Change Log
 
-**v1.8.2**:
+**v1.9.0**:
+- added Fabric Workspace Browser
 - added check for Dataset refreshes and whether `isRefreshable = true`
 
 **v1.8.1**:

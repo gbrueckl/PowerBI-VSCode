@@ -72,8 +72,13 @@ export class FabricWorkspacesTreeProvider implements vscode.TreeDataProvider<Fab
 			}
 
 			for (let item of items.success) {
-				let treeItem = new FabricWorkspace(item);
-				children.push(treeItem);
+				if(item.capacityId) {
+					let treeItem = new FabricWorkspace(item);
+					children.push(treeItem);
+				}
+				else {
+					ThisExtension.log("Skipping workspace '" + item.displayName + "' (" + item.id + ") because it has no capacityId");
+				}
 			}
 
 			return children;
