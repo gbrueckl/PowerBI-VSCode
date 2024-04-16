@@ -1,6 +1,3 @@
-import { FabricApiItemType } from "../../../fabric/_types";
-import { PowerBIConfiguration } from "../../configuration/PowerBIConfiguration";
-
 export type LoadingState =
 	"not_loaded" // not loaded yet
 	| "loading"  // currently loading

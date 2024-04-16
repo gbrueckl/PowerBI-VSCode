@@ -38,10 +38,20 @@ export namespace FabricApiItemType {
 	}
 }
 
+export type FabricApiItemTypeWithDefinition =
+	"DataPipelines"			//	A data pipeline.
+	| "Notebooks"				//	A notebook.
+	| "Reports"				//	PowerBI report.
+	| "SemanticModels"			//	PowerBI semantic model.
+	| "SparkJobDefinitions"	//	A spark job definition.
+;
+
 export enum FabricApiWorkspaceType {
 	"Personal"		// A personal workspace
 	, "Workspace"		// A collaborative workspace
 };
+
+
 
 export enum FabricApiItemFormat {
 	DEFAULT = "DEFAULT"

@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import { UniqueId } from '../../../helpers/Helper';
 
 import { ThisExtension } from '../../../ThisExtension';
-import { ApiItemType } from '../_types';
 import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';
 import { FabricApiItemType } from '../../../fabric/_types';
 

@@ -5,7 +5,7 @@ import { fetch, FormData, RequestInit, RequestInfo, File, fileFrom, Response, ge
 import { Helper } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
-import { FabricApiItemFormat, FabricApiItemType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart, iFabricApiResponse, iFabricApiWorkspace, iFabricErrorResponse, iFabricListResponse, iFabricPollingResponse } from './_types';
+import { FabricApiItemFormat, FabricApiItemType, FabricApiItemTypeWithDefinition, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart, iFabricApiResponse, iFabricApiWorkspace, iFabricErrorResponse, iFabricListResponse, iFabricPollingResponse } from './_types';
 import { FabricFSCache } from '../vscode/filesystemProvider/fabric/FabricFSCache';
 
 export abstract class FabricApiService {
@@ -91,7 +91,7 @@ export abstract class FabricApiService {
 		let callback = response.headers.get("location");
 		let retryAfter = response.headers.get("retry-after");
 
-		let customWaitMs: number = 250;
+		let customWaitMs: number = 100;
 		let resultText: string;
 		let pollingResult: iFabricPollingResponse;
 
@@ -118,7 +118,7 @@ export abstract class FabricApiService {
 
 				if (callback_response.success.ok) {
 					if (pollingResult["status"] == "Failed") {
-						return { error: pollingResult.error };
+						return { error: pollingResult.error ?? pollingResult["failureReason"] };
 					}
 				}
 			}
@@ -149,7 +149,7 @@ export abstract class FabricApiService {
 					return { success: response as any as TSuccess };
 				}
 				if (response.status == 202) {
-					return this.longRunningOperation<TSuccess>(response, 2000);
+					return await this.longRunningOperation<TSuccess>(response, 2000);
 				}
 				return { success: (await response.json()) as TSuccess };
 			}
@@ -358,12 +358,11 @@ export abstract class FabricApiService {
 		return { success: "No Changes!" };
 	}
 
-	static async createItem(workspaceId: string, name: string, type: FabricApiItemType, definition?: iFabricApiItemDefinition, progressText: string = "Publishing Item"): Promise<iFabricApiResponse> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items`;
+	static async createItem(workspaceId: string, name: string, type: FabricApiItemTypeWithDefinition, definition?: iFabricApiItemDefinition, progressText: string = "Publishing Item"): Promise<iFabricApiResponse> {
+		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/${type}`;
 
 		const body = Object.assign({}, {
-			displayName: name,
-			type: FabricApiItemType[type]
+			displayName: name
 		}, definition)
 
 		return await FabricApiService.awaitWithProgress(progressText, FabricApiService.post<iFabricApiItem>(endpoint, body), 3000);

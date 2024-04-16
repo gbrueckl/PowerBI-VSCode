@@ -134,7 +134,7 @@ The Tabular Model Scripting Language (TMSL) can be used to create or modify Tabu
 While you could technically run any TMSL script including large `createOrUpdate` scripts, its purpose is to modify individual properties of selected objects like changing the name of a role etc.
 
 # Microsoft Fabric
-The extension also provides an easy way to interact with all items hosted in Microsoft Fabric. Besides the regular Power BI artifacts like Datasets and Reports this also includes Notebooks and SparkJobDefinitions (more to be added once the Fabric APIs exist!). To browse your Fabric items, you need to use [VSCode Workspace](https://code.visualstudio.com/docs/editor/workspaces) when working with VSCode. In your workspace settings file, you can add a Fabric Workspace using an URI in the format of `fabric://<workspace-guid>`:
+The extension also provides an easy way to interact with all items hosted in Microsoft Fabric. Besides the regular Power BI artifacts like Datasets and Reports this also includes Notebooks and SparkJobDefinitions (more to be added once the Fabric APIs exist!). To browse your Fabric items, you need to use [VSCode Workspace](https://code.visualstudio.com/docs/editor/workspaces) when working with VSCode. In your workspace settings file, you can add a Fabric Workspace using an URI in the format of `fabric://workspaces/<workspace-guid>`:
 
 ```json
 {
@@ -143,7 +143,7 @@ The extension also provides an easy way to interact with all items hosted in Mic
 			"path": "."
 		},
 		{
-			"uri": "fabric://f6fb3aea-f11f-4f06-b6fa-89bac4c0fee0",
+			"uri": "fabric://workspaces/f6fb3aea-f11f-4f06-b6fa-89bac4c0fee0",
 			"name": "My Fabric Workspace"
 		}
 	]

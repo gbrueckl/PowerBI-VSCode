@@ -1,9 +1,6 @@
 import * as vscode from 'vscode';
 
 import { ThisExtension } from '../../../ThisExtension';
-
-import { PowerBICommandBuilder, PowerBICommandInput } from '../../../powerbi/CommandBuilder';
-import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { Helper } from '../../../helpers/Helper';
 
 import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';

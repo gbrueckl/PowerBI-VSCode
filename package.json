@@ -1,8 +1,8 @@
 {
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
-	"description": "Power BI Extension for VSCode",
-	"version": "1.9.0",
+	"description": "Fabric and Power BI Extension for VSCode",
+	"version": "2.0.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -108,19 +108,19 @@
 						},
 						"default": [
 							{
-								"itemType": "Notebook"
+								"itemType": "notebooks"
 							},
 							{
-								"itemType": "Report"
+								"itemType": "reports"
 							},
 							{
-								"itemType": "SemanticModel"
+								"itemType": "semanticModels"
 							},
 							{
-								"itemType": "SparkJobDefinition"
+								"itemType": "sparkJobDefinitions"
 							},
 							{
-								"itemType": "DataPipeline"
+								"itemType": "dataPipelines"
 							}
 						]
 					},

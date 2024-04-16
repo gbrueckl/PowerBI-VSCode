@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { Helper } from '../../../helpers/Helper';
 import { FABRIC_SCHEME } from './FabricFileSystemProvider';
-import { FabricApiItemType } from '../../../fabric/_types';
+import { FabricApiItemTypeWithDefinition } from '../../../fabric/_types';
 import { ThisExtension } from '../../../ThisExtension';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricFSWorkspace } from './FabricFSWorkspace';
@@ -30,7 +30,7 @@ export class FabricFSUri {
 
 	uri: vscode.Uri;
 	workspace?: string;
-	itemType?: FabricApiItemType;
+	itemType?: FabricApiItemTypeWithDefinition;
 	item?: string;
 	part: string;
 	uriType: FabricUriType;
@@ -49,11 +49,11 @@ export class FabricFSUri {
 				ThisExtension.log(`Fabric URI '${uri.toString()}' does not match pattern ${REGEX_FABRIC_URI}!`);
 			}
 			this.workspace = paths[1];
-			this.itemType = FabricApiItemType.fromString(paths[2]);
+			this.itemType = paths[2] as FabricApiItemTypeWithDefinition;
 			this.item = paths[3];
 			this.part = paths.slice(4).join("/");
 
-			if (paths.length >= 6) {
+			if (paths.length >= 5) {
 				this.uriType = FabricUriType.part;
 			}
 			else {
@@ -90,14 +90,15 @@ export class FabricFSUri {
 	}
 
 	private get itemTypeBrowserLink(): string {
+		//TODO should be handled somehow by FabricItemType class
 		switch (this.itemType) {
-			case FabricApiItemType.Notebook: return "synapsenotebooks";
-			case FabricApiItemType.SemanticModel: return "datasets";
-			case FabricApiItemType.Report: return "reports";
-			case FabricApiItemType.SparkJobDefinition: return "sparkjobdefinitions";
+			case "Notebooks": return "synapsenotebooks";
+			case "SemanticModels": return "datasets";
+			case "Reports": return "reports";
+			case "SparkJobDefinitions": return "sparkjobdefinitions";
 			default:
 				vscode.window.showWarningMessage(`No Browser Link specified for Item Type '${this.itemType}'!`);
-				return this.itemTypeText.toLowerCase() + "s";
+				return this.itemType.toLowerCase() + "s";
 		}
 	}
 
@@ -138,7 +139,7 @@ export class FabricFSUri {
 	}
 
 	private get itemMapName(): string {
-		return decodeURI(`${this.workspaceId}/${this.itemTypeText}/${this.item}`);
+		return decodeURI(`${this.workspaceId}/${this.itemType}/${this.item}`);
 	}
 
 	get itemId(): string {
@@ -146,10 +147,6 @@ export class FabricFSUri {
 
 		ThisExtension.log("Trying to get ID for item '" + this.itemMapName + "' ...");
 		return FabricFSUri._itemNameIdMap.get(this.itemMapName);
-	}
-
-	get itemTypeText(): string {
-		return FabricApiItemType[this.itemType];
 	}
 
 	async getParent(): Promise<FabricFSUri> {
@@ -174,7 +171,7 @@ export class FabricFSUri {
 
 		if (match) {
 			this.workspace = match.groups["workspace"];
-			this.itemType = FabricApiItemType.fromString(match.groups["itemType"]);
+			this.itemType = match.groups["itemType"] as FabricApiItemTypeWithDefinition;
 			this.item = match.groups["item"];
 			this.part = match.groups["part"];
 

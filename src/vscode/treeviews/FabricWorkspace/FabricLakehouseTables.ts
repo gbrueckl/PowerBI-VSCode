@@ -3,12 +3,10 @@ import * as vscode from 'vscode';
 import { UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
-import { FabricApiItemType, iFabricApiItem, iFabricApiLakehouseTable } from '../../../fabric/_types';
+import { FabricApiItemType,  iFabricApiLakehouseTable } from '../../../fabric/_types';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';
-import { FabricLakehouse } from './FabricLakehouse';
 import { FabricWorkspaceGenericFolder } from './FabricWorkspaceGenericFolder';
 import { FabricLakehouseTable } from './FabricLakehouseTable';
 

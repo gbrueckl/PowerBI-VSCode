@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FabricApiItemFormat, FabricApiItemType } from '../../fabric/_types';
+import { FabricApiItemFormat, FabricApiItemType, FabricApiItemTypeWithDefinition } from '../../fabric/_types';
 
 /*
 CLOUD_CONFIGS are mainly derived from here:
@@ -102,12 +102,12 @@ export abstract class PowerBIConfiguration {
 	static set tmdlEnabled(value: boolean) { this.setValue("TMDL.enabled", value); }
 
 	// key must be a string value from FabricApiItemType
-	static get fabricItemTypes(): { itemType: FabricApiItemType, format: FabricApiItemFormat }[] { 
+	static get fabricItemTypes(): { itemType: FabricApiItemTypeWithDefinition, format: FabricApiItemFormat }[] { 
 		let confValues = this.getValue("Fabric.itemTypes") as { itemType: string, format: string }[];
 		
 		let typedValues = confValues.map((item) => {
 			return { 
-				itemType: FabricApiItemType[item.itemType], // strict cast as the list of itemTypes is static
+				itemType: item.itemType as FabricApiItemTypeWithDefinition, // strict cast as the list of itemTypes is static
 				format: item.format as FabricApiItemFormat // loose cast as the list of formats may change
 			};
 		});
@@ -116,14 +116,14 @@ export abstract class PowerBIConfiguration {
 	}
 
 	static get fabricItemTypeNames(): string[] {
-		return this.fabricItemTypes.map((itemType) => FabricApiItemType[itemType.itemType]);
-	}
-
-	static get fabricItemTypeKeys(): FabricApiItemType[] {
 		return this.fabricItemTypes.map((itemType) => itemType.itemType);
 	}
 
-	static getFabricItemTypeformat(itemType: FabricApiItemType): FabricApiItemFormat {
+	static get fabricItemTypeKeys(): FabricApiItemTypeWithDefinition[] {
+		return this.fabricItemTypes.map((itemType) => itemType.itemType);
+	}
+
+	static getFabricItemTypeformat(itemType: FabricApiItemTypeWithDefinition): FabricApiItemFormat {
 		const item = this.fabricItemTypes.find((item) => item.itemType == itemType);
 		if(!item || !item.format)
 		{

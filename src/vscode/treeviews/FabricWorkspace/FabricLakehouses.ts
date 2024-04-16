@@ -3,13 +3,7 @@ import * as vscode from 'vscode';
 import { UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
-import { PowerBIWorkspaceTreeItem } from '../workspaces/PowerBIWorkspaceTreeItem';
-import { iPowerBIDatasetDMV } from '../../../powerbi/DatasetsAPI/_types';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
-import { PowerBIDatasetTable } from '../workspaces/PowerBIDatasetTable';
-import { PowerBIWorkspaceGenericFolder } from '../workspaces/PowerBIWorkspaceGenericFolder';
-import { PowerBIDatasetTableColumn } from '../workspaces/PowerBIDatasetTableColumn';
 import { FabricApiItemType, iFabricApiItem } from '../../../fabric/_types';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';

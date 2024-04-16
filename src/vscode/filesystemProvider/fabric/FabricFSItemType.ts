@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { FabricFSUri } from './FabricFSUri';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
 import { FabricApiService } from '../../../fabric/FabricApiService';
-import { FabricApiItemType } from '../../../fabric/_types';
+import { FabricApiItemType, FabricApiItemTypeWithDefinition } from '../../../fabric/_types';
 import { FabricFSPublishAction } from './_types';
 import { FabricFSCache } from './FabricFSCache';
 import { FabricFSItem } from './FabricFSItem';
@@ -15,7 +15,7 @@ export class FabricFSItemType extends FabricFSCacheItem {
 		super(uri);
 	}
 
-	get itemType(): FabricApiItemType {
+	get itemType(): FabricApiItemTypeWithDefinition {
 		return this.FabricUri.itemType;
 	}
 
@@ -39,11 +39,11 @@ export class FabricFSItemType extends FabricFSCacheItem {
 
 	public async loadChildrenFromApi<T>(): Promise<void> {
 		if (!this._children) {
-			const response = await FabricApiService.listItems(this.FabricUri.workspaceId, this.FabricUri.itemType);
+			const response = await FabricApiService.getList(`/v1/workspaces/${this.FabricUri.workspaceId}/${this.FabricUri.itemType.toString()}`);
 			this._apiResponse = response.success;
 			this._children = [];
 			for (let item of this._apiResponse) {
-				FabricFSUri.addItemNameIdMap(`${item.workspaceId}/${item.type}/${item.displayName}`, item.id);
+				FabricFSUri.addItemNameIdMap(`${item.workspaceId}/${this.itemType}/${item.displayName}`, item.id);
 				this._children.push([item.displayName, vscode.FileType.Directory]);
 			}
 		}

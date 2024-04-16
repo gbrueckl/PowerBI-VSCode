@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 
 import { FabricFSUri } from './FabricFSUri';
 import { FabricFSCacheItem } from './FabricFSCacheItem';
-import { FabricApiItemFormat, FabricApiItemType, FabricApiPayloadType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart, iFabricApiResponse } from '../../../fabric/_types';
+import { FabricApiItemFormat, FabricApiPayloadType, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart, iFabricApiResponse } from '../../../fabric/_types';
 import { FabricFSWorkspace } from './FabricFSWorkspace';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { ThisExtension } from '../../../ThisExtension';
@@ -231,7 +231,7 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		let response;
 		// if the item was created locally, we need to use CREATE instead of UPDATE
 		if (this.publishAction == FabricFSPublishAction.CREATE) {
-			response = await FabricApiService.createItem(this.workspaceId, this.displayName, this.FabricUri.itemType, definition, `Creating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+			response = await FabricApiService.createItem(this.workspaceId, this.displayName, this.FabricUri.itemType, definition, `Creating ${this.FabricUri.itemType} '${this.displayName}'`);
 			// add NameIdMap for subsequent calls to the created item
 			FabricFSUri.addItemNameIdMap(`${response.success.workspaceId}/${response.success.type}/${response.success.displayName}`, response.success.id);
 			this.publishAction = FabricFSPublishAction.MODIFIED;
@@ -239,11 +239,11 @@ export class FabricFSItem extends FabricFSCacheItem implements iFabricApiItem {
 		else if (this.publishAction == FabricFSPublishAction.MODIFIED) {
 			response = await FabricApiService.updateItem(this.workspaceId, this.itemId, this.displayName, this.description);
 			if (!response.error) {
-				response = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Updating ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+				response = await FabricApiService.updateItemDefinition(this.workspaceId, this.itemId, definition, `Updating ${this.FabricUri.itemType} '${this.displayName}'`);
 			}
 		}
 		else if (this.publishAction == FabricFSPublishAction.DELETE) {
-			response = await FabricApiService.deleteItem(this.workspaceId, this.itemId, `Deleting ${this.FabricUri.itemTypeText} '${this.displayName}'`);
+			response = await FabricApiService.deleteItem(this.workspaceId, this.itemId, `Deleting ${this.FabricUri.itemType} '${this.displayName}'`);
 			FabricFSCache.removeCacheItem(this);
 			this.parent.removeChild(this.displayName)
 			ThisExtension.FabricFileSystemProvider.fireDeleted(this.FabricUri.uri);

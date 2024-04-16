@@ -1,7 +1,8 @@
 # Change Log
 
-**v1.9.0**:
+**v2.0.0**:
 - added Fabric Workspace Browser
+- added support for [Long Running Operation (LRO)](https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation) when calling Fabric APIs from notebooks
 - added check for Dataset refreshes and whether `isRefreshable = true`
 
 **v1.8.1**:
