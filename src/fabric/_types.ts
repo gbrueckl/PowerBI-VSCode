@@ -26,6 +26,7 @@ export enum FabricApiItemType {
 	, "Lakehouses"					//	Folder for Lakehouse item.
 	, "LakehouseTable"				//	Lakehouse Table
 	, "LakehouseTables"				//	Folder for Lakehouse Table item.
+	, "DataPipelines"				//	Folder for DataPipeline item.
 };
 
 export namespace FabricApiItemType {

@@ -60,4 +60,26 @@ export class FabricLakehouseTable extends FabricWorkspaceTreeItem {
 	get tableLocation(): string {
 		return this.tableDefinition.location
 	}
+
+	async runMaintenanceJob(): Promise<void> {
+		// https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-api#table-maintenance-api-request
+
+		/*
+		POST https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/items/{lakehouseId}/jobs/instances?jobType=TableMaintenance
+		{
+			"executionData": {
+				"tableName": "{table_name}",
+				"optimizeSettings": {
+					"vOrder": true,
+					"zOrderBy": [
+						"tipAmount"
+					]
+				},
+				"vacuumSettings": {
+					"retentionPeriod": "7.01:00:00"
+				}
+			}
+		}
+		*/
+	}
 }

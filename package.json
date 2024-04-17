@@ -601,6 +601,36 @@
 				"title": "Copy OneLake Tables Path",
 				"icon": "$(layout-panel-justify)",
 				"category": "Fabric.Lakehouse"
+			},
+			{
+				"command": "Fabric.Item.openInBrowser",
+				"title": "Open in Fabric Service",
+				"icon": "$(globe)",
+				"category": "Fabric.Item"
+			},
+			{
+				"command": "Fabric.Item.copyIdToClipboard",
+				"title": "Copy ID to Clipboard",
+				"icon": "$(clippy)",
+				"category": "Fabric.Item"
+			},
+			{
+				"command": "Fabric.Item.copyNameToClipboard",
+				"title": "Copy Name to Clipboard",
+				"icon": "$(clippy)",
+				"category": "Fabric.Item"
+			},
+			{
+				"command": "Fabric.Item.copyPathToClipboard",
+				"title": "Copy API Path to Clipboard",
+				"icon": "$(clippy)",
+				"category": "Fabric.Item"
+			},
+			{
+				"command": "Fabric.Item.insertPath",
+				"title": "Insert Path",
+				"icon": "$(code)",
+				"category": "Fabric.Item"
 			}
 		],
 		"menus": {
@@ -846,6 +876,32 @@
 					"command": "PowerBIPipelineStage.unassignWorkspace",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,UNASSIGN,.*/",
 					"group": "navigation"
+				},
+
+				{
+					"command": "Fabric.Item.openInBrowser",
+					"when": "view =~ /(FabricWorkspaces)/",
+					"group": "7_open"
+				},
+				{
+					"command": "Fabric.Item.copyIdToClipboard",
+					"when": "view =~ /(FabricWorkspaces)/",
+					"group": "6_copypath"
+				},
+				{
+					"command": "Fabric.Item.copyNameToClipboard",
+					"when": "view =~ /(FabricWorkspaces)/",
+					"group": "6_copypath"
+				},
+				{
+					"command": "Fabric.Item.copyPathToClipboard",
+					"when": "view =~ /(FabricWorkspaces)/",
+					"group": "6_copypath"
+				},
+				{
+					"command": "Fabric.Item.insertPath",
+					"when": "view =~ /(FabricWorkspaces)/",
+					"group": "inline"
 				},
 				{
 					"command": "Fabric.Lakehouse.copySQLConnectionString",

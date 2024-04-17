@@ -9,6 +9,7 @@ import { FabricApiItemType, FabricApiWorkspaceType, iFabricApiCapacity, iFabricA
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { FABRIC_SCHEME } from '../../filesystemProvider/fabric/FabricFileSystemProvider';
 import { FabricFSUri } from '../../filesystemProvider/fabric/FabricFSUri';
+import { FabricDataPipelines } from './FabricDataPipelines';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class FabricWorkspace extends FabricWorkspaceTreeItem {
@@ -57,6 +58,7 @@ export class FabricWorkspace extends FabricWorkspaceTreeItem {
 	async getChildren(element?: FabricWorkspaceTreeItem): Promise<FabricWorkspaceTreeItem[]> {
 		let children: FabricWorkspaceTreeItem[] = [];
 
+		children.push(new FabricDataPipelines(this.itemId, this));
 		children.push(new FabricLakehouses(this.itemId, this));
 
 		return children;

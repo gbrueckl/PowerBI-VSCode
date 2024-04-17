@@ -17,7 +17,7 @@ export class FabricItemType {
 
 		let result: FabricItemType = new FabricItemType();
 		result._itemType = FabricApiItemType[itemType];
-		result._itemTypeWithDefinition = FabricApiItemTypeWithDefinition[itemTypeWithDefinition];
+		result._itemTypeWithDefinition = itemTypeWithDefinition as FabricApiItemTypeWithDefinition;
 
 		return result;
 	}

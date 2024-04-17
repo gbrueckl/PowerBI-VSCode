@@ -240,7 +240,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 					endpoint = this.resolveRelativePath(endpoint, customApi);
 
-					const useFabricApi = endpoint.includes("api.fabric.microsoft.com");
+					const useFabricApi = endpoint.includes("api.fabric.microsoft.com") || endpoint.includes("/workspaces/");
 					let fabricResult: iFabricApiResponse<any>;
 
 					switch (method) {

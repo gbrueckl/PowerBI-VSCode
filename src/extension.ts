@@ -107,6 +107,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('FabricWorkspaces.refresh', (item: FabricWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => fabricWorkspacesTreeProvider.refresh(item, showInfoMessage));
 	vscode.commands.registerCommand('FabricWorkspaces.editItems', (item: FabricWorkspaceTreeItem = undefined) => item.editItems());
 
+	vscode.commands.registerCommand('Fabric.Item.copyIdToClipboard', (treeItem: FabricWorkspaceTreeItem) => treeItem.copyIdToClipboard());
+	vscode.commands.registerCommand('Fabric.Item.copyNameToClipboard', (treeItem: FabricWorkspaceTreeItem) => treeItem.copyNameToClipboard());
+	vscode.commands.registerCommand('Fabric.Item.copyPathToClipboard', (treeItem: FabricWorkspaceTreeItem) => treeItem.copyPathToClipboard());
+	vscode.commands.registerCommand('Fabric.Item.insertPath', (treeItem: FabricWorkspaceTreeItem) => treeItem.insertCode());
+
+
 	vscode.commands.registerCommand('Fabric.Lakehouse.copySQLConnectionString', (treeItem: FabricLakehouse) => treeItem.copySQLConnectionString());
 	vscode.commands.registerCommand('Fabric.Lakehouse.copyOneLakeFilesPath', (treeItem: FabricLakehouse) => treeItem.copyOneLakeFilesPath());
 	vscode.commands.registerCommand('Fabric.Lakehouse.copyOneLakeTablesPath', (treeItem: FabricLakehouse) => treeItem.copyOneLakeTablesPath());

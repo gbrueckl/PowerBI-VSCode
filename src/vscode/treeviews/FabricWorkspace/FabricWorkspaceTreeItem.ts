@@ -6,6 +6,7 @@ import { ThisExtension, TreeProviderId } from '../../../ThisExtension';
 import { FabricApiItemType, FabricApiWorkspaceType, iFabricApiItem } from '../../../fabric/_types';
 import { FabricFSUri } from '../../filesystemProvider/fabric/FabricFSUri';
 import { FABRIC_SCHEME } from '../../filesystemProvider/fabric/FabricFileSystemProvider';
+import { FabricApiService } from '../../../fabric/FabricApiService';
 
 export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabricApiItem {
 	protected _displayName: string;
@@ -59,7 +60,7 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 	}
 
 	protected getIconPath(theme: string): string | vscode.Uri {
-		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, FabricApiItemType[this.type] + '.png');
+		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, 'Fabric', FabricApiItemType[this.type] + '.svg');
 	}
 
 	// tooltip shown when hovering over the item
@@ -67,7 +68,7 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 		let tooltip: string = "";
 		for (const [key, value] of Object.entries(definition)) {
 			if (typeof value === "string") {
-				if (value.length > 100) {
+				if (value.length > 100 || value.length < 1) {
 					continue;
 				}
 			}
@@ -145,6 +146,31 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 		}
 
 		return parent as T;
+	}
+
+	public copyIdToClipboard(): void {
+		vscode.env.clipboard.writeText(this.itemId.toString());
+	}
+
+	public copyNameToClipboard(): void {
+		vscode.env.clipboard.writeText(this.displayName);
+	}
+
+	public copyPathToClipboard(): void {
+		vscode.env.clipboard.writeText(this.apiPath);
+	}
+
+	public getBrowserLink(): vscode.Uri {
+		//https://app.powerbi.com/groups/ccce57d1-10af-1234-1234-665f8bbd8458/datasets/7cdff921-9999-8888-b0c8-34be20567742
+
+		return vscode.Uri.joinPath(vscode.Uri.parse(FabricApiService.BrowserBaseUrl), this.itemPath);
+	}
+
+	public openInBrowser(): void {
+		const tenantParam = FabricApiService.TenantId ? `?ctid=${FabricApiService.TenantId}` : "";
+		const fullLink = `${this.getBrowserLink()}${tenantParam}`;
+		
+		Helper.openLink(fullLink);
 	}
 
 	get apiUrlPart(): string {

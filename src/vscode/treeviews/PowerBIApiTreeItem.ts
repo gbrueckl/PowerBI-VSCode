@@ -60,7 +60,7 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		let tooltip: string = "";
 		for (const [key, value] of Object.entries(this._definition)) {
 			if (typeof value === "string") {
-				if (value.length > 100) {
+				if (value.length > 100 || value.length < 1) {
 					continue;
 				}
 			}
