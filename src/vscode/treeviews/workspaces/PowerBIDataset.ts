@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import { startExternalProcess } from '@env/process';
 import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
@@ -17,6 +18,8 @@ import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
 import { TMDLProxy } from '../../../TMDLVSCode/TMDLProxy';
 import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTables } from './PowerBIDatasetTables';
+import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
+
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxyBackup, TOMProxyRestore {
@@ -270,6 +273,30 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 
 	public async copyConnectionString(): Promise<void> {
 		vscode.env.clipboard.writeText(await this.getXMLACConnectionString());
+	}
+
+	public async openInTabularEditor(): Promise<void> {
+		const xmlaConnectionString = await this.getXMLACConnectionString();
+		const tabularEditorExecutable = PowerBIConfiguration.TabularEditorExecutable;
+		if (!tabularEditorExecutable) {
+			vscode.window.showErrorMessage("Tabular Editor path not configured! Please use setting 'powerbi.TabularEditorExecutable' to set the path to Tabular Editor executable.");
+			return;
+		}
+
+		let accessToken = "";
+		if(PowerBIConfiguration.tmdlClientId) {
+			const xmlaSession = (await PowerBIApiService.getXmlaSession())
+			accessToken = `;Password=${xmlaSession.accessToken};`
+		}
+		
+
+		const tabularEditorArgs = [
+			`"${Helper.trimChar(xmlaConnectionString, ';')}${accessToken}"`, 
+			//`"${Helper.trimChar(xmlaConnectionString, ';')}"`,
+			`"${this.name}"`
+		];
+
+		startExternalProcess(tabularEditorExecutable, tabularEditorArgs);
 	}
 }
 

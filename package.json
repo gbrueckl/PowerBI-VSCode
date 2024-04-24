@@ -87,6 +87,14 @@
 						"markdownDescription": "Set to true to allow editing Power BI datasets using TMDL.",
 						"default": true
 					},
+					"powerbi.TabularEditorExecutable": {
+						"type": "string",
+						"markdownDescription": "The path to the Tabular Editor executable. If not set, a dataset cannot be opened in Tabular Editor from this extension.",
+						"default": null,
+						"examples": [
+							"%ProgramFiles(x86)%\\TabularEditor\\TabularEditor.exe"
+						]
+					},
 					"powerbi.Fabric.itemTypes": {
 						"type": "array",
 						"markdownDescription": "(Optional) A list of [Fabric Item Types](https://learn.microsoft.com/en-us/rest/api/fabric/core/items/list-items?tabs=HTTP#itemtype) with an optional [Format](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/notebook-definition#supported-formats) as list of objects.",
@@ -421,6 +429,12 @@
 			{
 				"command": "PowerBIDataset.copyConnectionString",
 				"title": "Copy ConnectionString",
+				"icon": "$(debug-disconnect)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIDataset.openInTabularEditor",
+				"title": "Open in Tabular Editor",
 				"icon": "$(debug-disconnect)",
 				"category": "PowerBI"
 			},
@@ -789,8 +803,13 @@
 				},
 				{
 					"command": "PowerBIDataset.copyConnectionString",
-					"when": "view == PowerBIWorkspaces  && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,COPY_CONNECTIONSTRING,.*/",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,COPY_CONNECTIONSTRING,.*/",
 					"group": "6_copypath"
+				},
+				{
+					"command": "PowerBIDataset.openInTabularEditor",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && !powerbi.isInBrowser",
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDatasetRefresh.cancel",

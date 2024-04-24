@@ -261,6 +261,12 @@ export abstract class ThisExtension {
 			"powerbi.isTMDLEnabled",
 			PowerBIConfiguration.isTMDLEnabled
 		);
+
+		vscode.commands.executeCommand(
+			"setContext",
+			"powerbi.isInBrowser",
+			this.isInBrowser
+		);
 	}
 
 	public static get TreeProviderIds(): TreeProviderId[] {
