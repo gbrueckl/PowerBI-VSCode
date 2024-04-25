@@ -87,14 +87,6 @@
 						"markdownDescription": "Set to true to allow editing Power BI datasets using TMDL.",
 						"default": true
 					},
-					"powerbi.TabularEditorExecutable": {
-						"type": "string",
-						"markdownDescription": "The path to the Tabular Editor executable. If not set, a dataset cannot be opened in Tabular Editor from this extension.",
-						"default": null,
-						"examples": [
-							"%ProgramFiles(x86)%\\TabularEditor\\TabularEditor.exe"
-						]
-					},
 					"powerbi.Fabric.itemTypes": {
 						"type": "array",
 						"markdownDescription": "(Optional) A list of [Fabric Item Types](https://learn.microsoft.com/en-us/rest/api/fabric/core/items/list-items?tabs=HTTP#itemtype) with an optional [Format](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/notebook-definition#supported-formats) as list of objects.",
@@ -433,9 +425,9 @@
 				"category": "PowerBI"
 			},
 			{
-				"command": "PowerBIDataset.openInTabularEditor",
-				"title": "Open in Tabular Editor",
-				"icon": "$(debug-disconnect)",
+				"command": "PowerBIDataset.openExternalTool",
+				"title": "Open PowerBI External Tool",
+				"icon": "$(extensions)",
 				"category": "PowerBI"
 			},
 			{
@@ -807,7 +799,7 @@
 					"group": "6_copypath"
 				},
 				{
-					"command": "PowerBIDataset.openInTabularEditor",
+					"command": "PowerBIDataset.openExternalTool",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && !powerbi.isInBrowser",
 					"group": "navigation"
 				},

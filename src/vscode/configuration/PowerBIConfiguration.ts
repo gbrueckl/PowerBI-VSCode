@@ -101,9 +101,6 @@ export abstract class PowerBIConfiguration {
 	static get tmdlEnabled(): boolean { return this.getValue("TMDL.enabled"); }
 	static set tmdlEnabled(value: boolean) { this.setValue("TMDL.enabled", value); }
 
-	static get TabularEditorExecutable(): string { return this.getValue("TabularEditorExecutable"); }
-	static set TabularEditorExecutable(value: string) { this.setValue("TabularEditorExecutable", value); }
-
 	// key must be a string value from FabricApiItemType
 	static get fabricItemTypes(): { itemType: FabricApiItemTypeWithDefinition, format: FabricApiItemFormat }[] { 
 		let confValues = this.getValue("Fabric.itemTypes") as { itemType: string, format: string }[];

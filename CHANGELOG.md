@@ -4,7 +4,7 @@
 - added Fabric Workspace Browser
 - added support for [Long Running Operation (LRO)](https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation) when calling Fabric APIs from notebooks
 - added check for Dataset refreshes and whether `isRefreshable = true`
-- added support for `Open in Tabular Editor`
+- added feature to open External Tools configured in PowerBI Desktop with connection to online dataset preconfigured
 
 **v1.8.1**:
 - fix issue with Processing of individual partitions if Incremental Refresh is configured ([#27](/../../issues/27))

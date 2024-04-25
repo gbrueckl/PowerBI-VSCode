@@ -60,3 +60,12 @@ export type ApiItemType =
 |	"LAKEHOUSETABLES"
 |	"LAKEHOUSETABLE"
 ;
+
+export interface iPowerBIDesktopExternalToolConfig {
+	version: string;
+    name: string;
+	description: string;
+	path: string;
+	arguments: string;
+	iconData: string;
+}

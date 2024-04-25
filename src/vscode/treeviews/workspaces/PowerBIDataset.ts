@@ -19,6 +19,7 @@ import { TMDLProxy } from '../../../TMDLVSCode/TMDLProxy';
 import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
+import { iPowerBIDesktopExternalToolConfig } from '../_types';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -45,10 +46,10 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			"DELETE"
 		]
 
-		if(this.definition.IsRefreshable) {
+		if (this.definition.IsRefreshable) {
 			actions.push("REFRESH");
 		}
-		
+
 		if (this.definition.configuredBy != PowerBIApiService.SessionUserEmail) {
 			actions.push("TAKEOVER");
 		}
@@ -275,28 +276,70 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		vscode.env.clipboard.writeText(await this.getXMLACConnectionString());
 	}
 
-	public async openInTabularEditor(): Promise<void> {
-		const xmlaConnectionString = await this.getXMLACConnectionString();
-		const tabularEditorExecutable = PowerBIConfiguration.TabularEditorExecutable;
-		if (!tabularEditorExecutable) {
-			vscode.window.showErrorMessage("Tabular Editor path not configured! Please use setting 'powerbi.TabularEditorExecutable' to set the path to Tabular Editor executable.");
+	public static async openPowerBIDesktopExternalTool(dataset: PowerBIDataset): Promise<void> {
+		const paths = [
+			vscode.Uri.file(process.env["CommonProgramFiles(x86)"]),
+			vscode.Uri.file(process.env["CommonProgramFiles"])
+		]
+
+		let extToolPaths: vscode.Uri[] = []
+		for (let path of paths) {
+			try {
+				ThisExtension.log("Searching for Power BI Desktop External Tools in " + path.fsPath + " ...");
+				let dirs = await vscode.workspace.fs.readDirectory(vscode.Uri.joinPath(path, "Microsoft Shared", "Power BI Desktop", "External Tools"));
+				for (let dir of dirs) {
+					extToolPaths.push(vscode.Uri.joinPath(path, "Microsoft Shared", "Power BI Desktop", "External Tools", dir[0]));
+				}
+			}
+			catch {
+				ThisExtension.log("Error checking for Power BI Desktop External Tools in " + path.fsPath + "! Folder will be skipped!")
+			}
+		}
+
+		if(extToolPaths.length == 0) {
+			vscode.window.showErrorMessage("No Power BI Desktop External Tools found!");
 			return;
 		}
 
-		let accessToken = "";
-		if(PowerBIConfiguration.tmdlClientId) {
-			const xmlaSession = (await PowerBIApiService.getXmlaSession())
-			accessToken = `;Password=${xmlaSession.accessToken};`
+		let extToolConfigs: iPowerBIDesktopExternalToolConfig[] = []
+		let qpItems: vscode.QuickPickItem[] = []
+		for (let extToolPath of extToolPaths) {
+			let extToolConfig: iPowerBIDesktopExternalToolConfig = JSON.parse(Buffer.from(await vscode.workspace.fs.readFile(extToolPath)).toString());
+			extToolConfigs.push(extToolConfig);
+			let qpItem: vscode.QuickPickItem = {
+				"label": extToolConfig.name,
+				"detail": extToolConfig.description,
+				"description": extToolConfig.version,
+				"iconPath": vscode.Uri.parse("data:" + extToolConfig.iconData)
+			};
+			qpItems.push(qpItem);
+		}
+
+		let selectedTool = await vscode.window.showQuickPick(qpItems, {ignoreFocusOut: true})
+		
+		if (!selectedTool) {
+			Helper.showTemporaryInformationMessage("No tool selected - aborting... !");
+			return;
+		}
+
+		let selectedToolConfig = extToolConfigs.find((config) => config.name == selectedTool.label);
+		if (!selectedToolConfig) {
+			return;
+		}
+
+		let args = [];
+		if(dataset) {
+			const xmlaEndpoint = PowerBIApiService.getXmlaEndpoint(dataset.workspace.name);
+			args = selectedToolConfig.arguments.split(" ").map((arg) => arg.replace("%server%", xmlaEndpoint.toString()).replace("%database%", dataset.name));
+			//args = [selectedToolConfig.arguments.replace("%server%", xmlaEndpoint.toString()).replace("%database%", dataset.name)]
 		}
 		
-
-		const tabularEditorArgs = [
-			`"${Helper.trimChar(xmlaConnectionString, ';')}${accessToken}"`, 
-			//`"${Helper.trimChar(xmlaConnectionString, ';')}"`,
-			`"${this.name}"`
-		];
-
-		startExternalProcess(tabularEditorExecutable, tabularEditorArgs);
+		let extProcess = await startExternalProcess(selectedToolConfig.path, args);
+		if(dataset) {
+			extProcess.on('exit', () => {
+				ThisExtension.TreeViewWorkspaces.refresh(dataset, true)
+		});
+		}
 	}
 }
 

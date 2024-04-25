@@ -42,7 +42,6 @@ import { FabricFSUri } from './vscode/filesystemProvider/fabric/FabricFSUri';
 import { FabricFSFileDecorationProvider } from './vscode/fileDecoration/FabricFileDecorationProvider';
 import { FabricWorkspacesTreeProvider } from './vscode/treeviews/FabricWorkspace/FabricWorkspacesTreeProvider';
 import { FabricWorkspaceTreeItem } from './vscode/treeviews/FabricWorkspace/FabricWorkspaceTreeItem';
-import { FabricWorkspace } from './vscode/treeviews/FabricWorkspace/FabricWorkspace';
 import { FabricLakehouse } from './vscode/treeviews/FabricWorkspace/FabricLakehouse';
 
 
@@ -142,7 +141,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIDataset.syncReadOnlyReplicas', (dataset: PowerBIDataset) => dataset.syncReadOnlyReplicas());
 	vscode.commands.registerCommand('PowerBIDataset.editTMDL', (dataset: PowerBIDataset) => dataset.editTMDL());
 	vscode.commands.registerCommand('PowerBIDataset.copyConnectionString', (dataset: PowerBIDataset) => dataset.copyConnectionString());
-	vscode.commands.registerCommand('PowerBIDataset.openInTabularEditor', (dataset: PowerBIDataset) => dataset.openInTabularEditor());
+	vscode.commands.registerCommand('PowerBIDataset.openExternalTool', (dataset: PowerBIDataset) => PowerBIDataset.openPowerBIDesktopExternalTool(dataset));
 	// DatasetParameter commands
 	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
 
