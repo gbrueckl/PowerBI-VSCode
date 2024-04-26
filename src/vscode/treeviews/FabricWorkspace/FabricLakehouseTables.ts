@@ -9,6 +9,7 @@ import { FabricApiService } from '../../../fabric/FabricApiService';
 import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';
 import { FabricWorkspaceGenericFolder } from './FabricWorkspaceGenericFolder';
 import { FabricLakehouseTable } from './FabricLakehouseTable';
+import { FabricWorkspace } from './FabricWorkspace';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class FabricLakehouseTables extends FabricWorkspaceGenericFolder {
@@ -17,6 +18,15 @@ export class FabricLakehouseTables extends FabricWorkspaceGenericFolder {
 		parent: FabricWorkspaceTreeItem
 	) {
 		super("Tables", FabricApiItemType.LakehouseTables, workspaceId, parent, "tables");
+	}
+
+	/* Overwritten properties from FabricApiTreeItem */
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = ["BROWSEONELAKE"];
+
+		return orig + actions.join(",") + ",";
 	}
 
 	async getChildren(element?: FabricWorkspaceTreeItem): Promise<FabricWorkspaceTreeItem[]> {
@@ -44,5 +54,13 @@ export class FabricLakehouseTables extends FabricWorkspaceGenericFolder {
 
 			return children;
 		}
+	}
+
+	get oneLakeUri(): vscode.Uri {
+		// onelake:/<WorkspaceName>/<ItemName>.<ItemType>
+		const workspace = this.getParentByType<FabricWorkspace>(FabricApiItemType.Workspace);
+		const lakehouse = this.getParentByType<FabricWorkspace>(FabricApiItemType.Lakehouse);
+		
+		return vscode.Uri.parse(`onelake://${workspace.displayName}/${lakehouse.displayName}.Lakehouse/Tables`);
 	}
 }

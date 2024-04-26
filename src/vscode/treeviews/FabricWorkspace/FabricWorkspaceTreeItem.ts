@@ -7,6 +7,7 @@ import { FabricApiItemType, FabricApiWorkspaceType, iFabricApiItem } from '../..
 import { FabricFSUri } from '../../filesystemProvider/fabric/FabricFSUri';
 import { FABRIC_SCHEME } from '../../filesystemProvider/fabric/FabricFileSystemProvider';
 import { FabricApiService } from '../../../fabric/FabricApiService';
+import { FabricWorkspace } from './FabricWorkspace';
 
 export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabricApiItem {
 	protected _displayName: string;
@@ -106,6 +107,10 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 		return this._type;
 	}
 
+	get typeKey(): FabricApiItemType {
+		return Number(this._type) as FabricApiItemType;
+	}
+
 	/* Overwritten properties from FabricApiTreeItem */
 	get definition(): iFabricApiItem {
 		return this._definition as iFabricApiItem;
@@ -131,7 +136,7 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 	getParentByType<T = FabricWorkspaceTreeItem>(type: FabricApiItemType): T {
 		let parent: FabricWorkspaceTreeItem = this.parent;
 
-		while (parent !== undefined && FabricApiItemType[parent.type] !== type) {
+		while (parent !== undefined && parent.typeKey !== type) {
 			parent = parent.parent;
 		}
 
@@ -141,7 +146,7 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 	getPathItemByType<T = FabricWorkspaceTreeItem>(type: FabricApiItemType): T {
 		let parent: FabricWorkspaceTreeItem = this;
 
-		while (parent !== undefined && FabricApiItemType[parent.type] !== type) {
+		while (parent !== undefined && parent.typeKey !== type) {
 			parent = parent.parent;
 		}
 
@@ -200,6 +205,10 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 		return `${urlParts.reverse().join("/")}`;
 	}
 
+	get oneLakeUri(): vscode.Uri {
+		return undefined;
+	}
+
 	get apiPath(): string {
 		return `/v1/${this.itemPath}`;
 	}
@@ -231,10 +240,8 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 	public async editItems(): Promise<void> {
 		const fabricUri = new FabricFSUri(vscode.Uri.parse(`${FABRIC_SCHEME}://${this.itemPath}`));
 
-		await Helper.addToWorkspace(fabricUri.uri, `Fabric - ${this.displayName}`);
+		await Helper.addToWorkspace(fabricUri.uri, `Fabric - ${this.displayName}`, true);
 		// if the workspace does not exist, the folder is opened in a new workspace where the Fabric folder would be reloaded again
 		// so we only load the URI if we already have a workspace
-
-		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", fabricUri.uri);
 	}
 }

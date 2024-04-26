@@ -241,11 +241,9 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 	public async editTMDL(): Promise<void> {
 		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.workspace.name}/${this.name}`));
 
-		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - ${this.name}`);
+		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - ${this.name}`, true);
 		// if the workspace does not exist, the folder is opened in a new workspace where the TMDL folder would be reloaded again
 		// so we only load the model if we already have a workspace
-
-		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
 	}
 
 	public async updateAllParameters(): Promise<void> {

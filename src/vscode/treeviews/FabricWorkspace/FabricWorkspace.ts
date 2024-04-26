@@ -43,7 +43,7 @@ export class FabricWorkspace extends FabricWorkspaceTreeItem {
 	get _contextValue(): string {
 		let orig: string = super._contextValue;
 
-		let actions: string[] = []
+		let actions: string[] = ["BROWSEONELAKE"];
 
 		if (this.capacityId) {
 			actions.push("UNASSIGNCAPACITY");
@@ -70,6 +70,13 @@ export class FabricWorkspace extends FabricWorkspaceTreeItem {
 			capacityType = "_premium";
 		}
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, "group" + capacityType + '.png');
+	}
+
+	get oneLakeUri(): vscode.Uri {
+	// onelake:/<WorkspaceName>/<ItemName>.<ItemType>
+		const workspace = this.getParentByType<FabricWorkspace>(FabricApiItemType.Workspace);
+		
+		return vscode.Uri.parse(`onelake://${workspace.displayName}`);
 	}
 
 	get apiUrlPart(): string {
@@ -104,8 +111,6 @@ export class FabricWorkspace extends FabricWorkspaceTreeItem {
 	public async browseFabric(): Promise<void> {
 		const fabricUri = new FabricFSUri(vscode.Uri.parse(`${FABRIC_SCHEME}://${this.workspaceId}`))
 
-		await Helper.addToWorkspace(fabricUri.uri, `Fabric - Workspace ${this.displayName}`);
-
-		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", fabricUri.uri);
+		await Helper.addToWorkspace(fabricUri.uri, `Fabric - Workspace ${this.displayName}`, true);
 	}
 }

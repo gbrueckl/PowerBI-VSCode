@@ -43,6 +43,7 @@ import { FabricFSFileDecorationProvider } from './vscode/fileDecoration/FabricFi
 import { FabricWorkspacesTreeProvider } from './vscode/treeviews/FabricWorkspace/FabricWorkspacesTreeProvider';
 import { FabricWorkspaceTreeItem } from './vscode/treeviews/FabricWorkspace/FabricWorkspaceTreeItem';
 import { FabricLakehouse } from './vscode/treeviews/FabricWorkspace/FabricLakehouse';
+import { Helper } from './helpers/Helper';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -110,6 +111,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('Fabric.Item.copyNameToClipboard', (treeItem: FabricWorkspaceTreeItem) => treeItem.copyNameToClipboard());
 	vscode.commands.registerCommand('Fabric.Item.copyPathToClipboard', (treeItem: FabricWorkspaceTreeItem) => treeItem.copyPathToClipboard());
 	vscode.commands.registerCommand('Fabric.Item.insertPath', (treeItem: FabricWorkspaceTreeItem) => treeItem.insertCode());
+	vscode.commands.registerCommand('Fabric.Item.browseInOneLake', (treeItem: FabricWorkspaceTreeItem) => Helper.addToWorkspace(treeItem.oneLakeUri, `OneLake - ${treeItem.label}`, true, true));
 
 
 	vscode.commands.registerCommand('Fabric.Lakehouse.copySQLConnectionString', (treeItem: FabricLakehouse) => treeItem.copySQLConnectionString());

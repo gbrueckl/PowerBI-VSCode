@@ -137,7 +137,7 @@ export abstract class Helper {
 				ThisExtension.log("WARNING: sortArrayByProperty: property '" + property + "' does not exist on one of the items.\n" + JSON.stringify(t1) + "\n" + JSON.stringify(t2));
 				return 0;
 			}
-			if( t1[property] == undefined ||  t2[property] == undefined){
+			if (t1[property] == undefined || t2[property] == undefined) {
 				return 0;
 			}
 			const name1 = t1[property].toString().toLowerCase();
@@ -189,8 +189,7 @@ export abstract class Helper {
 
 	static openLink(link: string | vscode.Uri): void {
 		ThisExtension.log(`Opening link in Brwoser: ${link.toString()}`);
-		if(typeof link === "string")
-		{
+		if (typeof link === "string") {
 			vscode.env.openExternal(vscode.Uri.parse(link));
 		}
 		else {
@@ -277,11 +276,18 @@ export abstract class Helper {
 		return value[0].toUpperCase() + value.substring(1).toLowerCase();
 	}
 
-	static async addToWorkspace(uri: vscode.Uri, name: string): Promise<void> {
+	static async addToWorkspace(uri: vscode.Uri, name: string, open: boolean = true, showMessage: boolean = false): Promise<void> {
 		await vscode.workspace.updateWorkspaceFolders(
 			vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders.length : 0,
 			0,
 			{ uri: uri, name: name });
+
+		if (open) {
+			await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", uri);
+		}
+		if (showMessage) {
+			await Helper.showTemporaryInformationMessage(`Added '${name}' to VSCode Explorer!`, 10000);
+		}
 	}
 
 	static parentUri(uri: vscode.Uri): vscode.Uri {

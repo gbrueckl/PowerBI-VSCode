@@ -38,6 +38,14 @@ export class FabricLakehouseTable extends FabricWorkspaceTreeItem {
 		return new vscode.ThemeIcon("layout-panel-justify");
 	}
 
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = ["BROWSEONELAKE"];
+
+		return orig + actions.join(",") + ",";
+	}
+
 	// description is show next to the label
 	get _description(): string {
 		if (this.tableDefinition) {
@@ -81,5 +89,13 @@ export class FabricLakehouseTable extends FabricWorkspaceTreeItem {
 			}
 		}
 		*/
+	}
+
+	get oneLakeUri(): vscode.Uri {
+		// onelake:/<WorkspaceName>/<ItemName>.<ItemType>
+		const workspace = this.getParentByType<FabricWorkspace>(FabricApiItemType.Workspace);
+		const lakehouse = this.getParentByType<FabricWorkspace>(FabricApiItemType.Lakehouse);
+		
+		return vscode.Uri.parse(`onelake://${workspace.displayName}/${lakehouse.displayName}.Lakehouse/Tables/${this.displayName}`);
 	}
 }

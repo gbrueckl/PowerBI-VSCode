@@ -181,9 +181,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 	public async browseTMDL(): Promise<void> {
 		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.name}`))
 
-		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - Workspace ${this.name}`);
-
-		await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
+		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - Workspace ${this.name}`, true);
 	}
 
 	public static async uploadPbixFiles(workspace: PowerBIWorkspace, fileUris: vscode.Uri[]): Promise<iPowerBIImportDetails[]> {

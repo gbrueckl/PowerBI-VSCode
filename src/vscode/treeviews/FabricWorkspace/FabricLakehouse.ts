@@ -24,6 +24,16 @@ export class FabricLakehouse extends FabricWorkspaceTreeItem {
 		this.contextValue = this._contextValue;
 	}
 
+	/* Overwritten properties from FabricApiTreeItem */
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = ["BROWSEONELAKE"];
+
+		return orig + actions.join(",") + ",";
+	}
+
+
 	async getChildren(element?: FabricWorkspaceTreeItem): Promise<FabricWorkspaceTreeItem[]> {
 		let children: FabricWorkspaceTreeItem[] = [];
 
@@ -69,5 +79,12 @@ export class FabricLakehouse extends FabricWorkspaceTreeItem {
 
 	public async copyOneLakeTablesPath(): Promise<void> {
 		vscode.env.clipboard.writeText(await this.getOneLakeTablesPath());
+	}
+
+	get oneLakeUri(): vscode.Uri {
+	// onelake:/<WorkspaceName>/<ItemName>.<ItemType>
+		const workspace = this.getParentByType<FabricWorkspace>(FabricApiItemType.Workspace);
+		
+		return vscode.Uri.parse(`onelake://${workspace.displayName}/${this.displayName}.Lakehouse`);
 	}
 }

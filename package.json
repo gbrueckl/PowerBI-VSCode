@@ -637,6 +637,12 @@
 				"title": "Insert Path",
 				"icon": "$(code)",
 				"category": "Fabric.Item"
+			},
+			{
+				"command": "Fabric.Item.browseInOneLake",
+				"title": "Browse in OneLake",
+				"icon": "$(link-external)",
+				"category": "Fabric.Item"
 			}
 		],
 		"menus": {
@@ -913,6 +919,11 @@
 					"command": "Fabric.Item.insertPath",
 					"when": "view =~ /(FabricWorkspaces)/",
 					"group": "inline"
+				},
+				{
+					"command": "Fabric.Item.browseInOneLake",
+					"when": "view == FabricWorkspaces && viewItem =~ /.*,BROWSEONELAKE,.*/",
+					"group": "navigation"
 				},
 				{
 					"command": "Fabric.Lakehouse.copySQLConnectionString",
