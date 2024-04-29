@@ -431,6 +431,12 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIDataset.showMemoryStats",
+				"title": "Show Memory Statistics",
+				"icon": "$(chip)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIDatasetParameter.update",
 				"title": "Update",
 				"icon": "$(pencil)",
@@ -794,6 +800,12 @@
 					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/",
 					"group": "navigation"
 				},
+				{
+					"command": "PowerBIDataset.showMemoryStats",
+					"when": "view == PowerBIWorkspaces && !powerbi.isInBrowser && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,SHOWMEMORYSTATS,.*/",
+					"group": "navigation"
+				},
+				
 				{
 					"command": "PowerBIDataset.updateAllParameters",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/",

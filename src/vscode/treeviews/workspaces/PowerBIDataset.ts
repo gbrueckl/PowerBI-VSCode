@@ -20,6 +20,10 @@ import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 import { iPowerBIDesktopExternalToolConfig } from '../_types';
+import { PowerBINotebook, PowerBINotebookCell, PowerBINotebookType } from '../../notebook/PowerBINotebook';
+import { PowerBIAPILanguage } from '../../language/_types';
+import { PowerBINotebookContext } from '../../notebook/PowerBINotebookContext';
+import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSerializer';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -43,7 +47,8 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		let orig: string = super._contextValue;
 
 		let actions: string[] = [
-			"DELETE"
+			"DELETE",
+			"SHOWMEMORYSTATS"
 		]
 
 		if (this.definition.IsRefreshable) {
@@ -294,7 +299,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			}
 		}
 
-		if(extToolPaths.length == 0) {
+		if (extToolPaths.length == 0) {
 			vscode.window.showErrorMessage("No Power BI Desktop External Tools found!");
 			return;
 		}
@@ -313,8 +318,8 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			qpItems.push(qpItem);
 		}
 
-		let selectedTool = await vscode.window.showQuickPick(qpItems, {ignoreFocusOut: true})
-		
+		let selectedTool = await vscode.window.showQuickPick(qpItems, { ignoreFocusOut: true })
+
 		if (!selectedTool) {
 			Helper.showTemporaryInformationMessage("No tool selected - aborting... !");
 			return;
@@ -326,18 +331,48 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		}
 
 		let args = [];
-		if(dataset) {
+		if (dataset) {
 			const xmlaEndpoint = PowerBIApiService.getXmlaEndpoint(dataset.workspace.name);
 			args = selectedToolConfig.arguments.split(" ").map((arg) => arg.replace("%server%", xmlaEndpoint.toString()).replace("%database%", dataset.name));
 			//args = [selectedToolConfig.arguments.replace("%server%", xmlaEndpoint.toString()).replace("%database%", dataset.name)]
 		}
-		
+
 		let extProcess = await startExternalProcess(selectedToolConfig.path, args);
-		if(dataset) {
+		if (dataset) {
 			extProcess.on('exit', () => {
 				ThisExtension.TreeViewWorkspaces.refresh(dataset, true)
-		});
+			});
 		}
+	}
+
+	public async showMemoryStats() {
+		const notebookContent = await vscode.workspace.fs.readFile(
+			vscode.Uri.joinPath(
+				ThisExtension.extensionContext.extensionUri, "resources", "Files", "VertipaqAnalyzerDAX.pbinb"));
+
+		let notebook = await (new PowerBINotebookSerializer).deserializeNotebook(notebookContent, undefined);
+
+		let apiPath = '/' + Helper.trimChar(this.apiPath.split("/").slice(2).join("/"), "/", false, true);
+
+		notebook.cells[1].value = '%cmd\nSET API_PATH = ' + apiPath;
+
+		notebook.metadata = PowerBINotebookContext.loadFromMetadata(notebook.metadata);
+
+		const doc = await vscode.workspace.openNotebookDocument(PowerBINotebookType, notebook);
+		let context: PowerBINotebookContext = new PowerBINotebookContext(apiPath);
+		context.apiRootPath = apiPath;
+		context.uri = doc.uri;
+		PowerBINotebookContext.set(notebook.metadata.guid, context)
+
+		ThisExtension.NotebookKernel.setNotebookContext(doc, context);
+
+		const editor = await vscode.window.showNotebookDocument(doc);
+
+		vscode.commands.executeCommand('editorScroll', {
+			to: 'up',
+			by: 'editor',
+			revealCursor: true,
+		});
 	}
 }
 

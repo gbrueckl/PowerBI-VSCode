@@ -144,6 +144,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIDataset.editTMDL', (dataset: PowerBIDataset) => dataset.editTMDL());
 	vscode.commands.registerCommand('PowerBIDataset.copyConnectionString', (dataset: PowerBIDataset) => dataset.copyConnectionString());
 	vscode.commands.registerCommand('PowerBIDataset.openExternalTool', (dataset: PowerBIDataset) => PowerBIDataset.openPowerBIDesktopExternalTool(dataset));
+	vscode.commands.registerCommand('PowerBIDataset.showMemoryStats', (dataset: PowerBIDataset) => dataset.showMemoryStats());
 	// DatasetParameter commands
 	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
 
