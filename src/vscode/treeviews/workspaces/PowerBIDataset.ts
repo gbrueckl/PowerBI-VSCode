@@ -24,6 +24,8 @@ import { PowerBINotebook, PowerBINotebookCell, PowerBINotebookType } from '../..
 import { PowerBIAPILanguage } from '../../language/_types';
 import { PowerBINotebookContext } from '../../notebook/PowerBINotebookContext';
 import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSerializer';
+import { FabricFSUri } from '../../filesystemProvider/fabric/FabricFSUri';
+import { FABRIC_SCHEME } from '../../filesystemProvider/fabric/FabricFileSystemProvider';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -246,7 +248,10 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 	public async editTMDL(): Promise<void> {
 		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.workspace.name}/${this.name}`));
 
-		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - ${this.name}`, true);
+		//fabric://workspaces/<workspace-id>/<itemType>/<item-id>/<partFolder/partfolder/partFile>
+		const fabricUri = new FabricFSUri(vscode.Uri.parse(`${FABRIC_SCHEME}:/workspaces/${this.workspace.id}/semanticModels/${this.id}`));
+
+		await Helper.addToWorkspace(fabricUri.uri, `TMDL - ${this.name}`, true);
 		// if the workspace does not exist, the folder is opened in a new workspace where the TMDL folder would be reloaded again
 		// so we only load the model if we already have a workspace
 	}

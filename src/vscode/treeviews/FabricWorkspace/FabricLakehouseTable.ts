@@ -5,6 +5,7 @@ import { FabricWorkspaceTreeItem } from './FabricWorkspaceTreeItem';
 import { FabricApiItemType, iFabricApiItem, iFabricApiLakehouseTable } from '../../../fabric/_types';
 import { FabricLakehouseTables } from './FabricLakehouseTables';
 import { FabricWorkspace } from './FabricWorkspace';
+import { FabricApiService } from '../../../fabric/FabricApiService';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class FabricLakehouseTable extends FabricWorkspaceTreeItem {
@@ -97,5 +98,47 @@ export class FabricLakehouseTable extends FabricWorkspaceTreeItem {
 		const lakehouse = this.getParentByType<FabricWorkspace>(FabricApiItemType.Lakehouse);
 		
 		return vscode.Uri.parse(`onelake://${workspace.displayName}/${lakehouse.displayName}.Lakehouse/Tables/${this.displayName}`);
+	}
+
+	async runMaintainanceJob(): Promise<void> {
+		/*
+		POST https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/items/{lakehouseId}/jobs/instances?jobType=TableMaintenance
+		{
+			"executionData": {
+				"tableName": "{table_name}",
+				"optimizeSettings": {
+					"vOrder": true,
+					"zOrderBy": [
+						"tipAmount"
+					]
+				},
+				"vacuumSettings": {
+					"retentionPeriod": "7.01:00:00"
+				}
+			}
+		}
+		*/
+
+		const lakehouse = this.getParentByType(FabricApiItemType.Lakehouse);
+
+		const endpoint = lakehouse.apiPath + "/jobs/instances?jobType=TableMaintenance";
+		const body = {
+			"executionData": {
+				"tableName": this.displayName,
+				"optimizeSettings": {
+					"vOrder": true
+				}
+			}
+		}
+
+		const response = await FabricApiService.post(endpoint, body, false, false );
+
+		if(response.error)
+		{
+			vscode.window.showErrorMessage(response.error.message);
+		}
+		else {
+			Helper.showTemporaryInformationMessage(`Maintenance job started for table ${this.displayName}. (Tracking: GET ${response.success.url})`, 15000);
+		}
 	}
 }

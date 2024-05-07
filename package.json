@@ -615,6 +615,12 @@
 				"category": "Fabric.Lakehouse"
 			},
 			{
+				"command": "Fabric.Lakehouse.Table.maintain",
+				"title": "Run Maintainance Job",
+				"icon": "$(combine)",
+				"category": "Fabric.Lakehouse"
+			},
+			{
 				"command": "Fabric.Item.openInBrowser",
 				"title": "Open in Fabric Service",
 				"icon": "$(globe)",
@@ -951,7 +957,14 @@
 					"command": "Fabric.Lakehouse.copyOneLakeTablesPath",
 					"when": "view == FabricWorkspaces && viewItem =~ /.*,LAKEHOUSE,.*/",
 					"group": "navigation"
+				},
+				{
+					"command": "Fabric.Lakehouse.Table.maintain",
+					"when": "view == FabricWorkspaces && viewItem =~ /.*,LAKEHOUSETABLE,.*/",
+					"group": "navigation"
 				}
+
+				
 			],
 			"editor/title": [
 				{

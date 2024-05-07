@@ -44,6 +44,7 @@ import { FabricWorkspacesTreeProvider } from './vscode/treeviews/FabricWorkspace
 import { FabricWorkspaceTreeItem } from './vscode/treeviews/FabricWorkspace/FabricWorkspaceTreeItem';
 import { FabricLakehouse } from './vscode/treeviews/FabricWorkspace/FabricLakehouse';
 import { Helper } from './helpers/Helper';
+import { FabricLakehouseTable } from './vscode/treeviews/FabricWorkspace/FabricLakehouseTable';
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -117,6 +118,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('Fabric.Lakehouse.copySQLConnectionString', (treeItem: FabricLakehouse) => treeItem.copySQLConnectionString());
 	vscode.commands.registerCommand('Fabric.Lakehouse.copyOneLakeFilesPath', (treeItem: FabricLakehouse) => treeItem.copyOneLakeFilesPath());
 	vscode.commands.registerCommand('Fabric.Lakehouse.copyOneLakeTablesPath', (treeItem: FabricLakehouse) => treeItem.copyOneLakeTablesPath());
+	vscode.commands.registerCommand('Fabric.Lakehouse.Table.maintain', (lakehouseTable: FabricLakehouseTable) => lakehouseTable.runMaintainanceJob());
+
 
 	// register PowerBIWorkspacesTreeProvider
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);

@@ -128,7 +128,7 @@ export abstract class FabricApiService {
 		};
 	}
 
-	static async post<TSuccess = any>(endpoint: string, body: object, raw: boolean = false): Promise<iFabricApiResponse<TSuccess>> {
+	static async post<TSuccess = any>(endpoint: string, body: object, raw: boolean = false, awaitLongRunningOperation: boolean = true): Promise<iFabricApiResponse<TSuccess>> {
 		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("POST " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
@@ -149,7 +149,13 @@ export abstract class FabricApiService {
 					return { success: response as any as TSuccess };
 				}
 				if (response.status == 202) {
+					if ( awaitLongRunningOperation)
+					{
 					return await this.longRunningOperation<TSuccess>(response, 2000);
+					}
+					else {
+						return { success: ({message: "Long Running Operation started!", url: response.headers.get("location")}) as TSuccess };
+					}
 				}
 				return { success: (await response.json()) as TSuccess };
 			}
