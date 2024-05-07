@@ -60,7 +60,7 @@ export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem imple
 
 		let actions: string[] = [];
 
-		if (this.dataset.workspace.isPremiumCapacity && this.dataset.definition.IsRefreshable) {
+		if (this.dataset.workspace.isPremiumCapacity && this.dataset.definition.isRefreshable) {
 			actions.push("REFRESH");
 		}
 

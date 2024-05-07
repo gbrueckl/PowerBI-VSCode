@@ -51,7 +51,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			"SHOWMEMORYSTATS"
 		]
 
-		if (this.definition.IsRefreshable) {
+		if (this.definition.isRefreshable) {
 			actions.push("REFRESH");
 		}
 

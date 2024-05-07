@@ -6,15 +6,15 @@ export class iPowerBIDataset {
 	id: UniqueId;
 	item_type: ApiItemType;
 	
-	ContentProviderType: string; //	The content provider type for the dataset
-	CreateReportEmbedURL: string; //	The dataset create report embed URL
-	CreatedDate: string; //	The dataset creation date and time
+	contentProviderType: string; //	The content provider type for the dataset
+	createReportEmbedURL: string; //	The dataset create report embed URL
+	createdDate: string; //	The dataset creation date and time
 	//Encryption: Encryption; //	Dataset encryption information. Only applicable when $expand is specified.
-	IsEffectiveIdentityRequired: boolean; //	Whether the dataset requires an effective identity, which you must send in a GenerateToken API call.
-	IsEffectiveIdentityRolesRequired: boolean; //	Whether row-level security is defined inside the Power BI .pbix file. If so, you must specify a role.
-	IsOnPremGatewayRequired: boolean; //	Whether the dataset requires an on-premises data gateway
-	IsRefreshable: boolean; //	Whether the dataset can be refreshed
-	QnaEmbedURL: string; //	The dataset Q&A embed URL
+	isEffectiveIdentityRequired: boolean; //	Whether the dataset requires an effective identity, which you must send in a GenerateToken API call.
+	isEffectiveIdentityRolesRequired: boolean; //	Whether row-level security is defined inside the Power BI .pbix file. If so, you must specify a role.
+	isOnPremGatewayRequired: boolean; //	Whether the dataset requires an on-premises data gateway
+	isRefreshable: boolean; //	Whether the dataset can be refreshed
+	qnaEmbedURL: string; //	The dataset Q&A embed URL
 	addRowsAPIEnabled: boolean; //	Whether the dataset allows adding new rows
 	configuredBy: string; //	The dataset owner
 	description: string; //	The dataset description

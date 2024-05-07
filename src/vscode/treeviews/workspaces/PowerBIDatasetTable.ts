@@ -68,7 +68,7 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem implements Pow
 
 		let actions: string[] = ["LOADSTATISTICS"];
 
-		if (this.dataset.workspace.isPremiumCapacity && this.dataset.definition.IsRefreshable) {
+		if (this.dataset.workspace.isPremiumCapacity && this.dataset.definition.isRefreshable) {
 			actions.push("REFRESH");
 		}
 
