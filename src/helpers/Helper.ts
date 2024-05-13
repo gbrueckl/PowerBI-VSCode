@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import { ThisExtension } from '../ThisExtension';
 
-export class UniqueId extends String {
+export class UniqueIdOld extends String {
 	// placeholder class for unique-ids in Power BI
 	constructor(
 		value?: string
@@ -15,13 +15,15 @@ export class UniqueId extends String {
 	}
 }
 
-export namespace UniqueId {
+export type UniqueId = string;
+
+export namespace UniqueIdOld {
 	export function toString(dir: UniqueId): string {
 		return dir.toString();
 	}
 
-	export function fromString(dir: string): UniqueId {
-		return new UniqueId(dir);
+	export function fromString(dir: string): UniqueIdOld {
+		return new UniqueIdOld(dir);
 	}
 }
 

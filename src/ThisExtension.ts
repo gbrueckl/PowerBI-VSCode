@@ -18,6 +18,7 @@ import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPip
 import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/FabricFileSystemProvider';
 import { FabricWorkspacesTreeProvider } from './vscode/treeviews/FabricWorkspace/FabricWorkspacesTreeProvider';
 import { FabricWorkspaceTreeItem } from './vscode/treeviews/FabricWorkspace/FabricWorkspaceTreeItem';
+import { GenericApiTreeItem } from './vscode/treeviews/GenericApiTreeItem';
 
 
 export type TreeProviderId =
@@ -165,7 +166,7 @@ export abstract class ThisExtension {
 		return this._treeViewPipeliness;
 	}
 
-	static getTreeView(id: TreeProviderId): vscode.TreeDataProvider<PowerBIApiTreeItem> | vscode.TreeDataProvider<FabricWorkspaceTreeItem> {
+	static getTreeView(id: TreeProviderId): vscode.TreeDataProvider<GenericApiTreeItem> {
 		switch (id) {
 			case "application/vnd.code.tree.powerbiworkspaces":
 				return this.TreeViewWorkspaces;
@@ -180,18 +181,18 @@ export abstract class ThisExtension {
 		}
 	}
 
-	static async refreshTreeView(id: TreeProviderId, item: PowerBIApiTreeItem | FabricWorkspaceTreeItem = null, ): Promise<void> {
+	static async refreshTreeView(id: TreeProviderId, item: GenericApiTreeItem = null, ): Promise<void> {
 		switch (id) {
 			case "application/vnd.code.tree.powerbiworkspaces":
-				await this.TreeViewWorkspaces.refresh(item as PowerBIWorkspaceTreeItem);
+				await this.TreeViewWorkspaces.refresh(item as GenericApiTreeItem);
 			case "application/vnd.code.tree.powerbicapacities":
-				await this.TreeViewCapacities.refresh(item as PowerBICapacityTreeItem);
+				await this.TreeViewCapacities.refresh(item as GenericApiTreeItem);
 			case "application/vnd.code.tree.powerbigateways":
-				await this.TreeViewGateways.refresh(item as PowerBIGatewayTreeItem);
+				await this.TreeViewGateways.refresh(item as GenericApiTreeItem);
 			case "application/vnd.code.tree.powerbipipelines":
-				await this.TreeViewPipelines.refresh(item as PowerBIPipelineTreeItem);
+				await this.TreeViewPipelines.refresh(item as GenericApiTreeItem);
 			case "application/vnd.code.tree.fabricworkspaces":
-				await this.TreeViewFabric.refresh(item as FabricWorkspaceTreeItem);
+				await this.TreeViewFabric.refresh(item as GenericApiTreeItem);
 		}
 	}
 	//#endregion

@@ -6,8 +6,9 @@ import { ApiItemType } from '../_types';
 import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { TreeProviderId } from '../../../ThisExtension';
+import { GenericApiTreeItem } from '../GenericApiTreeItem';
 
-export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPowerBIWorkspaceItem {
+export class PowerBIWorkspaceTreeItem extends GenericApiTreeItem implements iPowerBIWorkspaceItem {
 	protected _groupId: UniqueId;
 
 	constructor(
@@ -15,10 +16,10 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 		groupId: UniqueId,
 		itemType: ApiItemType,
 		id: UniqueId,
-		parent: PowerBIWorkspaceTreeItem,
+		parent: GenericApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(id, name, itemType, parent, collapsibleState);
+		super("PowerBI", id, name, itemType, parent, collapsibleState);
 
 		this._groupId = groupId;
 

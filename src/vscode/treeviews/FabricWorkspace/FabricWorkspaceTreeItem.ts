@@ -3,38 +3,25 @@ import * as vscode from 'vscode';
 import { Helper, UniqueId } from '../../../helpers/Helper';
 
 import { ThisExtension, TreeProviderId } from '../../../ThisExtension';
-import { FabricApiItemType, FabricApiWorkspaceType, iFabricApiItem } from '../../../fabric/_types';
+import { FabricApiItemType, iFabricApiItem } from '../../../fabric/_types';
 import { FabricFSUri } from '../../filesystemProvider/fabric/FabricFSUri';
 import { FABRIC_SCHEME } from '../../filesystemProvider/fabric/FabricFileSystemProvider';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { FabricWorkspace } from './FabricWorkspace';
+import { GenericApiTreeItem } from '../GenericApiTreeItem';
 
-export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabricApiItem {
-	protected _displayName: string;
-	protected _workspaceId: UniqueId;
-	protected _type: string;
-	protected _itemId: UniqueId;
-	protected _parent: FabricWorkspaceTreeItem;
-	protected _itemDescription?: string;
-
-	protected _definition: object;
-
+export class FabricWorkspaceTreeItem extends GenericApiTreeItem  implements iFabricApiItem {
 	constructor(
 		displayName: string,
 		workspaceId: UniqueId,
-		type: FabricApiItemType | FabricApiWorkspaceType,
+		type: FabricApiItemType,
 		id: UniqueId,
-		parent: FabricWorkspaceTreeItem,
+		parent: GenericApiTreeItem,
 		description?: string | boolean,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(displayName, collapsibleState);
+		super("Fabric", id, displayName, type, parent, collapsibleState);
 
-		this._parent = parent;
-		this._displayName = displayName;
-		this._itemId = id;
-		this._type = type.toString();
-		this._workspaceId = workspaceId;
 		if(description !== undefined && typeof description === "string")
 		{
 			this._itemDescription = description;
@@ -43,13 +30,13 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 		this.definition = {
 			displayName: displayName,
 			workspaceId: workspaceId.toString(),
-			type: FabricApiItemType[type],
+			type: this.itemType,
 			id: id.toString(),
 			description: description
 		};
 
 		this.id = (id as string);
-		this.label = this._displayName;
+		this.label = this.displayName;
 		this.tooltip = this.getToolTip(this.definition);
 		this.description = this._description;
 		this.contextValue = this._contextValue;
@@ -95,17 +82,7 @@ export class FabricWorkspaceTreeItem extends vscode.TreeItem  implements iFabric
 		return this._itemId;
 	}
 	
-	get displayName(): string {
-		return this._displayName;
-	}
-
-	get workspaceId(): UniqueId {
-		return this._workspaceId;
-	}
-
-	get type(): string {
-		return this._type;
-	}
+	
 
 	get typeKey(): FabricApiItemType {
 		return Number(this._type) as FabricApiItemType;

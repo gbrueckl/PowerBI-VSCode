@@ -6,17 +6,18 @@ import { ApiItemType } from '../_types';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { iPowerBIPipeline, iPowerBIPipelineStage } from '../../../powerbi/PipelinesAPI/_types';
 import { TreeProviderId } from '../../../ThisExtension';
+import { GenericApiTreeItem } from '../GenericApiTreeItem';
 
-export class PowerBIPipelineTreeItem extends PowerBIApiTreeItem implements iPowerBIPipeline {
+export class PowerBIPipelineTreeItem extends GenericApiTreeItem implements iPowerBIPipeline {
 
 	constructor(
 		name: string,
 		itemType: ApiItemType,
 		id: UniqueId,
-		parent: PowerBIPipelineTreeItem,
+		parent: GenericApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(id, name, itemType, parent, collapsibleState);
+		super("PowerBI", id, name, itemType, parent, collapsibleState);
 
 		this.definition = {
 			name: name,

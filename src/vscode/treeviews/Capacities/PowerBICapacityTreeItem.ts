@@ -7,8 +7,9 @@ import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 import { TreeProviderId } from '../../../ThisExtension';
 import { UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { GenericApiTreeItem } from '../GenericApiTreeItem';
 
-export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowerBICapacityItem {
+export class PowerBICapacityTreeItem extends GenericApiTreeItem implements iPowerBICapacityItem {
 	protected _capacity: iPowerBICapacity;
 
 	constructor(
@@ -16,10 +17,10 @@ export class PowerBICapacityTreeItem extends PowerBIApiTreeItem implements iPowe
 		name: string,
 		itemType: ApiItemType,
 		capacity: iPowerBICapacity,
-		parent: PowerBIApiTreeItem,
+		parent: GenericApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(id, name, itemType, parent, collapsibleState);
+		super("PowerBI", id, name, itemType, parent, collapsibleState);
 
 		this._capacity = capacity;
 		

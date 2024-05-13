@@ -5,36 +5,39 @@ import { Helper, UniqueId } from '../../helpers/Helper';
 import { ApiItemType } from './_types';
 import { iPowerBIApiItem } from './iPowerBIApiItem';
 import { ThisExtension, TreeProviderId } from '../../ThisExtension';
-import { ApiUrlPair } from '../../powerbi/_types';
 import { PowerBIApiService } from '../../powerbi/PowerBIApiService';
-import { iHandleBeingDropped } from './PowerBIApiDragAndDropController';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../powerbi/CommandBuilder';
 import { PowerBIApiDrop } from '../dropProvider/_types';
-import { GenericApiTreeItem } from './GenericApiTreeItem';
+import { FabricApiItemType, iFabricApiItem } from '../../fabric/_types';
 
 
-export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIApiItem, PowerBIApiDrop {
-	protected _itemType: ApiItemType;
-	protected _id: UniqueId;
-	protected _name: string;
-	protected _definition: object;
+
+export class GenericApiTreeItem extends vscode.TreeItem implements iPowerBIApiItem, iFabricApiItem, PowerBIApiDrop {
+	protected _apiType: "PowerBI" | "Fabric";
+	protected _itemType: ApiItemType | FabricApiItemType;
+	protected _itemId: UniqueId;
+	protected _itemName: string;
+	protected _itemDescription: string;
+	protected _itemDefinition: object;
 	protected _parent?: GenericApiTreeItem;
 
 	constructor(
+		apiType: "PowerBI" | "Fabric",
 		id: UniqueId,
 		name: string,
-		itemType: ApiItemType,
+		itemType: ApiItemType | FabricApiItemType,
 		parent: GenericApiTreeItem = undefined,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super("PowerBI", id, name, itemType, parent, collapsibleState);
+		super(name, collapsibleState);
 
-		this._name = name;
+		this._apiType = apiType;
+		this._itemName = name;
 		this._itemType = itemType;
-		this._id = id;
+		this._itemId = id;
 		this._parent = parent;
 
-		this._definition = {
+		this._itemDefinition = {
 			name: name,
 			itemType: itemType,
 			uid: id
@@ -52,6 +55,7 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 		};
 	}
 
+	//#region TreeItem
 	protected getIconPath(theme: string): string | vscode.Uri {
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + '.png');
 	}
@@ -59,7 +63,7 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 	// tooltip shown when hovering over the item
 	get _tooltip(): string {
 		let tooltip: string = "";
-		for (const [key, value] of Object.entries(this._definition)) {
+		for (const [key, value] of Object.entries(this._itemDefinition)) {
 			if (typeof value === "string") {
 				if (value.length > 100 || value.length < 1) {
 					continue;
@@ -73,7 +77,7 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 
 	// description is show next to the label
 	get _description(): string {
-		return this._id.toString();
+		return this._itemId.toString();
 	}
 
 	// used in package.json to filter commands via viewItem =~ /.*,GROUP,.*/
@@ -81,42 +85,65 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 		return "," + this.itemType + ",";
 	}
 
-	public async getChildren(element?: PowerBIApiTreeItem): Promise<PowerBIApiTreeItem[]> {
+	public async getChildren(element?: GenericApiTreeItem): Promise<GenericApiTreeItem[]> {
 		await vscode.window.showErrorMessage("getChildren is not implemented! Please overwrite in derived class!");
 		return undefined;
 	}
+	//#endregion
 
-	/* iDatabrickWorkspaceItem implementatin */
+	get apiType(): "PowerBI" | "Fabric" {
+		return this._apiType;
+	}
+
+	//#region iPowerBIApiItem
 	get definition(): object {
-		return this._definition;
+		return this._itemDefinition;
 	}
 
 	set definition(value: object) {
-		this._definition = value;
+		this._itemDefinition = value;
 	}
 
 	get name(): string {
-		return this._name;
+		return this._itemName;
 	}
 
 	set name(value: string) {
-		this._name = value;
+		this._itemName = value;
 	}
 
 	get itemType(): ApiItemType {
-		return this._itemType;
+		return this._itemType as ApiItemType;
 	}
 
 	get uid() {
-		return this._id;
+		return this._itemId;
+	}
+	//#endregion
+
+	//#region iFabricApiItem
+	get displayName(): string {
+		return this._itemName;
 	}
 
-	get parent(): PowerBIApiTreeItem {
+	get itemDescription(): string {
+		return this._itemDescription;
+
+	}
+	get type(): FabricApiItemType {
+		return this._itemType as FabricApiItemType;
+	}
+
+	get workspaceId(): UniqueId {
+		return this.getParentByType("WORKSPACE").uid;
+	}
+
+	get parent(): GenericApiTreeItem {
 		return this._parent;
 	}
 
-	getParentByType<T = PowerBIApiTreeItem>(type: ApiItemType): T {
-		let parent: PowerBIApiTreeItem = this.parent;
+	getParentByType<T = GenericApiTreeItem>(type: ApiItemType): T {
+		let parent: GenericApiTreeItem = this.parent;
 
 		while (parent !== undefined && parent.itemType !== type) {
 			parent = parent.parent;
@@ -125,8 +152,8 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 		return parent as T;
 	}
 
-	getPathItemByType<T = PowerBIApiTreeItem>(type: ApiItemType): T {
-		let parent: PowerBIApiTreeItem = this;
+	getPathItemByType<T = GenericApiTreeItem>(type: ApiItemType): T {
+		let parent: GenericApiTreeItem = this;
 
 		while (parent !== undefined && parent.itemType !== type) {
 			parent = parent.parent;
@@ -140,11 +167,11 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 	}
 
 	public copyIdToClipboard(): void {
-		vscode.env.clipboard.writeText(this._id.toString());
+		vscode.env.clipboard.writeText(this._itemId.toString());
 	}
 
 	public copyNameToClipboard(): void {
-		vscode.env.clipboard.writeText(this._name);
+		vscode.env.clipboard.writeText(this._itemName);
 	}
 
 	public copyPathToClipboard(): void {
@@ -160,7 +187,7 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 	public openInBrowser(): void {
 		const tenantParam = PowerBIApiService.TenantId ? `?ctid=${PowerBIApiService.TenantId}` : "";
 		const fullLink = `${this.getBrowserLink()}${tenantParam}`;
-		
+
 		Helper.openLink(fullLink);
 	}
 
@@ -178,7 +205,7 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 
 		let urlParts: string[] = [];
 
-		let apiItem: PowerBIApiTreeItem = this;
+		let apiItem: GenericApiTreeItem = this;
 
 		while (apiItem) {
 			if (apiItem.apiUrlPart) {
@@ -195,7 +222,7 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 
 		let urlParts: string[] = [];
 
-		let apiItem: PowerBIApiTreeItem = this;
+		let apiItem: GenericApiTreeItem = this;
 
 		while (apiItem) {
 			if (apiItem.apiUrlPart) {
@@ -239,7 +266,7 @@ export class PowerBIApiTreeItem extends GenericApiTreeItem implements iPowerBIAp
 		return Helper.trimChar("/" + this.apiPath.split("/").slice(2).join("/"), "/", false);
 	}
 
-	public static async delete(apiItem: PowerBIApiTreeItem, confirmation: "yesNo" | "name" | undefined = undefined): Promise<void> {
+	public static async delete(apiItem: GenericApiTreeItem, confirmation: "yesNo" | "name" | undefined = undefined): Promise<void> {
 		if (confirmation) {
 			let confirm: string;
 			switch (confirmation) {

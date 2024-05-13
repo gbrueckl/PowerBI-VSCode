@@ -6,6 +6,7 @@ import { ApiItemType } from '../vscode/treeviews/_types';
 import { PowerBIApiService } from './PowerBIApiService';
 import { ApiMethod } from './_types';
 import { Helper } from '../helpers/Helper';
+import { GenericApiTreeItem } from '../vscode/treeviews/GenericApiTreeItem';
 
 
 export type CommandInputType =
@@ -108,7 +109,7 @@ export class PowerBIQuickPickItem implements vscode.QuickPickItem {
 	private _description?: string;
 	private _details?: string;
 	private _picked?: boolean;
-	private _apiItem?: PowerBIApiTreeItem;
+	private _apiItem?: GenericApiTreeItem;
 
 	constructor(
 		label: string,
@@ -153,11 +154,11 @@ export class PowerBIQuickPickItem implements vscode.QuickPickItem {
 		this._picked = value;
 	}
 
-	get apiItem(): PowerBIApiTreeItem {
+	get apiItem(): GenericApiTreeItem {
 		return this._apiItem;
 	}
 
-	set apiItem(value: PowerBIApiTreeItem) {
+	set apiItem(value: GenericApiTreeItem) {
 		this._apiItem = value;
 	}
 }

@@ -7,14 +7,9 @@ import { ThisExtension } from '../ThisExtension';
 import { PowerBIApiService } from '../powerbi/PowerBIApiService';
 import { FabricApiItemFormat, FabricApiItemType, FabricApiItemTypeWithDefinition, iFabricApiItem, iFabricApiItemDefinition, iFabricApiItemPart, iFabricApiResponse, iFabricApiWorkspace, iFabricErrorResponse, iFabricListResponse, iFabricPollingResponse } from './_types';
 import { FabricFSCache } from '../vscode/filesystemProvider/fabric/FabricFSCache';
+import { GenericApiService } from '../apiServices/GenericApiService';
 
-export abstract class FabricApiService {
-
-	private static _apiBaseUrl: string = "https://api.fabric.microsoft.com";
-	private static _tenantId: string;
-	private static _clientId: string;
-	private static _authenticationProvider: string;
-	private static _resourceId: string;
+export abstract class FabricApiService extends GenericApiService {
 
 	//#region Initialization
 	static async initialize(
@@ -25,7 +20,8 @@ export abstract class FabricApiService {
 		authenticationProvider: string = "microsoft",
 		resourceId: string = "https://analysis.windows.net/powerbi/api"
 	): Promise<boolean> {
-
+		
+		this._apiServiceName = "Fabric";
 		this._tenantId = tenantId;
 		this._clientId = clientId;
 		this._authenticationProvider = authenticationProvider;
@@ -34,22 +30,6 @@ export abstract class FabricApiService {
 		FabricFSCache.initialize()
 
 		return true;
-	}
-
-	public static get TenantId(): string {
-		return this._tenantId;
-	}
-
-	public static get ClientId(): string {
-		return this._clientId;
-	}
-
-	public static get BrowserBaseUrl(): string {
-		return this._apiBaseUrl.replace("api.", "app.");
-	}
-
-	public static getHeaders(): HeadersInit {
-		return PowerBIApiService.getHeaders();
 	}
 
 	static async get<T = any>(endpoint: string, params: object = null, raw: boolean = false): Promise<iFabricApiResponse<T>> {
@@ -206,18 +186,6 @@ export abstract class FabricApiService {
 		}
 	}
 
-	public static get isInitialized(): boolean {
-		return PowerBIApiService.isInitialized;
-	}
-
-	public static async Initialization(): Promise<boolean> {
-		if (PowerBIApiService.isInitialized) {
-			return true;
-		}
-		// wait 5 minutes for the service to initialize
-		return Helper.awaitCondition(async () => FabricApiService.isInitialized, 300000, 100);
-	}
-
 	public static getFullUrl(endpoint: string, params?: object): string {
 
 		let baseItems = this._apiBaseUrl.split("/");
@@ -242,88 +210,29 @@ export abstract class FabricApiService {
 		return uri.toString(true);
 	}
 
-	private static async logResponse(response: any): Promise<void> {
-		if (typeof response == "string") {
-			ThisExtension.log("Response: " + response);
-		}
-		else {
-			ThisExtension.log("Response: " + JSON.stringify(response));
-		}
-	}
-
-	private static handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): void {
-		ThisExtension.log("ERROR: " + error.name);
-		ThisExtension.log("ERROR: " + error.message);
-		if (error.stack) {
-			ThisExtension.log("ERROR: " + error.stack);
-		}
-
-		if (showErrorMessage) {
-			vscode.window.showErrorMessage(error.message);
-		}
-
-		if (raise) {
-			throw error;
-		}
-	}
-
-	private static async awaitWithProgress(message: string, promise: Promise<iFabricApiResponse>, showResultMessage: number = 5000): Promise<iFabricApiResponse> {
-		let ret: iFabricApiResponse = undefined;
-
-		await vscode.window.withProgress({
-			location: vscode.ProgressLocation.Notification,
-			title: message,
-			cancellable: false
-		}, async (progress: vscode.Progress<any>) => {
-			progress.report({ message: " ..." });
-			ThisExtension.log(message + " ...");
-
-			const start = new Date().getTime();
-			let result = await promise;
-			const end = new Date().getTime();
-			const duration = end - start;
-			ThisExtension.log(message + " took " + duration + "ms!");
-
-			let resultMessage = `SUCCEEDED after ${Math.round(duration / 1000)}s!`;
-			if (result.error) {
-				resultMessage = `FAILED after ${Math.round(duration / 1000)}s!`;
-				vscode.window.showErrorMessage(JSON.stringify(result.error));
-			}
-			progress.report({ increment: 100, message: resultMessage });
-
-			Helper.showTemporaryInformationMessage(message + ": " + resultMessage, showResultMessage);
-
-			ret = result;
-
-			return;
-		});
-
-		return ret;
-	}
-
 	static async listWorkspaces(): Promise<iFabricApiResponse<iFabricApiWorkspace[]>> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces`;
+		const endpoint = `/v1/workspaces`;
 		return (await FabricApiService.getList<iFabricApiWorkspace>(endpoint));
 	}
 
 	static async getWorkspace(id: string): Promise<iFabricApiResponse<iFabricApiWorkspace>> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${id}`;
+		const endpoint = `/v1/workspaces/${id}`;
 		return await FabricApiService.get<iFabricApiWorkspace>(endpoint);
 	}
 
 	static async listItems(workspaceId: string, itemType?: FabricApiItemType): Promise<iFabricApiResponse<iFabricApiItem[]>> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items`;
+		const endpoint = `/v1/workspaces/${workspaceId}/items`;
 		const itemTypeFilter = itemType ? { type: FabricApiItemType[itemType] } : undefined;
 		return (await FabricApiService.getList<iFabricApiItem>(endpoint, itemTypeFilter));
 	}
 
 	static async getItem(workspaceId: string, itemId: string): Promise<iFabricApiResponse<iFabricApiItem>> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}`;
+		const endpoint = `/v1/workspaces/${workspaceId}/items/${itemId}`;
 		return await FabricApiService.get<iFabricApiItem>(endpoint);
 	}
 
 	static async getItemDefinition(workspaceId: string, itemId: string, format?: FabricApiItemFormat): Promise<iFabricApiResponse<iFabricApiItemDefinition>> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}/getDefinition`;
+		const endpoint = `/v1/workspaces/${workspaceId}/items/${itemId}/getDefinition`;
 		const itemFormat = format && format != FabricApiItemFormat.DEFAULT ? `?format=${format}` : '';
 
 		return await FabricApiService.post<iFabricApiItemDefinition>(endpoint + itemFormat, undefined);
@@ -341,13 +250,13 @@ export abstract class FabricApiService {
 	}
 
 	static async updateItemDefinition(workspaceId: string, itemId: string, itemDefinition: iFabricApiItemDefinition, progressText: string = "Creating Item"): Promise<iFabricApiResponse> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}/updateDefinition`;
+		const endpoint = `/v1/workspaces/${workspaceId}/items/${itemId}/updateDefinition`;
 
 		return await FabricApiService.awaitWithProgress(progressText, FabricApiService.post(endpoint, itemDefinition), 3000);
 	}
 
 	static async updateItem(workspaceId: string, itemId: string, newName?: string, newDescription?: string): Promise<iFabricApiResponse> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}`;
+		const endpoint = `/v1/workspaces/${workspaceId}/items/${itemId}`;
 
 		const body = {};
 
@@ -365,7 +274,7 @@ export abstract class FabricApiService {
 	}
 
 	static async createItem(workspaceId: string, name: string, type: FabricApiItemTypeWithDefinition, definition?: iFabricApiItemDefinition, progressText: string = "Publishing Item"): Promise<iFabricApiResponse> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/${type}`;
+		const endpoint = `/v1/workspaces/${workspaceId}/${type}`;
 
 		const body = Object.assign({}, {
 			displayName: name
@@ -375,7 +284,7 @@ export abstract class FabricApiService {
 	}
 
 	static async deleteItem(workspaceId: string, itemId: string, progressText: string = "Deleting Item"): Promise<iFabricApiResponse> {
-		const endpoint = `${this._apiBaseUrl}/v1/workspaces/${workspaceId}/items/${itemId}`;
+		const endpoint = `/v1/workspaces/${workspaceId}/items/${itemId}`;
 
 		return await FabricApiService.awaitWithProgress(progressText, FabricApiService.delete<any>(endpoint, undefined), 3000);
 	}

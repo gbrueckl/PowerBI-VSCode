@@ -7,8 +7,9 @@ import { iPowerBIGatewayItem } from './iPowerBIGatewayItem';
 import { TreeProviderId } from '../../../ThisExtension';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { UniqueId } from '../../../helpers/Helper';
+import { GenericApiTreeItem } from '../GenericApiTreeItem';
 
-export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPowerBIGatewayItem {
+export class PowerBIGatewayTreeItem extends GenericApiTreeItem implements iPowerBIGatewayItem {
 	protected _definition: iPowerBIGatewayItem;
 	protected _itemType: ApiItemType;
 
@@ -16,10 +17,10 @@ export class PowerBIGatewayTreeItem extends PowerBIApiTreeItem implements iPower
 		name: string,
 		itemType: ApiItemType,
 		id: UniqueId,
-		parent: PowerBIGatewayTreeItem,
+		parent: GenericApiTreeItem,
 		collapsibleState: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.Collapsed
 	) {
-		super(id, name, itemType, parent, collapsibleState);
+		super("PowerBI", id, name, itemType, parent, collapsibleState);
 
 		this.id = this.uid as string;
 		this.tooltip = this._tooltip;

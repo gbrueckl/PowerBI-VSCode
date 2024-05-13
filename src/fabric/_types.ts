@@ -22,11 +22,12 @@ export enum FabricApiItemType {
 	, "Warehouse"				//	A warehouse item.
 
 	// custom types
-	, "Workspace"
+	, "Workspace"					// A collaborative workspace
+	, "Personal"		// A personal workspace
 	, "Lakehouses"					//	Folder for Lakehouse item.
 	, "LakehouseTable"				//	Lakehouse Table
 	, "LakehouseTables"				//	Folder for Lakehouse Table item.
-	, "DataPipelines"				//	Folder for DataPipeline item.
+	, "DataPipelines"				//	Folder for DataPipeline item.	
 };
 
 export namespace FabricApiItemType {
@@ -47,12 +48,6 @@ export type FabricApiItemTypeWithDefinition =
 	| "SparkJobDefinitions"	//	A spark job definition.
 ;
 
-export enum FabricApiWorkspaceType {
-	"Personal"		// A personal workspace
-	, "Workspace"		// A collaborative workspace
-};
-
-
 
 export enum FabricApiItemFormat {
 	DEFAULT = "DEFAULT"
@@ -65,7 +60,7 @@ export enum FabricApiItemFormat {
 export interface iFabricApiItem {
 	displayName: string;
 	description?: string | boolean; // to be compatible with TreeItem property "description"
-	type: string;
+	type: FabricApiItemType;
 	workspaceId?: UniqueId;
 	id?: string;
 }
