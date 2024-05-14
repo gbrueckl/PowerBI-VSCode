@@ -8,6 +8,7 @@ import { Helper } from '../../../helpers/Helper';
 import { iFabricApiWorkspace } from '../../../fabric/_types';
 import { FabricApiService } from '../../../fabric/FabricApiService';
 import { FabricWorkspace } from './FabricWorkspace';
+import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class FabricWorkspacesTreeProvider implements vscode.TreeDataProvider<FabricWorkspaceTreeItem> {
@@ -72,6 +73,13 @@ export class FabricWorkspacesTreeProvider implements vscode.TreeDataProvider<Fab
 			}
 
 			for (let item of items.success) {
+				if(PowerBIConfiguration.workspaceFilter) {
+					const match = item.displayName.match(PowerBIConfiguration.workspaceFilterRegEx);
+					if(!match) {
+						ThisExtension.log(`Skipping workspace ${item.displayName} because it does not match the workspace filter.`);
+						continue;
+					}
+				}
 				if(item.capacityId) {
 					let treeItem = new FabricWorkspace(item);
 					children.push(treeItem);

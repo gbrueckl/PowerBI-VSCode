@@ -158,6 +158,14 @@
 							"**US Government Top Secret**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.powerbi.microsoft.scloud|\n|ResourceId|https://analysis.microsoft.scloud/powerbi/api|\n|AuthenticationProvider|microsoft-sovereign-cloud|\n|AuthenticationEndpoint|https://login.microsoftonline.eaglex.ic.gov/common|",
 							"**US Government Secret**\n\n|Setting|Value|\n|-------|-----|\n|ApiEndpoint|https://api.powerbi.eaglex.ic.gov|\n|ResourceId|https://analysis.eaglex.ic.gov/powerbi/api/common|\n|AuthenticationProvider|microsoft-sovereign-cloud|\n|AuthenticationEndpoint|https://login.microsoftonline.eaglex.ic.gov/common|"
 						]
+					},
+					"powerbi.workspaceFilter": {
+						"type": "string",
+						"markdownDescription": "(Optional) A regex to filter workspaces by name. Only workspaces matching this regex will be shown in the Power BI Workspaces view.",
+						"examples": [
+							"Project A|Sales",
+							"\\[TEST]|\\[PROD]"
+						]
 					}
 				}
 			}

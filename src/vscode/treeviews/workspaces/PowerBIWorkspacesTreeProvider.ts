@@ -15,6 +15,7 @@ import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { Helper } from '../../../helpers/Helper';
 import { PowerBIDataset } from './PowerBIDataset';
 import { iPowerBIDatasetRefreshableObject } from '../../../powerbi/DatasetsAPI/_types';
+import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeDataProvider.html
 export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<PowerBIWorkspaceTreeItem> {
@@ -150,6 +151,13 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 			children.push(new PowerBIWorkspacePersonal())
 
 			for (let item of items) {
+				if(PowerBIConfiguration.workspaceFilter) {
+					const match = item.name.match(PowerBIConfiguration.workspaceFilterRegEx);
+					if(!match) {
+						ThisExtension.log(`Skipping workspace ${item.name} because it does not match the workspace filter.`);
+						continue;
+					}
+				}
 				let treeItem = new PowerBIWorkspace(item);
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);

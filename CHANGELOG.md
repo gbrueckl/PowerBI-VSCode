@@ -3,6 +3,7 @@
 **v2.0.0**:
 - added Fabric Workspace Browser`
 - added feature to `Open PowerBI External Tool` configured in PowerBI Desktop with connection to online dataset preconfigured
+- added new config setting `powerni.workspaceFilter` to define RegEx filters on workspace names
 - added `Show Memory Statistics` for Datasets
 - added support for [Long Running Operation (LRO)](https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation) when calling Fabric APIs from notebooks
 - added check for Dataset refreshes and whether `isRefreshable = true`
