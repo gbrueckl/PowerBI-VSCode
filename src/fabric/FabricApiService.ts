@@ -21,6 +21,7 @@ export abstract class FabricApiService extends GenericApiService {
 		resourceId: string = "https://analysis.windows.net/powerbi/api"
 	): Promise<boolean> {
 		
+		this._apiBaseUrl = apiBaseUrl;
 		this._apiServiceName = "Fabric";
 		this._tenantId = tenantId;
 		this._clientId = clientId;
