@@ -1,7 +1,7 @@
 {
 	"name": "powerbi-vscode",
 	"displayName": "Power BI VSCode",
-	"description": "Fabric and Power BI Extension for VSCode",
+	"description": "Power BI Extension for VSCode",
 	"version": "2.0.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
@@ -52,8 +52,7 @@
 	"activationEvents": [
 		"onNotebook:powerbi-notebook",
 		"onLanguage:tmdl",
-		"onFileSystem:tmdl",
-		"onFileSystem:fabric"
+		"onFileSystem:tmdl"
 	],
 	"capabilities": {
 		"virtualWorkspaces": {
@@ -86,43 +85,6 @@
 						"type": "boolean",
 						"markdownDescription": "Set to true to allow editing Power BI datasets using TMDL.",
 						"default": true
-					},
-					"powerbi.Fabric.itemTypes": {
-						"type": "array",
-						"markdownDescription": "(Optional) A list of [Fabric Item Types](https://learn.microsoft.com/en-us/rest/api/fabric/core/items/list-items?tabs=HTTP#itemtype) with an optional [Format](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/notebook-definition#supported-formats) as list of objects.",
-						"scope": "window",
-						"items": {
-							"type": "object",
-							"properties": {
-								"itemType": {
-									"type": "string",
-									"markdownDescription": "The ItemType to configure the file format for.",
-									"required": true
-								},
-								"format": {
-									"type": "string",
-									"markdownDescription": "The file extension used when downloading the specified ItemType.",
-									"required": false
-								}
-							}
-						},
-						"default": [
-							{
-								"itemType": "notebooks"
-							},
-							{
-								"itemType": "reports"
-							},
-							{
-								"itemType": "semanticModels"
-							},
-							{
-								"itemType": "sparkJobDefinitions"
-							},
-							{
-								"itemType": "dataPipelines"
-							}
-						]
 					},
 					"powerbi.cloud": {
 						"type": "string",
@@ -196,10 +158,6 @@
 				{
 					"id": "PowerBIGateways",
 					"name": "Gateways"
-				},
-				{
-					"id": "FabricWorkspaces",
-					"name": "Fabric Workspaces"
 				}
 			]
 		},
@@ -218,10 +176,6 @@
 			},
 			{
 				"view": "PowerBIPipelines",
-				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
-			},
-			{
-				"view": "FabricWorkspaces",
 				"contents": "Please log in to VSCode with a Microsoft Account first!\n[Login](command:PowerBI.initialize)"
 			}
 		],
@@ -573,96 +527,6 @@
 				"title": "Unassign",
 				"icon": "$(debug-step-out)",
 				"category": "PowerBI"
-			},
-			{
-				"command": "Fabric.publishToFabric",
-				"title": "Publish to Fabric",
-				"icon": "$(cloud-upload)",
-				"category": "Fabric"
-			},
-			{
-				"command": "Fabric.reloadFromFabric",
-				"title": "Reload from Fabric",
-				"icon": "$(cloud-download)",
-				"category": "Fabric"
-			},
-			{
-				"command": "Fabric.openInFabric",
-				"title": "Open in Fabric",
-				"icon": "$(globe)",
-				"category": "Fabric"
-			},
-			{
-				"command": "FabricWorkspaces.refresh",
-				"title": "Refresh View",
-				"icon": "$(refresh)",
-				"category": "Fabric"
-			},
-			{
-				"command": "FabricWorkspaces.editItems",
-				"title": "Edit Fabric Items",
-				"icon": "$(pencil)",
-				"category": "Fabric"
-			},
-			{
-				"command": "Fabric.Lakehouse.copySQLConnectionString",
-				"title": "Copy SQL ConnectionString",
-				"icon": "$(debug-disconnect)",
-				"category": "Fabric.Lakehouse"
-			},
-			{
-				"command": "Fabric.Lakehouse.copyOneLakeFilesPath",
-				"title": "Copy OneLake Files Path",
-				"icon": "$(file-binary)",
-				"category": "Fabric.Lakehouse"
-			},
-			{
-				"command": "Fabric.Lakehouse.copyOneLakeTablesPath",
-				"title": "Copy OneLake Tables Path",
-				"icon": "$(layout-panel-justify)",
-				"category": "Fabric.Lakehouse"
-			},
-			{
-				"command": "Fabric.Lakehouse.Table.maintain",
-				"title": "Run Maintainance Job",
-				"icon": "$(combine)",
-				"category": "Fabric.Lakehouse"
-			},
-			{
-				"command": "Fabric.Item.openInBrowser",
-				"title": "Open in Fabric Service",
-				"icon": "$(globe)",
-				"category": "Fabric.Item"
-			},
-			{
-				"command": "Fabric.Item.copyIdToClipboard",
-				"title": "Copy ID to Clipboard",
-				"icon": "$(clippy)",
-				"category": "Fabric.Item"
-			},
-			{
-				"command": "Fabric.Item.copyNameToClipboard",
-				"title": "Copy Name to Clipboard",
-				"icon": "$(clippy)",
-				"category": "Fabric.Item"
-			},
-			{
-				"command": "Fabric.Item.copyPathToClipboard",
-				"title": "Copy API Path to Clipboard",
-				"icon": "$(clippy)",
-				"category": "Fabric.Item"
-			},
-			{
-				"command": "Fabric.Item.insertPath",
-				"title": "Insert Path",
-				"icon": "$(code)",
-				"category": "Fabric.Item"
-			},
-			{
-				"command": "Fabric.Item.browseInOneLake",
-				"title": "Browse in OneLake",
-				"icon": "$(link-external)",
-				"category": "Fabric.Item"
 			}
 		],
 		"menus": {
@@ -700,16 +564,6 @@
 				{
 					"command": "PowerBIPipelines.add",
 					"when": "view == PowerBIPipelines",
-					"group": "navigation"
-				},
-				{
-					"command": "FabricWorkspaces.refresh",
-					"when": "view == FabricWorkspaces",
-					"group": "navigation"
-				},
-				{
-					"command": "FabricWorkspaces.editItems",
-					"when": "view == FabricWorkspaces",
 					"group": "navigation"
 				}
 			],
@@ -919,60 +773,7 @@
 					"command": "PowerBIPipelineStage.unassignWorkspace",
 					"when": "view == PowerBIPipelines && viewItem =~ /.*,UNASSIGN,.*/",
 					"group": "navigation"
-				},
-
-				{
-					"command": "Fabric.Item.openInBrowser",
-					"when": "view =~ /(FabricWorkspaces)/",
-					"group": "7_open"
-				},
-				{
-					"command": "Fabric.Item.copyIdToClipboard",
-					"when": "view =~ /(FabricWorkspaces)/",
-					"group": "6_copypath"
-				},
-				{
-					"command": "Fabric.Item.copyNameToClipboard",
-					"when": "view =~ /(FabricWorkspaces)/",
-					"group": "6_copypath"
-				},
-				{
-					"command": "Fabric.Item.copyPathToClipboard",
-					"when": "view =~ /(FabricWorkspaces)/",
-					"group": "6_copypath"
-				},
-				{
-					"command": "Fabric.Item.insertPath",
-					"when": "view =~ /(FabricWorkspaces)/",
-					"group": "inline"
-				},
-				{
-					"command": "Fabric.Item.browseInOneLake",
-					"when": "view == FabricWorkspaces && viewItem =~ /.*,BROWSEONELAKE,.*/",
-					"group": "navigation"
-				},
-				{
-					"command": "Fabric.Lakehouse.copySQLConnectionString",
-					"when": "view == FabricWorkspaces && viewItem =~ /.*,LAKEHOUSE,.*/",
-					"group": "navigation"
-				},
-				{
-					"command": "Fabric.Lakehouse.copyOneLakeFilesPath",
-					"when": "view == FabricWorkspaces && viewItem =~ /.*,LAKEHOUSE,.*/",
-					"group": "navigation"
-				},
-				{
-					"command": "Fabric.Lakehouse.copyOneLakeTablesPath",
-					"when": "view == FabricWorkspaces && viewItem =~ /.*,LAKEHOUSE,.*/",
-					"group": "navigation"
-				},
-				{
-					"command": "Fabric.Lakehouse.Table.maintain",
-					"when": "view == FabricWorkspaces && viewItem =~ /.*,LAKEHOUSETABLE,.*/",
-					"group": "navigation"
-				}
-
-				
+				}				
 			],
 			"editor/title": [
 				{
@@ -1005,21 +806,6 @@
 				{
 					"command": "PowerBI.TMDL.saveLocally",
 					"when": "resourceScheme == tmdl && resourcePath =~ /\\/powerbi\\/[^\\/]*?\\/[^\\/]*?$/ && !powerbi.isInBrowser",
-					"group": "2_workspace"
-				},
-				{
-					"command": "Fabric.publishToFabric",
-					"when": "resourceScheme == fabric && resource =~ /^fabric:[\\/]*workspaces\\/[^\\/]*?\\/[^\\/]*?\\/[^\\/]*?$/",
-					"group": "2_workspace"
-				},
-				{
-					"command": "Fabric.openInFabric",
-					"when": "resourceScheme == fabric && resource =~ /^fabric:(([\\/]+[^\\/]+?)?|([\\/]+[^\\/]+?){4})$/",
-					"group": "2_workspace"
-				},
-				{
-					"command": "Fabric.reloadFromFabric",
-					"when": "resourceScheme == fabric",
 					"group": "2_workspace"
 				}
 			]

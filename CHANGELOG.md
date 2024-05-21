@@ -1,69 +1,70 @@
 # Change Log
 
 **v2.0.0**:
-- added Fabric Workspace Browser`
+- moved recently introduced Fabric specific features to the new [Fabric Studio](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.fabricstudio) extension
 - added feature to `Open PowerBI External Tool` configured in PowerBI Desktop with connection to online dataset preconfigured
-- added new config setting `powerni.workspaceFilter` to define RegEx filters on workspace names
+- added new config setting `powerbi.workspaceFilter` to define RegEx filters on workspace names
 - added `Show Memory Statistics` for Datasets
 - added support for [Long Running Operation (LRO)](https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation) when calling Fabric APIs from notebooks
 - added check for Dataset refreshes and whether `isRefreshable = true`
+- removed Fabric features like the FileSystemProvider `fabric:/` and all related features. They are moved to the new *Fabric Studio* extension!
 
 **v1.8.1**:
 - fix issue with Processing of individual partitions if Incremental Refresh is configured ([#27](/../../issues/27))
-- propate change decoration of Fabric items to parents
+- ~~propate change decoration of Fabric items to parents~~
 
 **v1.8.0**:
-- reworked [Long Running Operation (LRO)](https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation) in Fabric
-- added support to publish changes to multiple Fabric items at once
-- reworked API respnose structure
+- ~~reworked [Long Running Operation (LRO)](https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation) in Fabric~~
+- ~~added support to publish changes to multiple Fabric items at once~~
+- ~~reworked API respnose structure~~
 
 **v1.7.2**:
 - removed Table name and square brackets from DAX query results in notebooks
 
 **v1.7.1**:
-- added configuration `powerbi.Fabric.itemTypes` to control which Fabric Items are downloaded with an optional format
-- fixed an issue with publishing of modified items
+- ~~added configuration `powerbi.Fabric.itemTypes` to control which Fabric Items are downloaded with an optional format~~
+- ~~fixed an issue with publishing of modified items~~
 
 **v1.7.0**:
-- added support for creating items by creating a folder under the specific `Item Type`
-- improved `Publish to Fabric` to also handle `Create Item` and `Delete Item`
-- improved custom `FileDecorationProvider` to also highlight added and deleted items
+- ~~added support for creating items by creating a folder under the specific `Item Type`~~
+- ~~improved `Publish to Fabric` to also handle `Create Item` and `Delete Item`~~
+- ~~improved custom `FileDecorationProvider` to also highlight added and deleted items~~
 
 **v1.6.5**:
 - changed Dataset actions from hidden to disabled if they are not available (e.g. a `TakeOver` needs to be done first)
 - fixed issue with `Update Parameter` if the user is not the Owner of the dataset
 
 **v1.6.4**:
-- added custom `FileDecorationProvider` to highlight changed but unpublished files in the `fabric:/` scheme
+- ~~added custom `FileDecorationProvider` to highlight changed but unpublished files in the `fabric:/` scheme~~
 
 **v1.6.3**:
-- added `Open in Fabric` for `fabric:/` scheme
+- ~~added `Open in Fabric` for `fabric:/` scheme~~
 
 **v1.6.2**:
-- fixed issue with special characters in file and folder names when using the `fabric:/` scheme
+- ~~fixed issue with special characters in file and folder names when using the `fabric:/` scheme~~
 
 **v1.6.1**:
-- added new configiguration `powerbi.Fabric.fileFormats` to control how notebooks are exported (`.py`(default) vs. `ipynb`)
+- ~~added new configiguration `powerbi.Fabric.fileFormats` to control how notebooks are exported (`.py`(default) vs. `ipynb`)~~
 
 **v1.6.0**:
-- added support for `Publish to Fabric` in the context-menu of the Fabric Item
-- added support for `(Re)load from Fabric` in the context-menu
-- fixed issue with internal files being searched in the `fabric:/` scheme
+- ~~added support for `Publish to Fabric` in the context-menu of the Fabric Item~~
+- ~~added support for `(Re)load from Fabric` in the context-menu~~
+- ~~fixed issue with internal files being searched in the `fabric:/` scheme~~
 
 **v1.5.3**:
-- fixed issue with Fabric FileSystemProvider Cachen when changing user
-- fixed issue with error messages for internal files that cannot be found on the `fabric:/` scheme
+- ~~fixed issue with Fabric FileSystemProvider Cachen when changing user~~
+- ~~fixed issue with error messages for internal files that cannot be found on the `fabric:/` scheme~~
 
 **v1.5.2**:
-- fixed issue with Fabric FileSystemProvider caused by special characters in the name
+- ~~fixed issue with Fabric FileSystemProvider caused by special characters in the name~~
 
 **v1.5.1**:
-- fixed issue with Fabric FileSystemProvider caused by duplicate item names
+- ~~fixed issue with Fabric FileSystemProvider caused by duplicate item names~~
 
 **v1.5.0**:
-- Support for Fabric via FileSystemProvider `fabric://<workspaceId>`
-  - load all items with their definition
-  - update and publish definition of existing items
+- ~~Support for Fabric via FileSystemProvider `fabric://<workspaceId>`~~
+  - ~~load all items with their definition~~
+  - ~~update and publish definition of existing items~~
 - added support for multiselect of `Tables` and `Partitions` to process multiple at the same time
 - added support to deploy local TMDL folders directly without `.publishsettings.json`
 - added Drag & Drop to Power BI notebooks supporting `DAX` (tables, columns and measures)
@@ -125,4 +126,3 @@
 - Added Gateway Data Sources to Gateway treeview
 - Fixed issue with Web Extension and TMDLProxy
 - Fixed issue when no pipelines/gateways/capacities are accessible/available
-

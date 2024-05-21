@@ -298,15 +298,15 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 							return;
 					}
 
-					if(useFabricApi) {
-						if(fabricResult.error) {
-						throw new Error(fabricResult.error.message);
+					if (useFabricApi) {
+						if (fabricResult.error) {
+							throw new Error(fabricResult.error.message);
 						}
 						else {
 							// mimic a Power BI Response structure
 							result = {
 								"odata.context": "FabricAPI",
-								"value": fabricResult.success
+								"value": fabricResult.success.value
 							};
 						}
 					}

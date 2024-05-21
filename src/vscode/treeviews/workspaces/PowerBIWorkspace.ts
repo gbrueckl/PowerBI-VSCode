@@ -89,9 +89,6 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 		if (this.isPremiumCapacity) {
 			capacityType = "_premium";
 		}
-		if (this.isFabricCapacity) {
-			capacityType = "_fabric";
-		}
 		return vscode.Uri.joinPath(ThisExtension.rootUri, 'resources', theme, this.itemType.toLowerCase() + capacityType + '.png');
 	}
 
@@ -102,14 +99,6 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 	// Workspace-specific functions
 	get isPremiumCapacity(): boolean {
 		return this.definition.isOnDedicatedCapacity
-	}
-
-	get isFabricCapacity(): boolean {
-		return false;
-		if (!this.isPremiumCapacity) {
-			return false;
-		}
-		return this.definition.sku.startsWith("F");
 	}
 
 	get sku(): string {

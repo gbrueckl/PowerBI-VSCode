@@ -52,13 +52,6 @@ export type ApiItemType =
 |	"DATAFLOWTRANSACTION"		// single Dataflow refresh
 |	"DATAFLOWDATASOURCES"
 |	"DATAFLOWDATASOURCE"
-// FabricItems
-|	"WORKSPACES"
-|	"WORKSPACE"
-|	"LAKEHOUSES"
-|	"LAKEHOUSE"
-|	"LAKEHOUSETABLES"
-|	"LAKEHOUSETABLE"
 ;
 
 export interface iPowerBIDesktopExternalToolConfig {

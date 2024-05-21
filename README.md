@@ -14,7 +14,6 @@ The extensions can be installed directly from within VSCode by searching for thi
 # Features
 - GUI to browse your workspace and run operations like [rebind](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/rebind-report-in-group), [clone](https://learn.microsoft.com/en-us/rest/api/power-bi/reports/clone-report-in-group), ...
 - Modify Power BI datasets using **TMDL** - see [TMDL](#tmdl)
-- Microsoft Fabric integration - see [Microsoft Fabric](#microsoft-fabric) (Preview)
 - Supports VSCode and [vscode.dev](https://vscode.dev)
 - Connect to remote tenants where you are invited as a guest user - see [Configuration](#configuration)
 - Run DAX queries in a notebook against your Power BI Datasets using `%dax` magic
@@ -32,7 +31,6 @@ The extension supports the following VSCode settings:
 |`powerbi.cloud`|(Optional) Only use when you want to connect to a sovereign or governmental cloud!|GlobalCloud|
 |`powerbi.TMDL.clientId`|(Optional) To use **TMDL features**, a custom ClientID/Application can be used. You can use `058487e5-bde7-4aba-a5dc-2f9ac58cb668` and make sure its permitted in your tenant or you can create your own AAD application in your AAD tenant (see [README](https://github.com/gbrueckl/PowerBI-VSCode/blob/main/README.md#tmdl)) for details. If this is configured, VSCode will manage the authentication and also remember it!|A GUID, `058487e5-bde7-4aba-a5dc-2f9ac58cb668`|
 |`powerbi.TMDL.enabled`|Set to `true` (default) to allow editing Power BI datasets using TMDL.|`true`(default)/`false`|
-|`powerbi.Fabric.itemTypes`|(Optional) A list of [Fabric Item Types](https://learn.microsoft.com/en-us/rest/api/fabric/core/items/list-items?tabs=HTTP#itemtype) with an optional [Format](https://learn.microsoft.com/en-us/rest/api/fabric/articles/item-management/definitions/notebook-definition#supported-formats) as list of objects.|```[{"itemType": "Notebook", "format": "ipynb"}, {"itemType": "Report"}]```|
 |`powerbi.workspaceFilter`|(Optional) A regex to filter workspaces by name. Only workspaces matching this regex will be shown in the Power BI Workspaces view.|`Project A\|Sales` to see only workspaces that have "Project A" or (\|) "Sales" in the name|
 
 # Notebooks
@@ -133,33 +131,6 @@ The Tabular Model Scripting Language (TMSL) can be used to create or modify Tabu
 ```
 
 While you could technically run any TMSL script including large `createOrUpdate` scripts, its purpose is to modify individual properties of selected objects like changing the name of a role etc.
-
-# Microsoft Fabric
-The extension also provides an easy way to interact with all items hosted in Microsoft Fabric. Besides the regular Power BI artifacts like Datasets and Reports this also includes Notebooks and SparkJobDefinitions (more to be added once the Fabric APIs exist!). To browse your Fabric items, you need to use [VSCode Workspace](https://code.visualstudio.com/docs/editor/workspaces) when working with VSCode. In your workspace settings file, you can add a Fabric Workspace using an URI in the format of `fabric://workspaces/<workspace-guid>`:
-
-```json
-{
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"uri": "fabric://workspaces/f6fb3aea-f11f-4f06-b6fa-89bac4c0fee0",
-			"name": "My Fabric Workspace"
-		}
-	]
-}
-```
-
-Once this is set up, you can browse your Fabric items as if they were local. In fact we use the API to download them and cache them locally in memory for you. You can also add, modify or delete the whole Fabric items or its files. Locally changed files will be displayed similar to changed items in GIT:
-
-- green with `A` badge -> Added
-- yellow with `M` badge -> Modified
-- red with `D` badge -> Deleted
-
-To publish your local changes back to Fabric, right-clicking on the Item-folder (e.g the Dataset, the Report, the Notebook, ...) and select `Publish to Fabric`.
-
-To undo your local changes or force the reload of content from Fabric (e.g. if you changed/created a new item in the Fabric UI), you can use `Reload from Fabric` from the context menu.
 
 # TMDL
 

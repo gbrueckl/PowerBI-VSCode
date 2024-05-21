@@ -36,15 +36,8 @@ import { PowerBICapacityWorkload } from './vscode/treeviews/Capacities/PowerBICa
 import { TOMProxyBackup, TOMProxyRestore } from './TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTable } from './vscode/treeviews/workspaces/PowerBIDatasetTable';
 import { PowerBIOnDropProvider } from './vscode/dropProvider/PowerBIOnDropProvider';
-import { FabricFileSystemProvider } from './vscode/filesystemProvider/fabric/FabricFileSystemProvider';
-import { FabricFSCache } from './vscode/filesystemProvider/fabric/FabricFSCache';
-import { FabricFSUri } from './vscode/filesystemProvider/fabric/FabricFSUri';
-import { FabricFSFileDecorationProvider } from './vscode/fileDecoration/FabricFileDecorationProvider';
-import { FabricWorkspacesTreeProvider } from './vscode/treeviews/FabricWorkspace/FabricWorkspacesTreeProvider';
-import { FabricWorkspaceTreeItem } from './vscode/treeviews/FabricWorkspace/FabricWorkspaceTreeItem';
-import { FabricLakehouse } from './vscode/treeviews/FabricWorkspace/FabricLakehouse';
 import { Helper } from './helpers/Helper';
-import { FabricLakehouseTable } from './vscode/treeviews/FabricWorkspace/FabricLakehouseTable';
+
 
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -102,24 +95,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIItem.copyNameToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyNameToClipboard());
 	vscode.commands.registerCommand('PowerBIItem.copyPathToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyPathToClipboard());
 	vscode.commands.registerCommand('PowerBIItem.insertPath', (treeItem: PowerBIApiTreeItem) => treeItem.insertCode());
-
-	// register FabricWorkspacesTreeProvider
-	let fabricWorkspacesTreeProvider = new FabricWorkspacesTreeProvider(context);
-	vscode.commands.registerCommand('FabricWorkspaces.refresh', (item: FabricWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => fabricWorkspacesTreeProvider.refresh(item, showInfoMessage));
-	vscode.commands.registerCommand('FabricWorkspaces.editItems', (item: FabricWorkspaceTreeItem = undefined) => item.editItems());
-
-	vscode.commands.registerCommand('Fabric.Item.copyIdToClipboard', (treeItem: FabricWorkspaceTreeItem) => treeItem.copyIdToClipboard());
-	vscode.commands.registerCommand('Fabric.Item.copyNameToClipboard', (treeItem: FabricWorkspaceTreeItem) => treeItem.copyNameToClipboard());
-	vscode.commands.registerCommand('Fabric.Item.copyPathToClipboard', (treeItem: FabricWorkspaceTreeItem) => treeItem.copyPathToClipboard());
-	vscode.commands.registerCommand('Fabric.Item.insertPath', (treeItem: FabricWorkspaceTreeItem) => treeItem.insertCode());
-	vscode.commands.registerCommand('Fabric.Item.browseInOneLake', (treeItem: FabricWorkspaceTreeItem) => Helper.addToWorkspace(treeItem.oneLakeUri, `OneLake - ${treeItem.label}`, true, true));
-
-
-	vscode.commands.registerCommand('Fabric.Lakehouse.copySQLConnectionString', (treeItem: FabricLakehouse) => treeItem.copySQLConnectionString());
-	vscode.commands.registerCommand('Fabric.Lakehouse.copyOneLakeFilesPath', (treeItem: FabricLakehouse) => treeItem.copyOneLakeFilesPath());
-	vscode.commands.registerCommand('Fabric.Lakehouse.copyOneLakeTablesPath', (treeItem: FabricLakehouse) => treeItem.copyOneLakeTablesPath());
-	vscode.commands.registerCommand('Fabric.Lakehouse.Table.maintain', (lakehouseTable: FabricLakehouseTable) => lakehouseTable.runMaintainanceJob());
-
 
 	// register PowerBIWorkspacesTreeProvider
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
@@ -235,12 +210,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		ThisExtension.log("TMDL is not enabled! Please use the setting `powerbi.TMDL.enabled` to configure it and use TMDL features");
 	}
 
-	// Fabric FileSystemProvider
-	FabricFileSystemProvider.register(context);
-
-	// Fabric FileDecorationProvider
-	FabricFSFileDecorationProvider.register(context);
-
 	vscode.commands.registerCommand('PowerBI.TMDL.test', () => TMDLProxy.test());
 
 	// new editor commands for TMDL files
@@ -259,19 +228,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('PowerBI.TMDL.ensureProxy',
 		() => TMDLProxy.ensureProxy(context)
-	);
-
-	// new commands for Fabric FileSystemProvider
-	vscode.commands.registerCommand('Fabric.publishToFabric',
-		(uri) => FabricFSCache.publishToFabric(uri)
-	);
-
-	vscode.commands.registerCommand('Fabric.reloadFromFabric',
-		(uri) => FabricFSCache.reloadFromFabric(uri)
-	);
-
-	vscode.commands.registerCommand('Fabric.openInFabric',
-		(uri) => FabricFSUri.openInBrowser(uri)
 	);
 
 	EventHandlers.init(context);
