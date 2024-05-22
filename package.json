@@ -19,7 +19,7 @@
 	},
 	"bugs": {
 		"url": "https://github.com/gbrueckl/PowerBI-VSCode/issues",
-		"email": "powerbi-vscode@gbrueckl.at"
+		"email": "powerbi-studio@gbrueckl.at"
 	},
 	"qna": "https://github.com/gbrueckl/PowerBI-VSCode/issues",
 	"sponsor": {
@@ -65,7 +65,7 @@
 	"contributes": {
 		"configuration": [
 			{
-				"title": "Power BI",
+				"title": "Power BI Studio",
 				"properties": {
 					"powerbi.tenantId": {
 						"type": "string",
@@ -136,7 +136,7 @@
 			"activitybar": [
 				{
 					"id": "powerbi",
-					"title": "Power BI",
+					"title": "Power BI Studio",
 					"icon": "resources/powerbi_sidebar.png"
 				}
 			]
@@ -145,7 +145,7 @@
 			"powerbi": [
 				{
 					"id": "PowerBIWorkspaces",
-					"name": "PowerBI Workspaces"
+					"name": "Workspaces"
 				},
 				{
 					"id": "PowerBIPipelines",

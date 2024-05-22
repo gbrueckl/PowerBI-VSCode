@@ -1,10 +1,10 @@
-# PowerBI-VSCode
+# Power BI Studio
 [![Version](https://img.shields.io/visual-studio-marketplace/v/GerhardBrueckl.powerbi-vscode)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/GerhardBrueckl.powerbi-vscode)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
 [![Downloads](https://img.shields.io/visual-studio-marketplace/d/GerhardBrueckl.powerbi-vscode)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
 [![Ratings](https://img.shields.io/visual-studio-marketplace/r/GerhardBrueckl.powerbi-vscode)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
 
-![PowerBI-VSCode](/images/PowerBI-VSCode.png?raw=true "PowerBI-VSCode")
+![PowerBI-Studio](/images/PowerBI-VSCode.png?raw=true "PowerBI-Studio")
 
 A [VSCode](https://code.visualstudio.com/) extension for managing your Power BI tenant using the [Power BI REST API](https://docs.microsoft.com/en-us/rest/api/power-bi/) and modify Power BI datasets using TMDL (Tabular Model Definition Language) from within VSCode.
 
@@ -58,14 +58,14 @@ For proper visualization of the results I highly recommend to also install the [
 ## Run REST API calls (%api)
 To run a REST API call from the notebook you can simply write the following:
 
-``` rest
+```rest
 METHOD endpoint
 {JSON-Body}
 ```
 
 For example to create a new dashboard in _My Workspace_ you can run the following command:
 
-``` rest
+```rest
 POST /dashboards
 {
   "name": "SalesMarketing"
@@ -73,12 +73,14 @@ POST /dashboards
 ```
 
 The JSON-body can also be omitted, e.g. for a GET request.
-Supported METHODs are `GET`, `POST`, `PUT`, `PATCH` and `DELETE`. the _endpoint_ can either be absolute (e.g. `https://api.powerbi.com/v1.0/myorg/dashboards`), relative to the root of the API (e.g. `/dashboards`) or relative to the path set via notebook variables `API_ROOT_PATH` (e.g. `./refreshes`) (see [Using Variables](#using-variables-cmd) below)
+Supported METHODs are `GET`, `POST`, `PUT`, `PATCH` and `DELETE`. the _endpoint_ can either be absolute (e.g. `https://api.powerbi.com/v1.0/myorg/dashboards`), relative to the root of the API (e.g. `/dashboards`) or relative to the path set via notebook variables `API_PATH` (e.g. `./refreshes`) (see [Using Variables](#using-variables-cmd) below)
+
+You can also execute call against the [Fabric REST APIs](https://learn.microsoft.com/en-us/rest/api/fabric/articles/). The only thing you need to do is to use the full path of the API, e.g. `https://api.fabric.microsoft.com/v1/workspaces`. You can either specify it directly in your notebook cell or via `API_PATH` and relative paths in the cells.
 
 ## Execute DAX queries (%dax)
 To run a DAX query from within the notebook, you have to use the cell magic `%dax` in the very first line of your cell. The following lines will contain the actual DAX query:
 
-``` dax
+```dax
 %dax
 EVALUATE MyTable
 ```
@@ -88,7 +90,7 @@ For this to work, you first need to set the variable `DATASET` in your notebook 
 ## Using variables (%cmd)
 You can also define and use variables within the notebook. To set a variable you can use
 
-``` bash
+```bash
 %cmd
 MY_VARIABLE = my_value
 ```

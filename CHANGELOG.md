@@ -1,13 +1,14 @@
 # Change Log
 
 **v2.0.0**:
-- moved recently introduced Fabric specific features to the new [Fabric Studio](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.fabricstudio) extension
+- renamed extension to "Power BI Studio"
+- moved recently introduced Fabric specific features to the new [Fabric Studio](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.fabricstudio) extension.
+  - all former 
 - added feature to `Open PowerBI External Tool` configured in PowerBI Desktop with connection to online dataset preconfigured
 - added new config setting `powerbi.workspaceFilter` to define RegEx filters on workspace names
 - added `Show Memory Statistics` for Datasets
 - added support for [Long Running Operation (LRO)](https://learn.microsoft.com/en-us/rest/api/fabric/articles/long-running-operation) when calling Fabric APIs from notebooks
 - added check for Dataset refreshes and whether `isRefreshable = true`
-- removed Fabric features like the FileSystemProvider `fabric:/` and all related features. They are moved to the new *Fabric Studio* extension!
 
 **v1.8.1**:
 - fix issue with Processing of individual partitions if Incremental Refresh is configured ([#27](/../../issues/27))
