@@ -5,7 +5,7 @@ import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { iPowerBIDataset, iPowerBIDatasetGenericResponse, iPowerBIDatasetParameter, iPowerBIDatasetRefreshableObject } from '../../../powerbi/DatasetsAPI/_types';
+import { iPowerBIDataset, iPowerBIDatasetGenericResponse, iPowerBIDatasetParameter, iPowerBIDatasetRefresh, iPowerBIDatasetRefreshableObject } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder, PowerBICommandInput, PowerBIQuickPickItem } from '../../../powerbi/CommandBuilder';
 import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIParameters } from './PowerBIParameters';
@@ -162,6 +162,39 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 
 		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this, false);
+
+		this.awaitRunningRefresh();
+	}
+
+	async awaitRunningRefresh(timeoutSeconds: number = 10): Promise<void> {
+		let refreshTimer;
+		let isFirstCheck = true;
+
+		ThisExtension.log(`Starting polling of running Power BI refresh for dataset '${this.name}' every ${timeoutSeconds} seconds ...`);
+
+		refreshTimer = setInterval(async () => {
+			ThisExtension.log("Checking refresh status ...")
+
+			let lastRefresh: iPowerBIDatasetRefresh[] = await PowerBIApiService.getItemList<iPowerBIDatasetRefresh>(this.apiPath + "/refreshes", { "$top": 1 }, null);
+
+			if (lastRefresh.length == 0) {
+				ThisExtension.log("No refreshes found yet ...");
+				clearInterval(refreshTimer); // abort the polling
+				
+				return;
+			}
+
+			if (lastRefresh[0].status != "Unknown") {
+				const msg = `Refresh of Power BI dataset '${this.name}' in workspace '${this.workspace.name} completed with status '${lastRefresh[0].status}'.`;
+				ThisExtension.log(msg);
+				vscode.window.showInformationMessage(msg, "OK");
+
+				ThisExtension.TreeViewWorkspaces.refresh(this, false);
+
+				clearInterval(refreshTimer); // abort the polling
+			}
+			isFirstCheck = false;
+		}, timeoutSeconds * 1000);
 	}
 
 	public async takeOver(): Promise<void> {

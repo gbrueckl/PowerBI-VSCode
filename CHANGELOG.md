@@ -1,5 +1,10 @@
 # Change Log
 
+**v2.1.0**:
+- added a notification when a Dataset refresh finishes
+  - for refreshes triggered from Power BI Studio
+  - for already running refreshes once the refresh history was expanded
+
 **v2.0.0**:
 - renamed extension to "Power BI Studio"
 - moved recently introduced Fabric specific features to the new [Fabric Studio](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.fabricstudio) extension.

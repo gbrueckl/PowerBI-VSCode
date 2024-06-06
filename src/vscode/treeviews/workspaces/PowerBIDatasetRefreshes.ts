@@ -53,14 +53,17 @@ export class PowerBIDatasetRefreshes extends PowerBIWorkspaceTreeItem {
 			let children: PowerBIDatasetRefresh[] = [];
 
 			try {
-
-
 				let items: iPowerBIDatasetRefresh[] = await PowerBIApiService.getItemList<iPowerBIDatasetRefresh>(this.apiPath, undefined, null);
 
 				for (let item of items) {
 					let treeItem = new PowerBIDatasetRefresh(item, this.groupId, this);
 					children.push(treeItem);
 					PowerBICommandBuilder.pushQuickPickItem(treeItem);
+				}
+
+				// once we expanded the refreshhistory, we check for running refreshes and inform the user once it completed
+				if (items.length > 0 && items[0].status == "Unknown") {
+					this.dataset.awaitRunningRefresh();
 				}
 			}
 			catch (e) {
