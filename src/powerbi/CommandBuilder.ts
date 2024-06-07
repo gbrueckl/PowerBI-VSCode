@@ -285,7 +285,7 @@ export abstract class PowerBICommandBuilder {
 		}
 		*/
 		if (this._quickPickLists == undefined) {
-			ThisExtension.log(`Initializing QuickPickList ...`);
+			ThisExtension.log(`Initializing QuickPickLists ...`);
 			this._quickPickLists = new Map<ApiItemType, PowerBIQuickPickItem[]>();
 		}
 
@@ -302,12 +302,12 @@ export abstract class PowerBICommandBuilder {
 			this._quickPickLists.get(item.itemType).splice(existingItemIndex, 1);
 		}
 
-		ThisExtension.log(`Adding item '${newItem.label}(${newItem.value})' to QuickPickList '${item.itemType}'.`);
+		ThisExtension.logDebug(`Adding item '${newItem.label}(${newItem.value})' to QuickPickList '${item.itemType}'.`);
 		this._quickPickLists.get(item.itemType).push(newItem);
 
 		while (this._quickPickLists.get(item.itemType).length > this._maxQuickPickListItems) {
 			let removed = this._quickPickLists.get(item.itemType).shift();
-			ThisExtension.log(`Removed item '${removed.label}(${removed.value})' from QuickPickList '${item.itemType}'.`);
+			ThisExtension.logDebug(`Removed item '${removed.label}(${removed.value})' from QuickPickList '${item.itemType}'.`);
 		}
 	}
 

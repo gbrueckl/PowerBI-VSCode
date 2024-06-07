@@ -166,7 +166,13 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		this.awaitRunningRefresh();
 	}
 
-	async awaitRunningRefresh(timeoutSeconds: number = 10): Promise<void> {
+	async awaitRunningRefresh(): Promise<void> {
+		if (!PowerBIConfiguration.datasetRefreshCheckInterval || PowerBIConfiguration.datasetRefreshCheckInterval <= 0) {
+			ThisExtension.log("No dataset refresh check interval configured. Aborting polling of running Power BI refresh ...");
+			return;
+		}
+		
+		const timeoutSeconds = PowerBIConfiguration.datasetRefreshCheckInterval;
 		let refreshTimer;
 		let isFirstCheck = true;
 

@@ -94,6 +94,9 @@ export abstract class PowerBIConfiguration {
 	static get clientId(): string { return this.getValue("clientId"); }
 	static set clientId(value: string) { this.setValue("clientId", value); }
 
+	static get datasetRefreshCheckInterval(): number { return this.getValue("datasetRefreshCheckInterval"); }
+	static set datasetRefreshCheckInterval(value: number) { this.setValue("datasetRefreshCheckInterval", value); }
+
 	static get workspaceFilter(): string { return this.getValue("workspaceFilter"); }
 	static set workspaceFilter(value: string) { this.setValue("workspaceFilter", value); }
 	static get workspaceFilterRegEx(): RegExp { return new RegExp(this.getValue("workspaceFilter")); }
@@ -103,6 +106,8 @@ export abstract class PowerBIConfiguration {
 
 	static get tmdlEnabled(): boolean { return this.getValue("TMDL.enabled"); }
 	static set tmdlEnabled(value: boolean) { this.setValue("TMDL.enabled", value); }
+
+
 
 	static get apiUrl(): string { return CLOUD_CONFIGS[this.cloud].apiEndpoint; }
 

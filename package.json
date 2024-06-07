@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "PowerBI Studio",
 	"description": "An extension to manage your Power BI resources from within VSCode",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -128,6 +128,11 @@
 							"Project A|Sales",
 							"\\[TEST]|\\[PROD]"
 						]
+					},
+					"powerbi.datasetRefreshCheckInterval": {
+						"type": "integer",
+						"description": "(Optional) The number of seconds to wait between checking for completed dataset refreshes in the background. Set to 0 to disable automatic refresh checks.",
+						"default": 60
 					}
 				}
 			}
