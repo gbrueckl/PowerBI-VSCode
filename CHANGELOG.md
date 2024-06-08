@@ -2,6 +2,7 @@
 
 **v2.1.1**:
 - added a new configuration setting `powerbi.datasetRefreshCheckInterval` to control how frequently we poll for completed dataset refreshes (default is every 60 seconds)
+
 **v2.1.0**:
 - added a notification when a Dataset refresh finishes
   - for refreshes triggered from Power BI Studio
