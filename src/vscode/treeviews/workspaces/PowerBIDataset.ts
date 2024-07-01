@@ -143,11 +143,17 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			}
 			body = {
 				"type": processType.label,
-				"applyRefreshPolicy": false
+				"applyRefreshPolicy": true
 			}
 
 			if (objectsToRefresh) {
 				body["objects"] = objectsToRefresh;
+
+				// it is not supported to apply the refresh policy when processing individual partitions
+				if (objectsToRefresh.find((obj) => obj.partition)) {
+					body["applyRefreshPolicy"] = false;
+					Helper.showTemporaryInformationMessage("Refresh policy will not be applied when processing individual partitions!", 3000);
+				}
 			}
 		}
 
@@ -171,7 +177,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			ThisExtension.log("No dataset refresh check interval configured. Aborting polling of running Power BI refresh ...");
 			return;
 		}
-		
+
 		const timeoutSeconds = PowerBIConfiguration.datasetRefreshCheckInterval;
 		let refreshTimer;
 		let isFirstCheck = true;
@@ -186,7 +192,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 			if (lastRefresh.length == 0) {
 				ThisExtension.log("No refreshes found yet ...");
 				clearInterval(refreshTimer); // abort the polling
-				
+
 				return;
 			}
 
