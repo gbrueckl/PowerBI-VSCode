@@ -1,5 +1,10 @@
 # Change Log
 
+**v2.2.0**:
+- greatly improved auto-completion for custom REST API calls in [Power BI Notebooks](./README.md/#notebooks)
+  - show also endpoints for other methods
+  - improved examples + bug fixes
+
 **v2.1.2**:
 - fixed issue with  `applyRefreshPolicy` when processing individual partitions from the GUI ([#33](/../../issues/33))
 
