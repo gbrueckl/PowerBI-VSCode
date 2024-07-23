@@ -24,6 +24,7 @@ import { PowerBINotebook, PowerBINotebookCell, PowerBINotebookType } from '../..
 import { PowerBIAPILanguage } from '../../language/_types';
 import { PowerBINotebookContext } from '../../notebook/PowerBINotebookContext';
 import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSerializer';
+import { PowerBIDatasetPermissions } from './PowerBIDatasetPermissions';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -106,6 +107,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		children.push(new PowerBIParameters(this.groupId, this));
 		children.push(new PowerBIDatasetRefreshes(this.groupId, this));
 		children.push(new PowerBIDatasetTables(this.groupId, this));
+		children.push(new PowerBIDatasetPermissions(this.groupId, this));
 
 		return children;
 	}

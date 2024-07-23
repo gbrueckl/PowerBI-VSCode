@@ -19,3 +19,11 @@ export class iPowerBIResponseGeneric<T = any> {
 	"odata.context": string;
 	value: T[];
 }
+
+export class iPowerBIPermission {
+	displayName?: string;
+	datasetUserAccessRight?: string; 	//The access rights to assign to the user for the dataset (permission level)
+	groupUserAccessRight?: string; 	//The access rights to assign to the user for the group (permission level)
+	identifier: string;					//For principal type User, provide the UPN. Otherwise provide the object ID of the principal.
+	principalType: "App" | "Group" | "User" | "None"; 			//The principal type
+}

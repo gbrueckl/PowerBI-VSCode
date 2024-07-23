@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { Helper, UniqueId } from '../../../helpers/Helper';
+import { UniqueId } from '../../../helpers/Helper';
 
 import { ApiItemType } from '../_types';
 import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';

@@ -1,5 +1,9 @@
 # Change Log
 
+**v2.3.0**:
+- added new `_cells` special variable to be used in Power BI Notebooks to reference the output of previous cells - see [_cells](./README.md/#_cells)
+- added new `Permissions` folder for Workspaces and Datasets
+
 **v2.2.0**:
 - greatly improved auto-completion for custom REST API calls in [Power BI Notebooks](./README.md/#notebooks)
   - show also endpoints for other methods

@@ -98,22 +98,34 @@ MY_VARIABLE = my_value
 
 Please note that variable names are note case sensitive and are converted to UPPER when you define them. However, you reference them using any casing you want.
 
-There are some special variables that must be set in combination with `%dax` magic to identify the dataset. The main variable that needs to be set is the `DATASET` (aliases are also `DATASET_PATH`, `API_PATH`or `API_ROOT_PATH`) to identify the dataset to which the DAX query is sent. the value has to be an API path pointing to the dataset:
-
-``` bash
-%cmd
-SET DATASET = /groups/d1f70e51-1234-1234-8e4c-55f35f9fa758/datasets/028d20ca-7777-8888-9999-7a253c7bb6b3
-```
-
 Current values of variables can be retrieved by running `SET MY_VARIABLE`.
-
+**Note:** you can also set/get multiple variables within the same notebook cell!
 Variables can be used via the pattern `$(<variableName>)`. Assuming the variable `My_Variable` is set to `123`:
 
 ``` dax
 EVALUATE ROW("MyVariable", $(My_Variable))
 ```
 
-**Note:** you can also set/get multiple variables within the same notebook cell!
+### Special Variables
+#### API_PATH
+There are some special variables that must be set in combination with `%dax` magic to identify the dataset. The main variable that needs to be set is the `API_PATH` (aliases are also `DATASET_PATH`, `API_PATH`or `API_ROOT_PATH`) to identify the dataset to which the DAX query is sent. the value has to be an API path pointing to the dataset:
+
+``` bash
+%cmd
+SET API_PATH = /groups/d1f70e51-1234-1234-8e4c-55f35f9fa758/datasets/028d20ca-7777-8888-9999-7a253c7bb6b3
+```
+
+#### _cells
+Another special variable is `_cells` which allows you to refernce the output of other cells. The full syntax is `_cells[<relativeCellIndex>]<XPathInResult>`. This variable can then be used like this:
+
+``` bash
+GET /groups
+------ CELL -------
+GET /groups/$(_cells[-1][2].id)/datasets
+```
+The first cell would return the list of all workspaces. The second cell gets the result of the previous cell (`[-1]`), and reads the `id` of the 3rd row (`[2].id`). This syntax can not only be used in the API path but anywhere in the cell, e.g. also in the body! To reference the whole output, you can also omi the `<XPathInResult>` and only use `_cells[<relativeCellIndex>]`.
+
+This approach can also be used to simply copy settings from one Power BI object to another by first running a `GET` on the source object and then a `POST`/`PUT`/`PATCH` on the target referencing the output of the preceding `GET`. Common scenarios would be to copy users/permissions or dataset refresh schedules but there are definitely much more use-cases!
 
 ## Executing TMSL scripts (%tmsl)
 The Tabular Model Scripting Language (TMSL) can be used to create or modify Tabular Models like Power BI datasets. Using the `%tmsl` magic you can now also run TMSL scripts against the current Tabular Server (Power BI Premium Workspace) as follows:

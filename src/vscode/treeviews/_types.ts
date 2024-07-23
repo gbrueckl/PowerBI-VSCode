@@ -1,6 +1,7 @@
 export type ApiItemType = 
 	"GROUP"
 |	"GROUPS" 
+|	"GROUPPERMISSIONS" // container for users in a workspace
 |	"DATASETS" // container for datasets within workspace
 | 	"DATASET"
 | 	"DATASET_XMLA" // only used for QuickPick items to allow to store XMLA information for datasets
@@ -38,6 +39,7 @@ export type ApiItemType =
 |	"PIPELINESTAGEREPORTS" 
 |	"DATASETPARAMETERS"
 |	"DATASETPARAMETER"
+|	"DATASETPERMISSIONS"		// container for Dataset permissions
 |	"DATASETREFRESHES"			// container for Dataset refreshes
 |	"DATASETREFRESH"			// single Dataset refresh
 |	"DATASETTABLES"				// container for Dataset tables
@@ -52,6 +54,7 @@ export type ApiItemType =
 |	"DATAFLOWTRANSACTION"		// single Dataflow refresh
 |	"DATAFLOWDATASOURCES"
 |	"DATAFLOWDATASOURCE"
+|	"PERMISSION"
 ;
 
 export interface iPowerBIDesktopExternalToolConfig {

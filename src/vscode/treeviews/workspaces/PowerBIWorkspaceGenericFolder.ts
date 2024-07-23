@@ -1,17 +1,10 @@
 import * as vscode from 'vscode';
 
 import { UniqueId } from '../../../helpers/Helper';
-import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { PowerBIDataset } from './PowerBIDataset';
-import { iPowerBIDataset, iPowerBIDatasetDMV, iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
-import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
-import { PowerBIDatasetRefresh } from './PowerBIDatasetRefresh';
 import { ThisExtension } from '../../../ThisExtension';
-import { PowerBIDatasetTable } from './PowerBIDatasetTable';
 import { ApiItemType } from '../_types';
-import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIWorkspaceGenericFolder extends PowerBIWorkspaceTreeItem {
@@ -29,7 +22,7 @@ export class PowerBIWorkspaceGenericFolder extends PowerBIWorkspaceTreeItem {
 
 		this.customApiUrlPart = apiUrlPart;
 		// the groupId is not unique for logical folders hence we make it unique
-		this.id = groupId + "/" + this.parent.uid + "/" + this.itemType.toString();
+		this.id = groupId + "/" + parent.uid + "/" + this.itemType.toString();
 		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")

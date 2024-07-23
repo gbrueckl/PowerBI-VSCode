@@ -14,10 +14,10 @@ import { Helper } from '../../../helpers/Helper';
 import { iPowerBICapacity } from '../../../powerbi/CapacityAPI/_types';
 import { TMDLFSUri } from '../../filesystemProvider/TMDLFSUri';
 import { TMDL_SCHEME } from '../../filesystemProvider/TMDLFileSystemProvider';
-import { TMDLFSCache } from '../../filesystemProvider/TMDLFSCache';
 import { TMDLProxy } from '../../../TMDLVSCode/TMDLProxy';
-import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
+import { TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
 import { iPowerBIImport, iPowerBIImportDetails } from '../../../powerbi/ImportsAPI/_types';
+import { PowerBIWorkspacePermissions } from './PowerBIWorkspacePermissions';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMProxyRestore {
@@ -80,6 +80,7 @@ export class PowerBIWorkspace extends PowerBIWorkspaceTreeItem implements TOMPro
 		children.push(new PowerBIReports(this.uid, this));
 		children.push(new PowerBIDashboards(this.uid, this));
 		children.push(new PowerBIDataflows(this.uid, this));
+		children.push(new PowerBIWorkspacePermissions(this.uid, this));
 
 		return children;
 	}

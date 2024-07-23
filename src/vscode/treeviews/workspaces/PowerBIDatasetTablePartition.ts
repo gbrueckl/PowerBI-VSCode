@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
-import { Helper, UniqueId } from '../../../helpers/Helper';
+import { UniqueId } from '../../../helpers/Helper';
 import { ThisExtension } from '../../../ThisExtension';
 import {  PowerBIDataset } from './PowerBIDataset';
 import { iPowerBIDatasetDMV, iPowerBIDatasetRefreshableObject } from '../../../powerbi/DatasetsAPI/_types';
@@ -22,7 +22,7 @@ export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem imple
 		this.definition = definition;
 
 		this.id = this.parent.uid + "/" + definition.id;
-		this.description = this._description;
+		this.description = `Refreshed: ${this.definition.properties["RefreshedTime"]}`;
 		this.tooltip = this._tooltip;
 		this.contextValue = this._contextValue;
 		this.iconPath = this.getIcon();
@@ -46,10 +46,6 @@ export class PowerBIDatasetTablePartition extends PowerBIWorkspaceTreeItem imple
 	}
 
 	// description is show next to the label
-	get _description(): string {
-		return this.definition.id;
-	}
-
 	getIcon(): vscode.ThemeIcon {
 		return new vscode.ThemeIcon("extensions");
 	}
