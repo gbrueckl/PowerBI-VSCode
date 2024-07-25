@@ -150,6 +150,10 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 		vscode.env.clipboard.writeText(this.apiPath);
 	}
 
+	public copyPropertiesToClipboard(): void {
+		vscode.env.clipboard.writeText(JSON.stringify(this.definition, null, 4));
+	}
+
 	public getBrowserLink(): vscode.Uri {
 		//https://app.powerbi.com/groups/ccce57d1-10af-1234-1234-665f8bbd8458/datasets/7cdff921-9999-8888-b0c8-34be20567742
 

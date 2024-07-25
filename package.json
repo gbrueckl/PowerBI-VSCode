@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "PowerBI Studio",
 	"description": "An extension to manage your Power BI resources from within VSCode",
-	"version": "2.3.0",
+	"version": "2.4.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -222,6 +222,12 @@
 			{
 				"command": "PowerBIItem.copyPathToClipboard",
 				"title": "Copy API Path to Clipboard",
+				"icon": "$(clippy)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIItem.copyPropertiesToClipboard",
+				"title": "Copy Properties to Clipboard",
 				"icon": "$(clippy)",
 				"category": "PowerBI"
 			},
@@ -590,6 +596,11 @@
 				},
 				{
 					"command": "PowerBIItem.copyPathToClipboard",
+					"when": "view =~ /(PowerBIWorkspaces)|(PowerBIPipelines)|(PowerBIGateways)|(PowerBICapacities)/",
+					"group": "6_copypath"
+				},
+				{
+					"command": "PowerBIItem.copyPropertiesToClipboard",
 					"when": "view =~ /(PowerBIWorkspaces)|(PowerBIPipelines)|(PowerBIGateways)|(PowerBICapacities)/",
 					"group": "6_copypath"
 				},

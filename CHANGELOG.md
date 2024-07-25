@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.4.0**:
+- added `Copy Properties to Clipboard` for all tree-views
+
 **v2.3.0**:
 - added new `_cells` special variable to be used in Power BI Notebooks to reference the output of previous cells - see [_cells](./README.md/#_cells)
 - added new `Permissions` folder for Workspaces and Datasets

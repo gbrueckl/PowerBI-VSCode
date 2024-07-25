@@ -94,6 +94,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIItem.copyIdToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyIdToClipboard());
 	vscode.commands.registerCommand('PowerBIItem.copyNameToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyNameToClipboard());
 	vscode.commands.registerCommand('PowerBIItem.copyPathToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyPathToClipboard());
+	vscode.commands.registerCommand('PowerBIItem.copyPropertiesToClipboard', (treeItem: PowerBIApiTreeItem) => treeItem.copyPropertiesToClipboard());
 	vscode.commands.registerCommand('PowerBIItem.insertPath', (treeItem: PowerBIApiTreeItem) => treeItem.insertCode());
 
 	// register PowerBIWorkspacesTreeProvider
