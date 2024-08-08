@@ -15,6 +15,7 @@ import { PowerBIWorkspaceTreeItem } from './vscode/treeviews/workspaces/PowerBIW
 import { PowerBICapacityTreeItem } from './vscode/treeviews/Capacities/PowerBICapacityTreeItem';
 import { PowerBIGatewayTreeItem } from './vscode/treeviews/Gateways/PowerBIGatewayTreeItem';
 import { PowerBIPipelineTreeItem } from './vscode/treeviews/Pipelines/PowerBIPipelineTreeItem';
+import { TempFileSystemProvider } from './vscode/filesystemProvider/temp/TempFileSystemProvider';
 
 
 
@@ -36,6 +37,7 @@ export abstract class ThisExtension {
 	private static _statusBarRight: vscode.StatusBarItem;
 	private static _statusBarLeft: vscode.StatusBarItem;
 	private static _tmdlFileSystemProvider: TMDLFileSystemProvider;
+	private static _tempFileSystemProvider: TempFileSystemProvider;
 	private static _treeViewWorkspaces: PowerBIWorkspacesTreeProvider;
 	private static _treeViewCapacities: PowerBICapacitiesTreeProvider;
 	private static _treeViewGateways: PowerBIGatewaysTreeProvider;
@@ -110,6 +112,13 @@ export abstract class ThisExtension {
 	}
 	static get TMDLFileSystemProvider(): TMDLFileSystemProvider {
 		return this._tmdlFileSystemProvider;
+	}
+
+	static set TempFileSystemProvider(provider: TempFileSystemProvider) {
+		this._tempFileSystemProvider = provider;
+	}
+	static get TepmFileSystemProvider(): TempFileSystemProvider {
+		return this._tempFileSystemProvider;
 	}
 	// #endregion
 

@@ -7,6 +7,7 @@ import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 import { PowerBIDataset } from './PowerBIDataset';
 import { PowerBIDatasetRefreshes } from './PowerBIDatasetRefreshes';
 import { iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
+import { TempFileSystemProvider } from '../../filesystemProvider/temp/TempFileSystemProvider';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
@@ -154,7 +155,14 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 			result = await PowerBIApiService.get(this.apiPath);
 		}
 
-		vscode.workspace.openTextDocument({ language: "json", content: JSON.stringify(result, null, "\t") }).then(
+		let tempPath = Helper.joinPath(
+			this.getParentByType("GROUP").label.toString(),
+			this.getParentByType("DATASET").label.toString(),
+			this.getParentByType("DATASET").label.toString() + " " + this.label + ".json");
+
+		let tempUri = await TempFileSystemProvider.createTempFile(tempPath, JSON.stringify(result, null, "\t"));
+
+		vscode.workspace.openTextDocument(tempUri).then(
 			document => vscode.window.showTextDocument(document)
 		);
 	}

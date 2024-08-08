@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.4.1**:
+- added a new way to view temporary files (e.g. Dataset Refreshes) which does not require you to store the open files anymore when closing VSCode
+
 **v2.4.0**:
 - added `Copy Properties to Clipboard` for all tree-views
 
