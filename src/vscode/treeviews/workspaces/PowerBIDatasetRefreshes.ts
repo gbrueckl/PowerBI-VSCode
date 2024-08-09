@@ -9,6 +9,7 @@ import { iPowerBIDataset, iPowerBIDatasetRefresh } from '../../../powerbi/Datase
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIDatasetRefresh } from './PowerBIDatasetRefresh';
 import { ThisExtension } from '../../../ThisExtension';
+import { PowerBIDatasets } from './PowerBIDatasets';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasetRefreshes extends PowerBIWorkspaceTreeItem {
@@ -62,8 +63,8 @@ export class PowerBIDatasetRefreshes extends PowerBIWorkspaceTreeItem {
 				}
 
 				// once we expanded the refreshhistory, we check for running refreshes and inform the user once it completed
-				if (items.length > 0 && items[0].status == "Unknown") {
-					this.dataset.awaitRunningRefresh();
+				if (children.length > 0 && ["Unknown", "NotStarted"].includes(children[0].status)) {
+					PowerBIDatasets.startRunningRefreshTimer("/" + this.apiPath.split("/").slice(2).join("/"))
 				}
 			}
 			catch (e) {

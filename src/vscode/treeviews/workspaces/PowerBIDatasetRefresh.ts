@@ -34,11 +34,14 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 	}
 
 	get _label(): string {
-		let dateToShow: Date = this.startTime;
-		const offset = dateToShow.getTimezoneOffset();
-		dateToShow = new Date(dateToShow.getTime() - (offset*60*1000));
+		if (this.startTime) {
+			let dateToShow: Date = this.startTime;
+			const offset = dateToShow.getTimezoneOffset();
+			dateToShow = new Date(dateToShow.getTime() - (offset * 60 * 1000));
 
-		return `${dateToShow.toISOString().substr(0, 19).replace('T', ' ')}`;
+			return `${dateToShow.toISOString().substr(0, 19).replace('T', ' ')}`;
+		}
+		return "not started";
 	}
 
 	// description is show next to the label
@@ -51,7 +54,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		}
 		else {
 			if (this.startTime) {
-				if(this.definition.extendedStatus == "InProgress") {
+				if (this.definition.extendedStatus == "InProgress") {
 					const runningFor = (new Date().getTime() - this.startTime.getTime()) / 1000;
 					durationText = `(${Helper.secondsToHms(runningFor)} ...)`;
 				}
@@ -74,7 +77,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 			status = "failed";
 		}
 
-		if(this.definition.extendedStatus == "InProgress") {
+		if (this.definition.extendedStatus == "InProgress") {
 			status = "inprogress";
 		}
 

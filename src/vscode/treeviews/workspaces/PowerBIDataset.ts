@@ -20,11 +20,12 @@ import { TOMProxyBackup, TOMProxyRestore } from '../../../TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTables } from './PowerBIDatasetTables';
 import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 import { iPowerBIDesktopExternalToolConfig } from '../_types';
-import { PowerBINotebook, PowerBINotebookCell, PowerBINotebookType } from '../../notebook/PowerBINotebook';
-import { PowerBIAPILanguage } from '../../language/_types';
+import { PowerBINotebookType } from '../../notebook/PowerBINotebook';
 import { PowerBINotebookContext } from '../../notebook/PowerBINotebookContext';
 import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSerializer';
 import { PowerBIDatasetPermissions } from './PowerBIDatasetPermissions';
+import { PowerBIDatasetRefresh } from './PowerBIDatasetRefresh';
+import { PowerBIDatasets } from './PowerBIDatasets';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -123,7 +124,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
-	public static async refreshById(workspaceId: string, datasetId: string, isOnDedicatedCapacity: boolean, objectsToRefresh?: iPowerBIDatasetRefreshableObject[]): Promise<void> {
+	public static async refreshById(workspaceId: string, datasetId: string, isOnDedicatedCapacity: boolean, objectsToRefresh?: iPowerBIDatasetRefreshableObject[]): Promise<iPowerBIDatasetRefresh> {
 		ThisExtension.setStatusBarRight("Triggering dataset-refresh ...", true);
 		const apiUrl = Helper.joinPath("groups", workspaceId, "datasets", datasetId, "refreshes");
 
@@ -165,53 +166,16 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		await PowerBIApiService.post(apiUrl, body);
 		ThisExtension.setStatusBarRight("Dataset-refresh triggered!");
 		Helper.showTemporaryInformationMessage("Dataset-refresh triggered!", 3000);
+
+		PowerBIDatasets.startRunningRefreshTimer(apiUrl);
 	}
 
 	public async refresh(): Promise<void> {
 		const isOnDedicatedCapacity = this.workspace.definition.isOnDedicatedCapacity;
-		await PowerBIDataset.refreshById(this.groupId.toString(), this.id, isOnDedicatedCapacity);
+		const newRefresh = await PowerBIDataset.refreshById(this.groupId.toString(), this.id, isOnDedicatedCapacity);
 
 		await Helper.delay(1000);
 		ThisExtension.TreeViewWorkspaces.refresh(this, false);
-
-		this.awaitRunningRefresh();
-	}
-
-	async awaitRunningRefresh(): Promise<void> {
-		if (!PowerBIConfiguration.datasetRefreshCheckInterval || PowerBIConfiguration.datasetRefreshCheckInterval <= 0) {
-			ThisExtension.log("No dataset refresh check interval configured. Aborting polling of running Power BI refresh ...");
-			return;
-		}
-
-		const timeoutSeconds = PowerBIConfiguration.datasetRefreshCheckInterval;
-		let refreshTimer;
-		let isFirstCheck = true;
-
-		ThisExtension.log(`Starting polling of running Power BI refresh for dataset '${this.name}' every ${timeoutSeconds} seconds ...`);
-
-		refreshTimer = setInterval(async () => {
-			ThisExtension.log("Checking refresh status ...")
-
-			let lastRefresh: iPowerBIDatasetRefresh[] = await PowerBIApiService.getItemList<iPowerBIDatasetRefresh>(this.apiPath + "/refreshes", { "$top": 1 }, null);
-
-			if (lastRefresh.length == 0) {
-				ThisExtension.log("No refreshes found yet ...");
-				clearInterval(refreshTimer); // abort the polling
-
-				return;
-			}
-
-			if (lastRefresh[0].status != "Unknown") {
-				const msg = `Refresh of Power BI dataset '${this.name}' in workspace '${this.workspace.name} completed with status '${lastRefresh[0].status}'.`;
-				ThisExtension.log(msg);
-				vscode.window.showInformationMessage(msg, "OK");
-
-				ThisExtension.TreeViewWorkspaces.refresh(this, false);
-
-				clearInterval(refreshTimer); // abort the polling
-			}
-			isFirstCheck = false;
-		}, timeoutSeconds * 1000);
 	}
 
 	public async takeOver(): Promise<void> {

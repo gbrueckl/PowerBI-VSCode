@@ -2,6 +2,7 @@
 
 **v2.4.2**:
 - added a new processing option `full (without refresh policy)` to easily allow a full refresh of a dataset which has a incremental refresh policy applied.
+- fixed issue multiple dataset refresh completion notification
 
 **v2.4.1**:
 - added a new way to view temporary files (e.g. Dataset Refreshes) which does not require you to store the open files anymore when closing VSCode
@@ -32,7 +33,7 @@
 **v2.0.0**:
 - renamed extension to "Power BI Studio"
 - moved recently introduced Fabric specific features to the new [Fabric Studio](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.fabricstudio) extension.
-  - all former 
+  - all former
 - added feature to `Open PowerBI External Tool` configured in PowerBI Desktop with connection to online dataset preconfigured
 - added new config setting `powerbi.workspaceFilter` to define RegEx filters on workspace names
 - added `Show Memory Statistics` for Datasets

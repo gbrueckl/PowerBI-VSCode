@@ -47,7 +47,7 @@ export class PowerBIWorkspaceGenericFolder extends PowerBIWorkspaceTreeItem {
 		if(this.customApiUrlPart != undefined) {
 			return this.customApiUrlPart;
 		}
-		return this.apiUrlPart;
+		return super.apiUrlPart;
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
