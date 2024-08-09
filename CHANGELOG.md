@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.4.2**:
+- added a new processing option `full (without refresh policy)` to easily allow a full refresh of a dataset which has a incremental refresh policy applied.
+
 **v2.4.1**:
 - added a new way to view temporary files (e.g. Dataset Refreshes) which does not require you to store the open files anymore when closing VSCode
 

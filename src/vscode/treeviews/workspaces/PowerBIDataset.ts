@@ -131,7 +131,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 
 		// if we are on premium, we can use the Enhanced Refresh API
 		if (isOnDedicatedCapacity) {
-			const processType: vscode.QuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
+			const processType: ProcessTypeQuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
 				//placeHolder: toolTip,
 				ignoreFocusOut: true
 				/*,
@@ -143,10 +143,13 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 				Helper.showTemporaryInformationMessage("Dataset-refresh aborted!", 3000);
 				return;
 			}
-			body = {
-				"type": processType.label,
-				"applyRefreshPolicy": true
-			}
+			body = Object.assign(
+				{}, 
+				{
+					"type": processType.label,
+					"applyRefreshPolicy": true
+				},
+				processType.customProperties);
 
 			if (objectsToRefresh) {
 				body["objects"] = objectsToRefresh;
@@ -423,7 +426,13 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 	}
 }
 
-export const PROCESSING_TYPES: vscode.QuickPickItem[] = [
+class ProcessTypeQuickPickItem implements vscode.QuickPickItem {
+	label: string;
+	detail?: string | undefined;
+	customProperties?: object | undefined;
+}
+
+export const PROCESSING_TYPES: ProcessTypeQuickPickItem[] = [
 	{
 		"label": "full",
 		"detail": "Processes an SQL Server Analysis Services object and all the objects that it contains. When Process Full is executed against an object that has already been processed, SQL Server Analysis Services drops all data in the object, and then processes the object. This kind of processing is required when a structural change has been made to an object, for example, when an attribute hierarchy is added, deleted, or renamed."
@@ -447,5 +456,10 @@ export const PROCESSING_TYPES: vscode.QuickPickItem[] = [
 	{
 		"label": "defragment",
 		"detail": "Creates or rebuilds indexes and aggregations for all processed partitions. For unprocessed objects, this option generates an error. Processing with this option is needed if you turn off Lazy Processing."
-	}
+	},
+	{
+		"label": "full (without refresh policy)",
+		"detail": "Full refresh without applying the Incremental Refresh Policy. Processes an SQL Server Analysis Services object and all the objects that it contains. When Process Full is executed against an object that has already been processed, SQL Server Analysis Services drops all data in the object, and then processes the object. This kind of processing is required when a structural change has been made to an object, for example, when an attribute hierarchy is added, deleted, or renamed.",
+		"customProperties": { "applyRefreshPolicy": false }
+	},
 ];
