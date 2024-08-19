@@ -424,6 +424,6 @@ export const PROCESSING_TYPES: ProcessTypeQuickPickItem[] = [
 	{
 		"label": "full (without refresh policy)",
 		"detail": "Full refresh without applying the Incremental Refresh Policy. Processes an SQL Server Analysis Services object and all the objects that it contains. When Process Full is executed against an object that has already been processed, SQL Server Analysis Services drops all data in the object, and then processes the object. This kind of processing is required when a structural change has been made to an object, for example, when an attribute hierarchy is added, deleted, or renamed.",
-		"customProperties": { "applyRefreshPolicy": false }
+		"customProperties": { "applyRefreshPolicy": false, "type": "full" }
 	},
 ];
