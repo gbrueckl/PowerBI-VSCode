@@ -182,7 +182,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		ThisExtension.setStatusBarRight("Taking over dataset ...", true);
 
 		const apiUrl = Helper.joinPath(this.apiPath, "Default.TakeOver");
-		PowerBIApiService.post(apiUrl, null);
+		await PowerBIApiService.invokeWithProgress(`Taking over dataset '${this.name}'`, PowerBIApiService.post(apiUrl, null));
 		ThisExtension.setStatusBarRight("Dataset taken over!");
 
 		await Helper.delay(1000);

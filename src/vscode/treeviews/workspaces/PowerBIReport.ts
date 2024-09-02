@@ -73,7 +73,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 		ThisExtension.setStatusBarRight("Taking over report ...", true);
 		const apiUrl = Helper.joinPath(this.apiPath, "Default.TakeOver");
 
-		await PowerBIApiService.post(apiUrl, null);
+		const result = await PowerBIApiService.invokeWithProgress(`Taking over report '${this.name}'`, PowerBIApiService.post(apiUrl, null));
 		ThisExtension.setStatusBarRight("Report taken over!");
 
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
@@ -99,7 +99,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 				]);
 		}
 		else {
-			response = await PowerBIApiService.post(apiUrl, settings);
+			response = await PowerBIApiService.invokeWithProgress(`Cloning parameter '${this.name}' to '${settings["name"]}`,  PowerBIApiService.post(apiUrl, settings));
 		}
 
 		if (response.error) {

@@ -197,7 +197,6 @@ export abstract class PowerBICommandBuilder {
 			default:
 				break;
 		}
-
 	}
 
 	static addProperty(body: object, key: string, inputValue: string): object {

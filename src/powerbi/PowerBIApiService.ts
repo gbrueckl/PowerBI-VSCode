@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { fetch,  RequestInit, Response, getProxyAgent } from '@env/fetch';
+import { fetch, RequestInit, Response, getProxyAgent } from '@env/fetch';
 
 import { Helper, UniqueId } from '../helpers/Helper';
 import { ThisExtension } from '../ThisExtension';
@@ -51,10 +51,10 @@ export abstract class PowerBIApiService {
 			this._resourceId = resourceId;
 
 			await FabricApiService.initialize(
-				apiBaseUrl, 
+				apiBaseUrl,
 				tenantId,
-				clientId, 
-				authenticationProvider, 
+				clientId,
+				authenticationProvider,
 				resourceId
 			)
 
@@ -306,6 +306,44 @@ export abstract class PowerBIApiService {
 		return uri.toString(true);
 	}
 
+	static async invokeWithProgress<T>(message: string, promise: Promise<any>, showErrorMessage: boolean = true, showResultMessage: number = 3000): Promise<T> {
+		let ret: T = undefined;
+
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: message,
+			cancellable: false
+		}, async (progress: vscode.Progress<any>) => {
+			progress.report({ message: " ... " });
+			ThisExtension.log(message + " ... ");
+
+			const start = new Date().getTime();
+			let result = await promise;
+			const end = new Date().getTime();
+			const duration = end - start;
+			ThisExtension.log(message + " took " + duration + "ms!");
+
+			if (result.error && showErrorMessage) {
+				vscode.window.showErrorMessage(result.error.message);
+				ThisExtension.log(`ERROR: ${result.error.message}`);
+			}
+			else {
+				progress.report({ increment: 100, message: `Finished after ${Math.round(duration / 1000)}s!` });
+				ret = result;
+
+				const p = await new Promise<void>(resolve => {
+					setTimeout(() => {
+						resolve();
+					}, showResultMessage);
+				});
+
+				return p;
+			}
+		});
+
+		return ret;
+	}
+
 	static async get<T = any>(endpoint: string, params: object = null, raiseError: boolean = false, raw: boolean = false): Promise<T> {
 		if (!this._isInitialized && !this._connectionTestRunning) {
 			ThisExtension.log("API has not yet been initialized! Please connect first!");
@@ -365,7 +403,7 @@ export abstract class PowerBIApiService {
 
 	public static async getFile(endpoint: string, raiseError: boolean = true): Promise<Buffer> {
 		endpoint = this.getFullUrl(endpoint);
-		
+
 		try {
 			const config: RequestInit = {
 				method: "GET",
@@ -768,7 +806,7 @@ export abstract class PowerBIApiService {
 
 	static async executeQueries(apiPath, daxQuery: string): Promise<iPowerBIDatasetExecuteQueries> {
 		const match = apiPath.match(/(?<datasetPath>.*\/datasets\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/);
-		if(!match) {
+		if (!match) {
 			throw new Error(`Invalid or incomplete API path for dataset: ${apiPath}!`);
 		}
 		const datasetApiPath = match.groups["datasetPath"];;
@@ -801,10 +839,10 @@ export abstract class PowerBIApiService {
 		idColumn: string = "ID",
 	): Promise<iPowerBIDatasetDMV[]> {
 		let query = `INFO.${dmv}()`;
-		if(dmv == "COLUMNSTATISTICS") {
+		if (dmv == "COLUMNSTATISTICS") {
 			query = `${dmv}()`;
 		}
-		
+
 		if (filter) {
 			query = `FILTER(${query}, ${filter})`;
 		}
@@ -821,10 +859,11 @@ export abstract class PowerBIApiService {
 				const newKey = Helper.trimChar(Helper.trimChar(key, "["), "]");
 				properties[newKey] = value;
 			}
-			ret.push({ 
-				"id": properties[idColumn], 
+			ret.push({
+				"id": properties[idColumn],
 				"name": properties[nameColumn] ?? properties["InferredName"], // sometimes InferredName is used
-				"properties": properties });
+				"properties": properties
+			});
 		}
 
 		Helper.sortArrayByProperty(ret, "name");

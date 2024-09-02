@@ -67,6 +67,17 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		return `${this.status} ${durationText} - ${this.definition.refreshType}`;
 	}
 
+	get _tooltip(): string {
+		let tooltip = super._tooltip;
+
+		if(this.definition.serviceExceptionJson) {
+			const exception = JSON.parse(this.definition.serviceExceptionJson);
+			tooltip = "ERROR: " + exception.errorCode + "\n" + exception.errorDescription + "\n" + "-".repeat(80) + "\n" + tooltip;
+		}
+
+		return tooltip;
+	}
+
 	protected getIconPath(theme: string): vscode.Uri {
 		let status: string = this.definition.status;
 

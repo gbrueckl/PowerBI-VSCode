@@ -94,7 +94,7 @@ export class PowerBIParameter extends PowerBIWorkspaceTreeItem {
 		}
 
 		ThisExtension.setStatusBarRight("Updating parameter ...", true);
-		await PowerBIApiService.post(apiUrl, settings);
+		const result = await PowerBIApiService.invokeWithProgress(`Updating parameter '${this.name}' to '${newValue}`, PowerBIApiService.post(apiUrl, settings));
 		ThisExtension.setStatusBarRight("Parameter updated!")
 
 		await ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);

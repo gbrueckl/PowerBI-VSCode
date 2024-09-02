@@ -2,6 +2,8 @@
 
 **v2.4.3**:
 - fixed issue with new processing option `full (without refresh policy)`
+- improved error tracking for failed dataset refreshes
+- improved `Copy Properties to Clipboard` to also include the originating API path
 
 **v2.4.2**:
 - added a new processing option `full (without refresh policy)` to easily allow a full refresh of a dataset which has a incremental refresh policy applied.

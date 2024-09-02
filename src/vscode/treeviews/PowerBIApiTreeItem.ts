@@ -151,7 +151,9 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 	}
 
 	public copyPropertiesToClipboard(): void {
-		vscode.env.clipboard.writeText(JSON.stringify(this.definition, null, 4));
+		const source = "// Source: " + this.apiPath;
+		const definition = JSON.stringify(this.definition, null, 4)
+		vscode.env.clipboard.writeText(`${source}\n${definition}`);
 	}
 
 	public getBrowserLink(): vscode.Uri {

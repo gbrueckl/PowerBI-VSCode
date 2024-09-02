@@ -62,6 +62,7 @@ export class iPowerBIDatasetRefresh {
     status: string;
     requestId: string;
 	extendedStatus?: string;
+	serviceExceptionJson?: string;
 }
 
 export class iPowerBIDatasetGenericResponse {
