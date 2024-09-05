@@ -214,7 +214,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		ThisExtension.setStatusBarRight("Starting RO replica sync ...", true);
 
 		const apiUrl = Helper.joinPath(this.apiPath, "queryScaleOut", "sync");
-		var response = await PowerBIApiService.post<iPowerBIDatasetGenericResponse>(apiUrl, null);
+		var response = await PowerBIApiService.invokeWithProgress<iPowerBIDatasetGenericResponse>("Query Scale Out Sync started", PowerBIApiService.post<iPowerBIDatasetGenericResponse>(apiUrl, null));
 
 		if (response.error) {
 			vscode.window.showErrorMessage(JSON.stringify(response));
@@ -283,7 +283,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		}
 
 		ThisExtension.setStatusBarRight("Updating parameter ...", true);
-		await PowerBIApiService.post(apiUrl, settings);
+		await PowerBIApiService.invokeWithProgress(`Updating parameters`, await PowerBIApiService.post(apiUrl, settings));
 		ThisExtension.setStatusBarRight("Parameter updated!")
 
 		await ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);

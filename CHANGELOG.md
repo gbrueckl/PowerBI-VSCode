@@ -1,5 +1,9 @@
 # Change Log
 
+**v2.4.4**:
+- fully renamed extensions to `Power BI Studio`
+- added progress-bars to some actions (`Update Parameter`)
+
 **v2.4.3**:
 - fixed issue with new processing option `full (without refresh policy)`
 - improved error tracking for failed dataset refreshes
