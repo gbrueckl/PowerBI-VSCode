@@ -17,7 +17,8 @@ const TRIGGER_CHARS = ['/', '%'];
 /** sometimes the API is not consistent and Swagger-definition is different from whats returned by the API  */
 const LIST_ITEM_OVERWRITE = {
 	"refreshId": "requestId",
-	"stageOrder": "order"
+	"stageOrder": "order",
+	"dataflowId": "objectId",
 }
 
 /** black list of properties that are not exposed in the details of the popup
@@ -284,7 +285,7 @@ export class PowerBIAPICompletionProvider implements vscode.CompletionItemProvid
 		completionItem.label = apiItem.name ?? apiItem.displayName ?? apiItem[itemTypeOverwrite];
 		completionItem.detail = await this.getCompletionItemDetail(apiItem)
 		completionItem.insertText = apiItem[itemTypeOverwrite] ?? apiItem.id,
-			completionItem.commitCharacters = TRIGGER_CHARS;
+		completionItem.commitCharacters = TRIGGER_CHARS;
 
 		return completionItem;
 	}

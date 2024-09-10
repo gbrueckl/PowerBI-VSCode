@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.4.5**:
+- fixed issue with API autocompletion for dataflows
+
 **v2.4.4**:
 - fully renamed extensions to `Power BI Studio`
 - added progress-bars to some actions (`Update Parameter`)
