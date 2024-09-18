@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.4.6**:
+- fixed issue with TMDL proxy starting for all `.tmdl` files
+
 **v2.4.5**:
 - fixed issue with API autocompletion for dataflows
 

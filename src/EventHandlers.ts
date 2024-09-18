@@ -51,7 +51,7 @@ export abstract class EventHandlers {
 		});
 
 		vscode.workspace.onDidOpenTextDocument((e) => {
-			if (e.uri.fsPath.endsWith(TMDL_EXTENSION)) {
+			if (e.uri.scheme == TMDL_SCHEME && e.uri.fsPath.endsWith(TMDL_EXTENSION)) {
 				TMDLProxy.ensureProxy(context);
 			}
 		});
