@@ -175,4 +175,23 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 	async newNotebook(workspaceItem: PowerBIWorkspaceTreeItem): Promise<void> {
 		PowerBINotebookSerializer.openNewNotebook(workspaceItem);
 	}
+
+	async filter(): Promise<void> {
+		const currentFilter = PowerBIConfiguration.workspaceFilter;
+
+		const filter = await vscode.window.showInputBox({
+			title: "Filter Workspaces",
+			prompt: "Enter a filter to apply to the workspaces. Regular Expressions (RegEx) are supported. Leave empty to clear the filter.",
+			placeHolder: "Enter a filter to apply to the workspaces",
+			value: currentFilter
+		});
+
+		if (filter === undefined) {
+			return;
+		}
+
+		PowerBIConfiguration.workspaceFilter = filter;
+
+		this.refresh(null, true);
+	}
 }

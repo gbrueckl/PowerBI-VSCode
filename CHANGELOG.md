@@ -2,6 +2,7 @@
 
 **v2.4.6**:
 - fixed issue with TMDL proxy starting for all `.tmdl` files
+- added button for Workspace Filter
 
 **v2.4.5**:
 - fixed issue with API autocompletion for dataflows

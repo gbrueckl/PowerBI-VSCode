@@ -238,6 +238,12 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIWorkspaces.filter",
+				"title": "Filter View",
+				"icon": "$(filter)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIWorkspace.assignToCapacity",
 				"title": "Assign to Capacity",
 				"icon": "$(debug-step-into)",
@@ -544,6 +550,11 @@
 			"view/title": [
 				{
 					"command": "PowerBIWorkspaces.refresh",
+					"when": "view == PowerBIWorkspaces",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIWorkspaces.filter",
 					"when": "view == PowerBIWorkspaces",
 					"group": "navigation"
 				},

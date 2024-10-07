@@ -101,6 +101,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	let pbiWorkspacesTreeProvider = new PowerBIWorkspacesTreeProvider(context);
 	//vscode.window.registerTreeDataProvider('PowerBIWorkspaces', pbiWorkspacesTreeProvider); / done in constructor which also adds Drag&Drop Controller
 	vscode.commands.registerCommand('PowerBIWorkspaces.refresh', (item: PowerBIWorkspaceTreeItem = undefined, showInfoMessage: boolean = true) => pbiWorkspacesTreeProvider.refresh(item, showInfoMessage));
+	vscode.commands.registerCommand('PowerBIWorkspaces.filter', () => pbiWorkspacesTreeProvider.filter());
 
 	vscode.commands.registerCommand('PowerBI.TOM.backup', (item: TOMProxyBackup) => item.backup());
 	vscode.commands.registerCommand('PowerBI.TOM.restore', (item: TOMProxyRestore) => item.restore());
