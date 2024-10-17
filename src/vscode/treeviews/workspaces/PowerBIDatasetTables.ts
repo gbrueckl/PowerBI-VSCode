@@ -46,7 +46,12 @@ export class PowerBIDatasetTables extends PowerBIWorkspaceGenericFolder {
 				}
 			}
 			catch (e) {
+				if(e.message.includes("PowerBIFeatureDisabled")) {
+					ThisExtension.log(e.message);
+					vscode.window.showErrorMessage(e.message);
+				}
 				ThisExtension.log("No tables found for dataset " + this.dataset.name);
+				return;
 			}
 
 			return children;

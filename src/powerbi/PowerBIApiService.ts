@@ -848,6 +848,10 @@ export abstract class PowerBIApiService {
 		}
 
 		const result: iPowerBIDatasetExecuteQueries = await this.executeQueries(apiPath, `EVALUATE ${query}`);
+
+		if(result.error) {
+			throw new Error(result.error.message);
+		}
 		const rows = result.results[0].tables[0].rows;
 
 		let ret: iPowerBIDatasetDMV[] = [];

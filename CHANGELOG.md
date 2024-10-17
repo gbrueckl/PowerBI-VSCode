@@ -3,6 +3,7 @@
 **v2.4.6**:
 - fixed issue with TMDL proxy starting for all `.tmdl` files
 - added button for Workspace Filter
+- improved error handling for missing tenant settings (e.g. when browsing `Tables`)
 
 **v2.4.5**:
 - fixed issue with API autocompletion for dataflows

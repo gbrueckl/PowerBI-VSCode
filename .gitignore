@@ -1,3 +1,5 @@
+*.test.code-workspace
+
 .DS_Store
 npm-debug.log
 Thumbs.db
