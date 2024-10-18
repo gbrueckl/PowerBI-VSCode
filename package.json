@@ -322,6 +322,12 @@
 				"enablement": "viewItem =~ /.*,SYNCREADONLYREPLICAS,.*/"
 			},
 			{
+				"command": "PowerBIDatasetRefresh.rerun",
+				"title": "Rerun Refresh",
+				"icon": "$(refresh)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIDatasetTable.loadColumnStatistics",
 				"title": "Load Column Statistics",
 				"icon": "$(graph)",
@@ -660,6 +666,12 @@
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETTABLEPARTITION,.*/ && viewItem =~ /.*,REFRESH,.*/",
 					"group": "navigation"
 				},
+				{
+					"command": "PowerBIDatasetRefresh.rerun",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESH,.*/ && viewItem =~ /.*,RERUN,.*/",
+					"group": "navigation"
+				},
+				
 				{
 					"command": "PowerBIDataset.takeOver",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,TAKEOVER,.*/",

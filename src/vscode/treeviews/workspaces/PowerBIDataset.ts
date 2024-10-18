@@ -124,41 +124,48 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
-	public static async refreshById(workspaceId: string, datasetId: string, isOnDedicatedCapacity: boolean, objectsToRefresh?: iPowerBIDatasetRefreshableObject[]): Promise<iPowerBIDatasetRefresh> {
+	public static async refreshById(workspaceId: string, datasetId: string, isOnDedicatedCapacity: boolean, objectsToRefresh?: iPowerBIDatasetRefreshableObject[], customBody?: any): Promise<iPowerBIDatasetRefresh> {
 		ThisExtension.setStatusBarRight("Triggering dataset-refresh ...", true);
 		const apiUrl = Helper.joinPath("groups", workspaceId, "datasets", datasetId, "refreshes");
 
 		let body = null;
 
-		// if we are on premium, we can use the Enhanced Refresh API
-		if (isOnDedicatedCapacity) {
-			const processType: ProcessTypeQuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
-				//placeHolder: toolTip,
-				ignoreFocusOut: true
-				/*,
-				onDidSelectItem: item => window.showInformationMessage(`Focus ${++i}: ${item}`)
-				*/
-			});
-			if (processType == undefined || processType == null) {
-				ThisExtension.setStatusBarRight("Dataset-refresh aborted!");
-				Helper.showTemporaryInformationMessage("Dataset-refresh aborted!", 3000);
-				return;
-			}
-			body = Object.assign(
-				{}, 
-				{
-					"type": processType.label,
-					"applyRefreshPolicy": true
-				},
-				processType.customProperties);
+		if (customBody) {
+			body = customBody;
+		}
+		else {
+			// if we are on premium, we can use the Enhanced Refresh API
+			if (isOnDedicatedCapacity) {
 
-			if (objectsToRefresh) {
-				body["objects"] = objectsToRefresh;
 
-				// it is not supported to apply the refresh policy when processing individual partitions
-				if (objectsToRefresh.find((obj) => obj.partition)) {
-					body["applyRefreshPolicy"] = false;
-					Helper.showTemporaryInformationMessage("Refresh policy will not be applied when processing individual partitions!", 3000);
+				const processType: ProcessTypeQuickPickItem = await vscode.window.showQuickPick(PROCESSING_TYPES, {
+					//placeHolder: toolTip,
+					ignoreFocusOut: true
+					/*,
+					onDidSelectItem: item => window.showInformationMessage(`Focus ${++i}: ${item}`)
+					*/
+				});
+				if (processType == undefined || processType == null) {
+					ThisExtension.setStatusBarRight("Dataset-refresh aborted!");
+					Helper.showTemporaryInformationMessage("Dataset-refresh aborted!", 3000);
+					return;
+				}
+				body = Object.assign(
+					{},
+					{
+						"type": processType.label,
+						"applyRefreshPolicy": true
+					},
+					processType.customProperties);
+
+				if (objectsToRefresh) {
+					body["objects"] = objectsToRefresh;
+
+					// it is not supported to apply the refresh policy when processing individual partitions
+					if (objectsToRefresh.find((obj) => obj.partition)) {
+						body["applyRefreshPolicy"] = false;
+						Helper.showTemporaryInformationMessage("Refresh policy will not be applied when processing individual partitions!", 3000);
+					}
 				}
 			}
 		}

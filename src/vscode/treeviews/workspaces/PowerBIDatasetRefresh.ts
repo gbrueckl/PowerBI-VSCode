@@ -33,6 +33,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		this.command = this._command;
 	}
 
+	/* Overwritten properties from PowerBIApiTreeItem */
 	get _label(): string {
 		if (this.startTime) {
 			let dateToShow: Date = this.startTime;
@@ -42,6 +43,23 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 			return `${dateToShow.toISOString().substr(0, 19).replace('T', ' ')}`;
 		}
 		return "not started";
+	}
+
+	get _contextValue(): string {
+		let orig: string = super._contextValue;
+
+		let actions: string[] = []
+
+		if (this.status == "Unknown" || this.status == "InProgress" || this.status == "NotStarted") {
+			actions.push("CANCEL")
+		}
+		else {
+			if (this.definition.refreshType == "ViaEnhancedApi") {
+				actions.push("RERUN")
+			}
+		}
+
+		return orig + actions.join(",") + ",";
 	}
 
 	// description is show next to the label
@@ -70,7 +88,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 	get _tooltip(): string {
 		let tooltip = super._tooltip;
 
-		if(this.definition.serviceExceptionJson) {
+		if (this.definition.serviceExceptionJson) {
 			const exception = JSON.parse(this.definition.serviceExceptionJson);
 			tooltip = "ERROR: " + exception.errorCode + "\n" + exception.errorDescription + "\n" + "-".repeat(80) + "\n" + tooltip;
 		}
@@ -101,19 +119,6 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		}
 	}
 
-	/* Overwritten properties from PowerBIApiTreeItem */
-	get _contextValue(): string {
-		let orig: string = super._contextValue;
-
-		let actions: string[] = []
-
-		if (this.status == "Unknown" || this.status == "InProgress" || this.status == "NotStarted") {
-			actions.push("CANCEL")
-		}
-
-		return orig + actions.join(",") + ",";
-	}
-
 	get definition(): iPowerBIDatasetRefresh {
 		return super.definition as iPowerBIDatasetRefresh;
 	}
@@ -122,6 +127,7 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		super.definition = value;
 	}
 
+	// Dataset-specific funtions
 	get dataset(): PowerBIDataset {
 		return (this.parent as PowerBIDatasetRefreshes).dataset;
 	}
@@ -161,6 +167,33 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		ThisExtension.setStatusBarRight("Cancelling dataset-refresh ...", true);
 		PowerBIApiService.delete(this.apiPath, null);
 		ThisExtension.setStatusBarRight("Dataset-refresh cancelled!");
+	}
+
+	public async rerun(): Promise<void> {
+		ThisExtension.setStatusBarRight("Rerunning dataset-refresh ...", true);
+
+		let result = await PowerBIApiService.get<iPowerBIDatasetRefresh>(this.apiPath);
+
+		if (!result) {
+			ThisExtension.setStatusBarRight("Dataset-refresh rerun aborted!");
+			ThisExtension.log("Dataset-refresh rerun aborted! No refresh found for " + this.apiPath);
+			vscode.window.showErrorMessage("Dataset-refresh rerun aborted! No refresh found for " + this.apiPath);
+			return;
+		}
+
+		let body = {
+			"commitMode": result.commitMode,
+			"type": result.type,
+			"objects": result.objects,
+			"applyRefreshPolicy": false
+		}
+
+		const isOnDedicatedCapacity = this.dataset.workspace.definition.isOnDedicatedCapacity;
+		await PowerBIDataset.refreshById(this.groupId.toString(), this.dataset.id, isOnDedicatedCapacity, undefined, body);
+		ThisExtension.setStatusBarRight("Dataset-refresh rerun!");
+
+		await Helper.delay(1000);
+		ThisExtension.TreeViewWorkspaces.refresh(this.parent, false);
 	}
 
 	public async showDefinition(): Promise<void> {

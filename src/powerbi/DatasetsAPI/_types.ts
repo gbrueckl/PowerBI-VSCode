@@ -63,6 +63,11 @@ export class iPowerBIDatasetRefresh {
     requestId: string;
 	extendedStatus?: string;
 	serviceExceptionJson?: string;
+
+	// used when starting a new refresh
+	type?: string;
+	commitMode: string;
+	objects?: iPowerBIDatasetRefreshableObject[];
 }
 
 export class iPowerBIDatasetGenericResponse {
@@ -81,6 +86,8 @@ export class iPowerBIDatasetDMV {
 export class iPowerBIDatasetRefreshableObject {
 	table: string;
 	partition?: string;
+
+	status?: string; // only available from the RefreshHistory
 }
 
 export class iPowerBIDatasetColumnStatistics {
