@@ -11,4 +11,5 @@ tsconfig.json
 webpack.config.js
 *.code-workspace
 tslint.json
+.markdownlint.json
 utils/**
