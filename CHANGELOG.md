@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.4.7**:
+- fixed implementation of `Cancel` for dataset and dataflow refreshes to be aligned with the other actions
+
 **v2.4.6**:
 - fixed issue with TMDL proxy starting for all `.tmdl` files
 - added button for `Workspace Filter`

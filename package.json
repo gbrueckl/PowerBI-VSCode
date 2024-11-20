@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI Studio",
 	"description": "An extension to manage your Power BI resources from within VSCode",
-	"version": "2.4.6",
+	"version": "2.4.7",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -730,7 +730,7 @@
 				{
 					"command": "PowerBIDatasetRefresh.cancel",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESH,.*/ && viewItem =~ /.*,CANCEL,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIDatasetTable.loadColumnStatistics",
@@ -740,7 +740,7 @@
 				{
 					"command": "PowerBIDatasetParameter.update",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETPARAMETER,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIReport.takeOver",
@@ -795,7 +795,7 @@
 				{
 					"command": "PowerBICapacityWorkload.update",
 					"when": "view == PowerBICapacities && viewItem =~ /.*,UPDATE,.*/",
-					"group": "inline"
+					"group": "navigation"
 				},
 				{
 					"command": "PowerBIPipeline.delete",

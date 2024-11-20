@@ -9,7 +9,10 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceRoot}",
-                "${workspaceRoot}/utils/PowerBI_Studio.test.code-workspace"
+                "${workspaceRoot}/utils/PowerBI_Studio.test.code-workspace",
+                "--disable-extensions",
+				"--skip-release-notes",
+				"--skip-welcome",
             ],
             "sourceMaps": true,
             "outFiles": [
@@ -29,7 +32,10 @@
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}",
                 "--extensionDevelopmentKind=web",
-                "${workspaceRoot}/utils/PowerBI_Studio.test.code-workspace"
+                "${workspaceRoot}/utils/PowerBI_Studio.test.code-workspace",
+                "--disable-extensions",
+				"--skip-release-notes",
+				"--skip-welcome",
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/web/**/*.js"
