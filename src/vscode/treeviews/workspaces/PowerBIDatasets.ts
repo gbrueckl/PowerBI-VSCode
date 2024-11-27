@@ -94,7 +94,11 @@ export class PowerBIDatasets extends PowerBIWorkspaceGenericFolder {
 			return;
 		}
 
-		const pollingUrl = Helper.joinPath(apiUrl, lastRefresh[0].requestId);
+		let pollingUrl = Helper.joinPath(apiUrl, lastRefresh[0].requestId);
+		if(lastRefresh[0].refreshType != "ViaEnhancedApi") {
+			pollingUrl = apiUrl + "?$top=1";
+		}
+
 		const workspace = await PowerBIApiService.get<iPowerBIGroup>(apiUrl.split("/").slice(0, 3).join("/"));
 		const dataset = await PowerBIApiService.get<iPowerBIGroup>(apiUrl.split("/").slice(0, 5).join("/"));
 
@@ -105,12 +109,22 @@ export class PowerBIDatasets extends PowerBIWorkspaceGenericFolder {
 
 			let lastRefresh: iPowerBIDatasetRefresh = await PowerBIApiService.get<iPowerBIDatasetRefresh>(pollingUrl, null);
 
+			if("value" in lastRefresh) {
+				lastRefresh = lastRefresh.value[0];
+			}
+
 			if (!["Unknown", "NotStarted"].includes(lastRefresh.status)) {
-				const msg = `Refresh of Power BI dataset '${dataset.name}' in workspace '${workspace.name} completed with status '${lastRefresh.status}'.`;
+				const maxAttempts = lastRefresh.refreshAttempts.reduce((a, b) => Math.max(a, b.attemptId), 0);
+				let retries = ".";
+				if(maxAttempts > 1) {
+					retries = ` after ${maxAttempts - 1} retries!`;
+					//retries = ` - ${maxAttempts} attempts`;
+				}
+				const msg = `Refresh of Power BI dataset '${dataset.name}' in workspace '${workspace.name}' completed with status '${lastRefresh.status}'${retries}`;
 				ThisExtension.log(msg);
 				vscode.window.showInformationMessage(msg, "OK");
 
-				//ThisExtension.TreeViewWorkspaces.refresh(refresh, false);
+				ThisExtension.TreeViewWorkspaces.refresh(undefined, false);
 
 				clearInterval(refreshTimer); // abort the polling
 				this.refreshTimers.delete(apiUrl);

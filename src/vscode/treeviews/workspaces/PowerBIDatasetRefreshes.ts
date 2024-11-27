@@ -69,6 +69,7 @@ export class PowerBIDatasetRefreshes extends PowerBIWorkspaceTreeItem {
 			}
 			catch (e) {
 				ThisExtension.log("No refreshes found for dataset " + this.dataset.name);
+				ThisExtension.log(e)
 			}
 
 			return children;

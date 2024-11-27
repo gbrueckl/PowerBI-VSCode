@@ -55,6 +55,13 @@ export class iPowerBIDatasetExecuteQueries {
 	}[];
 }
 
+export class iPowerBIDatasetRefreshAttempt {
+	attemptId: number;
+	startTime: string;
+	endTime: string;
+	type: string;
+	serviceExceptionJson?: string;
+}
 export class iPowerBIDatasetRefresh {
     refreshType: "OnDemand" | "ViaXmlaEndpoint" | "ViaEnhancedApi" | "ViaApi" | "Scheduled" | "OnDemandTraining";
     startTime: string;
@@ -63,6 +70,8 @@ export class iPowerBIDatasetRefresh {
     requestId: string;
 	extendedStatus?: string;
 	serviceExceptionJson?: string;
+
+	refreshAttempts?: iPowerBIDatasetRefreshAttempt[];
 
 	// used when starting a new refresh
 	type?: string;

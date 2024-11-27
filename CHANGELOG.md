@@ -1,5 +1,9 @@
 # Change Log
 
+**v2.5.0**:
+- reworked the polling of running dataset refreshes so it also works with refreshes not triggered via the [Enhanced Refresh API](https://learn.microsoft.com/en-us/power-bi/connect-data/asynchronous-refresh)
+- added display of number of retries (if any) for dataset refreshes
+
 **v2.4.7**:
 - fixed implementation of `Cancel` for dataset and dataflow refreshes to be aligned with the other actions
 

@@ -82,7 +82,18 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 			}
 		}
 
-		return `${this.status} ${durationText} - ${this.definition.refreshType}`;
+		let retries = "";
+
+		if(this.definition.refreshAttempts) {
+			const maxAttempts = this.definition.refreshAttempts.reduce((a, b) => Math.max(a, b.attemptId), 0);
+
+			if(maxAttempts > 1) {
+				retries = ` - ${maxAttempts - 1} retries`;
+				//retries = ` - ${maxAttempts} attempts`;
+			}
+		}
+
+		return `${this.status} ${durationText}${retries} - ${this.definition.refreshType}`;
 	}
 
 	get _tooltip(): string {
