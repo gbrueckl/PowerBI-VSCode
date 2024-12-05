@@ -200,7 +200,7 @@ export abstract class PowerBIApiService {
 
 	public static get SessionUserEmail(): string {
 		if (this._vscodeSession) {
-			const email = Helper.getFirstRegexGroup(/([\w\.]+@[\w-]+\.+[\w-]{2,5})/gm, this._vscodeSession.account.label);
+			const email = Helper.getFirstRegexGroup(/\s*([^\s]*?@[\w-]+\.+[\w-]{2,5})/gm, this._vscodeSession.account.label);
 			if (email) {
 				return email;
 			}

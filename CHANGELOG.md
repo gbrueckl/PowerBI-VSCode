@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.5.1**:
+- fix issue with `-` in email addresses shown in the bottom bar
+
 **v2.5.0**:
 - reworked the polling of running dataset refreshes so it also works with refreshes not triggered via the [Enhanced Refresh API](https://learn.microsoft.com/en-us/power-bi/connect-data/asynchronous-refresh)
 - added display of number of retries (if any) for dataset refreshes
