@@ -37,6 +37,7 @@ import { TOMProxyBackup, TOMProxyRestore } from './TMDLVSCode/_typesTOM';
 import { PowerBIDatasetTable } from './vscode/treeviews/workspaces/PowerBIDatasetTable';
 import { PowerBIOnDropProvider } from './vscode/dropProvider/PowerBIOnDropProvider';
 import { TempFileSystemProvider } from './vscode/filesystemProvider/temp/TempFileSystemProvider';
+import { PowerBIApiService } from './powerbi/PowerBIApiService';
 
 
 
@@ -65,7 +66,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	ThisExtension.StatusBarLeft = vscode.window.createStatusBarItem("powerbi-vscode-left", vscode.StatusBarAlignment.Left);
 	ThisExtension.StatusBarLeft.show();
-	ThisExtension.StatusBarLeft.command = "PowerBI.initialize";
+	ThisExtension.StatusBarLeft.command = "PowerBI.changeUser";
+
+	vscode.commands.registerCommand('PowerBI.changeUser', PowerBIApiService.changeUser);
 
 	context.subscriptions.push(
 		vscode.workspace.registerNotebookSerializer(

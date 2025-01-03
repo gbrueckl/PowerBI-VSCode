@@ -67,8 +67,8 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static async refreshConnection(): Promise<void> {
-		this._vscodeSession = await this.getPowerBISession();
+	private static async refreshConnection(clearSession: boolean = false): Promise<void> {
+		this._vscodeSession = await this.getPowerBISession(clearSession);
 
 		if (!this._vscodeSession || !this._vscodeSession.accessToken) {
 			vscode.window.showInformationMessage("PowerBI / API: Please log in with your Microsoft account first!");
@@ -97,9 +97,14 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	public static async getPowerBISession(): Promise<vscode.AuthenticationSession> {
+	public static async changeUser(): Promise<void> {
+		await PowerBIApiService.refreshConnection(true);
+		ThisExtension.refreshUI();
+	}
+
+	public static async getPowerBISession(clearSession: boolean = false): Promise<vscode.AuthenticationSession> {
 		// we dont need to specify a clientId here as VSCode is a first party app and can use impersonation by default
-		let session = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`], this._tenantId, this._clientId);
+		let session = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`], this._tenantId, this._clientId, clearSession);
 		return session;
 	}
 
@@ -155,7 +160,7 @@ export abstract class PowerBIApiService {
 			*/
 		];
 
-		this._xmlaSession = await this.getAADAccessToken(scopes, this._tenantId, this._tmdlClientId);
+		this._xmlaSession = await this.getAADAccessToken(scopes, this._tenantId, this._tmdlClientId, false);
 
 		return this._xmlaSession;
 	}
@@ -179,7 +184,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	public static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string): Promise<vscode.AuthenticationSession> {
+	public static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string, clearSession: boolean = false): Promise<vscode.AuthenticationSession> {
 		//https://www.eliostruyf.com/microsoft-authentication-provider-visual-studio-code/
 
 		if (!scopes.includes("offline_access")) {
@@ -193,7 +198,7 @@ export abstract class PowerBIApiService {
 			scopes.push("VSCODE_CLIENT_ID:" + clientId);
 		}
 
-		let session: vscode.AuthenticationSession = await vscode.authentication.getSession(this._authenticationProvider, scopes, { createIfNone: true });
+		let session: vscode.AuthenticationSession = await vscode.authentication.getSession(this._authenticationProvider, scopes, { createIfNone: true, clearSessionPreference: clearSession });
 
 		return session;
 	}
