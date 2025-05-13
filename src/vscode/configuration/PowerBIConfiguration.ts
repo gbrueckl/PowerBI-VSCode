@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Helper } from '../../helpers/Helper';
 
 /*
 CLOUD_CONFIGS are mainly derived from here:
@@ -109,7 +110,7 @@ export abstract class PowerBIConfiguration {
 
 
 
-	static get apiUrl(): string { return CLOUD_CONFIGS[this.cloud].apiEndpoint; }
+	static get apiUrl(): string { return Helper.trimChar(CLOUD_CONFIGS[this.cloud].apiEndpoint, "/"); }
 
 	static get authenticationProvider(): string { return CLOUD_CONFIGS[this.cloud].authenticationProvider; }
 

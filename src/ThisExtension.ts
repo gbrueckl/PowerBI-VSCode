@@ -214,13 +214,7 @@ export abstract class ThisExtension {
 
 			let config = PowerBIConfiguration;
 			config.applySettings();
-			await PowerBIApiService.initialize(
-				config.apiUrl, 
-				config.tenantId, 
-				config.clientId, 
-				config.tmdlClientId,
-				config.authenticationProvider, 
-				config.resourceId);
+			await PowerBIApiService.initialize();
 
 			this._notebookKernel = await PowerBINotebookKernel.getInstance();
 

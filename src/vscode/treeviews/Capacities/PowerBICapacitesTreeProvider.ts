@@ -59,10 +59,6 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 	}
 
 	async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
-		if (!PowerBIApiService.isInitialized) {
-			return Promise.resolve([]);
-		}
-
 		if (element != null && element != undefined) {
 			return element.getChildren();
 		}

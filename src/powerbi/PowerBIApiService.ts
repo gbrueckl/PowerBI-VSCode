@@ -12,9 +12,10 @@ import { iPowerBIDataset, iPowerBIDatasetDMV, iPowerBIDatasetExecuteQueries, iPo
 import { iPowerBICapacity } from './CapacityAPI/_types';
 import { iPowerBIGateway } from './GatewayAPI/_types';
 import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
-import { FabricApiService } from '../fabric/FabricApiService';
+import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfiguration';
 
 export abstract class PowerBIApiService {
+	private static _initializationState: "not_loaded" | "loading" | "loaded" = "not_loaded";
 	private static _isInitialized: boolean = false;
 	private static _connectionTestRunning: boolean = false;
 	private static _apiBaseUrl: string;
@@ -29,36 +30,23 @@ export abstract class PowerBIApiService {
 	private static _xmlaSession: vscode.AuthenticationSession;
 
 	//#region Initialization
-	static async initialize(
-		// Default settings will be for Azure Global
-		apiBaseUrl: string = "https://api.powerbi.com/",
-		tenantId: string = undefined,
-		clientId: string = undefined,
-		tmdlClientId: string = undefined,
-		authenticationProvider: string = "microsoft",
-		resourceId: string = "https://analysis.windows.net/powerbi/api"
-	): Promise<boolean> {
+	static async initialize(clearSession: boolean = false): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing PowerBI API Service ...");
 
 			vscode.authentication.onDidChangeSessions((event) => this._onDidChangeSessions(event));
 
-			this._apiBaseUrl = Helper.trimChar(apiBaseUrl, '/');
-			this._tenantId = tenantId;
-			this._clientId = clientId;
-			this._tmdlClientId = tmdlClientId;
-			this._authenticationProvider = authenticationProvider;
-			this._resourceId = resourceId;
+			let config = PowerBIConfiguration;
+			config.applySettings();
 
-			await FabricApiService.initialize(
-				apiBaseUrl,
-				tenantId,
-				clientId,
-				authenticationProvider,
-				resourceId
-			)
+			this._apiBaseUrl = config.apiUrl
+			this._tenantId = config.tenantId;
+			this._clientId = config.clientId;
+			this._tmdlClientId = config.tmdlClientId;
+			this._authenticationProvider = config.authenticationProvider;
+			this._resourceId = config.resourceId;
 
-			await this.refreshConnection();
+			await this.refreshConnection(clearSession);
 		} catch (error) {
 			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
@@ -67,7 +55,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	private static async refreshConnection(clearSession: boolean = false): Promise<void> {
+	private static async refreshConnection(clearSession: boolean = false): Promise<boolean> {
 		this._vscodeSession = await this.getPowerBISession(clearSession);
 
 		if (!this._vscodeSession || !this._vscodeSession.accessToken) {
@@ -82,19 +70,9 @@ export abstract class PowerBIApiService {
 			"Accept": 'application/json'
 		}
 
-		ThisExtension.log(`Testing new PowerBI API (${this._apiBaseUrl}) settings for user '${this.SessionUser}' (${this.SessionUserId}) ...`);
-		this._connectionTestRunning = true;
-		let workspaceList = await this.getGroups();
-		this._connectionTestRunning = false;
+		ThisExtension.log("Authentication headers refreshed!");
 
-		if (workspaceList.length > 0) {
-			ThisExtension.log("Power BI API Service initialized!");
-			this._isInitialized = true;
-		}
-		else {
-			ThisExtension.log(JSON.stringify(workspaceList));
-			throw new Error(`Invalid Configuration for PowerBI REST API: Cannot access '${this._apiBaseUrl}' with given credentials'!`);
-		}
+		return true;
 	}
 
 	public static async changeUser(): Promise<void> {
@@ -243,15 +221,6 @@ export abstract class PowerBIApiService {
 		return this._tmdlClientId;
 	}
 
-	public static get isInitialized(): boolean {
-		return this._isInitialized;
-	}
-
-	public static async Initialization(): Promise<boolean> {
-		// wait 5 minutes for the service to initialize
-		return Helper.awaitCondition(async () => PowerBIApiService.isInitialized, 300000, 500);
-	}
-
 	public static get BrowserBaseUrl(): string {
 		return this._apiBaseUrl.replace("api.", "app.");
 	}
@@ -267,7 +236,32 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	public static getHeaders(): HeadersInit {
+	public static async getHeaders(): Promise<HeadersInit> {
+		if (this._initializationState == "not_loaded") {
+			this._initializationState = "loading";
+
+			ThisExtension.log(`Initializing Connection ...`);
+
+			const initialized = await PowerBIApiService.initialize(false);
+			if (initialized) {
+				this._initializationState = "loaded";
+			}
+			else {
+				this._initializationState = "not_loaded";
+			}
+		}
+		else if (this._initializationState == "loading") {
+			ThisExtension.logDebug(`Connection Initialization in progress - waiting ... `);
+			const initialized = await Helper.awaitCondition(async () => this._initializationState != "loading", 5000, 100);
+
+			if (initialized) {
+				ThisExtension.logDebug(`Connection Initialization SUCCESSFUL!`);
+			}
+			else {
+				ThisExtension.log(`Connection Initialization FAILED!`);
+				vscode.window.showErrorMessage("PowerBI API: Connection initialization failed!");
+			}
+		}
 		return this._headers;
 	}
 
@@ -350,69 +344,82 @@ export abstract class PowerBIApiService {
 	}
 
 	static async get<T = any>(endpoint: string, params: object = null, raiseError: boolean = false, raw: boolean = false): Promise<T> {
-		if (!this._isInitialized && !this._connectionTestRunning) {
-			ThisExtension.log("API has not yet been initialized! Please connect first!");
+
+		const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
+		endpoint = this.getFullUrl(endpoint, params);
+		if (params) {
+			ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
 		}
 		else {
-			endpoint = this.getFullUrl(endpoint, params);
-			if (params) {
-				ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
+			ThisExtension.log("GET " + endpoint);
+		}
+
+		try {
+			const config: RequestInit = {
+				method: "GET",
+				headers: headers,
+				agent: getProxyAgent()
+			};
+			let response: Response = await fetch(endpoint, config);
+
+			if (raw) {
+				return response as any as T;
 			}
-			else {
-				ThisExtension.log("GET " + endpoint);
-			}
+			let resultText = await response.text();
+			let ret: T;
 
-			try {
-				const config: RequestInit = {
-					method: "GET",
-					headers: this._headers,
-					agent: getProxyAgent()
-				};
-				let response: Response = await fetch(endpoint, config);
-
-				if (raw) {
-					return response as any as T;
-				}
-				let resultText = await response.text();
-				let ret: T;
-
-				if (response.ok) {
-					if (!resultText || resultText == "") {
-						ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
-					}
-					else {
-						ret = JSON.parse(resultText) as T;
-					}
+			if (response.ok) {
+				if (!resultText || resultText == "") {
+					ret = { "value": { "status": response.status, "statusText": response.statusText } } as T;
 				}
 				else {
+					ret = JSON.parse(resultText) as T;
+				}
+			}
+			else {
+				try {
+					ret = JSON.parse(resultText) as T;
+
+					if (ret["error"]["code"] == "TokenExpired") {
+						// token expired, refresh the connection
+						await this.refreshConnection(false);
+						ret = await this.get<T>(endpoint, params, raiseError, raw);
+					}
+				}
+				catch (e) {
 					if (!resultText || resultText == "") {
 						ret = { "error": { "status": response.status, "statusText": response.statusText } } as T;
-					}
-					if (raiseError) {
-						throw new Error(resultText);
 					}
 					else {
 						ret = { "error": { "message": resultText, "status": response.status, "statusText": response.statusText } } as T;
 					}
 				}
 
-				await this.logResponse(ret);
-				return ret;
-			} catch (error) {
-				this.handleApiException(error, false, raiseError);
-
-				return undefined;
+				if (raiseError) {
+					throw new Error(ret["error"].message);
+				}
 			}
+
+			await this.logResponse(ret);
+			return ret;
+		} catch (error) {
+			this.handleApiException(error, false, raiseError);
+
+			return undefined;
 		}
 	}
 
 	public static async getFile(endpoint: string, raiseError: boolean = true): Promise<Buffer> {
+
+		const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
 		endpoint = this.getFullUrl(endpoint);
 
 		try {
 			const config: RequestInit = {
 				method: "GET",
-				headers: this._headers,
+				headers: headers,
 				agent: getProxyAgent()
 			};
 			let response: Response = await PowerBIApiService.get<Response>(endpoint, undefined, false, true);
@@ -453,13 +460,15 @@ export abstract class PowerBIApiService {
 	}
 
 	static async post<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+		const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
 		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("POST " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
 			const config: RequestInit = {
 				method: "POST",
-				headers: this._headers,
+				headers: headers,
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
@@ -500,6 +509,8 @@ export abstract class PowerBIApiService {
 	static async postImport<T = any>(endpoint: string, content: Buffer, datasetDisplayName: string, urlParams: object = {}, raiseError: boolean = false): Promise<T> {
 		urlParams["datasetDisplayName"] = datasetDisplayName;
 
+		let headers = await this.getHeaders(); // this also checks if the connection is initialized
+
 		endpoint = this.getFullUrl(endpoint, urlParams);
 		ThisExtension.log("POST " + endpoint + " --> File: " + JSON.stringify(urlParams));
 
@@ -516,7 +527,6 @@ export abstract class PowerBIApiService {
 				Buffer.from("\r\n--" + boundary + "--\r\n", "utf8"),
 			]);
 
-			let headers = { ...this._headers };
 			headers["Content-Type"] = "multipart/form-data; boundary=" + boundary;
 			delete headers["Content-Length"];
 
@@ -570,13 +580,15 @@ export abstract class PowerBIApiService {
 	}
 
 	static async put<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+		const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
 		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("PUT " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
 			const config: RequestInit = {
 				method: "PUT",
-				headers: this._headers,
+				headers: headers,
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
@@ -615,13 +627,15 @@ export abstract class PowerBIApiService {
 	}
 
 	static async patch<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+		const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
 		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("PATCH " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
 			const config: RequestInit = {
 				method: "PATCH",
-				headers: this._headers,
+				headers: headers,
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
@@ -660,13 +674,15 @@ export abstract class PowerBIApiService {
 	}
 
 	static async delete<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
+		const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
 		endpoint = this.getFullUrl(endpoint);
 		ThisExtension.log("DELETE " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
 
 		try {
 			const config: RequestInit = {
 				method: "DELETE",
-				headers: this._headers,
+				headers: headers,
 				body: JSON.stringify(body),
 				agent: getProxyAgent()
 			};
@@ -854,7 +870,7 @@ export abstract class PowerBIApiService {
 
 		const result: iPowerBIDatasetExecuteQueries = await this.executeQueries(apiPath, `EVALUATE ${query}`);
 
-		if(result.error) {
+		if (result.error) {
 			throw new Error(result.error.message);
 		}
 		const rows = result.results[0].tables[0].rows;

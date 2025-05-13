@@ -10,9 +10,6 @@ import { iPowerBIResponseGeneric } from '../../powerbi/_types';
 import { PowerBINotebookContext } from './PowerBINotebookContext';
 import { TMDLProxy } from '../../TMDLVSCode/TMDLProxy';
 import { TMSLProxyExecuteResponse } from '../../TMDLVSCode/_typesTMSL';
-import { FabricApiService } from '../../fabric/FabricApiService';
-import { iFabricApiResponse } from '../../fabric/_types';
-
 
 export type NotebookMagic =
 	"dax"
@@ -273,53 +270,26 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 					endpoint = this.resolveRelativePath(endpoint, customApi);
 
-					const useFabricApi = endpoint.includes("api.fabric.microsoft.com") || endpoint.includes("/workspaces/");
-					let fabricResult: iFabricApiResponse<any>;
-
 					switch (method) {
 						case "GET":
-							if (useFabricApi) {
-								fabricResult = (await FabricApiService.get<any>(endpoint, body));
-							}
-							else {
-								result = await PowerBIApiService.get<any>(endpoint, body, true);
-							}
+							result = await PowerBIApiService.get<any>(endpoint, body, true);
 							break;
 
 						case "POST":
-							if (useFabricApi) {
-								fabricResult = (await FabricApiService.post<any>(endpoint, body));
-							}
-							else {
-								result = await PowerBIApiService.post<any>(endpoint, body, true);
-							}
+							result = await PowerBIApiService.post<any>(endpoint, body, true);
 							break;
 
 						case "PUT":
-							if (useFabricApi) {
-								fabricResult = (await FabricApiService.put<any>(endpoint, body));
-							}
-							else {
-								result = await PowerBIApiService.put<any>(endpoint, body, true);
-							}
+							result = await PowerBIApiService.put<any>(endpoint, body, true);
 							break;
 
 						case "PATCH":
-							if (useFabricApi) {
-								fabricResult = (await FabricApiService.patch<any>(endpoint, body));
-							}
-							else {
-								result = await PowerBIApiService.patch<any>(endpoint, body, true);
-							}
+							result = await PowerBIApiService.patch<any>(endpoint, body, true);
 							break;
 
 						case "DELETE":
-							if (useFabricApi) {
-								fabricResult = (await FabricApiService.delete<any>(endpoint, body));
-							}
-							else {
-								result = await PowerBIApiService.delete<any>(endpoint, body, true);
-							}
+							result = await PowerBIApiService.delete<any>(endpoint, body, true);
+
 							break;
 
 						default:
@@ -329,19 +299,6 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 							execution.end(false, Date.now());
 							return;
-					}
-
-					if (useFabricApi) {
-						if (fabricResult.error) {
-							throw new Error(fabricResult.error.message);
-						}
-						else {
-							// mimic a Power BI Response structure
-							result = {
-								"odata.context": "FabricAPI",
-								"value": fabricResult.success.value
-							};
-						}
 					}
 					break;
 				case "cmd":

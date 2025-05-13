@@ -11,6 +11,8 @@ import { iHandleBeingDropped } from './PowerBIApiDragAndDropController';
 import { PowerBICommandBuilder, PowerBIQuickPickItem } from '../../powerbi/CommandBuilder';
 import { PowerBIApiDrop } from '../dropProvider/_types';
 
+export const NO_ITEMS_ITEM_ID: string = "NO_ITEMS";
+export const ERROR_ITEM_ID: string = "ERROR_ITEM";
 
 export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiItem, PowerBIApiDrop {
 	protected _itemType: ApiItemType;
@@ -282,5 +284,40 @@ export class PowerBIApiTreeItem extends vscode.TreeItem implements iPowerBIApiIt
 				ThisExtension.refreshTreeView(apiItem.TreeProvider, apiItem.parent);
 			}
 		}
+	}
+
+	public static get NO_ITEMS(): PowerBIApiTreeItem {
+		let item = new PowerBIApiTreeItem(NO_ITEMS_ITEM_ID, "No items found!", "DUMMY_ITEM", undefined,  vscode.TreeItemCollapsibleState.None);
+		item.contextValue = "";
+		return item;
+	}
+
+	public static ERROR_ITEM<T>(error: any): T {
+		let item = new PowerBIApiTreeItem(Helper.newGuid(), `ERROR: ${error.errorCode}`, "DUMMY_ITEM", undefined, vscode.TreeItemCollapsibleState.None);
+		item.contextValue = "";
+		item.description = error.message;
+		item.tooltip = error.details || error.message;
+		item.iconPath = new vscode.ThemeIcon("error");
+		return item as T;
+	}
+
+	public static handleEmptyItems<T>(items: T[], filter: RegExp = undefined, itemType: string = "item"): T[] {
+		if (!items || items.length == 0) {
+			if (filter) {
+				ThisExtension.log(`No ${itemType}s found matching the filter '${filter.source}'!`, true);
+			}
+			else {
+				ThisExtension.log(`No ${itemType}s found! Make sure you have permissions on at least one ${itemType}!`, true);
+			}
+			items = [this.NO_ITEMS as T];
+		}
+		return items;
+	}
+
+	public static async getValidChildren(item: PowerBIApiTreeItem): Promise<PowerBIApiTreeItem[]> {
+		let children: PowerBIApiTreeItem[] = await item.getChildren();
+		children = children.filter((child) => child.itemType != "DUMMY_ITEM")
+
+		return children;
 	}
 }

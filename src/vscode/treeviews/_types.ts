@@ -55,6 +55,7 @@ export type ApiItemType =
 |	"DATAFLOWDATASOURCES"
 |	"DATAFLOWDATASOURCE"
 |	"PERMISSION"
+|	"DUMMY_ITEM"				// a dummy item for errors and no_rows
 ;
 
 export interface iPowerBIDesktopExternalToolConfig {

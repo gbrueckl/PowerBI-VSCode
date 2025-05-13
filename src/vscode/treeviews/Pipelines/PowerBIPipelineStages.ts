@@ -41,10 +41,6 @@ export class PowerBIPipelineStages extends PowerBIPipelineTreeItem {
 	}
 
 	async getChildren(element?: PowerBIPipelineTreeItem): Promise<PowerBIPipelineTreeItem[]> {
-		if(!PowerBIApiService.isInitialized) { 			
-			return Promise.resolve([]);
-		}
-
 		if (element != null && element != undefined) {
 			return element.getChildren();
 		}

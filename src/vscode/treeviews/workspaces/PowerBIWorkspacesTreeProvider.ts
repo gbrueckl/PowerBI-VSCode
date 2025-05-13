@@ -137,16 +137,17 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		if (!PowerBIApiService.isInitialized) {
-			return Promise.resolve([]);
-		}
-
 		if (element != null && element != undefined) {
 			return element.getChildren();
 		}
 		else {
 			let children: PowerBIWorkspaceTreeItem[] = [];
 			let items: iPowerBIGroup[] = await PowerBIApiService.getItemList<iPowerBIGroup>("/groups");
+
+			if (items["error"]) {
+				ThisExtension.log(items["error"].message);
+				return [PowerBIWorkspaceTreeItem.ERROR_ITEM<PowerBIWorkspaceTreeItem>(items["error"])];
+			}
 
 			children.push(new PowerBIWorkspacePersonal())
 
@@ -162,6 +163,8 @@ export class PowerBIWorkspacesTreeProvider implements vscode.TreeDataProvider<Po
 				children.push(treeItem);
 				PowerBICommandBuilder.pushQuickPickItem(treeItem);
 			}
+
+			children = PowerBIWorkspaceTreeItem.handleEmptyItems(children, undefined);
 
 			return children;
 		}

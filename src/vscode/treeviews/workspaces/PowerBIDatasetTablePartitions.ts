@@ -29,10 +29,6 @@ export class PowerBIDatasetTablePartitions extends PowerBIWorkspaceGenericFolder
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		if (!PowerBIApiService.isInitialized) {
-			return Promise.resolve([]);
-		}
-
 		if (element != null && element != undefined) {
 			return element.getChildren();
 		}

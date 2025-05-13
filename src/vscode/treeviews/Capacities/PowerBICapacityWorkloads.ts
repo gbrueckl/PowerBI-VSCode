@@ -35,10 +35,6 @@ export class PowerBICapacityWorkloads extends PowerBICapacityTreeItem {
 	}
 
 	async getChildren(element?: PowerBICapacityTreeItem): Promise<PowerBICapacityTreeItem[]> {
-		if(!PowerBIApiService.isInitialized) { 			
-			return Promise.resolve([]);
-		}
-
 		if (element != null && element != undefined) {
 			return element.getChildren();
 		}

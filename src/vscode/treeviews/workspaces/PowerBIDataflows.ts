@@ -34,10 +34,6 @@ export class PowerBIDataflows extends PowerBIWorkspaceTreeItem {
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
-		if(!PowerBIApiService.isInitialized) { 			
-			return Promise.resolve([]);
-		}
-
 		if (element != null && element != undefined) {
 			return element.getChildren();
 		}
@@ -53,6 +49,8 @@ export class PowerBIDataflows extends PowerBIWorkspaceTreeItem {
 					PowerBICommandBuilder.pushQuickPickItem(treeItem);
 				}
 			}
+
+			children = PowerBIWorkspaceTreeItem.handleEmptyItems(children, undefined);
 			
 			return children;
 		}

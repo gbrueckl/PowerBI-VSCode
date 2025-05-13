@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 
 import { ApiItemType } from '../_types';
 import { iPowerBIWorkspaceItem } from './iPowerBIWorkspaceItem';
@@ -33,7 +33,7 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 	get TreeProvider(): TreeProviderId {
 		return "application/vnd.code.tree.powerbiworkspaces";
 	}
-	
+
 	get parent(): PowerBIWorkspaceTreeItem {
 		return super.parent as PowerBIWorkspaceTreeItem;
 	}
@@ -46,5 +46,16 @@ export class PowerBIWorkspaceTreeItem extends PowerBIApiTreeItem implements iPow
 	/* iPowerBIWorkspaceItem implementation */
 	get groupId(): UniqueId {
 		return this._groupId;
+	}
+
+	public static get NO_ITEMS(): PowerBIWorkspaceTreeItem {
+		let item = new PowerBIWorkspaceTreeItem("NO_ITEMS", Helper.newGuid(), "DUMMY_ITEM", Helper.newGuid(), undefined, vscode.TreeItemCollapsibleState.None);
+		item.contextValue = "";
+		item.description = "No workspaces found!";
+		return item;
+	}
+
+	public static handleEmptyItems<PowerBIWorkspaceTreeItem>(items: PowerBIWorkspaceTreeItem[], filter: RegExp = undefined): PowerBIWorkspaceTreeItem[] {
+		return super.handleEmptyItems<PowerBIWorkspaceTreeItem>(items, filter, "items");
 	}
 }

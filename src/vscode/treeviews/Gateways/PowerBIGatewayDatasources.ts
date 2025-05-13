@@ -38,10 +38,6 @@ export class PowerBIGatewayDatasources extends PowerBIGatewayTreeItem {
 	}
 
 	async getChildren(element?: PowerBIGatewayTreeItem): Promise<PowerBIGatewayTreeItem[]> {
-		if (!PowerBIApiService.isInitialized) {
-			return Promise.resolve([]);
-		}
-
 		if (element != null && element != undefined) {
 			return element.getChildren();
 		}
