@@ -2,6 +2,10 @@
 
 **v2.7.0**:
 - make connection/session more resilient
+- added integration with [Fabric Studio](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.fabricstudio)
+  - fix issue with disabled DMV views (for Tables and Partitions)
+  - reworked `Edit TMDL` for datasets to not rely on the proxy anymore
+  - added `Edit PBIR` for reports
 
 **v2.6.0**:
 - added user switch via left status bar

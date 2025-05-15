@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { startExternalProcess } from '@env/process';
 import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
+import { FabricStudioConfig } from '../../../fabricStudio/FabricStudioConfig';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
 import { iPowerBIDataset, iPowerBIDatasetGenericResponse, iPowerBIDatasetParameter, iPowerBIDatasetRefresh, iPowerBIDatasetRefreshableObject } from '../../../powerbi/DatasetsAPI/_types';
@@ -24,7 +25,6 @@ import { PowerBINotebookType } from '../../notebook/PowerBINotebook';
 import { PowerBINotebookContext } from '../../notebook/PowerBINotebookContext';
 import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSerializer';
 import { PowerBIDatasetPermissions } from './PowerBIDatasetPermissions';
-import { PowerBIDatasetRefresh } from './PowerBIDatasetRefresh';
 import { PowerBIDatasets } from './PowerBIDatasets';
 
 
@@ -116,6 +116,13 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 	// Dataset-specific funtions
 	get workspace(): PowerBIWorkspace {
 		return this.getParentByType<PowerBIWorkspace>("GROUP");
+	}
+
+	get fabricFsUri(): vscode.Uri {
+		const fabricUriString = `${FabricStudioConfig.FSScheme}:///workspaces/${this.groupId}/semanticmodels/${this.id}`;
+		const fabricUri = vscode.Uri.parse(fabricUriString);
+
+		return fabricUri;
 	}
 
 	public async delete(): Promise<void> {
@@ -265,11 +272,16 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 	}
 
 	public async editTMDL(): Promise<void> {
-		const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.workspace.name}/${this.name}`));
+		if (PowerBIConfiguration.useFabricStudio) {
+			await Helper.addToWorkspace(this.fabricFsUri, `TMDL - ${this.name}`, true);
+		}
+		else {
+			const tmdlUri = new TMDLFSUri(vscode.Uri.parse(`${TMDL_SCHEME}:/powerbi/${this.workspace.name}/${this.name}`));
 
-		await Helper.addToWorkspace(tmdlUri.uri, `TMDL - ${this.name}`, true);
-		// if the workspace does not exist, the folder is opened in a new workspace where the TMDL folder would be reloaded again
-		// so we only load the model if we already have a workspace
+			await Helper.addToWorkspace(tmdlUri.uri, `TMDL - ${this.name}`, true);
+			// if the workspace does not exist, the folder is opened in a new workspace where the TMDL folder would be reloaded again
+			// so we only load the model if we already have a workspace
+		}
 	}
 
 	public async updateAllParameters(): Promise<void> {

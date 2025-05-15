@@ -9,6 +9,8 @@ import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIApiTreeItem } from '../PowerBIApiTreeItem';
 import { Response } from '@env/fetch';
 import { PowerBIWorkspace } from './PowerBIWorkspace';
+import { FabricStudioConfig } from '../../../fabricStudio/FabricStudioConfig';
+import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIReport extends PowerBIWorkspaceTreeItem {
@@ -44,6 +46,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 			actions.push("REBIND")
 			actions.push("UPDATECONTENT")
 			actions.push("DOWNLOAD")
+			actions.push("EDIT_PBIR")
 		}
 
 		return orig + actions.join(",") + ",";
@@ -58,10 +61,17 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 	}
 
 	get asQuickPickItem(): PowerBIQuickPickItem {
-		const qpItem =  new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Workspace: ${this.workspace.name} (ID: ${this.workspace.uid})`);
+		const qpItem = new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Workspace: ${this.workspace.name} (ID: ${this.workspace.uid})`);
 		qpItem.apiItem = this;
 
 		return qpItem;
+	}
+
+	get fabricFsUri(): vscode.Uri {
+		const fabricUriString = `${FabricStudioConfig.FSScheme}:///workspaces/${this.groupId}/reports/${this.id}`;
+		const fabricUri = vscode.Uri.parse(fabricUriString);
+
+		return fabricUri;
 	}
 
 	// Report-specific funtions
@@ -99,7 +109,7 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 				]);
 		}
 		else {
-			response = await PowerBIApiService.invokeWithProgress(`Cloning parameter '${this.name}' to '${settings["name"]}`,  PowerBIApiService.post(apiUrl, settings));
+			response = await PowerBIApiService.invokeWithProgress(`Cloning parameter '${this.name}' to '${settings["name"]}`, PowerBIApiService.post(apiUrl, settings));
 		}
 
 		if (response.error) {
@@ -197,5 +207,14 @@ export class PowerBIReport extends PowerBIWorkspaceTreeItem {
 		}
 
 		await PowerBIApiService.downloadFile(apiUrl, targetPath, true);
+	}
+
+	public async editPBIR(): Promise<void> {
+		if (PowerBIConfiguration.useFabricStudio) {
+			await Helper.addToWorkspace(this.fabricFsUri, `PBIR - ${this.name}`, true);
+		}
+		else {
+			vscode.window.showErrorMessage("Edit PBIR is only supported with Fabric Studio.")
+		}
 	}
 }

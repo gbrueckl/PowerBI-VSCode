@@ -246,6 +246,12 @@ export abstract class ThisExtension {
 			"powerbi.isInBrowser",
 			this.isInBrowser
 		);
+
+		vscode.commands.executeCommand(
+			"setContext",
+			"powerbi.useFabricStudio",
+			PowerBIConfiguration.useFabricStudio
+		);
 	}
 
 	public static get TreeProviderIds(): TreeProviderId[] {
@@ -422,6 +428,21 @@ export abstract class ThisExtension {
 
 	static PushDisposable(item: any) {
 		this.extensionContext.subscriptions.push(item);
+	}
+
+	static async ensureFabricStudio(): Promise<boolean> {
+		const fabricStudio: vscode.Extension<any> = vscode.extensions.getExtension("GerhardBrueckl.fabricstudio");
+		if (!fabricStudio) {
+			const install = await vscode.window.showErrorMessage("Please install the Fabric Studio extension ('GerhardBrueckl.fabricstudio') first!", "Install Fabric Studio");
+
+			if (install == "Install Fabric Studio") {
+				vscode.commands.executeCommand("workbench.extensions.installExtension", "GerhardBrueckl.fabricstudio");
+				vscode.window.showInformationMessage("Please refresh/redo your action after installing the extension.");
+			}
+
+			return false;
+		}
+		return true;
 	}
 }
 

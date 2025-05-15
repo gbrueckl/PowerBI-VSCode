@@ -479,6 +479,12 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIReport.editPBIR",
+				"title": "Edit PBIR",
+				"icon": "$(edit)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIDataflow.delete",
 				"title": "Delete",
 				"icon": "$(remove-close)",
@@ -775,6 +781,11 @@
 				{
 					"command": "PowerBIReport.download",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,DOWNLOAD,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIReport.editPBIR",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,REPORT,.*/ && viewItem =~ /.*,EDIT_PBIR,.*/",
 					"group": "navigation"
 				},
 				{

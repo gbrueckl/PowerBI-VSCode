@@ -130,6 +130,10 @@ export abstract class PowerBIConfiguration {
 		return this.tmdlEnabled;
 	}
 
+	static get useFabricStudio(): boolean {
+		return true;
+	}
+
 	static get config(): vscode.WorkspaceConfiguration {
 		return vscode.workspace.getConfiguration("powerbi");
 	}

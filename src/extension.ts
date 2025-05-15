@@ -143,6 +143,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIReport.rebind', (report: PowerBIReport) => PowerBIReport.rebind(report));
 	vscode.commands.registerCommand('PowerBIReport.updateContent', (report: PowerBIReport) => PowerBIReport.updateContent(report));
 	vscode.commands.registerCommand('PowerBIReport.download', (report: PowerBIReport) => PowerBIReport.download(report));
+	vscode.commands.registerCommand('PowerBIReport.editPBIR', (report: PowerBIReport) => report.editPBIR());
 
 	// Dataflow commands
 	vscode.commands.registerCommand('PowerBIDataflow.delete', (dataflow: PowerBIDataflow) => dataflow.delete());

@@ -13,7 +13,7 @@ import { PowerBIDatasetTablePartitions } from './PowerBIDatasetTablePartitions';
 import { PowerBIApiDrop, PowerBIDaxDrop, PowerBITmslDrop } from '../../dropProvider/_types';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
-export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem implements PowerBIDaxDrop, PowerBITmslDrop, PowerBIApiDrop{
+export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem implements PowerBIDaxDrop, PowerBITmslDrop, PowerBIApiDrop {
 	private _columnStatistics: iPowerBIDatasetColumnStatistics[] = [];
 
 	constructor(
@@ -99,6 +99,12 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem implements Pow
 		return JSON.stringify(this.refreshableObject, null, 4)
 	}
 
+	get fabricFsUri(): vscode.Uri {
+		const fabricUri = vscode.Uri.joinPath(this.dataset.fabricFsUri, "definition", "tables", this.definition.name + ".tmdl");
+
+		return fabricUri;
+	}
+
 	getColumnStatistic(columnName: string): iPowerBIDatasetColumnStatistics {
 		const stats = this._columnStatistics.find((item) => item.columnName == columnName);
 
@@ -132,6 +138,13 @@ export class PowerBIDatasetTable extends PowerBIWorkspaceTreeItem implements Pow
 			vscode.window.showErrorMessage(msg);
 			ThisExtension.log(msg);
 		}
+	}
+
+	async getTMDLContent(): Promise<string> {
+		const definitino = await vscode.workspace.fs.readFile(this.fabricFsUri);
+		const tmdlDef = Buffer.from(definitino).toString("utf8");
+
+		return tmdlDef;
 	}
 
 	async getChildren(element?: PowerBIWorkspaceTreeItem): Promise<PowerBIWorkspaceTreeItem[]> {
