@@ -212,9 +212,8 @@ export abstract class ThisExtension {
 				this._settingScope = "Global";
 			}
 
-			let config = PowerBIConfiguration;
-			config.applySettings();
-			await PowerBIApiService.initialize();
+			// for Sovereign Clouds we need to make some special settings in VSCode
+			PowerBIConfiguration.applySettings()
 
 			this._notebookKernel = await PowerBINotebookKernel.getInstance();
 

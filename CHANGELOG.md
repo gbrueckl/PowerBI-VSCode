@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.7.0**:
+- make connection/session more resilient
+
 **v2.6.0**:
 - added user switch via left status bar
 

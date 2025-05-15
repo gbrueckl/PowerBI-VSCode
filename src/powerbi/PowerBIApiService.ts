@@ -46,7 +46,7 @@ export abstract class PowerBIApiService {
 			this._authenticationProvider = config.authenticationProvider;
 			this._resourceId = config.resourceId;
 
-			await this.refreshConnection(clearSession);
+			return this.refreshConnection(clearSession);
 		} catch (error) {
 			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
@@ -60,7 +60,7 @@ export abstract class PowerBIApiService {
 
 		if (!this._vscodeSession || !this._vscodeSession.accessToken) {
 			vscode.window.showInformationMessage("PowerBI / API: Please log in with your Microsoft account first!");
-			return;
+			return false;
 		}
 
 		ThisExtension.log("Refreshing authentication headers ...");
@@ -158,7 +158,9 @@ export abstract class PowerBIApiService {
 			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing connections! ");
 
 			await this.refreshConnection();
-			ThisExtension.refreshUI();
+			if(this._initializationState == "loaded") {
+				ThisExtension.refreshUI();
+			}
 		}
 	}
 
@@ -260,6 +262,9 @@ export abstract class PowerBIApiService {
 			else {
 				ThisExtension.log(`Connection Initialization FAILED!`);
 				vscode.window.showErrorMessage("PowerBI API: Connection initialization failed!");
+				if(this._initializationState != "loading") {
+					this._initializationState = "not_loaded";
+				}
 			}
 		}
 		return this._headers;
