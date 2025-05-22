@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.7.1**:
+- fix sorting of Tables and Partitions
+
 **v2.7.0**:
 - make connection/session more resilient
 - added integration with [Fabric Studio](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.fabricstudio)

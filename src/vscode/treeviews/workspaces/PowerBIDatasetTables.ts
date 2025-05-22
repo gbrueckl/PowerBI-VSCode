@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
@@ -83,6 +83,8 @@ export class PowerBIDatasetTables extends PowerBIWorkspaceGenericFolder {
 				ThisExtension.log("No tables found for dataset " + this.dataset.name);
 				return;
 			}
+
+			Helper.sortArrayByProperty(children, "label");
 
 			return children;
 		}

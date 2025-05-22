@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
@@ -70,6 +70,8 @@ export class PowerBIDatasetTablePartitions extends PowerBIWorkspaceGenericFolder
 			catch (e) {
 				ThisExtension.log("No partitions found for table " + this.table.name);
 			}
+
+			Helper.sortArrayByProperty(children, "label");
 
 			return children;
 		}
