@@ -22,7 +22,7 @@ export class PowerBIWorkspaceGenericFolder extends PowerBIWorkspaceTreeItem {
 
 		this.customApiUrlPart = apiUrlPart;
 		// the groupId is not unique for logical folders hence we make it unique
-		this.id = groupId + "/" + parent.uid + "/" + this.itemType.toString();
+		this.id = parent.id + "/" + this.itemType.toString();
 		this.iconPath = {
 			light: this.getIconPath("light"),
 			dark: this.getIconPath("dark")

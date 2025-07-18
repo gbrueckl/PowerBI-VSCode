@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { UniqueId } from '../../../helpers/Helper';
+import { Helper, UniqueId } from '../../../helpers/Helper';
 import { PowerBIApiService } from '../../../powerbi/PowerBIApiService';
 
 import { PowerBIWorkspaceTreeItem } from './PowerBIWorkspaceTreeItem';
@@ -10,6 +10,7 @@ import { ThisExtension } from '../../../ThisExtension';
 import { PowerBIDatasetTable } from './PowerBIDatasetTable';
 import { PowerBIWorkspaceGenericFolder } from './PowerBIWorkspaceGenericFolder';
 import { PowerBIDatasetTableColumn } from './PowerBIDatasetTableColumn';
+import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasetTableColumns extends PowerBIWorkspaceGenericFolder {
@@ -32,18 +33,43 @@ export class PowerBIDatasetTableColumns extends PowerBIWorkspaceGenericFolder {
 			let children: PowerBIDatasetTableColumn[] = [];
 
 			try {
-				const items: iPowerBIDatasetDMV[] = await PowerBIApiService.getDMV(this.apiPath, "COLUMNS", "[TableID] = " + this.table.tableId, "ExplicitName");
-				//await this.table.loadColumnStatistics();
+				if (PowerBIConfiguration.useFabricStudio) {
+					const columnRegex = /^\s*column\s+(?<columnName>'[^']*'|"[^"]*"|[^=\s]*)/gm;
 
-				for (let item of items) {
-					let treeItem = new PowerBIDatasetTableColumn(item, this.groupId, this);
-					children.push(treeItem);
-					PowerBICommandBuilder.pushQuickPickItem(treeItem);
+					const tmdl = await this.table.getTMDLContent();
+					const matches = tmdl.matchAll(columnRegex);
+
+					for (const match of matches) {
+						let columnName = match.groups.columnName;
+						columnName = Helper.trimChar(Helper.trimChar(columnName, "'"), '"');
+
+						const meta: iPowerBIDatasetDMV = {
+							"name": columnName,
+							"id": columnName,
+							"properties": {}
+						};
+
+						let treeItem = new PowerBIDatasetTableColumn(meta, this.groupId, this);
+						children.push(treeItem);
+						PowerBICommandBuilder.pushQuickPickItem(treeItem);
+					}
+				}
+				else {
+					const items: iPowerBIDatasetDMV[] = await PowerBIApiService.getDMV(this.apiPath, "COLUMNS", "[TableID] = " + this.table.tableId, "ExplicitName");
+					//await this.table.loadColumnStatistics();
+
+					for (let item of items) {
+						let treeItem = new PowerBIDatasetTableColumn(item, this.groupId, this);
+						children.push(treeItem);
+						PowerBICommandBuilder.pushQuickPickItem(treeItem);
+					}
 				}
 			}
 			catch (e) {
 				ThisExtension.log("No columns found for table " + this.table.name);
 			}
+
+			Helper.sortArrayByProperty(children, "label");
 
 			return children;
 		}

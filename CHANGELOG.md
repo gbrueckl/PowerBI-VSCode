@@ -1,12 +1,16 @@
 # Change Log
 
+**v2.8.0**:
+- fixed issue with disabled DMV views (for Tables Columns and Measures)
+- fixed issue with duplicate ids ([#46](/../../issues/46))
+
 **v2.7.1**:
-- fix sorting of Tables and Partitions
+- fixed sorting of Tables and Partitions
 
 **v2.7.0**:
 - make connection/session more resilient
 - added integration with [Fabric Studio](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.fabricstudio)
-  - fix issue with disabled DMV views (for Tables and Partitions)
+  - fixed issue with disabled DMV views (for Tables and Partitions)
   - reworked `Edit TMDL` for datasets to not rely on the proxy anymore
   - added `Edit PBIR` for reports
 

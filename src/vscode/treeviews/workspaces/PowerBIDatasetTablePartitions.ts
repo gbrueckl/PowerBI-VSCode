@@ -38,13 +38,14 @@ export class PowerBIDatasetTablePartitions extends PowerBIWorkspaceGenericFolder
 
 			try {
 				if (PowerBIConfiguration.useFabricStudio) {
-					const partitionRegex = /^\s*partition\s*(?<partitionName>[^\s]*)[\s=]/gm;
+					const partitionRegex = /^\s*partition\s+(?<partitionName>'[^']*'|"[^"]*"|[^=\s]*)/gm;
 
 					const tmdl = await this.table.getTMDLContent();
 					const matches = tmdl.matchAll(partitionRegex);
-    
+
 					for (const match of matches) {
-						const partitionName = match.groups.partitionName;
+						let partitionName = match.groups.partitionName;
+						partitionName = Helper.trimChar(Helper.trimChar(partitionName, "'"), '"');
 
 						const meta: iPowerBIDatasetDMV = {
 							"name": partitionName,
