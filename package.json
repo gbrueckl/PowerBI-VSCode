@@ -150,19 +150,23 @@
 			"powerbi": [
 				{
 					"id": "PowerBIWorkspaces",
-					"name": "Workspaces"
+					"name": "Workspaces",
+					"icon": "$(list-tree)"
 				},
 				{
 					"id": "PowerBIPipelines",
-					"name": "Pipelines"
+					"name": "Pipelines",
+					"icon": "$(live-share)"
 				},
 				{
 					"id": "PowerBICapacities",
-					"name": "Capacities"
+					"name": "Capacities",
+					"icon": "$(settings-gear)"
 				},
 				{
 					"id": "PowerBIGateways",
-					"name": "Gateways"
+					"name": "Gateways",
+					"icon": "$(server-environment)"
 				}
 			]
 		},
