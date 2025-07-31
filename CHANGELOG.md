@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.8.1**:
+- added automated deployment to marketplace
+
 **v2.8.0**:
 - fixed issue with disabled DMV views (for Tables Columns and Measures)
 - fixed issue with duplicate ids ([#46](/../../issues/46))
