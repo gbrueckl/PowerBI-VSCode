@@ -23,16 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Dump GITHUB context
-        env:
-          GITHUB: ${{ toJSON(github) }}
-        run: echo "${GITHUB}"
-
-      - name: Dump input context
-        env:
-          INPUTS: ${{ toJSON(inputs) }}
-        run: echo "${INPUTS}"
-
       - name: Install npm
         run: npm install
 
@@ -41,11 +31,17 @@ jobs:
 
       # we first publish to VSCode gallery 
       # in case that version is already there, it would fail and also not overwrite the Github Release
-      - name: Publish extension
+      - name: Publish extension to VSCode Marketplace
         if: ${{ (inputs.publish == 'true') || (github.event_name == 'push') }}
         env:
           VSCE_PUBLISH_TOKEN: ${{ secrets.VSCE_PUBLISH_TOKEN }}
         run: vsce publish -p $VSCE_PUBLISH_TOKEN
+
+      - name: Publish extension to Open VSX Registry
+        uses: HaaLeo/publish-vscode-extension@v2
+        id: publishToOpenVSX
+        with:
+          pat: ${{ secrets.OPENVSX_PUBLISH_TOKEN }}
 
       - name: Calculate version/tag-name from package.json
         id: calculatePackageVersion

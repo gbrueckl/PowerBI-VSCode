@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI Studio",
 	"description": "An extension to manage your Power BI resources from within VSCode",
-	"version": "2.8.1",
+	"version": "2.8.2",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {

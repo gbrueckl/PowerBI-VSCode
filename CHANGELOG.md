@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.8.2**:
+- added automated deployment to [OpenVSX](https://open-vsx.org/)
+
 **v2.8.1**:
 - added automated deployment to marketplace
 
