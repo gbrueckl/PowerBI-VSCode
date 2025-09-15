@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.8.3**:
+- fixed issue with query string parameters in API notebooks
+
 **v2.8.2**:
 - added automated deployment to [OpenVSX](https://open-vsx.org/)
 

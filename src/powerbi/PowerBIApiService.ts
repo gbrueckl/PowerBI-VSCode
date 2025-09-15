@@ -286,7 +286,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	public static getFullUrl(endpoint: string, params?: object): string {
+	public static getFullUrl(endpoint: string, params: any): string {
 		let baseItems = this._apiBaseUrl.split("/");
 		baseItems.push("v1.0");
 		baseItems.push(this.Org);
@@ -300,11 +300,12 @@ export abstract class PowerBIApiService {
 		let uri = vscode.Uri.parse(endpoint);
 
 		if (params) {
-			let urlParams = []
+			// specific parameters overwrite existing ones
+			let urlParams = new URLSearchParams(uri.query);
 			for (let kvp of Object.entries(params)) {
-				urlParams.push(`${kvp[0]}=${kvp[1] as number | string | boolean}`)
+				urlParams.set(kvp[0], `${kvp[1] as number | string | boolean}`);
 			}
-			uri = uri.with({ query: urlParams.join('&') })
+			uri = uri.with({ query: urlParams.toString() });
 		}
 
 		return uri.toString(true);
