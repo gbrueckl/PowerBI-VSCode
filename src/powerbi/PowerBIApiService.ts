@@ -286,7 +286,7 @@ export abstract class PowerBIApiService {
 		}
 	}
 
-	public static getFullUrl(endpoint: string, params: any): string {
+	public static getFullUrl(endpoint: string, params: any = undefined): string {
 		let baseItems = this._apiBaseUrl.split("/");
 		baseItems.push("v1.0");
 		baseItems.push(this.Org);
