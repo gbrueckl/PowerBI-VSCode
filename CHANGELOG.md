@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.8.4**:
+- fixed issue with cancelled and failed notebook cells
+
 **v2.8.3**:
 - fixed issue with query string parameters in API notebooks
 
