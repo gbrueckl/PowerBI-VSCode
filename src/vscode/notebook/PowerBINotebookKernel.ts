@@ -117,7 +117,10 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 		let context: PowerBINotebookContext = this.getNotebookContext(notebook);
 
 		for (let cell of cells) {
-			await this._doExecution(cell, context);
+			const success = await this._doExecution(cell, context);
+			if(!success){
+				break;
+			}
 			await Helper.delay(10); // Force some delay before executing/queueing the next cell
 		}
 	}
@@ -227,7 +230,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 		return commandTextClean;
 	}
 
-	private async _doExecution(cell: vscode.NotebookCell, context: PowerBINotebookContext): Promise<void> {
+	private async _doExecution(cell: vscode.NotebookCell, context: PowerBINotebookContext): Promise<boolean> {
 		const execution = this.Controller.createNotebookCellExecution(cell);
 		execution.executionOrder = ++this._executionOrder;
 		execution.start(Date.now());
@@ -298,7 +301,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 							]));
 
 							execution.end(false, Date.now());
-							return;
+							return false;
 					}
 					break;
 				case "cmd":
@@ -313,7 +316,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 							]));
 
 							execution.end(false, Date.now());
-							return;
+							return false;
 						}
 						const varName = match.groups.variable.trim().toUpperCase();
 						if (match.groups.variable && match.groups.value) {
@@ -334,14 +337,14 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					}
 
 					execution.end(true, Date.now());
-					return;
+					return true;
 				default:
 					execution.appendOutput(new vscode.NotebookCellOutput([
 						vscode.NotebookCellOutputItem.text("Only %dax, %api and %cmd magics are supported."),
 					]));
 
 					execution.end(false, Date.now());
-					return;
+					return false;
 			}
 
 			execution.token.onCancellationRequested(() => {
@@ -350,7 +353,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 				]));
 
 				execution.end(false, Date.now());
-				return;
+				return false;
 			});
 
 			if (magic == "tmsl") {
@@ -361,7 +364,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					]));
 
 					execution.end(false, Date.now());
-					return;
+					return false;
 				}
 				else if (result.message) {
 					execution.appendOutput(new vscode.NotebookCellOutput([
@@ -369,6 +372,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					]));
 
 					execution.end(true, Date.now());
+					return true;
 				}
 			}
 			else if (magic == "dax") {
@@ -379,7 +383,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					]));
 
 					execution.end(false, Date.now());
-					return;
+					return false;
 				}
 				if (result.results) {
 					let rows = result.results[0].tables[0].rows;
@@ -405,6 +409,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 					execution.appendOutput(output);
 
 					execution.end(true, Date.now());
+					return true;
 				}
 			}
 			else if (magic == "api") {
@@ -426,6 +431,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 
 				execution.appendOutput(output);
 				execution.end(true, Date.now());
+				return true;
 			}
 		} catch (error) {
 			execution.appendOutput(new vscode.NotebookCellOutput([
@@ -433,7 +439,7 @@ export class PowerBINotebookKernel implements vscode.NotebookController {
 			]));
 
 			execution.end(false, Date.now());
-			return;
+			return false;
 		}
 	}
 }
