@@ -1,5 +1,9 @@
 # Change Log
 
+**v2.9.0**:
+- added Dataset Version History
+- added `Restore Version` to Dataset Version History
+
 **v2.8.4**:
 - fixed issue with cancelled and failed notebook cells
 
