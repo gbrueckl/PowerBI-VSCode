@@ -8,7 +8,6 @@ import { PowerBIDataset } from './PowerBIDataset';
 import { iPowerBIDataset, iPowerBIDatasetRefresh } from '../../../powerbi/DatasetsAPI/_types';
 import { PowerBICommandBuilder } from '../../../powerbi/CommandBuilder';
 import { PowerBIWorkspaceGenericFolder } from './PowerBIWorkspaceGenericFolder';
-import { PowerBIDatasetRefresh } from './PowerBIDatasetRefresh';
 import { PowerBIConfiguration } from '../../configuration/PowerBIConfiguration';
 import { ThisExtension } from '../../../ThisExtension';
 import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';

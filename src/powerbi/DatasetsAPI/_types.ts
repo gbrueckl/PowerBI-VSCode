@@ -107,3 +107,24 @@ export class iPowerBIDatasetColumnStatistics {
 	cardinality: number;
 	maxLength: number;
 }
+
+export class iPowerBIDatasetVersion {
+	versionTimestamp: Date;
+	asModifiedByUserObjectId: UniqueId;
+	asVersionTimestamp: Date;
+	snapshotKind: number;
+	description: string;
+	dlModifiedByUserObjectId: UniqueId;
+	dlVersionTimestamp: Date;
+}
+
+export class iPowerBIDatasetVersionHistory {
+	modelVersions: iPowerBIDatasetVersion[];
+}
+
+export class iPowerBIDatasetRestoreVersionStatus {
+    restoreVersionTimestamp: Date;
+    restoreStartTime: Date;
+    restoreEndTime: Date;
+    restoreStatus: number; // 1 = In Progress, 2 = Succeeded
+}

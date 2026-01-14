@@ -50,6 +50,8 @@ export type ApiItemType =
 |	"DATASETTABLEMEASURE"		// single Dataset table measure
 |	"DATASETTABLEPARTITIONS"	// container for Dataset table partitions
 |	"DATASETTABLEPARTITION"		// single Dataset table partition
+|	"DATASETVERSIONHISTORIES"	// container for Dataset version histories
+|	"DATASETVERSIONHISTORY"		// single Dataset version History
 |	"DATAFLOWTRANSACTIONS"		// container for Dataflow refreshes
 |	"DATAFLOWTRANSACTION"		// single Dataflow refresh
 |	"DATAFLOWDATASOURCES"

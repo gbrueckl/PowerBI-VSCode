@@ -26,6 +26,7 @@ import { PowerBINotebookContext } from '../../notebook/PowerBINotebookContext';
 import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSerializer';
 import { PowerBIDatasetPermissions } from './PowerBIDatasetPermissions';
 import { PowerBIDatasets } from './PowerBIDatasets';
+import { PowerBIDatasetVersionHistories } from './PowerBIDatasetVersionHistories';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -109,6 +110,14 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		children.push(new PowerBIDatasetRefreshes(this.groupId, this));
 		children.push(new PowerBIDatasetTables(this.groupId, this));
 		children.push(new PowerBIDatasetPermissions(this.groupId, this));
+
+		// Version Histories
+		let apiResponse: Response = await PowerBIApiService.get<Response>(this.apiPath, undefined, false, true);
+		const baseUrl = apiResponse.headers.get("home-cluster-uri");
+		let versionHistories = new PowerBIDatasetVersionHistories(this.groupId, this, baseUrl);
+		await versionHistories.updateRestoreStatus();
+		children.push(versionHistories);
+
 
 		return children;
 	}

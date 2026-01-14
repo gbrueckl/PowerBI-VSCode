@@ -38,6 +38,7 @@ import { PowerBIDatasetTable } from './vscode/treeviews/workspaces/PowerBIDatase
 import { PowerBIOnDropProvider } from './vscode/dropProvider/PowerBIOnDropProvider';
 import { TempFileSystemProvider } from './vscode/filesystemProvider/temp/TempFileSystemProvider';
 import { PowerBIApiService } from './powerbi/PowerBIApiService';
+import { PowerBIDatasetVersionHistory } from './vscode/treeviews/workspaces/PowerBIDatasetVersionHistory';
 
 
 
@@ -129,6 +130,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIDataset.copyConnectionString', (dataset: PowerBIDataset) => dataset.copyConnectionString());
 	vscode.commands.registerCommand('PowerBIDataset.openExternalTool', (dataset: PowerBIDataset) => PowerBIDataset.openPowerBIDesktopExternalTool(dataset));
 	vscode.commands.registerCommand('PowerBIDataset.showMemoryStats', (dataset: PowerBIDataset) => dataset.showMemoryStats());
+	vscode.commands.registerCommand('PowerBIDataset.restoreVersion', (version: PowerBIDatasetVersionHistory) => version.restoreVersion());
 	// DatasetParameter commands
 	vscode.commands.registerCommand('PowerBIDatasetParameter.update', (parameter: PowerBIParameter) => parameter.update());
 
