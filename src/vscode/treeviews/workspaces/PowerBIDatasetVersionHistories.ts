@@ -23,6 +23,8 @@ export class PowerBIDatasetVersionHistories extends PowerBIWorkspaceGenericFolde
 	) {
 		super("Version History", "DATASETVERSIONHISTORIES", groupId, parent, "");
 		this._baseUrl = Helper.trimChar(baseUrl, "/");
+
+		this.tooltip = "Version History for self-service users"
 	}
 
 	get dataset(): PowerBIDataset {
