@@ -1,5 +1,9 @@
 # Change Log
 
+**v2.10.0**:
+- implement changes as suggested by ([#54](/../../issues/54))
+- implement changes as suggested by ([#55](/../../issues/55))
+
 **v2.9.0**:
 - added Dataset Version History
 - added `Restore Version` to Dataset Version History

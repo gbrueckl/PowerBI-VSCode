@@ -96,6 +96,12 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 		return PowerBIApiService.getXmlaConnectionString(this.workspace.name, this.name);
 	}
 
+	public getBrowserLink(): vscode.Uri {
+		//https://app.powerbi.com/groups/<groupID>/datasets/<datasetID>/overview
+
+		return vscode.Uri.parse(`https://app.powerbi.com/onelake/details/${this.groupId}/dataset/${this.id}/overview`);
+	}
+
 	get asQuickPickItem(): PowerBIQuickPickItem {
 		const qpItem = new PowerBIQuickPickItem(this.name, this.uid.toString(), this.uid.toString(), `Workspace: ${this.workspace.name} (ID: ${this.workspace.uid})`);
 		qpItem.apiItem = this;

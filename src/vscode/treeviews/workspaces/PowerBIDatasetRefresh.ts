@@ -138,6 +138,12 @@ export class PowerBIDatasetRefresh extends PowerBIWorkspaceTreeItem {
 		super.definition = value;
 	}
 
+	public getBrowserLink(): vscode.Uri {
+		//https://app.powerbi.com/groups/<groupID>/datasets/<datasetID>/refreshdetails/<refreshID>
+
+		return super.getBrowserLink().with({ path: super.getBrowserLink().path.replace("/refreshes/", "/refreshdetails/") });
+	}
+
 	// Dataset-specific funtions
 	get dataset(): PowerBIDataset {
 		return (this.parent as PowerBIDatasetRefreshes).dataset;
