@@ -42,6 +42,12 @@ export type ApiItemType =
 |	"DATASETPERMISSIONS"		// container for Dataset permissions
 |	"DATASETREFRESHES"			// container for Dataset refreshes
 |	"DATASETREFRESH"			// single Dataset refresh
+| 	"DATASETREFRESHSCHEDULE"		// Dataset refresh schedule
+|	"DATASETREFRESHSCHEDULEENABLED"	// whether a refresh schedule is enabled for the dataset
+| 	"DATASETREFRESHSCHEDULEDAYS"	// container for Dataset refresh schedule days
+| 	"DATASETREFRESHSCHEDULETIMES"	// container for Dataset refresh schedule times
+| 	"DATASETREFRESHSCHEDULENOTIFY" // Dataset refresh schedule notify option
+|	"DATASETREFRESHSCHEDULETIMEZONE"	// Dataset refresh schedule timezone
 |	"DATASETTABLES"				// container for Dataset tables
 |	"DATASETTABLE"				// single Dataset table
 |	"DATASETTABLECOLUMNS"		// container for Dataset table columns
@@ -57,6 +63,8 @@ export type ApiItemType =
 |	"DATAFLOWDATASOURCES"
 |	"DATAFLOWDATASOURCE"
 |	"PERMISSION"
+|	"GENERICVIEWER"	
+|	"GENERICFOLDER"
 |	"DUMMY_ITEM"				// a dummy item for errors and no_rows
 ;
 

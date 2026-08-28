@@ -128,3 +128,24 @@ export class iPowerBIDatasetRestoreVersionStatus {
     restoreEndTime: Date;
     restoreStatus: number; // 1 = In Progress, 2 = Succeeded
 }
+
+export type iPowerBIDatasetRefreshScheduleDay =
+	| "Monday"
+	| "Tuesday"
+	| "Wednesday"
+	| "Thursday"
+	| "Friday"
+	| "Saturday"
+	| "Sunday";
+
+export type iPowerBIDatasetRefreshScheduleNotifyOption =
+	| "NoNotification"
+	| "MailOnFailure";
+
+export interface iPowerBIDatasetRefreshSchedule {
+	days?: iPowerBIDatasetRefreshScheduleDay[];
+	enabled?: boolean;
+	localTimeZoneId?: string;
+	notifyOption?: iPowerBIDatasetRefreshScheduleNotifyOption;
+	times?: string[]; // HH:mm format
+}

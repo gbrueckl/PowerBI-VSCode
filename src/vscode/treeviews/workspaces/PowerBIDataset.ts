@@ -27,6 +27,7 @@ import { PowerBINotebookSerializer } from '../../notebook/PowerBINotebookSeriali
 import { PowerBIDatasetPermissions } from './PowerBIDatasetPermissions';
 import { PowerBIDatasets } from './PowerBIDatasets';
 import { PowerBIDatasetVersionHistories } from './PowerBIDatasetVersionHistories';
+import { PowerBIDatasetRefreshSchedule } from './PowerBIDatasetRefreshSchedule';
 
 
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
@@ -114,6 +115,7 @@ export class PowerBIDataset extends PowerBIWorkspaceTreeItem implements TOMProxy
 
 		children.push(new PowerBIParameters(this.groupId, this));
 		children.push(new PowerBIDatasetRefreshes(this.groupId, this));
+		children.push(new PowerBIDatasetRefreshSchedule(this.groupId, this));
 		children.push(new PowerBIDatasetTables(this.groupId, this));
 		children.push(new PowerBIDatasetPermissions(this.groupId, this));
 
