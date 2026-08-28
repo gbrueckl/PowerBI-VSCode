@@ -149,3 +149,7 @@ export interface iPowerBIDatasetRefreshSchedule {
 	notifyOption?: iPowerBIDatasetRefreshScheduleNotifyOption;
 	times?: string[]; // HH:mm format
 }
+
+export interface iPowerBIDatasetRefreshScheduleRequest {
+	value: iPowerBIDatasetRefreshSchedule;
+}

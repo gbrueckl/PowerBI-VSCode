@@ -39,6 +39,7 @@ import { PowerBIOnDropProvider } from './vscode/dropProvider/PowerBIOnDropProvid
 import { TempFileSystemProvider } from './vscode/filesystemProvider/temp/TempFileSystemProvider';
 import { PowerBIApiService } from './powerbi/PowerBIApiService';
 import { PowerBIDatasetVersionHistory } from './vscode/treeviews/workspaces/PowerBIDatasetVersionHistory';
+import { PowerBIDatasetRefreshSchedule } from './vscode/treeviews/workspaces/PowerBIDatasetRefreshSchedule';
 
 
 
@@ -123,6 +124,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('PowerBIDatasetRefresh.cancel', (refresh: PowerBIDatasetRefresh) => refresh.cancel());
 	vscode.commands.registerCommand('PowerBIDatasetRefresh.rerun', (refresh: PowerBIDatasetRefresh) => refresh.rerun());
 	vscode.commands.registerCommand('PowerBIDataset.showRefresh', async (refresh: PowerBIDatasetRefresh) => refresh.showDefinition());
+	vscode.commands.registerCommand('PowerBIDatasetRefreshSchedule.set', (schedule: PowerBIDatasetRefreshSchedule) => schedule.setRefreshSchedule());
+	vscode.commands.registerCommand('PowerBIDatasetRefreshSchedule.disable', (enabledItem: PowerBIWorkspaceTreeItem) => (enabledItem.parent as PowerBIDatasetRefreshSchedule).disableRefreshSchedule());
+	vscode.commands.registerCommand('PowerBIDatasetRefreshSchedule.enable', (enabledItem: PowerBIWorkspaceTreeItem) => (enabledItem.parent as PowerBIDatasetRefreshSchedule).enableRefreshSchedule());
 	vscode.commands.registerCommand('PowerBIDataset.updateAllParameters', (dataset: PowerBIDataset) => dataset.updateAllParameters());
 	vscode.commands.registerCommand('PowerBIDataset.configureScaleOut', (dataset: PowerBIDataset) => dataset.configureScaleOut());
 	vscode.commands.registerCommand('PowerBIDataset.syncReadOnlyReplicas', (dataset: PowerBIDataset) => dataset.syncReadOnlyReplicas());

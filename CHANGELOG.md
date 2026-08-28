@@ -2,7 +2,7 @@
 
 **v2.11.0**:
 - update sidebar icon to make it more distinctive
-- add support for showing Dataset Refresh Schedules in the treeview
+- add support for showing/editing/disabling Dataset Refresh Schedules in the treeview
 
 **v2.10.0**:
 - implement changes as suggested by ([#54](/../../issues/54))

@@ -337,6 +337,24 @@
 				"category": "PowerBI"
 			},
 			{
+				"command": "PowerBIDatasetRefreshSchedule.set",
+				"title": "Set Refresh Schedule",
+				"icon": "$(calendar)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIDatasetRefreshSchedule.disable",
+				"title": "Disable Refresh Schedule",
+				"icon": "$(circle-slash)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIDatasetRefreshSchedule.enable",
+				"title": "Enable Refresh Schedule",
+				"icon": "$(pass-filled)",
+				"category": "PowerBI"
+			},
+			{
 				"command": "PowerBIDatasetTable.loadColumnStatistics",
 				"title": "Load Column Statistics",
 				"icon": "$(graph)",
@@ -690,6 +708,21 @@
 				{
 					"command": "PowerBIDatasetRefresh.rerun",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESH,.*/ && viewItem =~ /.*,RERUN,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDatasetRefreshSchedule.set",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESHSCHEDULE,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDatasetRefreshSchedule.disable",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESHSCHEDULEENABLED,.*/ && viewItem =~ /.*,REFRESHSCHEDULE_ENABLED,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDatasetRefreshSchedule.enable",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESHSCHEDULEENABLED,.*/ && viewItem =~ /.*,REFRESHSCHEDULE_DISABLED,.*/",
 					"group": "navigation"
 				},
 				
