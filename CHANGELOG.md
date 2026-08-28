@@ -1,5 +1,9 @@
 # Change Log
 
+**v2.11.0**:
+- update sidebar icon to make it more distinctive
+- add support for showing Dataset Refresh Schedules in the treeview
+
 **v2.10.0**:
 - implement changes as suggested by ([#54](/../../issues/54))
 - implement changes as suggested by ([#55](/../../issues/55))
