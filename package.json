@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI Studio",
 	"description": "An extension to manage your Power BI resources from within VSCode",
-	"version": "2.10.0",
+	"version": "2.11.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -142,7 +142,7 @@
 				{
 					"id": "powerbi",
 					"title": "Power BI Studio",
-					"icon": "resources/powerbi_sidebar.png"
+					"icon": "resources/powerbi_sidebar.svg"
 				}
 			]
 		},
@@ -334,6 +334,24 @@
 				"command": "PowerBIDatasetRefresh.rerun",
 				"title": "Rerun Refresh",
 				"icon": "$(refresh)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIDatasetRefreshSchedule.set",
+				"title": "Set Refresh Schedule",
+				"icon": "$(calendar)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIDatasetRefreshSchedule.disable",
+				"title": "Disable Refresh Schedule",
+				"icon": "$(circle-slash)",
+				"category": "PowerBI"
+			},
+			{
+				"command": "PowerBIDatasetRefreshSchedule.enable",
+				"title": "Enable Refresh Schedule",
+				"icon": "$(pass-filled)",
 				"category": "PowerBI"
 			},
 			{
@@ -690,6 +708,21 @@
 				{
 					"command": "PowerBIDatasetRefresh.rerun",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESH,.*/ && viewItem =~ /.*,RERUN,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDatasetRefreshSchedule.set",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESHSCHEDULE,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDatasetRefreshSchedule.disable",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESHSCHEDULEENABLED,.*/ && viewItem =~ /.*,REFRESHSCHEDULE_ENABLED,.*/",
+					"group": "navigation"
+				},
+				{
+					"command": "PowerBIDatasetRefreshSchedule.enable",
+					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESHSCHEDULEENABLED,.*/ && viewItem =~ /.*,REFRESHSCHEDULE_DISABLED,.*/",
 					"group": "navigation"
 				},
 				

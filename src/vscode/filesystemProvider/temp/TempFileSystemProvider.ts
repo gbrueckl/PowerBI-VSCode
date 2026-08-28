@@ -11,6 +11,7 @@ export const TEMP_FILE_ENCODING: BufferEncoding = "utf8";
 
 export class TempFileSystemProvider implements vscode.FileSystemProvider, vscode.Disposable {
 	private static cache: Map<string, Buffer> = new Map<string, Buffer>();
+	private static writableFiles: Set<string> = new Set<string>();
 
 	constructor() { }
 
@@ -21,9 +22,18 @@ export class TempFileSystemProvider implements vscode.FileSystemProvider, vscode
 		ThisExtension.TempFileSystemProvider = fsp;
 	}
 
-	public static async createTempFile(path: string, content: string): Promise<vscode.Uri> {
+	public static async createTempFile(path: string, content: string, writable: boolean = false, unique: boolean = false): Promise<vscode.Uri> {
 		let uri = vscode.Uri.parse(`${TEMP_SCHEME}:///${Helper.trimChar(path, "/")}`);
+		if (unique) {
+			uri = uri.with({ query: Helper.newGuid().toString() });
+		}
 		TempFileSystemProvider.cache.set(uri.toString(), Buffer.from(content, TEMP_FILE_ENCODING));
+		if (writable) {
+			TempFileSystemProvider.writableFiles.add(uri.toString());
+		}
+		else {
+			TempFileSystemProvider.writableFiles.delete(uri.toString());
+		}
 
 		return uri;
 	}
@@ -56,7 +66,12 @@ export class TempFileSystemProvider implements vscode.FileSystemProvider, vscode
 	}
 
 	async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean, overwrite: boolean }): Promise<void> {
-		throw vscode.FileSystemError.NoPermissions(`This file is read-only!`);
+		if (!TempFileSystemProvider.writableFiles.has(uri.toString())) {
+			throw vscode.FileSystemError.NoPermissions(`This file is read-only!`);
+		}
+
+		TempFileSystemProvider.cache.set(uri.toString(), Buffer.from(content));
+		this._fireSoon({ type: vscode.FileChangeType.Changed, uri: uri });
 	}
 
 	// --- manage files/folders
