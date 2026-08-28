@@ -1,8 +1,9 @@
 # Power BI Studio
-[![Version](https://img.shields.io/visual-studio-marketplace/v/GerhardBrueckl.powerbi-vscode)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/GerhardBrueckl.powerbi-vscode)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
-[![Downloads](https://img.shields.io/visual-studio-marketplace/d/GerhardBrueckl.powerbi-vscode)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
-[![Ratings](https://img.shields.io/visual-studio-marketplace/r/GerhardBrueckl.powerbi-vscode)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.png?color=green)](http://opensource.org/licenses/MIT)
+[![Version](https://vsmarketplacebadges.dev/version/GerhardBrueckl.powerbi-vscode.png?&colorB=orange)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode) [![Installs](https://vsmarketplacebadges.dev/installs/GerhardBrueckl.powerbi-vscode.png)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode) [![Downloads](https://vsmarketplacebadges.dev/downloads/GerhardBrueckl.powerbi-vscode.png)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode) [![Rating Short](https://vsmarketplacebadges.dev/rating-short/GerhardBrueckl.powerbi-vscode.png)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode) 
+
+[![TrendingDaily](https://vsmarketplacebadges.dev/trending-daily/GerhardBrueckl.powerbi-vscode.png?&colorB=blue)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode) [![TrendingWeekly](https://vsmarketplacebadges.dev/trending-weekly/GerhardBrueckl.powerbi-vscode.png?&colorB=blue)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode) [![TrendingMonthly](https://vsmarketplacebadges.dev/trending-monthly/GerhardBrueckl.powerbi-vscode.png?&colorB=blue)](https://marketplace.visualstudio.com/items?itemName=GerhardBrueckl.powerbi-vscode)
 
 ![PowerBI-Studio](/images/PowerBI-VSCode.png?raw=true "PowerBI-Studio")
 
