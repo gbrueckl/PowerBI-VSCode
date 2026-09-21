@@ -107,6 +107,9 @@ export abstract class PowerBIConfiguration {
 
 	static get tmdlEnabled(): boolean { return this.getValue("TMDL.enabled"); }
 	static set tmdlEnabled(value: boolean) { this.setValue("TMDL.enabled", value); }
+	
+	static get hideDateTables(): boolean { return this.getValue("hideDateTables"); }
+	static set hideDateTables(value: boolean) { this.setValue("hideDateTables", value); }
 
 
 
