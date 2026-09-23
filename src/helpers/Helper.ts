@@ -26,8 +26,6 @@ export namespace UniqueId {
 }
 
 export abstract class Helper {
-	private static _doubleClickTimer: any;
-
 	static SEPARATOR: string = '/';
 
 
@@ -40,7 +38,7 @@ export abstract class Helper {
 	}
 
 	static async showTemporaryInformationMessage(message: string, timeout: number = 2000): Promise<void> {
-		vscode.window.withProgress({
+		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
 			title: message,
 			cancellable: false
@@ -205,28 +203,6 @@ export abstract class Helper {
 		return Math.round(bytes / Math.pow(1024, i)) + ' ' + sizes[i];
 	}
 
-	static async singleVsDoubleClick(
-		sourceObject: any,
-		singleClickFunction: Function,
-		doubleClickFunction: Function,
-		timeout: number = 250): Promise<void> {
-		if (!Helper._doubleClickTimer) {
-			//if timer still exists, it's a double-click
-			Helper._doubleClickTimer = setTimeout(await sourceObject[singleClickFunction.name], timeout); //do single-click once timer has elapsed
-			setTimeout(this.resetDoubleClickTimer, timeout + 1);
-		}
-		else {
-			await Helper.resetDoubleClickTimer();
-
-			await sourceObject[doubleClickFunction.name]();
-		}
-	}
-
-	private static async resetDoubleClickTimer(): Promise<void> {
-		clearTimeout(Helper._doubleClickTimer); //cancel timer
-		Helper._doubleClickTimer = undefined;
-	}
-
 	public static localUserFolder(): string {
 		return "";
 	}
@@ -312,25 +288,25 @@ export abstract class Helper {
 		timeout: number,
 		interval: number
 	): Promise<boolean> {
-		// Set a timer that will resolve with null
-		return new Promise<boolean>((resolve) => {
-			let finish: (result: boolean) => void;
-			const timer = setTimeout(() => finish(false), timeout);
-			const intervalId = setInterval(() => {
-				condition()
-					.then((result) => {
-						if (result) {
-							finish(true);
-						}
-					})
-					.catch((_e) => finish(false));
-			}, interval);
-			finish = (result: boolean) => {
-				clearTimeout(timer);
-				clearInterval(intervalId);
-				resolve(result);
-			};
-		});
+		const deadline = Date.now() + timeout;
+
+		try {
+			do {
+				if (await condition()) {
+					return true;
+				}
+
+				const remaining = deadline - Date.now();
+				if (remaining <= 0) {
+					break;
+				}
+				await this.delay(Math.min(interval, remaining));
+			} while (Date.now() < deadline);
+		} catch {
+			return false;
+		}
+
+		return false;
 	}
 
 	static toLocalDateTime(dateTime: Date): Date {

@@ -15,7 +15,7 @@ import { iPowerBIGroup } from '../../../powerbi/GroupsAPI/_types';
 // https://vshaxe.github.io/vscode-extern/vscode/TreeItem.html
 export class PowerBIDatasets extends PowerBIWorkspaceGenericFolder {
 
-	private static refreshTimers: Map<UniqueId, any> = new Map<UniqueId, any>();
+	private static refreshMonitors: Map<string, Promise<void>> = new Map<string, Promise<void>>();
 
 	constructor(
 		groupId: UniqueId,
@@ -58,34 +58,30 @@ export class PowerBIDatasets extends PowerBIWorkspaceGenericFolder {
 	public static async startRunningRefreshTimer(apiUrl: string): Promise<void>
 	{
 		apiUrl = Helper.trimChar(apiUrl, "/", false, true);
-		const currentRefresh = PowerBIDatasets.refreshTimers.get(apiUrl);
+		const currentRefresh = PowerBIDatasets.refreshMonitors.get(apiUrl);
 
 		if (currentRefresh) {
 			ThisExtension.log("Refresh is already monitored: " + apiUrl);
 			return;
 		}
-		else {
-			const newTimer = this.startAwaitRunningRefreshTimer(apiUrl);
-			PowerBIDatasets.refreshTimers.set(apiUrl, newTimer);
-		}
+
+		const monitor = this.monitorRunningRefresh(apiUrl)
+			.catch((error) => ThisExtension.log(`Failed to monitor Power BI refresh '${apiUrl}': ${error}`))
+			.finally(() => this.refreshMonitors.delete(apiUrl));
+		PowerBIDatasets.refreshMonitors.set(apiUrl, monitor);
 	}
 
-	private static async startAwaitRunningRefreshTimer(apiUrl: string): Promise<void> {
+	private static async monitorRunningRefresh(apiUrl: string): Promise<void> {
 		if (!PowerBIConfiguration.datasetRefreshCheckInterval || PowerBIConfiguration.datasetRefreshCheckInterval <= 0) {
 			ThisExtension.log("No dataset refresh check interval configured. Aborting polling of running Power BI refresh ...");
 			return;
 		}
 
 		const timeoutSeconds = PowerBIConfiguration.datasetRefreshCheckInterval;
-		let refreshTimer;
-		let isFirstCheck = true;
-
 		let lastRefresh: iPowerBIDatasetRefresh[] = await PowerBIApiService.getItemList<iPowerBIDatasetRefresh>(apiUrl, { "$top": 1 }, null);
 
 		if (lastRefresh.length == 0) {
 			ThisExtension.log("No refreshes found yet ...");
-			clearInterval(refreshTimer); // abort the polling
-
 			return;
 		}
 
@@ -99,7 +95,8 @@ export class PowerBIDatasets extends PowerBIWorkspaceGenericFolder {
 
 		ThisExtension.log(`Starting polling of running Power BI refresh for dataset '${dataset.name}' every ${timeoutSeconds} seconds ...`);
 
-		refreshTimer = setInterval(async () => {
+		while (PowerBIConfiguration.datasetRefreshCheckInterval > 0) {
+			await Helper.delay(timeoutSeconds * 1000);
 			ThisExtension.log(`Checking refresh status for dataset '${dataset.name}' ...`)
 
 			let lastRefresh: iPowerBIDatasetRefresh = await PowerBIApiService.get<iPowerBIDatasetRefresh>(pollingUrl, null);
@@ -109,7 +106,7 @@ export class PowerBIDatasets extends PowerBIWorkspaceGenericFolder {
 			}
 
 			if (!["Unknown", "NotStarted"].includes(lastRefresh.status)) {
-				const maxAttempts = lastRefresh.refreshAttempts.reduce((a, b) => Math.max(a, b.attemptId), 0);
+				const maxAttempts = lastRefresh.refreshAttempts?.reduce((a, b) => Math.max(a, b.attemptId), 0) ?? 0;
 				let retries = ".";
 				if(maxAttempts > 1) {
 					retries = ` after ${maxAttempts - 1} retries!`;
@@ -121,12 +118,10 @@ export class PowerBIDatasets extends PowerBIWorkspaceGenericFolder {
 
 				ThisExtension.TreeViewWorkspaces.refresh(undefined, false);
 
-				clearInterval(refreshTimer); // abort the polling
-				this.refreshTimers.delete(apiUrl);
+				return;
 			}
-			isFirstCheck = false;
-		}, timeoutSeconds * 1000);
+		}
 
-		return refreshTimer;
+		ThisExtension.log("Dataset refresh polling was disabled. Aborting polling of running Power BI refresh ...");
 	}
 }

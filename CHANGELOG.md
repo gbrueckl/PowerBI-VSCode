@@ -1,5 +1,12 @@
 # Change Log
 
+**v2.12.0**:
+- rework API calls
+  - authenticaiton
+  - polling
+  - caching
+- general fixes for async operations in UI
+
 **v2.11.1**:
 - updated sidebar icon
 

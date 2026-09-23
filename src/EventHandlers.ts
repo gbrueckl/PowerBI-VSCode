@@ -15,46 +15,49 @@ import { TMDLFSUri } from './vscode/filesystemProvider/TMDLFSUri';
 import { TMDLProxy } from './TMDLVSCode/TMDLProxy';
 import { PowerBINotebookContext } from './vscode/notebook/PowerBINotebookContext';
 import { TMDLFSCache } from './vscode/filesystemProvider/TMDLFSCache';
+import { ThisExtension } from './ThisExtension';
 
 
 export abstract class EventHandlers {
 
 	static init(context: vscode.ExtensionContext): void {
-		vscode.workspace.onDidChangeWorkspaceFolders(async (event) => {
-			if(event.added.length == 0)
-			{
-				return;
-			}
-			if (event.added[0].uri.scheme == TMDL_SCHEME) {
-				const tmdlUri = new TMDLFSUri(event.added[0].uri);
-
-				if(tmdlUri.isServerLevel)
+		context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders((event) => {
+			void (async () => {
+				if(event.added.length == 0)
 				{
-					await TMDLFSCache.loadServer(tmdlUri.server);
+					return;
 				}
-				else
-				{
-					await TMDLFSCache.loadDatabase(tmdlUri.server, tmdlUri.database);
+				if (event.added[0].uri.scheme == TMDL_SCHEME) {
+					const tmdlUri = new TMDLFSUri(event.added[0].uri);
+
+					if(tmdlUri.isServerLevel)
+					{
+						await TMDLFSCache.loadServer(tmdlUri.server);
+					}
+					else
+					{
+						await TMDLFSCache.loadDatabase(tmdlUri.server, tmdlUri.database);
+					}
+					await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
+
+					await TMDLFileSystemProvider.openModelFile(tmdlUri);
 				}
-				await vscode.commands.executeCommand("workbench.files.action.focusFilesExplorer", tmdlUri.uri);
+			})().catch((error) => ThisExtension.log("ERROR: " + error));
+		}));
 
-				TMDLFileSystemProvider.openModelFile(tmdlUri);
-			}
-		});
-
-		vscode.workspace.onDidOpenNotebookDocument((e) => {
+		context.subscriptions.push(vscode.workspace.onDidOpenNotebookDocument((e) => {
 			const metadata = PowerBINotebookContext.get(e.metadata.guid.toString());
 
 			metadata.uri = e.uri;
 
 			PowerBINotebookContext.set(e.metadata.guid, metadata);
-		});
+		}));
 
-		vscode.workspace.onDidOpenTextDocument((e) => {
+		context.subscriptions.push(vscode.workspace.onDidOpenTextDocument((e) => {
 			if (e.uri.scheme == TMDL_SCHEME && e.uri.fsPath.endsWith(TMDL_EXTENSION)) {
-				TMDLProxy.ensureProxy(context);
+				void TMDLProxy.ensureProxy(context).catch((error) => ThisExtension.log("ERROR: " + error));
 			}
-		});
+		}));
 	}
 }
 

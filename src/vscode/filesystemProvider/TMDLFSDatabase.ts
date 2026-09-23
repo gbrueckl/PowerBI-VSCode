@@ -75,7 +75,11 @@ export class TMDLFSDatabase {
 		}
 		else if (this.loadingState == "loading") {
 			ThisExtension.logDebug(`TMDL database '${this.databaseName}' is loading in other process - waiting ... `);
-			await Helper.awaitCondition(async () => this.loadingState != "loading", 60000, 500);
+			const finishedLoading = await Helper.awaitCondition(async () => this.loadingState != "loading", 60000, 500);
+			const loadingState = this.loadingState as LoadingState;
+			if (!finishedLoading || loadingState != "loaded") {
+				throw new Error(`TMDL database '${this.databaseName}' did not load successfully.`);
+			}
 			ThisExtension.logDebug(`TMDL database '${this.databaseName}' successfully loaded in other process!`);
 		}
 	}
