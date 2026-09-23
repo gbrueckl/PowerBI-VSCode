@@ -46,12 +46,45 @@ export abstract class TMDLProxy {
 	private static _tmdlProxyUri: vscode.Uri;
 
 	private static _terminal: vscode.Terminal;
+	private static _terminalCloseListener: vscode.Disposable;
 	private static _loadingState: ProxyState = "stopped";
 
 	private static _datasetTmdlPathMapping: Map<PowerBIDataset, vscode.Uri> = new Map<PowerBIDataset, vscode.Uri>();
 
 	static log(text: string, newLine: boolean = true): void {
 		ThisExtension.log("TMDLProxy: " + text, newLine);
+	}
+
+	private static disposeTerminalCloseListener(): void {
+		this._terminalCloseListener?.dispose();
+		this._terminalCloseListener = undefined;
+	}
+
+	private static async handleTerminalClosed(terminal: vscode.Terminal): Promise<void> {
+		if (terminal !== this._terminal) {
+			return;
+		}
+
+		this.disposeTerminalCloseListener();
+		this._terminal = undefined;
+		this._tmdlProxyUri = undefined;
+		this._loadingState = "stopped";
+
+		await vscode.commands.executeCommand(
+			"setContext",
+			"powerbi.isTMDLProxyRunning",
+			false
+		);
+
+		const action = await vscode.window.showWarningMessage(
+			"TMDLProxy could not be started or was closed! Please make sure the TMLD prerequisites are met start a new instance to continue working with TMDL!", "Restart TMDL Proxy", "Prerequisites");
+
+		if (action == "Restart TMDL Proxy") {
+			await vscode.commands.executeCommand("PowerBI.TMDL.ensureProxy");
+		}
+		if (action == "Prerequisites") {
+			Helper.openLink("https://github.com/gbrueckl/PowerBI-VSCode?tab=readme-ov-file#prerequisites");
+		}
 	}
 
 	static async ensureProxy(context: vscode.ExtensionContext): Promise<void> {
@@ -73,32 +106,9 @@ export abstract class TMDLProxy {
 
 				TMDLProxy._terminal = vscode.window.createTerminal("TMDLProxy", "dotnet", [proxyDllPath, this._port.toString(), this._secret]);
 				context.subscriptions.push(TMDLProxy._terminal);
-
-				vscode.window.onDidCloseTerminal(async (terminal) => {
-					if (terminal.name == TMDLProxy._terminal.name) {
-						TMDLProxy._terminal.dispose();
-						TMDLProxy._terminal = undefined;
-						TMDLProxy._tmdlProxyUri = undefined;
-						TMDLProxy._loadingState = "stopped";
-
-						vscode.commands.executeCommand(
-							"setContext",
-							"powerbi.isTMDLProxyRunning",
-							false
-						);
-
-						const action = await vscode.window.showWarningMessage(
-							"TMDLProxy could not be started or was closed! Please make sure the TMLD prerequisites are met start a new instance to continue working with TMDL!", "Restart TMDL Proxy", "Prerequisites");
-
-						if (action == "Restart TMDL Proxy") {
-							vscode.commands.executeCommand(
-								"PowerBI.TMDL.ensureProxy"
-							);
-						}
-						if (action == "Prerequisites") {
-							Helper.openLink("https://github.com/gbrueckl/PowerBI-VSCode?tab=readme-ov-file#prerequisites");
-						}
-					}
+				this.disposeTerminalCloseListener();
+				TMDLProxy._terminalCloseListener = vscode.window.onDidCloseTerminal((terminal) => {
+					void TMDLProxy.handleTerminalClosed(terminal).catch((error) => TMDLProxy.log("ERROR: " + error));
 				});
 
 				const pid = await TMDLProxy._terminal.processId;
@@ -129,7 +139,8 @@ export abstract class TMDLProxy {
 
 				TMDLProxy._loadingState = "started";
 			} catch (error) {
-				TMDLProxy._terminal.dispose();
+				this.disposeTerminalCloseListener();
+				TMDLProxy._terminal?.dispose();
 				TMDLProxy._terminal = undefined;
 				TMDLProxy._tmdlProxyUri = undefined;
 				TMDLProxy._loadingState = "stopped";
@@ -843,9 +854,12 @@ export abstract class TMDLProxy {
 	}
 
 	static async cleanUp(): Promise<void> {
+		this.disposeTerminalCloseListener();
 		TMDLProxy._loadingState = "stopped";
 		if (TMDLProxy._terminal) {
 			TMDLProxy._terminal.dispose();
+			TMDLProxy._terminal = undefined;
 		}
+		TMDLProxy._tmdlProxyUri = undefined;
 	}
 }
