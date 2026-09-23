@@ -71,7 +71,11 @@ export class TMDLFSServer {
 		}
 		else if (this.loadingState == "loading") {
 			ThisExtension.logDebug(`Server '${this.serverName}' is loading in other process - waiting ... `);
-			await Helper.awaitCondition(async () => this.loadingState != "loading", 60000, 500);
+			const finishedLoading = await Helper.awaitCondition(async () => this.loadingState != "loading", 60000, 500);
+			const loadingState = this.loadingState as LoadingState;
+			if (!finishedLoading || loadingState != "loaded") {
+				throw new Error(`TMDL server '${this.serverName}' did not load successfully.`);
+			}
 			ThisExtension.logDebug(`Server '${this.serverName}' successfully loaded in other process!`);
 		}
 	}

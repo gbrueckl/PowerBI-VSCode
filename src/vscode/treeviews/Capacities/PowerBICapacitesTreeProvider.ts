@@ -28,14 +28,16 @@ export class PowerBICapacitiesTreeProvider implements vscode.TreeDataProvider<Po
 		this._treeView = view;
 		context.subscriptions.push(view);
 
-		view.onDidChangeSelection((event) => this._onDidChangeSelection(event.selection));
+		context.subscriptions.push(view.onDidChangeSelection((event) => {
+			void this._onDidChangeSelection(event.selection).catch((error) => ThisExtension.log("ERROR: " + error));
+		}));
 
 		ThisExtension.TreeViewCapacities = this;
 	}
 
 	private async _onDidChangeSelection(items: readonly PowerBIApiTreeItem[]): Promise<void> {
 		if (items.length > 0) {
-			vscode.commands.executeCommand("PowerBI.updateQuickPickList", items.slice(-1)[0]);
+			await vscode.commands.executeCommand("PowerBI.updateQuickPickList", items.slice(-1)[0]);
 		}
 	}
 

@@ -138,7 +138,11 @@ export abstract class TMDLProxy {
 		}
 		else if (TMDLProxy._loadingState == "starting") {
 			TMDLProxy.log(`TMDLProxy is starting in other process - waiting ... `);
-			await Helper.awaitCondition(async () => TMDLProxy._loadingState != "starting", 5000, 100);
+			const finishedStarting = await Helper.awaitCondition(async () => TMDLProxy._loadingState != "starting", 5000, 100);
+			const proxyState = TMDLProxy._loadingState as ProxyState;
+			if (!finishedStarting || proxyState != "started") {
+				throw new Error("The TMDL proxy did not start successfully.");
+			}
 			TMDLProxy.log(`TMDLProxy finished starting in other process!`);
 		}
 		else if (TMDLProxy._loadingState == "started") {

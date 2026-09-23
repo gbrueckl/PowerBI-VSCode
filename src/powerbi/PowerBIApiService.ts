@@ -15,9 +15,7 @@ import { TMDLFSCache } from '../vscode/filesystemProvider/TMDLFSCache';
 import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfiguration';
 
 export abstract class PowerBIApiService {
-	private static _initializationState: "not_loaded" | "loading" | "loaded" = "not_loaded";
-	private static _isInitialized: boolean = false;
-	private static _connectionTestRunning: boolean = false;
+	private static _configurationPromise: Promise<void>;
 	private static _apiBaseUrl: string;
 	private static _tenantId: string;
 	private static _clientId: string;
@@ -25,30 +23,41 @@ export abstract class PowerBIApiService {
 	private static _authenticationProvider: string;
 	private static _resourceId: string;
 	private static _org: string = "myorg"
-	private static _headers;
-	private static _vscodeSession: vscode.AuthenticationSession;
-	private static _xmlaSession: vscode.AuthenticationSession;
+	private static _sessionAccount: vscode.AuthenticationSessionAccountInformation;
 
 	//#region Initialization
+	private static ensureConfigured(): Promise<void> {
+		if (!this._configurationPromise) {
+			this._configurationPromise = Promise.resolve()
+				.then(() => {
+					ThisExtension.log("Configuring PowerBI API Service ...");
+
+					const config = PowerBIConfiguration;
+					config.applySettings();
+
+					this._apiBaseUrl = config.apiUrl;
+					this._tenantId = config.tenantId;
+					this._clientId = config.clientId;
+					this._tmdlClientId = config.tmdlClientId;
+					this._authenticationProvider = config.authenticationProvider;
+					this._resourceId = config.resourceId;
+				})
+				.catch((error) => {
+					this._configurationPromise = undefined;
+					throw error;
+				});
+		}
+
+		return this._configurationPromise;
+	}
+
 	static async initialize(clearSession: boolean = false): Promise<boolean> {
 		try {
 			ThisExtension.log("Initializing PowerBI API Service ...");
 
-			vscode.authentication.onDidChangeSessions((event) => this._onDidChangeSessions(event));
-
-			let config = PowerBIConfiguration;
-			config.applySettings();
-
-			this._apiBaseUrl = config.apiUrl
-			this._tenantId = config.tenantId;
-			this._clientId = config.clientId;
-			this._tmdlClientId = config.tmdlClientId;
-			this._authenticationProvider = config.authenticationProvider;
-			this._resourceId = config.resourceId;
-
+			await this.ensureConfigured();
 			return this.refreshConnection(clearSession);
 		} catch (error) {
-			this._connectionTestRunning = false;
 			ThisExtension.log("ERROR: " + error);
 			vscode.window.showErrorMessage(error);
 			return false;
@@ -56,31 +65,27 @@ export abstract class PowerBIApiService {
 	}
 
 	private static async refreshConnection(clearSession: boolean = false): Promise<boolean> {
-		this._vscodeSession = await this.getPowerBISession(clearSession);
+		const session = await this.getPowerBISession(clearSession);
 
-		if (!this._vscodeSession || !this._vscodeSession.accessToken) {
+		if (!session || !session.accessToken) {
+			this._sessionAccount = undefined;
 			vscode.window.showInformationMessage("PowerBI / API: Please log in with your Microsoft account first!");
 			return false;
 		}
 
-		ThisExtension.log("Refreshing authentication headers ...");
-		this._headers = {
-			"Authorization": 'Bearer ' + this._vscodeSession.accessToken,
-			"Content-Type": 'application/json',
-			"Accept": 'application/json'
-		}
-
-		ThisExtension.log("Authentication headers refreshed!");
+		this._sessionAccount = session.account;
 
 		return true;
 	}
 
 	public static async changeUser(): Promise<void> {
+		await this.ensureConfigured();
 		await PowerBIApiService.refreshConnection(true);
 		ThisExtension.refreshUI();
 	}
 
 	public static async getPowerBISession(clearSession: boolean = false): Promise<vscode.AuthenticationSession> {
+		await this.ensureConfigured();
 		// we dont need to specify a clientId here as VSCode is a first party app and can use impersonation by default
 		let session = await this.getAADAccessToken([`${Helper.trimChar(this._resourceId, "/")}/.default`], this._tenantId, this._clientId, clearSession);
 		return session;
@@ -100,9 +105,9 @@ export abstract class PowerBIApiService {
 	}
 
 	public static async refreshXmlaSession(): Promise<boolean> {
-		this._xmlaSession = await this.getXmlaSession();
+		const session = await this.getXmlaSession();
 
-		if (!this._xmlaSession) {
+		if (!session) {
 			vscode.window.showInformationMessage("PowerBI / TMDL: Please log in with your Microsoft account first!");
 			return false;
 		}
@@ -119,9 +124,7 @@ export abstract class PowerBIApiService {
 	}
 
 	public static async getXmlaSession(): Promise<vscode.AuthenticationSession> {
-		if (this._xmlaSession) {
-			return this._xmlaSession;
-		}
+		await this.ensureConfigured();
 		let scopes = [
 			//`${Helper.trimChar(this._resourceId, "/")}/.default`,
 
@@ -138,9 +141,7 @@ export abstract class PowerBIApiService {
 			*/
 		];
 
-		this._xmlaSession = await this.getAADAccessToken(scopes, this._tenantId, this._tmdlClientId, false);
-
-		return this._xmlaSession;
+		return this.getAADAccessToken(scopes, this._tenantId, this._tmdlClientId, false);
 	}
 
 	public static async getDatasetUrl(workspaceName: string, datasetName: string): Promise<vscode.Uri> {
@@ -151,17 +152,6 @@ export abstract class PowerBIApiService {
 		const datasets = await PowerBIApiService.getItemList<iPowerBIDataset>(`/groups/${workspace.id}/datasets`);
 		const dataset = datasets.find((dataset) => dataset.name == datasetName);
 		return vscode.Uri.joinPath(vscode.Uri.parse(this.BrowserBaseUrl), "groups", workspace.id.toString(), "datasets", dataset.id.toString());
-	}
-
-	private static async _onDidChangeSessions(event: vscode.AuthenticationSessionsChangeEvent) {
-		if (event.provider.id === this._authenticationProvider) {
-			ThisExtension.log("Session for provider '" + event.provider.label + "' changed - refreshing connections! ");
-
-			await this.refreshConnection();
-			if(this._initializationState == "loaded") {
-				ThisExtension.refreshUI();
-			}
-		}
 	}
 
 	public static async getAADAccessToken(scopes: string[], tenantId?: string, clientId?: string, clearSession: boolean = false): Promise<vscode.AuthenticationSession> {
@@ -184,8 +174,8 @@ export abstract class PowerBIApiService {
 	}
 
 	public static get SessionUserEmail(): string {
-		if (this._vscodeSession) {
-			const email = Helper.getFirstRegexGroup(/\s*([^\s]*?@[\w-]+\.+[\w-]{2,5})/gm, this._vscodeSession.account.label);
+		if (this._sessionAccount) {
+			const email = Helper.getFirstRegexGroup(/\s*([^\s]*?@[\w-]+\.+[\w-]{2,5})/gm, this._sessionAccount.label);
 			if (email) {
 				return email;
 			}
@@ -194,15 +184,15 @@ export abstract class PowerBIApiService {
 	}
 
 	public static get SessionUser(): string {
-		if (this._vscodeSession) {
-			return this._vscodeSession.account.label;
+		if (this._sessionAccount) {
+			return this._sessionAccount.label;
 		}
 		return "UNAUTHENTICATED";
 	}
 
 	public static get SessionUserId(): string {
-		if (this._vscodeSession) {
-			return this._vscodeSession.account.id;
+		if (this._sessionAccount) {
+			return this._sessionAccount.id;
 		}
 		return "UNAUTHENTICATED";
 	}
@@ -239,35 +229,19 @@ export abstract class PowerBIApiService {
 	}
 
 	public static async getHeaders(): Promise<HeadersInit> {
-		if (this._initializationState == "not_loaded") {
-			this._initializationState = "loading";
-
-			ThisExtension.log(`Initializing Connection ...`);
-
-			const initialized = await PowerBIApiService.initialize(false);
-			if (initialized) {
-				this._initializationState = "loaded";
-			}
-			else {
-				this._initializationState = "not_loaded";
-			}
+		await this.ensureConfigured();
+		const session = await this.getPowerBISession();
+		if (!session || !session.accessToken) {
+			this._sessionAccount = undefined;
+			throw new Error("PowerBI API: Unable to acquire an access token.");
 		}
-		else if (this._initializationState == "loading") {
-			ThisExtension.logDebug(`Connection Initialization in progress - waiting ... `);
-			const initialized = await Helper.awaitCondition(async () => this._initializationState != "loading", 5000, 100);
 
-			if (initialized) {
-				ThisExtension.logDebug(`Connection Initialization SUCCESSFUL!`);
-			}
-			else {
-				ThisExtension.log(`Connection Initialization FAILED!`);
-				vscode.window.showErrorMessage("PowerBI API: Connection initialization failed!");
-				if(this._initializationState != "loading") {
-					this._initializationState = "not_loaded";
-				}
-			}
-		}
-		return this._headers;
+		this._sessionAccount = session.account;
+		return {
+			"Authorization": 'Bearer ' + session.accessToken,
+			"Content-Type": 'application/json',
+			"Accept": 'application/json'
+		};
 	}
 
 	private static handleApiException(error: Error, showErrorMessage: boolean = false, raise: boolean = false): void {
@@ -328,7 +302,7 @@ export abstract class PowerBIApiService {
 			const duration = end - start;
 			ThisExtension.log(message + " took " + duration + "ms!");
 
-			if (result.error && showErrorMessage) {
+			if (result?.error && showErrorMessage) {
 				vscode.window.showErrorMessage(result.error.message);
 				ThisExtension.log(`ERROR: ${result.error.message}`);
 			}
@@ -349,19 +323,18 @@ export abstract class PowerBIApiService {
 		return ret;
 	}
 
-	static async get<T = any>(endpoint: string, params: object = null, raiseError: boolean = false, raw: boolean = false): Promise<T> {
-
-		const headers = await this.getHeaders(); // this also checks if the connection is initialized
-
-		endpoint = this.getFullUrl(endpoint, params);
-		if (params) {
-			ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
-		}
-		else {
-			ThisExtension.log("GET " + endpoint);
-		}
-
+	static async get<T = any>(endpoint: string, params: object = null, raiseError: boolean = false, raw: boolean = false, retryTokenExpired: boolean = true): Promise<T> {
 		try {
+			const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
+			endpoint = this.getFullUrl(endpoint, params);
+			if (params) {
+				ThisExtension.log("GET " + endpoint + " --> " + JSON.stringify(params));
+			}
+			else {
+				ThisExtension.log("GET " + endpoint);
+			}
+
 			const config: RequestInit = {
 				method: "GET",
 				headers: headers,
@@ -387,10 +360,9 @@ export abstract class PowerBIApiService {
 				try {
 					ret = JSON.parse(resultText) as T;
 
-					if (ret["error"]["code"] == "TokenExpired") {
-						// token expired, refresh the connection
-						await this.refreshConnection(false);
-						ret = await this.get<T>(endpoint, params, raiseError, raw);
+					if (retryTokenExpired && ret?.["error"]?.["code"] == "TokenExpired") {
+						// Each request obtains a current token, so retry with a newly built header.
+						ret = await this.get<T>(endpoint, params, raiseError, raw, false);
 					}
 				}
 				catch (e) {
@@ -417,18 +389,10 @@ export abstract class PowerBIApiService {
 	}
 
 	public static async getFile(endpoint: string, raiseError: boolean = true): Promise<Buffer> {
-
-		const headers = await this.getHeaders(); // this also checks if the connection is initialized
-
 		endpoint = this.getFullUrl(endpoint);
 
 		try {
-			const config: RequestInit = {
-				method: "GET",
-				headers: headers,
-				agent: getProxyAgent()
-			};
-			let response: Response = await PowerBIApiService.get<Response>(endpoint, undefined, false, true);
+			let response: Response = await PowerBIApiService.get<Response>(endpoint, undefined, raiseError, true);
 
 			if (response.ok) {
 				const blob = await response.blob();
@@ -455,7 +419,7 @@ export abstract class PowerBIApiService {
 
 		try {
 			if (content) {
-				vscode.workspace.fs.writeFile(targetPath, content);
+				await vscode.workspace.fs.writeFile(targetPath, content);
 			}
 		}
 		catch (error) {
@@ -466,12 +430,12 @@ export abstract class PowerBIApiService {
 	}
 
 	static async post<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
-		const headers = await this.getHeaders(); // this also checks if the connection is initialized
-
-		endpoint = this.getFullUrl(endpoint);
-		ThisExtension.log("POST " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
-
 		try {
+			const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
+			endpoint = this.getFullUrl(endpoint);
+			ThisExtension.log("POST " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
+
 			const config: RequestInit = {
 				method: "POST",
 				headers: headers,
@@ -515,12 +479,12 @@ export abstract class PowerBIApiService {
 	static async postImport<T = any>(endpoint: string, content: Buffer, datasetDisplayName: string, urlParams: object = {}, raiseError: boolean = false): Promise<T> {
 		urlParams["datasetDisplayName"] = datasetDisplayName;
 
-		let headers = await this.getHeaders(); // this also checks if the connection is initialized
-
-		endpoint = this.getFullUrl(endpoint, urlParams);
-		ThisExtension.log("POST " + endpoint + " --> File: " + JSON.stringify(urlParams));
-
 		try {
+			let headers = await this.getHeaders(); // this also checks if the connection is initialized
+
+			endpoint = this.getFullUrl(endpoint, urlParams);
+			ThisExtension.log("POST " + endpoint + " --> File: " + JSON.stringify(urlParams));
+
 			// we manally build the formData as the node-fetch API for formData does not work with the PowerBI API
 			var boundary = "----WebKitFormBoundarykRourla9fGPRMwf6";
 			var data = "";
@@ -563,7 +527,7 @@ export abstract class PowerBIApiService {
 				throw new Error(resultText);
 			}
 
-			this.logResponse(ret);
+			await this.logResponse(ret);
 			return ret;
 		} catch (error) {
 			this.handleApiException(error, false, raiseError);
@@ -586,12 +550,12 @@ export abstract class PowerBIApiService {
 	}
 
 	static async put<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
-		const headers = await this.getHeaders(); // this also checks if the connection is initialized
-
-		endpoint = this.getFullUrl(endpoint);
-		ThisExtension.log("PUT " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
-
 		try {
+			const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
+			endpoint = this.getFullUrl(endpoint);
+			ThisExtension.log("PUT " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
+
 			const config: RequestInit = {
 				method: "PUT",
 				headers: headers,
@@ -633,12 +597,12 @@ export abstract class PowerBIApiService {
 	}
 
 	static async patch<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
-		const headers = await this.getHeaders(); // this also checks if the connection is initialized
-
-		endpoint = this.getFullUrl(endpoint);
-		ThisExtension.log("PATCH " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
-
 		try {
+			const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
+			endpoint = this.getFullUrl(endpoint);
+			ThisExtension.log("PATCH " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
+
 			const config: RequestInit = {
 				method: "PATCH",
 				headers: headers,
@@ -680,12 +644,12 @@ export abstract class PowerBIApiService {
 	}
 
 	static async delete<T = any>(endpoint: string, body: object, raiseError: boolean = false): Promise<T> {
-		const headers = await this.getHeaders(); // this also checks if the connection is initialized
-
-		endpoint = this.getFullUrl(endpoint);
-		ThisExtension.log("DELETE " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
-
 		try {
+			const headers = await this.getHeaders(); // this also checks if the connection is initialized
+
+			endpoint = this.getFullUrl(endpoint);
+			ThisExtension.log("DELETE " + endpoint + " --> " + (JSON.stringify(body) ?? "{}"));
+
 			const config: RequestInit = {
 				method: "DELETE",
 				headers: headers,
