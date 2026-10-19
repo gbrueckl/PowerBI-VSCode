@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.12.1**:
+- fixed issue with StatusBar displaying the logged in user
+
 **v2.12.0**:
 - rework API calls
   - authenticaiton

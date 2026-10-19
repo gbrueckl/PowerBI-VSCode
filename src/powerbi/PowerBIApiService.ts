@@ -74,12 +74,13 @@ export abstract class PowerBIApiService {
 		}
 
 		this._sessionAccount = session.account;
+		ThisExtension.updateStatusBarLeft();
 
 		return true;
 	}
 
 	public static async changeUser(): Promise<void> {
-		await this.ensureConfigured();
+		await PowerBIApiService.ensureConfigured();
 		await PowerBIApiService.refreshConnection(true);
 		ThisExtension.refreshUI();
 	}
@@ -237,6 +238,7 @@ export abstract class PowerBIApiService {
 		}
 
 		this._sessionAccount = session.account;
+		ThisExtension.updateStatusBarLeft();
 		return {
 			"Authorization": 'Bearer ' + session.accessToken,
 			"Content-Type": 'application/json',
