@@ -195,7 +195,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 	);
 
-	vscode.commands.executeCommand('PowerBI.initialize');
+	await vscode.commands.executeCommand('PowerBI.initialize');
 
 	// Workspace File System Provider
 	if (!ThisExtension.isInBrowser && PowerBIConfiguration.isTMDLEnabled) {
