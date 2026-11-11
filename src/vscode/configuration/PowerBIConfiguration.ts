@@ -98,6 +98,9 @@ export abstract class PowerBIConfiguration {
 	static get datasetRefreshCheckInterval(): number { return this.getValue("datasetRefreshCheckInterval"); }
 	static set datasetRefreshCheckInterval(value: number) { this.setValue("datasetRefreshCheckInterval", value); }
 
+	static get maxQuickPickListItems(): number { return this.getValue("maxQuickPickListItems"); }
+	static set maxQuickPickListItems(value: number) { this.setValue("maxQuickPickListItems", value); }
+
 	static get workspaceFilter(): string { return this.getValue("workspaceFilter"); }
 	static set workspaceFilter(value: string) { this.setValue("workspaceFilter", value); }
 	static get workspaceFilterRegEx(): RegExp { return new RegExp(this.getValue("workspaceFilter")); }

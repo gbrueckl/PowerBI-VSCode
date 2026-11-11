@@ -2,7 +2,7 @@
 	"name": "powerbi-vscode",
 	"displayName": "Power BI Studio",
 	"description": "An extension to manage your Power BI resources from within VSCode",
-	"version": "2.12.1",
+	"version": "2.13.0",
 	"publisher": "GerhardBrueckl",
 	"icon": "resources/powerbi_extension.png",
 	"author": {
@@ -133,6 +133,13 @@
 						"type": "integer",
 						"description": "(Optional) The number of seconds to wait between checking for completed dataset refreshes in the background. Set to 0 to disable automatic refresh checks.",
 						"default": 60
+					},
+					"powerbi.maxQuickPickListItems": {
+						"type": "integer",
+						"minimum": 10,
+						"maximum": 1000,
+						"description": "The maximum number of recently used items to keep in each Quick Pick list.",
+						"default": 500
 					}
 				}
 			}
@@ -725,7 +732,6 @@
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASETREFRESHSCHEDULEENABLED,.*/ && viewItem =~ /.*,REFRESHSCHEDULE_DISABLED,.*/",
 					"group": "navigation"
 				},
-				
 				{
 					"command": "PowerBIDataset.takeOver",
 					"when": "view == PowerBIWorkspaces && viewItem =~ /.*,DATASET,.*/ && viewItem =~ /.*,TAKEOVER,.*/",
@@ -978,13 +984,14 @@
 		"@types/node": "^12.12.0",
 		"@types/rimraf": "^2.0.5",
 		"@types/vscode": "^1.68.0",
+		"@vscode/vsce": "^4.1.0",
 		"buffer": "^6.0.3",
 		"eslint": "^8.19.0",
 		"form-data": "^4.0.0",
 		"glob": "^8.0.3",
 		"https-agent": "^1.0.0",
 		"https-proxy-agent": "^5.0.1",
-		"mocha": "^10.0.0",
+		"mocha": "^12.0.3",
 		"native-ext-loader": "^2.3.0",
 		"net": "^1.0.2",
 		"node-fetch": "^3.3.2",

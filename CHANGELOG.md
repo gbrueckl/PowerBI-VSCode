@@ -1,5 +1,8 @@
 # Change Log
 
+**v2.13.0**:
+- added new configuration setting `powerbi.maxQuickPickListItems` ([#62](/../../issues/62))
+
 **v2.12.1**:
 - fixed issue with StatusBar displaying the logged in user
 

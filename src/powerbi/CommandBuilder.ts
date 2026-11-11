@@ -6,6 +6,7 @@ import { ApiItemType } from '../vscode/treeviews/_types';
 import { PowerBIApiService } from './PowerBIApiService';
 import { ApiMethod } from './_types';
 import { Helper } from '../helpers/Helper';
+import { PowerBIConfiguration } from '../vscode/configuration/PowerBIConfiguration';
 
 
 export type CommandInputType =
@@ -165,7 +166,6 @@ export class PowerBIQuickPickItem implements vscode.QuickPickItem {
 
 export abstract class PowerBICommandBuilder {
 	private static _quickPickLists: Map<ApiItemType, PowerBIQuickPickItem[]>;
-	private static _maxQuickPickListItems: number = 10;
 
 	static async execute<T>(
 		apiUrl: string,
@@ -304,7 +304,7 @@ export abstract class PowerBICommandBuilder {
 		ThisExtension.logDebug(`Adding item '${newItem.label}(${newItem.value})' to QuickPickList '${item.itemType}'.`);
 		this._quickPickLists.get(item.itemType).push(newItem);
 
-		while (this._quickPickLists.get(item.itemType).length > this._maxQuickPickListItems) {
+		while (this._quickPickLists.get(item.itemType).length > PowerBIConfiguration.maxQuickPickListItems) {
 			let removed = this._quickPickLists.get(item.itemType).shift();
 			ThisExtension.logDebug(`Removed item '${removed.label}(${removed.value})' from QuickPickList '${item.itemType}'.`);
 		}
@@ -326,4 +326,3 @@ export abstract class PowerBICommandBuilder {
 		return this._quickPickLists.get(itemType);;
 	}
 }
-
