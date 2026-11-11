@@ -49,11 +49,17 @@ export class PowerBIDatasetTables extends PowerBIWorkspaceGenericFolder {
 					const initFolder = await vscode.workspace.fs.readDirectory(fabricUri);
 					const folders = await vscode.workspace.fs.readDirectory(this.fabricFsUri);
 
-					for (let item of folders) {
+					if(PowerBIConfiguration.hideDateTables === true){
+						for (let item of folders) {
 						if (item[1] != vscode.FileType.File) {
 							ThisExtension.log("Item is not a TMDL File: Skipping " + item[0]);
 							continue;
 						}
+						if (item[0].includes("LocalDateTable")) {
+							ThisExtension.log("This item is excluded by datetable setting " + item[0]);
+							continue;
+						}
+						
 						const tableName = item[0].replace("\.tmdl", "")
 						const meta: iPowerBIDatasetDMV = {
 							"name": tableName,
@@ -64,6 +70,24 @@ export class PowerBIDatasetTables extends PowerBIWorkspaceGenericFolder {
 						children.push(treeItem);
 						PowerBICommandBuilder.pushQuickPickItem(treeItem);
 					}
+					}
+					else {
+						for (let item of folders) {
+							if (item[1] != vscode.FileType.File) {
+								ThisExtension.log("Item is not a TMDL File: Skipping " + item[0]);
+								continue;
+							}
+							const tableName = item[0].replace("\.tmdl", "")
+							const meta: iPowerBIDatasetDMV = {
+								"name": tableName,
+								"id": tableName,
+								"properties": {}
+							};
+							let treeItem = new PowerBIDatasetTable(meta, this.groupId, this);
+							children.push(treeItem);
+							PowerBICommandBuilder.pushQuickPickItem(treeItem);
+					}
+				}
 				}
 				else {
 					const items: iPowerBIDatasetDMV[] = await PowerBIApiService.getDMV(this.apiPath, "TABLES");
